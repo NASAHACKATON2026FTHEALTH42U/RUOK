@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); check-in diario "R U OK?" en **FE-19** (#27); identidad de dispositivo e IndexedDB en **FE-30** (#74).
 
 ## Comandos
 
@@ -128,6 +128,7 @@ frontend/
     ├── components/body/       BodyFigure (SVG) + regions.ts (buildRegions, formatSinceLabel; + test)
     ├── components/dashboard/  SystemPanel, IndicatorCard, TrendChart, LinkChip + format.ts y trend.ts (+ tests)
     ├── components/measure/    IndicatorField + measureForm.ts (parseValue, emptyValue; + test)
+    ├── components/behavioral/ FaceScale + checkin.ts (CHECKIN_INDICATORS, faceFor, buildCheckinBatch; + test)
     ├── components/environment/  EnvironmentCard (pintada con su propia paleta), MemberList
     ├── components/ui/
     │   ├── Layout.tsx         cabecera + navegación + <Outlet /> + disclaimer
@@ -140,7 +141,7 @@ frontend/
     └── pages/                 una página vacía por ruta
 ```
 
-Carpetas que aún no existen y que crean sus issues: `components/{alerts,behavioral,game}/`. `offline/` ya existe con `outbox.ts`; FE-11 y FE-30 añaden IndexedDB y la sincronización.
+Carpetas que aún no existen y que crean sus issues: `components/{alerts,game}/`. `offline/` ya existe con `outbox.ts`; FE-11 y FE-30 añaden IndexedDB y la sincronización.
 
 ## Rutas
 
@@ -327,7 +328,7 @@ Verificado con una serie sintética de 30 días (interceptando la petición en C
 
 `/history` (`src/pages/History.tsx`):
 
-- **Selector de indicador**: los indicadores activos del entorno (`Environment.indicators`), con su nombre del catálogo.
+- **Selector de indicador**: los indicadores activos del entorno (`Environment.indicators`) más los 6 del check-in diario (FE-19), con su nombre del catálogo.
 - **Selector de periodo**: 7 d / 30 d.
 - El indicador y el periodo van en la URL: `/history?indicator=bp_systolic&days=30` (se puede enlazar directamente).
 - **Gráfica** grande (`TrendPlot`) con las bandas del entorno: si el indicador está en la evaluación se usan sus rangos ajustados; si no, los del catálogo.
@@ -352,6 +353,27 @@ Verificado con una serie sintética de 30 días (interceptando la petición en C
 - **Reintento idempotente:** si falla la red, el formulario conserva los valores, los bloquea y el botón pasa a "Reintentar el envío", que reenvía **los mismos UUID** (el servidor no duplica).
 - **Resultado:** "N mediciones enviadas" y el estado general de la evaluación que devuelve el lote; "Ver el panel" vuelve a `/dashboard`, que vuelve a pedir la evaluación.
 - Toda escritura pasa por `src/offline/outbox.ts` (`sendMeasurements()`). **TODO(FE-11):** guardar primero en IndexedDB para no perder nada sin conexión; hoy, sin red, la medición no se guarda hasta que se reintenta.
+
+## Check-in diario "R U OK?" (FE-19)
+
+`/checkin` (`src/pages/CheckIn.tsx`). Es el check-in conductual de [`docs/behavioral-health.md`](../docs/behavioral-health.md), pensado para hacerse **en menos de 30 s** y en una sola pantalla (mobile-first):
+
+- **6 escalas 1–5 con caras** (`FaceScale`), en este orden (`CHECKIN_INDICATORS`): `mood`, `stress`, `energy`, `loneliness`, `sleep_quality` y `crew_relation`. Debajo, una **nota** opcional.
+- **Textos desde el catálogo:** el nombre y la pregunta, con sus extremos ("1 = nada, 5 = muchísimo"), salen de `indicator.name` y `measurement_instructions[0]`. No hay textos clínicos fijos en el componente.
+- **Las caras siguen la polaridad** del indicador (`higher_is_worse`, `faceFor()`): en ánimo, 5 es 😄; en estrés y soledad, 5 es 😞. Cada cara va siempre con su número y `aria-label="N de 5"`, para no depender solo del emoji. Pulsar la opción elegida la quita.
+- Hay que responder a las 6. El botón muestra el progreso ("Responde 4 / 6") hasta que están todas.
+- **Envío:** un solo lote (`buildCheckinBatch()`) por `sendMeasurements()` del outbox. Lleva una medición por respuesta con su UUID (`newId()`), `source: "checkin"`, la misma `taken_at` (hora del servidor) y la nota en todas.
+- **Reintento idempotente:** igual que en FE-10. Si falla la red, las respuestas se bloquean y "Reintentar el envío" reenvía **los mismos UUID**.
+- **Resultado:** "Check-in guardado" con el estado general que devuelve el lote, y enlaces al panel y al historial (`/history?indicator=mood`).
+- **Historial:** los 6 indicadores aparecen siempre en el selector de `/history`, aunque el entorno no los tenga activos. Hoy los entornos solo activan `mood`.
+- **Aviso de privacidad** al pie, según `docs/behavioral-health.md`. Quien lo aplica es el backend (BE-20, BE-17 y BE-27); el front solo informa.
+
+**Probado** contra el backend real, a través del proxy de Vite: el lote de 6 entra con `accepted: 6`; reenviarlo con los mismos UUID da `duplicates: 6` y no duplica nada; `GET /members/1/measurements?indicator_id=<id>` (la consulta del historial) devuelve cada respuesta con `source: "checkin"` y su nota. Lint, build y tests en verde. **Falta verificarlo visualmente en un navegador o móvil.**
+
+**Pendiente:**
+
+- Cuando entre FE-11 (PR #107), `sendMeasurements()` devolverá `{ status: 'sent' | 'queued' }`. El check-in tendrá que mostrar "guardado en el dispositivo" si queda en cola, igual que `Measure`.
+- Activar los indicadores conductuales en `environments.json` para que entren en la evaluación (backend, BE-20).
 
 ## Dispositivo e IndexedDB (FE-30)
 
