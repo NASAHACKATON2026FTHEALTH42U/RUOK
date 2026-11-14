@@ -1,17 +1,16 @@
 """Alertas, escalado y consola ground.
 
-Reales: automáticas (BE-14), manuales y acciones (BE-15). STUB(FS-02) → BE-17 (consola
-ground) y BE-27 (SOS de emergencia sin token). En la consola ground el `link` ya es real (BE-13).
+Reales: automáticas (BE-14), manuales y acciones (BE-15) y consola ground (BE-17).
+Pendiente: BE-27 (SOS de emergencia sin token y rol de quien consulta).
 """
 
-from datetime import timedelta
 from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 
-from app import clock, models, stubs
+from app import models
 from app.db import get_session
 from app.routers.deps import ERRORS_404, ERRORS_AUTH, AuthDep
 from app.schemas import (
@@ -27,7 +26,7 @@ from app.schemas import (
 )
 from app.schemas.common import ErrorResponse
 from app.services import alerts as alerts_service
-from app.services import comm_link
+from app.services import comm_link, ground
 
 router = APIRouter(tags=["alerts"], dependencies=[AuthDep], responses={**ERRORS_AUTH, **ERRORS_404})
 
@@ -149,20 +148,17 @@ def add_message(alert_id: UUID, body: AlertMessageIn, session: SessionDep) -> Al
     "/environments/{env_id}/alerts",
     response_model=GroundView,
     summary="Consola /ground: solo lo ENTREGADO por el enlace, con estado as-of",
-    description="STUB(FS-02) → BE-17",
+    description="Alertas que el enlace ya ha entregado a tierra, members con su resumen y "
+    "`as_of` = ahora − retardo (en LOS, el último momento conocido y estado `unknown`). "
+    "El detalle conductual se oculta salvo que el member lo comparta o sea una emergencia.",
 )
 def ground_view(
     env_id: Slug,
-    session: Annotated[Session, Depends(get_session)],
+    session: SessionDep,
     view: Literal["ground"] = "ground",
 ) -> GroundView:
-    env = stubs.ENV_BY_ID.get(env_id)
-    if env is None:
-        raise HTTPException(404, f"Entorno desconocido: {env_id}")
-    return GroundView(
-        env_id=env_id,
-        as_of=clock.now() - timedelta(seconds=env.comm_delay_s),
-        link=comm_link.status(session, env_id),  # real (BE-13)
-        members=[stubs.member_summary(m) for m in stubs.MEMBERS if m.env_id == env_id],
-        alerts=[],  # la alerta de ejemplo sigue en cola (ETA 14 min): aún no entregada
-    )
+    try:
+        # TODO(BE-27): pasar el rol de quien consulta (psych ve el detalle conductual).
+        return ground.ground_view(session, env_id)
+    except comm_link.UnknownEnvironment as exc:
+        raise HTTPException(404, str(exc)) from exc
