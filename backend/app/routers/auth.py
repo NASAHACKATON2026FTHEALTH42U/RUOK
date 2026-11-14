@@ -1,11 +1,21 @@
-"""Autenticación local. STUB(FS-02) → BE-26 (login/PIN/JWT) y FS-07 (usuarios)."""
+"""Autenticación local (BE-26). `/users` sigue siendo STUB(FS-02) → FS-07.
 
-from datetime import timedelta
+Ver docs/auth-and-roles.md:
+- `POST /auth/login` y `POST /auth/pin` devuelven un JWT local (12 h).
+- Credenciales incorrectas, cuenta inexistente o bloqueada → 401. Los 5 fallos
+  seguidos y el bloqueo de 5 min están en `services/accounts.py` (BE-25).
+- `GET /auth/demo-users` solo existe con `DEMO_MODE=true` (si no, 404).
+"""
 
-from fastapi import APIRouter, HTTPException
+from typing import Annotated
 
-from app import clock, stubs
-from app.routers.deps import ERRORS_AUTH, AuthDep
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session, select
+
+from app import models, stubs
+from app.auth.security import create_token
+from app.db import get_session
+from app.routers.deps import ERRORS_AUTH, AuthDep, CurrentUser
 from app.schemas import (
     DemoUser,
     ErrorResponse,
@@ -16,21 +26,50 @@ from app.schemas import (
     User,
     UserCreate,
 )
+from app.services import accounts
 
 router = APIRouter(tags=["auth"])
 
+SessionDep = Annotated[Session, Depends(get_session)]
+
 _ERR_LOGIN = {401: {"model": ErrorResponse, "description": "Credenciales incorrectas"}}
+_BAD_CREDENTIALS = "Usuario o contraseña incorrectos"
+_ROLE_ORDER = ["member", "medic", "commander", "responder", "psych", "family", "admin"]
 
 
-def _token_for(username: str) -> TokenResponse:
-    user = next((u for u in stubs.USERS if u.username == username), None)
-    if user is None:
-        raise HTTPException(401, "Usuario o contraseña incorrectos")
-    return TokenResponse(
-        access_token=f"stub-token-{user.id}",
-        expires_at=clock.now() + timedelta(hours=12),
-        user=user,
+def to_user(account: models.UserAccount) -> User:
+    return User(
+        id=account.id,
+        username=account.username,
+        display_name=account.display_name,
+        role=account.role,
+        env_id=account.env_id,
+        member_id=account.member_id,
+        role_label=accounts.role_label(account),
     )
+
+
+def _authenticate(session: Session, username: str, secret: str, *, pin: bool) -> TokenResponse:
+    account = session.exec(
+        select(models.UserAccount).where(models.UserAccount.username == username)
+    ).first()
+    if account is None:
+        # TODO(BE-28): events.emit("auth.failed", reason="unknown_user")
+        raise HTTPException(401, _BAD_CREDENTIALS)
+    check = accounts.check_pin if pin else accounts.check_password
+    try:
+        ok = check(session, account, secret)
+    except accounts.AccountLocked as exc:
+        # TODO(BE-28): events.emit("auth.failed", reason="locked")
+        until = exc.locked_until.isoformat(timespec="seconds")
+        raise HTTPException(401, f"Cuenta bloqueada por demasiados intentos hasta {until}") from exc
+    if not ok:
+        # TODO(BE-28): events.emit("auth.failed", reason="bad_credentials")
+        raise HTTPException(401, "PIN incorrecto" if pin else _BAD_CREDENTIALS)
+
+    token, expires_at = create_token(session, account)
+    # TODO(BE-28): events.emit("auth.login", user_id=account.id, method="pin"|"password")
+    return TokenResponse(access_token=token, expires_at=expires_at, user=to_user(account))
 
 
 @router.post(
@@ -38,10 +77,9 @@ def _token_for(username: str) -> TokenResponse:
     response_model=TokenResponse,
     responses=_ERR_LOGIN,
     summary="Login con usuario y contraseña",
-    description="STUB(FS-02) → BE-26",
 )
-def login(body: LoginIn) -> TokenResponse:
-    return _token_for(body.username)
+def login(body: LoginIn, session: SessionDep) -> TokenResponse:
+    return _authenticate(session, body.username, body.password, pin=False)
 
 
 @router.post(
@@ -49,32 +87,46 @@ def login(body: LoginIn) -> TokenResponse:
     response_model=TokenResponse,
     responses=_ERR_LOGIN,
     summary="Login rápido con PIN",
-    description="STUB(FS-02) → BE-26",
+    description="Solo para `member` y `medic` (tablets compartidas).",
 )
-def login_pin(body: PinLoginIn) -> TokenResponse:
-    return _token_for(body.username)
+def login_pin(body: PinLoginIn, session: SessionDep) -> TokenResponse:
+    return _authenticate(session, body.username, body.pin, pin=True)
 
 
 @router.get(
     "/auth/me",
     response_model=User,
     responses=ERRORS_AUTH,
-    dependencies=[AuthDep],
     summary="Usuario de la sesión actual",
-    description="STUB(FS-02) → BE-26",
 )
-def me() -> User:
-    return stubs.USERS[0]
+def me(user: CurrentUser) -> User:
+    return to_user(user)
 
 
 @router.get(
     "/auth/demo-users",
     response_model=list[DemoUser],
+    responses={404: {"model": ErrorResponse, "description": "DEMO_MODE=false"}},
     summary="Usuarios demo para el selector del login (solo DEMO_MODE=true)",
-    description="STUB(FS-02) → BE-25/BE-26",
 )
-def demo_users() -> list[DemoUser]:
-    return stubs.DEMO_USERS
+def demo_users(session: SessionDep) -> list[DemoUser]:
+    if not accounts.demo_mode():
+        raise HTTPException(404, "Solo disponible con DEMO_MODE=true")
+    rows = session.exec(
+        select(models.UserAccount).where(models.UserAccount.active == True)  # noqa: E712
+    ).all()
+    rows = sorted(
+        rows,
+        key=lambda u: (u.env_id is None, u.env_id or "", _ROLE_ORDER.index(u.role), u.id),
+    )
+    return [
+        DemoUser(
+            **to_user(u).model_dump(
+                include={"username", "display_name", "role", "env_id", "role_label"}
+            )
+        )
+        for u in rows
+    ]
 
 
 @router.get(

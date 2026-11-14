@@ -6360,6 +6360,209 @@ export const users: Schema<'User'>[] = [
 
 export const demoUsers: Schema<'DemoUser'>[] = [
   {
+    "username": "ruiz",
+    "display_name": "Ana Ruiz",
+    "role": "member",
+    "env_id": "earth",
+    "role_label": "participante"
+  },
+  {
+    "username": "park",
+    "display_name": "Leo Park",
+    "role": "member",
+    "env_id": "earth",
+    "role_label": "participante"
+  },
+  {
+    "username": "gil",
+    "display_name": "Marta Gil",
+    "role": "member",
+    "env_id": "earth",
+    "role_label": "participante"
+  },
+  {
+    "username": "medic-earth",
+    "display_name": "Medic (Analógico terrestre)",
+    "role": "medic",
+    "env_id": "earth",
+    "role_label": "medic"
+  },
+  {
+    "username": "commander-earth",
+    "display_name": "Commander (Analógico terrestre)",
+    "role": "commander",
+    "env_id": "earth",
+    "role_label": "commander"
+  },
+  {
+    "username": "responder-earth",
+    "display_name": "Médico (Analógico terrestre)",
+    "role": "responder",
+    "env_id": "earth",
+    "role_label": "médico"
+  },
+  {
+    "username": "psych-earth",
+    "display_name": "Psych (Analógico terrestre)",
+    "role": "psych",
+    "env_id": "earth",
+    "role_label": "psych"
+  },
+  {
+    "username": "marti",
+    "display_name": "Rosa Martí",
+    "role": "member",
+    "env_id": "geriatric",
+    "role_label": "residente"
+  },
+  {
+    "username": "vidal",
+    "display_name": "Josep Vidal",
+    "role": "member",
+    "env_id": "geriatric",
+    "role_label": "residente"
+  },
+  {
+    "username": "lopez",
+    "display_name": "Carmen López",
+    "role": "member",
+    "env_id": "geriatric",
+    "role_label": "residente"
+  },
+  {
+    "username": "ferrer",
+    "display_name": "Antonio Ferrer",
+    "role": "member",
+    "env_id": "geriatric",
+    "role_label": "residente"
+  },
+  {
+    "username": "medic-geriatric",
+    "display_name": "Cuidador (Residencia geriátrica)",
+    "role": "medic",
+    "env_id": "geriatric",
+    "role_label": "cuidador"
+  },
+  {
+    "username": "commander-geriatric",
+    "display_name": "Commander (Residencia geriátrica)",
+    "role": "commander",
+    "env_id": "geriatric",
+    "role_label": "commander"
+  },
+  {
+    "username": "responder-geriatric",
+    "display_name": "Médico (Residencia geriátrica)",
+    "role": "responder",
+    "env_id": "geriatric",
+    "role_label": "médico"
+  },
+  {
+    "username": "psych-geriatric",
+    "display_name": "Psych (Residencia geriátrica)",
+    "role": "psych",
+    "env_id": "geriatric",
+    "role_label": "psych"
+  },
+  {
+    "username": "puig",
+    "display_name": "Joan Puig",
+    "role": "member",
+    "env_id": "hospital",
+    "role_label": "paciente"
+  },
+  {
+    "username": "sanz",
+    "display_name": "Laura Sanz",
+    "role": "member",
+    "env_id": "hospital",
+    "role_label": "paciente"
+  },
+  {
+    "username": "diaz",
+    "display_name": "Pedro Díaz",
+    "role": "member",
+    "env_id": "hospital",
+    "role_label": "paciente"
+  },
+  {
+    "username": "medic-hospital",
+    "display_name": "Enfermería (Planta de hospital)",
+    "role": "medic",
+    "env_id": "hospital",
+    "role_label": "enfermería"
+  },
+  {
+    "username": "commander-hospital",
+    "display_name": "Commander (Planta de hospital)",
+    "role": "commander",
+    "env_id": "hospital",
+    "role_label": "commander"
+  },
+  {
+    "username": "responder-hospital",
+    "display_name": "Médico (Planta de hospital)",
+    "role": "responder",
+    "env_id": "hospital",
+    "role_label": "médico"
+  },
+  {
+    "username": "psych-hospital",
+    "display_name": "Psych (Planta de hospital)",
+    "role": "psych",
+    "env_id": "hospital",
+    "role_label": "psych"
+  },
+  {
+    "username": "lindqvist",
+    "display_name": "Dra. Lindqvist",
+    "role": "member",
+    "env_id": "iss",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "moreau",
+    "display_name": "Cmdte. Moreau",
+    "role": "member",
+    "env_id": "iss",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "rao",
+    "display_name": "Esp. Rao",
+    "role": "member",
+    "env_id": "iss",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "medic-iss",
+    "display_name": "Oficial médico (Estación Espacial Internacional)",
+    "role": "medic",
+    "env_id": "iss",
+    "role_label": "oficial médico"
+  },
+  {
+    "username": "commander-iss",
+    "display_name": "Comandante (Estación Espacial Internacional)",
+    "role": "commander",
+    "env_id": "iss",
+    "role_label": "comandante"
+  },
+  {
+    "username": "responder-iss",
+    "display_name": "Flight surgeon (Estación Espacial Internacional)",
+    "role": "responder",
+    "env_id": "iss",
+    "role_label": "flight surgeon"
+  },
+  {
+    "username": "psych-iss",
+    "display_name": "Psicólogo bhp (Estación Espacial Internacional)",
+    "role": "psych",
+    "env_id": "iss",
+    "role_label": "psicólogo BHP"
+  },
+  {
     "username": "vega",
     "display_name": "Cmdr. Vega",
     "role": "member",
@@ -6367,18 +6570,102 @@ export const demoUsers: Schema<'DemoUser'>[] = [
     "role_label": "astronauta"
   },
   {
+    "username": "okafor",
+    "display_name": "Ing. Okafor",
+    "role": "member",
+    "env_id": "mars",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "haddad",
+    "display_name": "Dra. Haddad",
+    "role": "member",
+    "env_id": "mars",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "tanaka",
+    "display_name": "Esp. Tanaka",
+    "role": "member",
+    "env_id": "mars",
+    "role_label": "astronauta"
+  },
+  {
     "username": "medic-mars",
-    "display_name": "Dr. Haddad",
+    "display_name": "Oficial médico (Base marciana)",
     "role": "medic",
     "env_id": "mars",
     "role_label": "oficial médico"
   },
   {
-    "username": "surgeon-mars",
-    "display_name": "Dra. Ruiz",
+    "username": "commander-mars",
+    "display_name": "Comandante (Base marciana)",
+    "role": "commander",
+    "env_id": "mars",
+    "role_label": "comandante"
+  },
+  {
+    "username": "responder-mars",
+    "display_name": "Flight surgeon (Base marciana)",
     "role": "responder",
     "env_id": "mars",
     "role_label": "flight surgeon"
+  },
+  {
+    "username": "psych-mars",
+    "display_name": "Psicólogo bhp (Base marciana)",
+    "role": "psych",
+    "env_id": "mars",
+    "role_label": "psicólogo BHP"
+  },
+  {
+    "username": "ito",
+    "display_name": "Cmdr. Ito",
+    "role": "member",
+    "env_id": "moon",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "silva",
+    "display_name": "Ing. Silva",
+    "role": "member",
+    "env_id": "moon",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "weber",
+    "display_name": "Dra. Weber",
+    "role": "member",
+    "env_id": "moon",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "medic-moon",
+    "display_name": "Oficial médico (Base lunar Artemis)",
+    "role": "medic",
+    "env_id": "moon",
+    "role_label": "oficial médico"
+  },
+  {
+    "username": "commander-moon",
+    "display_name": "Comandante (Base lunar Artemis)",
+    "role": "commander",
+    "env_id": "moon",
+    "role_label": "comandante"
+  },
+  {
+    "username": "responder-moon",
+    "display_name": "Flight surgeon (Base lunar Artemis)",
+    "role": "responder",
+    "env_id": "moon",
+    "role_label": "flight surgeon"
+  },
+  {
+    "username": "psych-moon",
+    "display_name": "Psicólogo bhp (Base lunar Artemis)",
+    "role": "psych",
+    "env_id": "moon",
+    "role_label": "psicólogo BHP"
   },
   {
     "username": "admin",
@@ -6390,11 +6677,11 @@ export const demoUsers: Schema<'DemoUser'>[] = [
 ]
 
 export const tokenTemplate: Schema<'TokenResponse'> = {
-  "access_token": "stub-token-7",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicm9sZSI6Im1lbWJlciIsImVudl9pZCI6Im1hcnMiLCJtZW1iZXJfaWQiOjEsImlhdCI6MTc5NDY1MDQwMCwiZXhwIjoxNzk0NjkzNjAwfQ.XVdp2YbfAtUaOT3dDoIIuha6vSQ4qtkwpbeKUJl_sm8",
   "token_type": "bearer",
   "expires_at": "2026-11-14T22:00:00Z",
   "user": {
-    "id": 7,
+    "id": 1,
     "username": "vega",
     "display_name": "Cmdr. Vega",
     "role": "member",

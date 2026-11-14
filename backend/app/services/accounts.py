@@ -38,6 +38,7 @@ __all__ = [
     "demo_mode",
     "hash_secret",
     "is_locked",
+    "role_label",
     "seed_users",
     "verify_secret",
 ]
@@ -155,6 +156,14 @@ def _member_username(name: str) -> str:
 def _role_label(role: str, vocabulary: dict[str, str]) -> str:
     key = {"responder": "ground", "member": "member"}.get(role, role)
     return vocabulary.get(key, role)
+
+
+def role_label(user: models.UserAccount) -> str:
+    """Nombre visible del rol con el vocabulario del entorno del usuario."""
+    if user.role == "admin" or user.env_id is None:
+        return "operador" if user.role == "admin" else user.role
+    env = environments.get_environment(user.env_id)
+    return _role_label(user.role, env.vocabulary if env else {})
 
 
 def seed_users(

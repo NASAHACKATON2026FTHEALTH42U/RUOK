@@ -130,7 +130,7 @@ MEASUREMENT = {
 
 CALLS = [
     ("get", "/health", None, 200),
-    ("post", "/auth/login", {"username": "vega", "password": "x"}, 200),
+    ("post", "/auth/login", {"username": "vega", "password": "ruok-mars"}, 200),
     ("post", "/auth/pin", {"username": "vega", "pin": "1234"}, 200),
     ("get", "/auth/me", None, 200),
     ("get", "/auth/demo-users", None, 200),
@@ -197,7 +197,12 @@ CALLS = [
 
 @pytest.mark.parametrize(("method", "path", "body", "status"), CALLS)
 def test_stub_responds(client, method, path, body, status):
-    resp = client.request(method, API + path, json=body)
+    # Desde BE-26 el token es real: se envía en todas las llamadas (el resto de
+    # endpoints aún lo aceptan opcional hasta BE-27).
+    login = {"username": "admin", "password": "ruok-admin"}
+    token = client.post(API + "/auth/login", json=login).json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.request(method, API + path, json=body, headers=headers)
     assert resp.status_code == status, resp.text
 
 
