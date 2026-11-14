@@ -70,6 +70,6 @@ Fuente: https://images.nasa.gov · Uso: https://www.nasa.gov/nasa-brand-center/i
 ## Imágenes del cuerpo (FE-05)
 | Archivo | Uso | Origen y licencia |
 |---|---|---|
-| `frontend/src/assets/human-silhouette.webp` | Figura del cuerpo (`BodyFigure`), silueta luminosa | *Pendiente de confirmar por el equipo* |
+| `frontend/src/assets/holographic-human.webp` | Figura del cuerpo (`BodyFigure`) | *Pendiente de confirmar por el equipo* |
 
 Antes de la presentación hay que confirmar que se puede usar (y con qué atribución).
