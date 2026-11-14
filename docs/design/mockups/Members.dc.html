@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>R U OK? – Tripulación</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&amp;family=Saira:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#E6F1F3;text-decoration:none}a:hover{color:#FFFFFF}
+.scr{background-color:#091317;background-image:linear-gradient(rgba(95,212,232,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(95,212,232,.045) 1px,transparent 1px);background-size:39px 39px}
+.pn{position:relative;background:rgba(9,21,26,.92);border:1px solid #1C3540;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)}
+.pn::after{content:"";position:absolute;top:0;right:0;width:12px;height:12px;background:linear-gradient(45deg,transparent calc(50% - .7px),#1C3540 calc(50% - .7px),#1C3540 calc(50% + .7px),transparent calc(50% + .7px))}
+.ph{display:flex;align-items:center;gap:10px;padding:11px 14px 10px;border-bottom:1px solid #15303A;font:400 11px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#E6F1F3}
+.ph b{font-weight:400;color:#5FD4E8}
+.chip{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:3px 7px;border:1px solid currentColor;font:400 10px 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.chip::before{content:"";width:5px;height:5px;background:currentColor}
+.n{color:#5FD4E8}.w{color:#F5A623}.c{color:#FF6B6B}.u{color:#7C9AA3}
+.lb{font:400 10px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#7C9AA3}
+.mono{font-family:'IBM Plex Mono',monospace}
+.bar{height:7px;background:repeating-linear-gradient(90deg,#163039 0 8px,transparent 8px 10px)}
+.bar>i{display:block;height:100%;background:repeating-linear-gradient(90deg,currentColor 0 8px,transparent 8px 10px)}
+.row{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 14px;border-bottom:1px solid #12272E;font:400 15px Saira,sans-serif;color:#C9D8DC}
+.row.on{background:rgba(95,212,232,.07);box-shadow:inset 2px 0 0 #5FD4E8;color:#FFFFFF}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;height:52px;border:1px solid #5FD4E8;background:rgba(95,212,232,.07);color:#E6F1F3;font:500 12px 'IBM Plex Mono',monospace;letter-spacing:.16em;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}
+.btn.p{background:#5FD4E8;color:#04161B}
+.btn.d{border-color:#FF6B6B;color:#FF8F8F;background:rgba(255,107,107,.08)}
+.btn.df{border-color:#FF6B6B;background:#FF6B6B;color:#1A0606}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid #15303A;padding:0 6px 18px;background:rgba(9,19,23,.96)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 0 8px;font:400 10px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#7C9AA3;border-top:2px solid transparent}
+.tab.on{color:#E6F1F3;border-top-color:#5FD4E8;background:linear-gradient(rgba(95,212,232,.10),transparent)}
+@keyframes ruokSpin{to{transform:rotate(360deg)}}
+.spin{transform-box:fill-box;transform-origin:center;animation:ruokSpin 24s linear infinite}
+.spin.r{animation-direction:reverse;animation-duration:60s}
+@media (prefers-reduced-motion: reduce){.spin{animation:none}}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px; box-sizing: border-box; color: #E6F1F3; font-family: Saira, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <header style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px 12px; border-bottom: 1px solid #15303A">
+    <div><div class="mono" style="font-size: 13px; letter-spacing: 0.24em">R U OK</div><div class="lb" style="font-size: 9px; margin-top: 2px">Oficial médico · Base marciana</div></div>
+    <div style="text-align: right"><div class="mono" style="font-size: 19px; font-weight: 300">10:42:18</div><div class="lb" style="font-size: 9px">Sol 44</div></div>
+  </header>
+  <div style="padding: 14px 18px 0">
+    <h1 style="margin: 0; font-size: 28px; font-weight: 300">Tu <span style="color: #5FD4E8">tripulación.</span></h1>
+    <p style="margin: 2px 0 0; font-size: 14px; color: #A9BCC1">Una persona en crítico y una sin señal.</p>
+  </div>
+  <section aria-label="Resumen" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 14px 14px 0; border: 1px solid #1C3540">
+    <div style="padding: 10px 12px; border-right: 1px solid #12272E"><div class="lb" style="font-size: 9px">Crítico</div><div class="mono c" style="font-size: 24px; font-weight: 300">1</div></div>
+    <div style="padding: 10px 12px; border-right: 1px solid #12272E"><div class="lb" style="font-size: 9px">Atención</div><div class="mono w" style="font-size: 24px; font-weight: 300">1</div></div>
+    <div style="padding: 10px 12px; border-right: 1px solid #12272E"><div class="lb" style="font-size: 9px">Nominal</div><div class="mono n" style="font-size: 24px; font-weight: 300">1</div></div>
+    <div style="padding: 10px 12px"><div class="lb" style="font-size: 9px">Sin señal</div><div class="mono u" style="font-size: 24px; font-weight: 300">1</div></div>
+  </section>
+  <section class="pn" aria-label="Miembros" style="margin: 12px 14px 0">
+    <div class="ph"><b>CRW.01</b>Tripulación<span class="chip u">4</span></div>
+    <a href="Main.dc.html" class="row on" style="min-height: 62px">
+      <span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px">Cmdr. Vega</span><span class="mono u" style="font-size: 10px; letter-spacing: 0.08em">ACTIVA · HACE 12 MIN</span></span>
+      <span class="chip c">Crítico</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C9AA3" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+    </a>
+    <a href="Main.dc.html" class="row" style="min-height: 62px">
+      <span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px">Ing. Okafor</span><span class="mono u" style="font-size: 10px; letter-spacing: 0.08em">ACTIVO · HACE 40 MIN</span></span>
+      <span class="chip w">Atención</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C9AA3" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+    </a>
+    <a href="Main.dc.html" class="row" style="min-height: 62px">
+      <span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px">Dra. Lindqvist</span><span class="mono u" style="font-size: 10px; letter-spacing: 0.08em">ACTIVA · HACE 5 MIN</span></span>
+      <span class="chip n">Nominal</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C9AA3" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+    </a>
+    <a href="Main.dc.html" class="row" style="min-height: 62px; border-bottom: 0">
+      <span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px">Esp. Tanaka</span><span class="mono w" style="font-size: 10px; letter-spacing: 0.08em">EVA · SIN SEÑAL 3 MIN</span></span>
+      <span class="chip u">Sin datos</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C9AA3" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+    </a>
+  </section>
+  <section class="pn" aria-label="Alertas" style="margin: 12px 14px 0">
+    <div class="ph"><b>ALR.02</b>Alertas a bordo<span class="chip c">2 por reconocer</span></div>
+    <a href="Alert.dc.html" class="row" style="min-height: 48px"><span class="mono u" style="width: 40px; font-size: 11px">10:30</span><span style="flex: 1">Vega · sueño insuficiente</span><span class="mono c" style="font-size: 10px">CRÍT</span></a>
+    <a href="Alert.dc.html" class="row" style="min-height: 48px; border-bottom: 0"><span class="mono u" style="width: 40px; font-size: 11px">10:39</span><span style="flex: 1">Tanaka · sin contacto</span><span class="mono w" style="font-size: 10px">ATN</span></a>
+  </section>
+  <nav aria-label="Principal" class="tabs" style="margin-top: auto; grid-template-columns: repeat(3, minmax(0, 1fr))">
+    <a href="Members.dc.html" aria-current="page" class="tab on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="9" cy="8" r="3"></circle><circle cx="17" cy="9" r="2.5"></circle><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15 14.5c3 0 6 2 6 5"></path></svg>Tripulación</a>
+    <a href="Alerts.dc.html" class="tab"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3 22 20H2Z"></path><path d="M12 10v4M12 17v.5"></path></svg>Alertas</a>
+    <a href="MeasurePick.dc.html" class="tab"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 12h4l2-6 4 12 2-6h6"></path></svg>Medir</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>R U OK? – Nueva medición</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&amp;family=Saira:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#E6F1F3;text-decoration:none}a:hover{color:#FFFFFF}
+.scr{background-color:#091317;background-image:linear-gradient(rgba(95,212,232,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(95,212,232,.045) 1px,transparent 1px);background-size:39px 39px}
+.pn{position:relative;background:rgba(9,21,26,.92);border:1px solid #1C3540;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)}
+.pn::after{content:"";position:absolute;top:0;right:0;width:12px;height:12px;background:linear-gradient(45deg,transparent calc(50% - .7px),#1C3540 calc(50% - .7px),#1C3540 calc(50% + .7px),transparent calc(50% + .7px))}
+.ph{display:flex;align-items:center;gap:10px;padding:11px 14px 10px;border-bottom:1px solid #15303A;font:400 11px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#E6F1F3}
+.ph b{font-weight:400;color:#5FD4E8}
+.chip{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:3px 7px;border:1px solid currentColor;font:400 10px 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.chip::before{content:"";width:5px;height:5px;background:currentColor}
+.n{color:#5FD4E8}.w{color:#F5A623}.c{color:#FF6B6B}.u{color:#7C9AA3}
+.lb{font:400 10px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#7C9AA3}
+.mono{font-family:'IBM Plex Mono',monospace}
+.bar{height:7px;background:repeating-linear-gradient(90deg,#163039 0 8px,transparent 8px 10px)}
+.bar>i{display:block;height:100%;background:repeating-linear-gradient(90deg,currentColor 0 8px,transparent 8px 10px)}
+.row{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 14px;border-bottom:1px solid #12272E;font:400 15px Saira,sans-serif;color:#C9D8DC}
+.row.on{background:rgba(95,212,232,.07);box-shadow:inset 2px 0 0 #5FD4E8;color:#FFFFFF}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;height:52px;border:1px solid #5FD4E8;background:rgba(95,212,232,.07);color:#E6F1F3;font:500 12px 'IBM Plex Mono',monospace;letter-spacing:.16em;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}
+.btn.p{background:#5FD4E8;color:#04161B}
+.btn.d{border-color:#FF6B6B;color:#FF8F8F;background:rgba(255,107,107,.08)}
+.btn.df{border-color:#FF6B6B;background:#FF6B6B;color:#1A0606}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid #15303A;padding:0 6px 18px;background:rgba(9,19,23,.96)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 0 8px;font:400 10px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#7C9AA3;border-top:2px solid transparent}
+.tab.on{color:#E6F1F3;border-top-color:#5FD4E8;background:linear-gradient(rgba(95,212,232,.10),transparent)}
+@keyframes ruokSpin{to{transform:rotate(360deg)}}
+.spin{transform-box:fill-box;transform-origin:center;animation:ruokSpin 24s linear infinite}
+.spin.r{animation-direction:reverse;animation-duration:60s}
+@media (prefers-reduced-motion: reduce){.spin{animation:none}}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px; box-sizing: border-box; color: #E6F1F3; font-family: Saira, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <header style="padding: 14px 18px 12px; border-bottom: 1px solid #15303A; display: flex; justify-content: space-between; align-items: center">
+    <div><div class="lb" style="font-size: 9px">MED.00 / Nueva medición</div><h1 style="margin: 0; font-size: 22px; font-weight: 300">¿Qué quieres <span style="color: #5FD4E8">medir?</span></h1></div>
+    <a href="Sos.dc.html" class="btn d" style="height: 44px; padding: 0 12px; font-size: 11px; letter-spacing: 0.12em">SOS</a>
+  </header>
+  <div style="padding: 12px 14px 0; display: flex; justify-content: space-between"><span class="lb">Constantes · Base marciana</span><span class="lb">9</span></div>
+  <div style="margin: 8px 14px 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <a href="Measure.dc.html" class="pn" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 84px; padding: 10px 12px; box-sizing: border-box">
+        <span class="mono w" style="font-size: 10px; letter-spacing: 0.1em">C-01 · TOCA</span>
+        <span style="font-size: 14px; line-height: 1.2">Tensión arterial</span>
+        <span class="mono" style="font-size: 11px; color: #7C9AA3">hace 2 soles</span>
+      </a>
+      <a href="Measure.dc.html" class="pn" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 84px; padding: 10px 12px; box-sizing: border-box">
+        <span class="mono u" style="font-size: 10px; letter-spacing: 0.1em">C-02</span>
+        <span style="font-size: 14px; line-height: 1.2">Frec. cardiaca</span>
+        <span class="mono" style="font-size: 11px; color: #7C9AA3">72 lpm · 3 h</span>
+      </a>
+      <a href="Measure.dc.html" class="pn" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 84px; padding: 10px 12px; box-sizing: border-box">
+        <span class="mono u" style="font-size: 10px; letter-spacing: 0.1em">C-03</span>
+        <span style="font-size: 14px; line-height: 1.2">Saturación O₂</span>
+        <span class="mono" style="font-size: 11px; color: #7C9AA3">98 % · 3 h</span>
+      </a>
+      <a href="Measure.dc.html" class="pn" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 84px; padding: 10px 12px; box-sizing: border-box">
+        <span class="mono u" style="font-size: 10px; letter-spacing: 0.1em">C-04</span>
+        <span style="font-size: 14px; line-height: 1.2">Temperatura</span>
+        <span class="mono" style="font-size: 11px; color: #7C9AA3">36.7 °C · 1 sol</span>
+      </a>
+      <a href="Measure.dc.html" class="pn" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 84px; padding: 10px 12px; box-sizing: border-box">
+        <span class="mono c" style="font-size: 10px; letter-spacing: 0.1em">C-05</span>
+        <span style="font-size: 14px; line-height: 1.2">Horas de sueño</span>
+        <span class="mono" style="font-size: 11px; color: #7C9AA3">4.1 h · 6 h</span>
+      </a>
+      <a href="Measure.dc.html" class="pn" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 84px; padding: 10px 12px; box-sizing: border-box">
+        <span class="mono w" style="font-size: 10px; letter-spacing: 0.1em">C-06</span>
+        <span style="font-size: 14px; line-height: 1.2">Ánimo</span>
+        <span class="mono" style="font-size: 11px; color: #7C9AA3">2/5 · 1 sol</span>
+      </a>
+      <a href="Measure.dc.html" class="pn" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 84px; padding: 10px 12px; box-sizing: border-box">
+        <span class="mono u" style="font-size: 10px; letter-spacing: 0.1em">C-07</span>
+        <span style="font-size: 14px; line-height: 1.2">Ejercicio</span>
+        <span class="mono" style="font-size: 11px; color: #7C9AA3">45 min · ayer</span>
+      </a>
+      <a href="Measure.dc.html" class="pn" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 84px; padding: 10px 12px; box-sizing: border-box">
+        <span class="mono u" style="font-size: 10px; letter-spacing: 0.1em">C-08</span>
+        <span style="font-size: 14px; line-height: 1.2">Dosis radiación</span>
+        <span class="mono" style="font-size: 11px; color: #7C9AA3">38 mSv · hoy</span>
+      </a>
+      <a href="Measure.dc.html" class="pn" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 84px; padding: 10px 12px; box-sizing: border-box">
+        <span class="mono u" style="font-size: 10px; letter-spacing: 0.1em">C-09</span>
+        <span style="font-size: 14px; line-height: 1.2">Peso</span>
+        <span class="mono" style="font-size: 11px; color: #7C9AA3">71.2 kg · 7 soles</span>
+      </a>
+  </div>
+  <div style="padding: 16px 14px 0; display: flex; justify-content: space-between"><span class="lb">Bienestar</span><span class="lb">2</span></div>
+  <div style="margin: 8px 14px 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+      <a href="CheckIn.dc.html" class="pn" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 84px; padding: 10px 12px; box-sizing: border-box">
+        <span class="mono n" style="font-size: 10px; letter-spacing: 0.1em">B-01 · HOY</span>
+        <span style="font-size: 14px; line-height: 1.2">Check-in diario</span>
+        <span class="mono" style="font-size: 11px; color: #7C9AA3">6 preguntas · 1 min</span>
+      </a>
+      <a href="Pvt.dc.html" class="pn" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 84px; padding: 10px 12px; box-sizing: border-box">
+        <span class="mono u" style="font-size: 10px; letter-spacing: 0.1em">B-02</span>
+        <span style="font-size: 14px; line-height: 1.2">Test de vigilancia (PVT)</span>
+        <span class="mono" style="font-size: 11px; color: #7C9AA3">3 min · fatiga</span>
+      </a>
+  </div>
+  <nav aria-label="Principal" class="tabs" style="margin-top: auto">
+    <a href="Main.dc.html" class="tab"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle><path d="M12 3v3M12 18v3M3 12h3M18 12h3"></path></svg>Panel</a>
+    <a href="MeasurePick.dc.html" aria-current="page" class="tab on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2-6 4 12 2-6h6"></path></svg>Medir</a>
+    <a href="Missions.dc.html" class="tab"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 21 8v8l-9 5-9-5V8Z"></path><path d="M12 8v8M8 12h8"></path></svg>Misiones</a>
+    <a href="More.dc.html" class="tab"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6"></rect><rect x="14" y="4" width="6" height="6"></rect><rect x="4" y="14" width="6" height="6"></rect><rect x="14" y="14" width="6" height="6"></rect></svg>Más</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

@@ -8,6 +8,14 @@ import { initTheme } from './environments/applyTheme'
 import { getDb } from './offline/db'
 import { getDevice } from './offline/device'
 import { initOutbox } from './offline/outbox'
+// Fuentes empaquetadas (local-first, sin Google Fonts): estilo HUD, docs/design/hud-style.md.
+import '@fontsource/saira/300.css'
+import '@fontsource/saira/400.css'
+import '@fontsource/saira/500.css'
+import '@fontsource/saira/600.css'
+import '@fontsource/ibm-plex-mono/300.css'
+import '@fontsource/ibm-plex-mono/400.css'
+import '@fontsource/ibm-plex-mono/500.css'
 import './styles/index.css'
 
 // ?mocks=1 activa el modo demo sin servidor (se recuerda); ?mocks=0 lo desactiva.
