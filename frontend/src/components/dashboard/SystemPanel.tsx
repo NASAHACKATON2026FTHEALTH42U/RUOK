@@ -8,6 +8,7 @@ import type { BodySystem } from '../../api/useSystems'
 import { InterventionCard } from '../behavioral/InterventionCard'
 import { StatusBadge } from '../ui/StatusBadge'
 import { IndicatorCard } from './IndicatorCard'
+import { SystemTrends } from './SystemTrends'
 
 type SystemAssessment = Assessment['systems'][number]
 
@@ -109,19 +110,31 @@ export function SystemPanel({
               Todavía no hay mediciones de este sistema.
             </p>
           ) : (
-            <ul className="mt-2 grid gap-2 md:grid-cols-2">
-              {assessed.indicators.map((ind) => (
-                <li key={ind.indicator_id}>
-                  <IndicatorCard
-                    indicator={ind}
-                    name={byId.get(ind.indicator_id)?.name}
-                    stale={stale}
-                    showTrend
-                    provisional={provisionalIds?.has(ind.indicator_id)}
-                  />
-                </li>
-              ))}
-            </ul>
+            <>
+              {/* Valor, estado y tendencia de cada indicador; las gráficas van juntas debajo. */}
+              <ul className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {assessed.indicators.map((ind) => (
+                  <li key={ind.indicator_id}>
+                    <IndicatorCard
+                      indicator={ind}
+                      name={byId.get(ind.indicator_id)?.name}
+                      stale={stale}
+                      provisional={provisionalIds?.has(ind.indicator_id)}
+                    />
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-3">
+                <SystemTrends
+                  series={assessed.indicators.map((ind) => ({
+                    id: ind.indicator_id,
+                    name: byId.get(ind.indicator_id)?.name ?? ind.indicator_id,
+                    unit: ind.unit,
+                    range: ind.range,
+                  }))}
+                />
+              </div>
+            </>
           )}
         </section>
 

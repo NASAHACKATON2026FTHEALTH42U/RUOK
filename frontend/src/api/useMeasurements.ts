@@ -33,3 +33,25 @@ export function useMeasurements(
     { enabled: memberId !== null && indicatorId !== null, refreshMs },
   )
 }
+
+/**
+ * Series de varios indicadores a la vez (una petición por indicador, en paralelo), para la
+ * gráfica combinada de un sistema. Devuelve `{ indicador: mediciones }`.
+ */
+export function useMeasurementsMany(
+  memberId: number | null,
+  indicatorIds: readonly string[],
+  days: number,
+) {
+  const key = indicatorIds.join(',')
+  return useLoad(
+    async () => {
+      const from = new Date(serverNow().getTime() - days * DAY_MS).toISOString()
+      const ids = key ? key.split(',') : []
+      const all = await Promise.all(ids.map((id) => getMeasurements(memberId!, id, from)))
+      return Object.fromEntries(ids.map((id, i) => [id, all[i]])) as Record<string, Measurement[]>
+    },
+    [memberId, key, days],
+    { enabled: memberId !== null && key !== '' },
+  )
+}
