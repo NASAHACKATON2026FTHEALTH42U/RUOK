@@ -181,9 +181,9 @@ export function BodyFigure({
           transformBox: 'fill-box',
           transformOrigin: 'center',
           transition: 'transform 150ms ease-out, filter 150ms ease-out, opacity 150ms ease-out',
-          // Los huesos no crecen: son líneas repartidas por todo el cuerpo y, al escalarlas
-          // juntas, los brazos se abrían hacia fuera. Se resaltan engrosándose.
-          transform: lit && name !== 'bones' ? 'scale(1.08)' : undefined,
+          // Huesos y ganglios no crecen: están repartidos por todo el cuerpo y, al escalarlos
+          // juntos, los de los extremos se abrían hacia fuera. Se resaltan con el brillo.
+          transform: lit && name !== 'bones' && name !== 'immune' ? 'scale(1.08)' : undefined,
           filter: lit ? `url(#${glow})` : undefined,
           opacity: hovered !== null && !lit ? 0.4 : 1,
         }}
