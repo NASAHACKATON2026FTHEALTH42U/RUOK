@@ -10111,9 +10111,33 @@ export const controlOverview: Schema<'ControlOverview'> = {
           "share_behavioral_details": false,
           "last_seen_at": "2026-11-14T10:00:00Z",
           "liveness": "active",
+          "overall_status": "warning",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:15:41.582052Z"
+        },
+        {
+          "id": 6,
+          "env_id": "iss",
+          "name": "Cmdte. Moreau",
+          "position": "commander",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
           "overall_status": "normal",
           "open_alerts": 0,
-          "last_measurement_at": "2026-11-14T10:00:00Z"
+          "last_measurement_at": "2026-11-14T09:42:36.958736Z"
+        },
+        {
+          "id": 7,
+          "env_id": "iss",
+          "name": "Esp. Rao",
+          "position": "scientist",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:02:58.299119Z"
         }
       ],
       "open_alerts": {
@@ -10136,7 +10160,44 @@ export const controlOverview: Schema<'ControlOverview'> = {
         "queued": 0,
         "since": "2026-11-14T10:00:00Z"
       },
-      "members": [],
+      "members": [
+        {
+          "id": 8,
+          "env_id": "moon",
+          "name": "Cmdr. Ito",
+          "position": "commander",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:10:46.069797Z"
+        },
+        {
+          "id": 9,
+          "env_id": "moon",
+          "name": "Ing. Silva",
+          "position": "engineer",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "warning",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T08:49:35.366850Z"
+        },
+        {
+          "id": 10,
+          "env_id": "moon",
+          "name": "Dra. Weber",
+          "position": "geologist",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:43:26.383471Z"
+        }
+      ],
       "open_alerts": {
         "warning": 0,
         "critical": 0,
@@ -10166,8 +10227,8 @@ export const controlOverview: Schema<'ControlOverview'> = {
           "share_behavioral_details": false,
           "last_seen_at": "2026-11-14T10:00:00Z",
           "liveness": "active",
-          "overall_status": "warning",
-          "open_alerts": 1,
+          "overall_status": "critical",
+          "open_alerts": 3,
           "last_measurement_at": "2026-11-14T10:00:00Z"
         },
         {
@@ -10176,16 +10237,40 @@ export const controlOverview: Schema<'ControlOverview'> = {
           "name": "Ing. Okafor",
           "position": "engineer",
           "share_behavioral_details": false,
-          "last_seen_at": "2026-11-14T09:48:00Z",
-          "liveness": "stale",
-          "overall_status": "unknown",
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "warning",
           "open_alerts": 0,
-          "last_measurement_at": "2026-11-14T09:48:00Z"
+          "last_measurement_at": "2026-11-14T09:32:49.156823Z"
+        },
+        {
+          "id": 4,
+          "env_id": "mars",
+          "name": "Dra. Haddad",
+          "position": "medical_officer",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "warning",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:55:59.993267Z"
+        },
+        {
+          "id": 5,
+          "env_id": "mars",
+          "name": "Esp. Tanaka",
+          "position": "scientist",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T08:39:00.634194Z"
         }
       ],
       "open_alerts": {
         "warning": 1,
-        "critical": 0,
+        "critical": 2,
         "emergency": 0
       },
       "liveness_paused": false
@@ -10203,7 +10288,44 @@ export const controlOverview: Schema<'ControlOverview'> = {
         "queued": 0,
         "since": "2026-11-14T10:00:00Z"
       },
-      "members": [],
+      "members": [
+        {
+          "id": 11,
+          "env_id": "earth",
+          "name": "Ana Ruiz",
+          "position": "participant",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:49:17.059793Z"
+        },
+        {
+          "id": 12,
+          "env_id": "earth",
+          "name": "Leo Park",
+          "position": "participant",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:30:12.728452Z"
+        },
+        {
+          "id": 13,
+          "env_id": "earth",
+          "name": "Marta Gil",
+          "position": "participant",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:18:49.251217Z"
+        }
+      ],
       "open_alerts": {
         "warning": 0,
         "critical": 0,
@@ -10224,7 +10346,44 @@ export const controlOverview: Schema<'ControlOverview'> = {
         "queued": 0,
         "since": "2026-11-14T10:00:00Z"
       },
-      "members": [],
+      "members": [
+        {
+          "id": 14,
+          "env_id": "hospital",
+          "name": "Joan Puig",
+          "position": "patient",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:24:15.212296Z"
+        },
+        {
+          "id": 15,
+          "env_id": "hospital",
+          "name": "Laura Sanz",
+          "position": "patient",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T08:55:44.511251Z"
+        },
+        {
+          "id": 16,
+          "env_id": "hospital",
+          "name": "Pedro Díaz",
+          "position": "patient",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T08:38:09.500902Z"
+        }
+      ],
       "open_alerts": {
         "warning": 0,
         "critical": 0,
@@ -10245,7 +10404,56 @@ export const controlOverview: Schema<'ControlOverview'> = {
         "queued": 0,
         "since": "2026-11-14T10:00:00Z"
       },
-      "members": [],
+      "members": [
+        {
+          "id": 17,
+          "env_id": "geriatric",
+          "name": "Rosa Martí",
+          "position": "resident",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:02:13.903601Z"
+        },
+        {
+          "id": 18,
+          "env_id": "geriatric",
+          "name": "Josep Vidal",
+          "position": "resident",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:35:29.210944Z"
+        },
+        {
+          "id": 19,
+          "env_id": "geriatric",
+          "name": "Carmen López",
+          "position": "resident",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T08:01:13.417633Z"
+        },
+        {
+          "id": 20,
+          "env_id": "geriatric",
+          "name": "Antonio Ferrer",
+          "position": "resident",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T08:53:07.371617Z"
+        }
+      ],
       "open_alerts": {
         "warning": 0,
         "critical": 0,
@@ -10255,10 +10463,10 @@ export const controlOverview: Schema<'ControlOverview'> = {
     }
   ],
   "metrics": {
-    "measurements_last_hour": 12,
-    "open_alerts": 1,
+    "measurements_last_hour": 35,
+    "open_alerts": 3,
     "active_devices": 1,
-    "avg_alert_response_s": 95.0
+    "avg_alert_response_s": null
   }
 }
 
