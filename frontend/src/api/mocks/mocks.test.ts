@@ -74,6 +74,18 @@ describe('modo mock (VITE_USE_MOCKS=true)', () => {
     expect(err.status).toBe(401)
   })
 
+  it('todos los perfiles del selector del login entran (PIN), y un member con su ficha', async () => {
+    const demo = await unwrap(api.GET('/api/v1/auth/demo-users'))
+    expect(demo.length).toBeGreaterThan(4)
+    for (const d of demo) {
+      const tok = await unwrap(
+        api.POST('/api/v1/auth/pin', { body: { username: d.username, pin: '1234' } }),
+      )
+      expect(tok.user).toMatchObject({ username: d.username, role: d.role, env_id: d.env_id })
+      if (d.role === 'member') expect(tok.user.member_id).not.toBeNull()
+    }
+  })
+
   it('mediciones idempotentes: el mismo UUID no se duplica y aparece en el historial', async () => {
     const m = { id: newId(), indicator_id: 'bp_systolic', value: 150, taken_at: NOW }
     const post = () =>
