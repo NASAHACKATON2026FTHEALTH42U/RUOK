@@ -13,7 +13,8 @@
 | BE-08 (#15) | Motor de evaluación por indicador (`services/assessment.py`) | Hecho |
 | BE-09 (#16) | Evaluación agregada por sistema y global (`services/assessment.py`) | Hecho |
 | BE-03 (#9) | Perfiles de entorno en `app/data/environments.json`, loader validado y `GET /environments` reales | Hecho |
-| BE-04 (#10) | Catálogo de 20 indicadores y 7 sistemas en JSON, validación cruzada y `GET /indicators`, `/systems` reales | Hecho (PR pendiente de merge) |
+| BE-04 (#10) | Catálogo de 20 indicadores y 7 sistemas en JSON, validación cruzada y `GET /indicators`, `/systems` reales | Hecho |
+| BE-06 (#13) | `POST` de mediciones por lotes (idempotente por UUID, atómico, 409) y `GET` con filtros | Hecho (PR pendiente de merge) |
 
 ## Arrancar
 
@@ -56,7 +57,9 @@ backend/
 │   │   ├── app_state.py     clave-valor de app_state: get_value/set_value, save_clock/restore_clock
 │   │   ├── assessment.py    motor de evaluación por indicador y por sistema (BE-08, BE-09)
 │   │   ├── catalog.py       indicadores y sistemas: list_indicators(), get_indicator(), list_systems()
-│   │   └── environments.py  carga y valida environments.json: list_environments(), get_environment()
+│   │   ├── environments.py  carga y valida environments.json: list_environments(), get_environment()
+│   │   ├── measurements.py  lotes idempotentes (save_batch), series (list_series), validación
+│   │   └── members.py       ensure_demo_members(): members de ejemplo en la BD (STUB → BE-07)
 │   ├── stubs.py          STUB(FS-02): datos de ejemplo de los routers stub (se van retirando)
 │   ├── schemas/          modelos Pydantic del contrato, uno por dominio; se importan desde app.schemas
 │   │   ├── common.py     enumeraciones (Status, Liveness, Role…), Slug, Range, ApiModel, ErrorResponse
@@ -72,7 +75,7 @@ backend/
 │       ├── health.py     GET /health
 │       ├── auth.py       /auth/*, /users
 │       ├── catalog.py    /environments, /indicators, /systems (reales), /interventions (stub)
-│       ├── members.py    /members/{id}, privacy, measurements, assessment, heartbeat, ruok
+│       ├── members.py    /members/{id}, privacy, measurements (real), assessment, heartbeat, ruok
 │       ├── alerts.py     alertas del member, acciones sobre alertas, consola ground
 │       ├── game.py       tareas, game, leaderboard
 │       └── realtime.py   events (SSE), devices, control, system, link, demo
@@ -85,7 +88,8 @@ backend/
     ├── test_models.py    tablas, índices, crear/leer cada modelo, restricciones, fechas UTC, app_state
     ├── test_assessment.py   motor de evaluación (BE-08)
     ├── test_environments.py perfiles vs docs/environments.md, JSON inválido, GET /environments y 404
-    └── test_catalog.py      indicadores y sistemas, coherencia, rangos con el motor, endpoints y 404
+    ├── test_catalog.py      indicadores y sistemas, coherencia, rangos con el motor, endpoints y 404
+    └── test_measurements.py idempotencia, 409, lote atómico, validación, filtros y orden del GET
 ```
 
 La estructura objetivo completa (services, data, seed…) está en [architecture.md](architecture.md#estructura-de-carpetas).
@@ -185,6 +189,30 @@ Si cambias `indicators.json` o `systems.json`, regenera los mocks del front (`cd
 **Añadir o cambiar un indicador:** añádelo a `indicators.json` **y** a la lista `indicators` de su sistema en `systems.json`, actualiza la tabla de [sources.md](sources.md) y `EXPECTED_INDICATORS` en `tests/test_catalog.py`. Si es para un entorno, añádelo a su `indicators` en `environments.json`. Las regiones SVG (`svg_region`) tienen que coincidir con las de `BodyFigure` en el front.
 
 **Añadir o cambiar un entorno:** edita `environments.json` siguiendo [environments.md](environments.md), actualiza la tabla de ese documento y `DOC_TABLE` en `tests/test_environments.py`, y pasa los tests. Los valores clínicos (`threshold_overrides`) se citan en [sources.md](sources.md).
+
+### Mediciones (`services/measurements.py`)
+
+Implementa el principio **sin pérdida de datos** ([offline-and-liveness.md](offline-and-liveness.md)). El front guarda cada medición en su outbox con un UUID y la reenvía hasta que el servidor confirma; el servidor tiene que aguantar reenvíos.
+
+`POST /members/{id}/measurements` con `{measurements: [...]}`:
+
+| Caso | Resultado |
+|---|---|
+| id nuevo | se guarda → cuenta en `accepted` |
+| mismo id y mismo contenido (reintento) | no se duplica → cuenta en `duplicates` |
+| mismo id con contenido distinto | **409**, no se guarda **nada** del lote |
+| indicador desconocido, valor fuera de `input.min..max` o `taken_at` sin zona | **422**, no se guarda nada |
+| member inexistente | **404** |
+
+- **"Mismo contenido"** compara member, indicador, valor, `taken_at` (como instante UTC: `12:00+02:00` = `10:00Z`), `source` y `note`.
+- **Lote atómico:** se valida todo antes de escribir y hay un solo `commit`. El cliente corrige y reenvía el lote entero.
+- `unit` sale del catálogo y `received_at` del reloj del servidor (`clock.now()`).
+- **Envíos simultáneos** del mismo lote (dos pestañas): si el `commit` choca con la PK, se reintenta una vez y esas mediciones pasan a `duplicates`.
+- El `assessment` de la respuesta sigue siendo stub hasta **BE-11**; el evento `measurement.created` / `sync.batch` está marcado con `TODO(BE-28)`.
+
+`GET /members/{id}/measurements?indicator_id=&from=&to=`: ordenado por `taken_at`; `from` y `to` son inclusivos; `from > to` → 422.
+
+**Members de ejemplo (temporal):** las mediciones tienen FK a `member`, pero aún no hay seed. Al arrancar, `ensure_demo_members()` inserta los 3 members de `stubs.MEMBERS` si la tabla está vacía. Lo sustituye el seed de **BE-07**.
 
 ### Cabecera `X-Server-Time` y CORS (`app/main.py`)
 

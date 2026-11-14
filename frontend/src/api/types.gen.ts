@@ -314,13 +314,13 @@ export interface paths {
         };
         /**
          * Serie temporal de mediciones (orden: taken_at)
-         * @description STUB(FS-02) → BE-06
+         * @description Filtros opcionales por indicador y por intervalo de `taken_at` (inclusivo). `from` posterior a `to` → 422.
          */
         get: operations["list_measurements_api_v1_members__member_id__measurements_get"];
         put?: never;
         /**
          * Registrar un lote de mediciones (idempotente por UUID)
-         * @description Repetir un id con el mismo contenido cuenta como `duplicates`; con contenido distinto → 409. STUB(FS-02) → BE-06
+         * @description Repetir un id con el mismo contenido cuenta como `duplicates`; con contenido distinto → 409. El lote es atómico: si una medición es inválida (indicador desconocido o valor fuera del rango del input → 422) o está en conflicto, no se guarda ninguna. `assessment`: STUB(FS-02) → BE-11
          */
         post: operations["post_measurements_api_v1_members__member_id__measurements_post"];
         delete?: never;
