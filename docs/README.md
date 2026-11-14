@@ -22,6 +22,7 @@ Presentación: **domingo 16:00**.
 | [sources.md](sources.md) | Supervisor | Referencias NASA HRP / ESA y otras fuentes |
 
 ## Reglas de oro
+0. **Nunca hagas push directo a `main`.** Todo entra por PR con la CI en verde. Lee [`LEEME.txt`](../LEEME.txt).
 
 1. **El contrato manda.** Cualquier cambio en la API se hace primero en [api-contract.md](api-contract.md) y se avisa en el canal del equipo.
 2. **Sin datos = desconocido.** Nada se pinta en verde si no hay datos recientes.

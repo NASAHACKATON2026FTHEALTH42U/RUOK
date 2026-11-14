@@ -27,6 +27,14 @@
 - **Backlog:** GitHub Issues ([backlog.md](backlog.md)). Se coge siempre la issue **P0 o desbloqueada** de mayor prioridad de tu área. Al empezarla, asígnatela.
 - **Ramas:** `feat/<area>-<id>-<slug>`, por ejemplo `feat/be-08-assessment-engine`. Para fixes, `fix/<slug>`.
 - **PR pequeñas** a `main`. En la descripción va `Closes #n`. Basta 1 review del mismo área o del full-stack. Los P0 se mergean en cuanto estén verdes.
+- **🚫 Push directo a `main` prohibido. Protección por convención.**
+  - El repo es privado en una organización Free, y GitHub no permite proteger ramas ni crear *rulesets* en ese plan (la API devuelve HTTP 403). Por tanto, **la regla depende de que el equipo la cumpla**:
+    - todo cambio entra por PR;
+    - solo se mergea con los 3 checks de la CI en verde y 1 aprobación;
+    - el force-push y el borrado de `main` están prohibidos;
+    - excepción: los P0 urgentes de madrugada, con el visto bueno del supervisor y avisando en el canal.
+  - Cuando el repo pase a **público** (lo exige el envío de Space Apps), se activará la protección automática con esta misma configuración. Ver la issue FS-05.
+  - Resumen para el equipo: [`LEEME.txt`](../LEEME.txt).
 - **Contrato:** cualquier cambio de API se hace primero en [api-contract.md](api-contract.md), después se regeneran los tipos (`npm run gen:api`) y se avisa al equipo.
 - **Commits:** en imperativo y cortos, con el ID de la issue (`BE-08: umbrales por entorno`).
 - **Definición de hecho:**

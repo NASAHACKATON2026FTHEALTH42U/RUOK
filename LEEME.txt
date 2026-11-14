@@ -1,0 +1,115 @@
+==============================================================================
+ RUOK - NASA Space Apps 2026 - LEEME PARA LOS EQUIPOS FRONT Y BACK
+==============================================================================
+
+Lee esto antes de hacer tu primer commit. Son 2 minutos.
+Documentación completa: docs/README.md
+Backlog (GitHub Issues): docs/backlog.md
+
+------------------------------------------------------------------------------
+ 1. REGLA DE ORO DE GIT (OBLIGATORIA)
+------------------------------------------------------------------------------
+
+  >>> NUNCA hagas push directo a main. <<<
+
+  El repo es privado y con el plan Free de GitHub NO se puede bloquear main.
+  La protección es por CONVENCIÓN: depende de que todos la cumplamos.
+  (Cuando el repo pase a público para el envío de Space Apps, se activará
+  la protección automática y todo esto quedará forzado por GitHub.)
+
+  Flujo:
+    1. Coge una issue de tu área (ver sección 3) y asígnatela.
+    2. git checkout main && git pull
+    3. git checkout -b feat/<area>-<id>-<slug>
+         ejemplos: feat/be-08-assessment-engine
+                   feat/fe-05-body-figure
+                   fix/sos-modal-offline
+    4. Commits pequeños con el ID: "BE-08: umbrales por entorno"
+    5. git push -u origin <tu-rama>
+    6. Abre una PR a main con "Closes #<n>" en la descripción.
+    7. Espera a que la CI esté en VERDE (los 3 checks).
+    8. 1 aprobación de alguien de tu área o del full-stack.
+    9. Merge (squash). Borra la rama.
+
+  NO se mergea:
+    - con la CI en rojo o pendiente;
+    - sin aprobación (excepción: P0 urgentes de madrugada con el visto bueno
+      del supervisor; se avisa en el canal del equipo);
+    - con force-push sobre main (prohibido siempre).
+
+------------------------------------------------------------------------------
+ 2. CI (GITHUB ACTIONS) - .github/workflows/ci.yml
+------------------------------------------------------------------------------
+
+  Corre en cada PR y en cada push a main. Tiene 3 checks:
+
+    Backend (pytest)                -> ruff check + pytest
+    Frontend (lint + build)         -> npm run lint + npm run build + npm test
+    Contrato API (tipos TS al día)  -> regenera types.gen.ts desde FastAPI
+                                       y falla si no coincide con el repo
+
+  Antes de abrir la PR, pasa lo mismo en local:
+
+    BACK :  cd backend  && uv run pytest && uv run --with ruff ruff check .
+    FRONT:  cd frontend && npm run lint && npm run build
+
+  Si la CI falla, lo arreglas tú en tu rama. No se mergea "y luego lo arreglo".
+
+------------------------------------------------------------------------------
+ 3. CÓMO COGER TRABAJO
+------------------------------------------------------------------------------
+
+  - Filtra en GitHub Issues por tu label: area:frontend / area:backend /
+    area:fullstack / area:content.
+  - Orden: P0-blocker -> P1 -> P2. Los P0 bloquean a otros: van primero.
+  - Solo coge issues cuyas "Depende de" estén cerradas (o a punto de cerrarse).
+  - Asígnatela ANTES de empezar, para que nadie la duplique.
+  - Atascado más de 30 min -> avisa al supervisor.
+  - A partir del domingo a las 11:00 (FREEZE): solo bugs y pulido. Los P2 sin
+    terminar se cortan.
+
+------------------------------------------------------------------------------
+ 4. CONTRATO DE LA API (FRONT <-> BACK)
+------------------------------------------------------------------------------
+
+  Fuente de verdad: docs/api-contract.md
+
+  Si cambias la API (BACK):
+    1. Actualiza primero docs/api-contract.md (en la misma PR).
+    2. Cambia app/schemas.py y los routers.
+    3. Regenera los tipos del front: cd frontend && npm run gen:api
+    4. Commitea types.gen.ts. Si no, el check "Contrato API" falla.
+    5. Avisa al equipo FRONT en el canal.
+
+  FRONT:
+    - Nunca edites src/api/types.gen.ts a mano.
+    - Toda llamada pasa por src/api/client.ts y toda escritura por el outbox
+      (src/offline/outbox.ts).
+    - Mientras el back no esté listo, usa los mocks (VITE_USE_MOCKS=true).
+
+------------------------------------------------------------------------------
+ 5. PRINCIPIOS DEL PRODUCTO (NO NEGOCIABLES)
+------------------------------------------------------------------------------
+
+  1. Sin datos = DESCONOCIDO. unknown / stale / lost NUNCA se pintan en verde.
+  2. Local-first. Nada de nube, CDNs ni internet en tiempo de ejecución.
+  3. Sin pérdida de datos. Todo POST lleva un UUID del cliente y es idempotente.
+  4. Configuración, no código. Umbrales, entornos y protocolos van en
+     backend/app/data/*.json.
+  5. Reloj de demo: en el back usa app/clock.py (now()), nunca datetime.now().
+  6. Texto visible desde environment.vocabulary: nunca "astronauta" fijo.
+  7. Privacidad conductual: detalles de ánimo ocultos salvo que el member los
+     comparta o haya una emergencia.
+  8. Disclaimer: NO es un dispositivo médico.
+
+------------------------------------------------------------------------------
+ 6. HITOS
+------------------------------------------------------------------------------
+
+  M0 Setup        sáb, primeras 2 h  scaffolding + contrato + mocks
+  Hito 1          sáb noche          dashboard + cuerpo + semáforo, con datos reales
+  Hito 2          dom 09:00          MVP integrado (alertas, offline, liveness, juego)
+  Freeze          dom 11:00          solo bugs y pulido
+  Presentación    dom 16:00
+
+==============================================================================
