@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41).
 
 ## Comandos
 
@@ -106,7 +106,9 @@ frontend/
     ├── offline/
     │   ├── device.ts          identidad del dispositivo: getDevice(), ?device=<nombre> (+ test)
     │   ├── db.ts              base IndexedDB ruok-<device_id> con los stores de data-model.md
-    │   └── outbox.ts          sendMeasurements(): punto único de escritura (IndexedDB en FE-11)
+    │   ├── outbox.ts          outbox + sincronizador: sendMeasurements(), syncNow(), useOutboxStore
+    │   ├── backoff.ts         backoffMs(), classify(), isDue() (+ test)
+    │   └── cache.ts           caché offline: withCatalogCache(), última evaluación, isUnavailable()
     ├── lib/time.ts            formatAgo(): "hace 12 min" con la hora del servidor (+ test)
     ├── store/environment.ts   store Zustand: envId, memberId, vocabulary (persistido)
     ├── api/
@@ -134,6 +136,7 @@ frontend/
     │   ├── EnvironmentSelector.tsx
     │   ├── ServerStatus.tsx   chip de conexión con el servidor
     │   ├── StatusBadge.tsx    semáforo: icono (forma + símbolo) + etiqueta
+    │   ├── PendingSyncChip.tsx "N pendientes de sincronizar" en la cabecera
     │   ├── status.ts          statusStyle(), livenessState(), STATUS_COLORS (+ status.test.ts)
     │   ├── MockBanner.tsx     banner obligatorio con datos de ejemplo
     │   └── PagePlaceholder.tsx
@@ -349,9 +352,8 @@ Verificado con una serie sintética de 30 días (interceptando la petición en C
 
 - **Validación** (`parseValue()`): rango `[min, max]` y paso (`step`) de `indicator.input`; los errores salen bajo el campo (`role="alert"`, `aria-invalid`). Los campos vacíos no se envían; hace falta al menos uno.
 - **Un solo lote** por formulario: la tensión sistólica y la diastólica (y el resto del sistema) van juntas en `POST /members/{id}/measurements`, con un **UUID por medición** (`newId()`), `taken_at` = hora del servidor y `source: "manual"`, más la nota opcional.
-- **Reintento idempotente:** si falla la red, el formulario conserva los valores, los bloquea y el botón pasa a "Reintentar el envío", que reenvía **los mismos UUID** (el servidor no duplica).
-- **Resultado:** "N mediciones enviadas" y el estado general de la evaluación que devuelve el lote; "Ver el panel" vuelve a `/dashboard`, que vuelve a pedir la evaluación.
-- Toda escritura pasa por `src/offline/outbox.ts` (`sendMeasurements()`). **TODO(FE-11):** guardar primero en IndexedDB para no perder nada sin conexión; hoy, sin red, la medición no se guarda hasta que se reintenta.
+- **Sin conexión no se pierde nada** (FE-11): el lote se guarda primero en el outbox del dispositivo. Si llega al servidor, se ve "N mediciones enviadas" con el estado general que devuelve; si no, "Medición guardada en el dispositivo", y se envía sola cuando vuelva la conexión, con los mismos UUID (sin duplicados).
+- "Ver el panel" vuelve a `/dashboard`, que vuelve a pedir la evaluación.
 
 ## Dispositivo e IndexedDB (FE-30)
 
@@ -370,6 +372,30 @@ Cada dispositivo (o pestaña, en los ensayos) tiene su propia identidad, su base
   - la clave de la sesión de Zustand: **`ruok-session-<device_id>`**.
 - El `device_id` es siempre un UUID (el back lo valida).
 - Probado con dos pestañas `?device=a` y `?device=b`: ids, bases, sesión y outbox independientes.
+
+## Outbox offline y sincronización (FE-11)
+
+**Toda escritura pasa por `src/offline/outbox.ts`** (CLAUDE.md, principio 4). Flujo (`docs/data-model.md` §2):
+
+1. **Guardar primero** en la base del dispositivo: entrada en `outbox` (`status: pending`) y, para mediciones, cada una en `measurements` con `synced: false`. Aunque se cierre la app o no haya red, no se pierde.
+2. **Enviar.** El sincronizador recorre el outbox por orden de creación y decide con `classify(status)`:
+
+| Respuesta                  | Qué hace                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| 2xx (incluido "duplicado") | borra la entrada, marca las mediciones `synced`, guarda la evaluación devuelta |
+| sin red, 408, 429, 5xx     | `attempts + 1` y reintento con **backoff** (2 s, 4 s, 8 s… tope 60 s)          |
+| 401                        | **pausa** sin borrar nada; FE-27 pide login y llama a `resumeSync()`           |
+| otro 4xx (p. ej. 409, 422) | `failed`: se conserva para revisarla y no se reintenta en bucle                |
+
+3. **Cuándo se sincroniza:** al encolar, al arrancar, con el evento `online` y al volver a la pestaña (estos tres **sin esperar el backoff**), y cada 5 s si hay pendientes. `navigator.locks` evita envíos simultáneos desde dos pestañas del mismo dispositivo. Al arrancar, las entradas que se quedaron "enviando" (app cerrada a mitad) vuelven a `pending`.
+
+- **API:** `sendMeasurements(memberId, mediciones)` → `{ status: 'sent', result }` si ya llegó o `{ status: 'queued' }` si queda pendiente. `syncNow(force?)`, `resumeSync()`. Estado en `useOutboxStore` (`pending`, `failed`, `syncing`, `paused`).
+- **Cabecera:** `PendingSyncChip` muestra "⇡ N pendientes de sincronizar" (o "Sincronizando…", "N rechazadas"); pulsarlo fuerza un intento. Solo aparece si hay algo.
+- **Caché offline** (`src/offline/cache.ts`): `environments`, `indicators` y `systems` se guardan en el store `catalog` en cada carga y se usan si el servidor no está; la última evaluación de cada member se guarda en `assessments` y, sin servidor, el dashboard la muestra con el aviso "No se pudo actualizar: los datos pueden estar desfasados" (`useLoad({ fallback })`). Aún no hay endpoint de protocolos; las intervenciones (FE-20) pueden usar `withCatalogCache('interventions', …)`.
+- **"Sin servidor"** = error de red o 502/503/504 (`isUnavailable()`). En desarrollo, el proxy de Vite responde **503** cuando el backend está parado (`vite.config.ts`), en lugar de su 500 genérico.
+- Un 401 o un cierre de sesión **nunca** borran el outbox.
+
+**Probado** (criterio de aceptación): con el backend parado se registran 2 mediciones (temperatura y frecuencia cardiaca) → quedan en el outbox, sobreviven a una recarga y el panel se ve desde la caché → al arrancar el backend se sincronizan en 7 s; cada medición llega una sola vez (sin duplicados).
 
 ### Pendiente
 
