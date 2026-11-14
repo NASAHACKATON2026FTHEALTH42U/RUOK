@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { ROUTE_PERMISSIONS } from '../../auth/permissions'
 import { homeFor } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
@@ -30,8 +30,13 @@ export function Layout() {
   const device = getDevice()
   const { ground, crew } = useVocab()
   const { role, can } = useAuth()
+  const wide = useLocation().pathname.startsWith('/control')
   // Solo las vistas que permite el rol (FE-28, src/auth/permissions.ts).
-  const navItems = [...NAV_ITEMS, { to: '/ground', label: `Consola de ${ground}` }]
+  const navItems = [
+    ...NAV_ITEMS,
+    { to: '/ground', label: `Consola de ${ground}` },
+    { to: '/control', label: 'Centro de control' },
+  ]
     .map((i) => (i.to === '/members' ? { ...i, label: capitalize(crew) } : i))
     .filter((i) => can(ROUTE_PERMISSIONS[i.to]))
 
@@ -74,7 +79,8 @@ export function Layout() {
         </nav>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+      {/* El centro de control usa todo el ancho (proyector o pantalla grande). */}
+      <main className={`mx-auto w-full flex-1 px-4 py-6 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}>
         <Outlet />
       </main>
 
