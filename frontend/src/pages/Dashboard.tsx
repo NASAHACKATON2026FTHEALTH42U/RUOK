@@ -1,5 +1,7 @@
 import { PagePlaceholder } from '../components/ui/PagePlaceholder'
+import { capitalize, useVocab } from '../environments/useVocab'
 
 export default function Dashboard() {
-  return <PagePlaceholder title="Panel de salud" issue="FE-07" />
+  const { member } = useVocab()
+  return <PagePlaceholder title={`${capitalize(member)}: tu panel de salud`} issue="FE-07" />
 }

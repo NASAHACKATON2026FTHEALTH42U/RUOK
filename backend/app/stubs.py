@@ -117,27 +117,188 @@ INDICATORS: list[Indicator] = [
         why_it_matters="El aislamiento y el confinamiento afectan al ánimo y al rendimiento.",
         hazards=["isolation"],
     ),
+    *[
+        Indicator(
+            id=id_,
+            name=name,
+            unit=unit,
+            system_id=system,
+            ranges=IndicatorRanges(**ranges),
+            max_age_s=max_age,
+            higher_is_worse=worse,
+            input=IndicatorInput(**inp),
+            measurement_instructions=[instr],
+            why_it_matters=why,
+            hazards=hazards,
+        )
+        for id_, name, unit, system, ranges, max_age, worse, inp, instr, why, hazards in [
+            (
+                "temperature",
+                "Temperatura",
+                "°C",
+                "immune",
+                {
+                    "normal": (36.0, 37.4),
+                    "warning": (37.5, 38.4),
+                    "critical_low": 35.0,
+                    "critical_high": 38.5,
+                },
+                86400,
+                True,
+                {"type": "number", "min": 33, "max": 43, "step": 0.1},
+                "Termómetro bajo la lengua, 1 min",
+                "La fiebre puede indicar una infección; el sistema inmune cambia en el espacio.",
+                ["hostile_environment"],
+            ),
+            (
+                "glucose",
+                "Glucosa",
+                "mg/dL",
+                "metabolic",
+                {
+                    "normal": (70, 140),
+                    "warning": (141, 180),
+                    "critical_low": 60,
+                    "critical_high": 250,
+                },
+                86400,
+                True,
+                {"type": "number", "min": 20, "max": 600, "step": 1},
+                "Glucómetro: gota de sangre del dedo",
+                "La nutrición en misión es limitada y la glucosa refleja el estado metabólico.",
+                ["distance"],
+            ),
+            (
+                "exercise_min",
+                "Ejercicio diario",
+                "min",
+                "musculoskeletal",
+                {"normal": (120, 300), "warning": (60, 119), "critical_low": 30},
+                86400,
+                False,
+                {"type": "duration", "min": 0, "max": 600, "step": 5},
+                "Minutos de ejercicio resistivo y aeróbico de hoy",
+                "Sin gravedad se pierde hueso y músculo; el ejercicio es la contramedida.",
+                ["gravity"],
+            ),
+            (
+                "sleep_hours",
+                "Horas de sueño",
+                "h",
+                "neuro_behavioral",
+                {"normal": (7, 10), "warning": (5, 6.9), "critical_low": 4},
+                129600,
+                False,
+                {"type": "duration", "min": 0, "max": 16, "step": 0.5},
+                "Horas dormidas la última noche",
+                "El ciclo luz/oscuridad alterado y el ruido afectan al sueño.",
+                ["isolation"],
+            ),
+            (
+                "vision_changes",
+                "Cambios en la visión",
+                "1-5",
+                "eyes",
+                {"normal": (1, 1.9), "warning": (2, 3.4), "critical_high": 3.5},
+                604800,
+                True,
+                {"type": "scale_1_5", "min": 1, "max": 5, "step": 1},
+                "1 = sin cambios, 5 = visión muy borrosa o distorsionada",
+                "El SANS (síndrome neuro-ocular) aparece en misiones largas en microgravedad.",
+                ["gravity"],
+            ),
+            (
+                "radiation_dose",
+                "Dosis acumulada",
+                "mSv",
+                "radiation",
+                {"normal": (0, 250), "warning": (251, 500), "critical_high": 600},
+                604800,
+                True,
+                {"type": "number", "min": 0, "max": 2000, "step": 1},
+                "Lectura del dosímetro personal",
+                "Fuera de la magnetosfera la radiación aumenta el riesgo de cáncer.",
+                ["radiation"],
+            ),
+        ]
+    ],
 ]
 
 SYSTEMS: list[BodySystem] = [
     BodySystem(
-        id="cardiovascular",
-        name="Cardiovascular",
-        svg_region="heart",
-        indicators=["heart_rate", "bp_systolic", "bp_diastolic", "spo2"],
-        function="Bombea la sangre y lleva oxígeno a todo el cuerpo.",
-        space_effects="Redistribución de fluidos hacia la cabeza y desacondicionamiento cardiaco.",
-        hazards=["gravity", "radiation"],
-    ),
-    BodySystem(
-        id="neuro_behavioral",
-        name="Neuro-conductual",
-        svg_region="brain",
-        indicators=["mood", "sleep_hours"],
-        function="Ánimo, sueño, cognición y relación con la tripulación.",
-        space_effects="Aislamiento, confinamiento y alteración del sueño afectan al ánimo.",
-        hazards=["isolation"],
-    ),
+        id=id_,
+        name=name,
+        svg_region=region,
+        indicators=inds,
+        function=function,
+        space_effects=effects,
+        hazards=hazards,
+    )
+    for id_, name, region, inds, function, effects, hazards in [
+        (
+            "cardiovascular",
+            "Cardiovascular",
+            "heart",
+            ["heart_rate", "bp_systolic", "bp_diastolic", "spo2"],
+            "Bombea la sangre y lleva oxígeno a todo el cuerpo.",
+            "Redistribución de fluidos hacia la cabeza y desacondicionamiento cardiaco.",
+            ["gravity", "radiation"],
+        ),
+        (
+            "musculoskeletal",
+            "Musculoesquelético",
+            "bones",
+            ["exercise_min"],
+            "Huesos y músculos: sostén y movimiento.",
+            "Sin gravedad se pierde un 1–1,5 % de densidad ósea al mes y masa muscular.",
+            ["gravity"],
+        ),
+        (
+            "immune",
+            "Inmune",
+            "immune",
+            ["temperature"],
+            "Defiende al cuerpo de infecciones.",
+            "El estrés y el confinamiento alteran la respuesta inmune.",
+            ["hostile_environment", "isolation"],
+        ),
+        (
+            "metabolic",
+            "Metabólico y nutrición",
+            "metabolic",
+            ["glucose"],
+            "Convierte los alimentos en energía.",
+            "Dieta limitada y cambios hormonales afectan al metabolismo.",
+            ["distance"],
+        ),
+        (
+            "neuro_behavioral",
+            "Neuro-conductual",
+            "brain",
+            ["mood", "sleep_hours"],
+            "Ánimo, sueño, cognición y relación con la tripulación.",
+            "Aislamiento, confinamiento y alteración del sueño afectan al ánimo.",
+            ["isolation"],
+        ),
+        (
+            "eyes",
+            "Ojos (SANS)",
+            "eyes",
+            ["vision_changes"],
+            "Visión.",
+            "La presión de los fluidos hacia la cabeza puede deformar el globo ocular (SANS).",
+            ["gravity"],
+        ),
+        (
+            "radiation",
+            "Radiación (todo el cuerpo)",
+            "halo",
+            ["radiation_dose"],
+            "Exposición acumulada a la radiación espacial.",
+            "Fuera de la magnetosfera terrestre la dosis aumenta mucho.",
+            ["radiation"],
+        ),
+    ]
 ]
 
 INTERVENTIONS: list[Intervention] = [
@@ -232,7 +393,7 @@ def assessment(member_id: int = 1, env_id: str = "mars") -> Assessment:
         member_id=member_id,
         env_id=env.id,
         generated_at=clock.now(),
-        overall_status="warning",
+        overall_status="critical",
         liveness="active",
         last_seen_at=T0,
         systems=[
@@ -292,8 +453,76 @@ def assessment(member_id: int = 1, env_id: str = "mars") -> Assessment:
                     message="Sin datos recientes: haz el check-in.",
                 ),
             ),
+            *[
+                _simple_system(*args, delay_s=env.comm_delay_s)
+                for args in [
+                    ("musculoskeletal", "normal", "exercise_min", 135, "min", "stable", (120, 300)),
+                    ("immune", "normal", "temperature", 36.7, "°C", "stable", (36.0, 37.4)),
+                    (
+                        "metabolic",
+                        "critical",
+                        "glucose",
+                        58,
+                        "mg/dL",
+                        "falling",
+                        (70, 140),
+                        "Toma 15 g de hidratos rápidos y repite en 15 min",
+                    ),
+                    ("eyes", "normal", "vision_changes", 1, "1-5", "stable", (1, 1.9)),
+                    (
+                        "radiation",
+                        "warning",
+                        "radiation_dose",
+                        310,
+                        "mSv",
+                        "rising",
+                        (0, 250),
+                        "Reduce el tiempo fuera del refugio hasta nueva revisión",
+                    ),
+                ]
+            ],
         ],
         behavioral=BehavioralSummary(status="unknown", details_visible=True),
+    )
+
+
+def _simple_system(
+    system_id: str,
+    status: str,
+    indicator_id: str,
+    value: float,
+    unit: str,
+    trend: str,
+    normal: tuple[float, float],
+    rec: str | None = None,
+    delay_s: int = 0,
+) -> SystemAssessment:
+    """Sistema con un indicador, para completar el assessment de ejemplo."""
+    level = 1 if status == "critical" else 0
+    return SystemAssessment(
+        system_id=system_id,
+        status=status,
+        indicators=[
+            IndicatorAssessment(
+                indicator_id=indicator_id,
+                last_value=value,
+                unit=unit,
+                taken_at=T0,
+                status=status,
+                trend=trend,
+                range={"normal": normal},
+            )
+        ],
+        recommendations=[Recommendation(id=f"rec_{system_id}", priority=1, text=rec)]
+        if rec
+        else [],
+        escalation=Escalation(
+            level=level,
+            target_role="crew" if level else "self",
+            mode="realtime",
+            delay_s=0 if level else delay_s,
+            message="Avisa al oficial médico de a bordo." if level else "Sin acciones necesarias.",
+        ),
     )
 
 

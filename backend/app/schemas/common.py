@@ -17,9 +17,15 @@ Slug = Annotated[str, Field(pattern=r"^[a-z0-9_]+$", examples=["mars"])]
 
 
 class ApiModel(BaseModel):
-    """Base de todos los schemas: rechaza campos desconocidos en la entrada."""
+    """Base de todos los schemas.
 
-    model_config = ConfigDict(extra="forbid")
+    - `extra="forbid"`: rechaza campos desconocidos en la entrada (422).
+    - `json_schema_serialization_defaults_required`: en las RESPUESTAS, los campos con valor
+      por defecto se declaran obligatorios (siempre vienen), y en las PETICIONES siguen siendo
+      opcionales. Así los tipos TS no obligan al front a enviar los valores por defecto.
+    """
+
+    model_config = ConfigDict(extra="forbid", json_schema_serialization_defaults_required=True)
 
 
 class Status(StrEnum):

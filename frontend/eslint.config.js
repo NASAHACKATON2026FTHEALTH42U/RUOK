@@ -7,7 +7,7 @@ import prettier from 'eslint-config-prettier'
 
 export default tseslint.config(
   // types.gen.ts es generado por openapi-typescript: no se lintea ni se edita a mano.
-  { ignores: ['dist', 'src/api/types.gen.ts'] },
+  { ignores: ['dist', 'src/api/types.gen.ts', 'src/api/mocks/fixtures.gen.ts'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended, prettier],
     files: ['**/*.{ts,tsx}'],

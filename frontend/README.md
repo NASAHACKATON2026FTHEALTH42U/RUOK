@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20).
 
 ## Comandos
 
@@ -15,13 +15,12 @@ npm run lint           # ESLint
 npm run format         # Prettier (escribe)
 npm run format:check   # Prettier (solo comprueba)
 npm run gen:api        # regenera src/api/types.gen.ts desde el OpenAPI del backend (usa uv)
+npm run gen:mocks      # regenera src/api/mocks/fixtures.gen.ts desde las respuestas del backend
 npm test               # tests unitarios (Vitest)
 npm run typecheck      # solo tsc -b
 ```
 
 Antes de abrir una PR: `npm run lint && npm run build && npm test` (es lo que ejecuta el job `Frontend` de la CI). Si el backend cambió la API: `npm run gen:api` y commitea `types.gen.ts` (lo comprueba el job `Contrato API`).
-
-> `VITE_USE_MOCKS=true` llega con **FS-04** (#7).
 
 ## API: tipos y cliente (FS-03)
 
@@ -68,6 +67,22 @@ Notas:
 - Prettier (`.prettierrc.json`): sin punto y coma, comillas simples, `trailingComma: all`, 100 columnas.
 - ESLint y Prettier ignoran `src/api/types.gen.ts` (es generado, no se edita a mano).
 
+## Mocks: el front sin backend (FS-04)
+
+| Modo                             | Cómo                                                                                         | Qué pasa                                                                                                                                                            |
+| -------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Real** (por defecto)           | `npm run dev`                                                                                | Llama al backend. Sin servidor: chip "sin conexión" y `NetworkError`; **nunca datos inventados**                                                                    |
+| **Mock**                         | `VITE_USE_MOCKS=true npm run dev`, o `?mocks=1` en la URL (se recuerda; `?mocks=0` lo quita) | Todo el front funciona contra una API simulada en memoria. Banner amarillo **"DATOS DE EJEMPLO"**                                                                   |
+| **Fallback** (plan B de la demo) | `VITE_MOCK_FALLBACK=true`                                                                    | Si el servidor no responde, **solo las lecturas** usan mocks y aparece el banner. **Las escrituras nunca se simulan**: lanzan `NetworkError` y el outbox las guarda |
+
+- **Datos:** `src/api/mocks/fixtures.gen.ts` lo genera `npm run gen:mocks`, que llama a cada endpoint del backend con su `TestClient` (hoy, los stubs de `backend/app/stubs.py`). Cada fixture lleva su tipo (`: Schema<'Assessment'>`), así que **si el contrato cambia y los mocks no encajan, `npm run build` falla**. No se edita a mano.
+- **Estado en memoria** (`handlers.ts`): las mediciones enviadas aparecen en el historial (idempotentes por UUID), los SOS se crean, escalan y resuelven, las tareas suman puntos, `/demo/link` y `/demo/fast-forward` funcionan. `POST /demo/reset` lo reinicia.
+- **El assessment de ejemplo** tiene los 7 sistemas con los 4 estados (`normal`, `warning`, `critical`, `unknown`), y el modo de escalado cambia según el entorno (`?env=`).
+- **Usuarios demo:** `vega` (member, Marte), `medic-mars`, `surgeon-mars` y `admin`, con cualquier contraseña.
+- **Feed de eventos:** `EventSource` no pasa por `fetch`, así que en modo mock el cliente SSE (FE-29) usa `createMockEventStream(onEvent)` de `src/api/mocks/events.ts`.
+- **Por qué no MSW:** necesita un service worker, que no existe por HTTP en la red local.
+- **Cobertura:** `mocks.test.ts` exige un handler para **cada operación del OpenAPI** (`CONTRACT_OPERATIONS`). Si el backend añade un endpoint, regenera con `npm run gen:mocks` y añade su handler.
+
 ## Estructura
 
 ```
@@ -80,26 +95,36 @@ frontend/
 ├── eslint.config.js  .prettierrc.json  .prettierignore
 ├── tsconfig.json              referencias a tsconfig.app.json (src/) y tsconfig.node.json (vite.config.ts)
 └── src/
-    ├── main.tsx               monta <App /> e importa los estilos
+    ├── main.tsx               initTheme() + monta <App /> e importa los estilos
     ├── App.tsx                router con todas las rutas
-    ├── styles/index.css       Tailwind + tema base (fondo oscuro, fuente del sistema)
-    ├── environments/index.ts  lista PROVISIONAL de los 6 entornos (ver más abajo)
-    ├── store/environment.ts   store Zustand con el entorno activo (envId)
+    ├── styles/index.css       Tailwind, colores env-* (variables CSS) y fuente del sistema
+    ├── environments/
+    │   ├── format.ts          formato de gravedad, retardo y tipo (+ format.test.ts)
+    │   ├── useVocab.ts        hook useVocab() + capitalize()
+    │   ├── applyTheme.ts      initTheme(): aplica el tema del entorno activo en <html>
+    │   └── themes/            un tema por entorno (iss.ts, mars.ts…) + defaultTheme.ts
+    ├── store/environment.ts   store Zustand: envId, memberId, vocabulary (persistido)
     ├── api/
     │   ├── types.gen.ts       GENERADO (npm run gen:api): no editar
     │   ├── client.ts          cliente tipado, ApiError/NetworkError, configureApi, serverNow
     │   ├── newId.ts           UUID v4 sin contexto seguro
     │   ├── useServerHealth.ts hook de GET /health
+    │   ├── useEnvironments.ts hook de GET /environments (una petición compartida, con reintento)
+    │   ├── useMembers.ts      hook de GET /environments/{id}/members
+    │   ├── mocks/             API simulada: mode.ts, handlers.ts, mockFetch.ts, events.ts,
+    │   │                      useMockStatus.ts, fixtures.gen.ts (GENERADO por npm run gen:mocks)
     │   └── *.test.ts          tests (Vitest)
+    ├── components/environment/  EnvironmentCard (pintada con su propia paleta), MemberList
     ├── components/ui/
     │   ├── Layout.tsx         cabecera + navegación + <Outlet /> + disclaimer
     │   ├── EnvironmentSelector.tsx
     │   ├── ServerStatus.tsx   chip de conexión con el servidor
+    │   ├── MockBanner.tsx     banner obligatorio con datos de ejemplo
     │   └── PagePlaceholder.tsx
     └── pages/                 una página vacía por ruta
 ```
 
-Carpetas que aún no existen y que crean sus issues: `api/mocks/` (FS-04), `offline/` (FE-11/FE-30) y `components/{body,dashboard,measure,alerts,behavioral,game}/`.
+Carpetas que aún no existen y que crean sus issues: `offline/` (FE-11/FE-30) y `components/{body,dashboard,measure,alerts,behavioral,game}/`.
 
 ## Rutas
 
@@ -119,8 +144,69 @@ Todas cuelgan de `Layout`, que pinta la cabecera con el selector de entorno, la 
 
 Las páginas de FE-01 solo muestran un `PagePlaceholder` con el título y la issue que las completará.
 
-## Provisional (lo sustituye FE-02)
+## Entorno activo (FE-02)
 
-- `src/environments/index.ts` tiene `PLACEHOLDER_ENVIRONMENTS` (slug + nombre) solo para que el selector funcione. La fuente de verdad es `backend/app/data/environments.json` (`GET /environments`); **no añadas aquí umbrales, vocabulario ni temas**.
-- `useEnvironmentStore` guarda solo `envId` (empieza en `null`). FE-02 añade el `Environment` completo, el tema y el vocabulario.
-- Los textos de la navegación son genéricos. Cuando una pantalla tenga que nombrar al member, el texto saldrá de `environment.vocabulary` y nunca será "astronauta" fijo.
+### Store (`src/store/environment.ts`)
+
+`useEnvironmentStore` guarda `envId`, `memberId` y `vocabulary`, y se persiste en `localStorage` (`ruok-session`), así que sobrevive a una recarga también sin conexión.
+
+- `selectEnvironment({ id, vocabulary })` cambia `envId` y `vocabulary` **a la vez** (nunca hay un vocabulario de otro entorno). Si el entorno cambia, pone `memberId` a `null`, porque cada entorno tiene sus propios members. Las claves que falten del vocabulario se rellenan con el término neutro.
+- `selectMember(id)` elige el member. Aún no lo usa nadie: la lista llega con `GET /environments/{id}/members` (FS-04 / BE-05).
+- Sin entorno elegido, el vocabulario es neutro: `persona` / `equipo` / `control externo`.
+
+### Textos: `useVocab()`
+
+```tsx
+const { member, crew, ground } = useVocab()
+<h1>{capitalize(member)}: tu panel de salud</h1>   // "Astronauta: …", "Residente: …"
+```
+
+- Nunca escribas "astronauta" (ni paciente, residente…) fijo en un componente.
+- No se generan plurales ni artículos en código. Redacta sin artículo ("Consola de {ground}"). Si hace falta un plural, se añade al contrato (`Environment.vocabulary`).
+
+### Colores: temas por entorno
+
+- Cada entorno tiene su tema en `src/environments/themes/<id>.ts`. Si falta, se usa `defaultTheme`.
+- `initTheme()` (llamado en `main.tsx` antes del primer render) escribe los tokens como variables CSS en `<html>` (`--env-bg`…), además de `color-scheme` y `data-env`, y los actualiza al cambiar de entorno, con una transición de 300 ms.
+- En los componentes se usan **solo** las clases `env-*`, nunca colores fijos de Tailwind (`slate`, `sky`…):
+
+| Token         | Clase de ejemplo        | Uso                                            |
+| ------------- | ----------------------- | ---------------------------------------------- |
+| `bg`          | `bg-env-bg`             | Fondo de la app                                |
+| `surface`     | `bg-env-surface`        | Tarjetas, cabecera, paneles                    |
+| `border`      | `border-env-border`     | Bordes y separadores                           |
+| `text`        | `text-env-text`         | Texto principal                                |
+| `muted`       | `text-env-muted`        | Texto secundario                               |
+| `primary`     | `bg-env-primary`        | **Solo relleno**: botones, enlace activo, foco |
+| `primaryText` | `text-env-primary-text` | Texto encima de `primary`                      |
+
+| Entorno     | Esquema | `bg`      | `surface` | `border`  | `text`    | `muted`   | `primary` | `primaryText` |
+| ----------- | ------- | --------- | --------- | --------- | --------- | --------- | --------- | ------------- |
+| default     | oscuro  | `#0f172a` | `#1e293b` | `#334155` | `#f1f5f9` | `#94a3b8` | `#38bdf8` | `#0f172a`     |
+| `iss`       | oscuro  | `#0b1426` | `#14223d` | `#24395f` | `#e8f0ff` | `#9db0d3` | `#4d9fff` | `#0b1426`     |
+| `moon`      | oscuro  | `#141518` | `#1f2125` | `#3a3d44` | `#ececf0` | `#a3a6ae` | `#c8ccd6` | `#141518`     |
+| `mars`      | oscuro  | `#1a0d09` | `#2a1610` | `#4a2a1e` | `#f6e7df` | `#c9a99a` | `#c1440e` | `#ffffff`     |
+| `earth`     | oscuro  | `#0b1a1f` | `#132a31` | `#24474f` | `#e3f4f7` | `#93b8c0` | `#2bb3c9` | `#0b1a1f`     |
+| `hospital`  | claro   | `#d9e2ec` | `#e6edf4` | `#b3c2d3` | `#0f2133` | `#3d5063` | `#0b5a96` | `#ffffff`     |
+| `geriatric` | claro   | `#e6dccb` | `#f0e8db` | `#c8b89e` | `#2b2118` | `#57493b` | `#6a429e` | `#ffffff`     |
+
+Reglas:
+
+- **Contraste WCAG**: texto y `muted` sobre `bg` y `surface` ≥ 4,5:1; `primary` sobre `bg` ≥ 3:1; `primaryText` sobre `primary` ≥ 4,5:1. Todas las paletas lo cumplen; si cambias un color, comprueba el contraste antes de hacer commit.
+- **`primary` no se usa como color de texto**: en Marte (`#c1440e`, el del contrato) solo da 3,7:1 sobre el fondo.
+- **El semáforo no depende del tema**: `normal`, `warning`, `critical` y `unknown` usan una paleta fija en todos los entornos (FE-04). Ningún `primary` es verde, para no confundirse con "normal".
+- Para añadir un entorno: crea `themes/<id>.ts` y regístralo en `themes/index.ts`.
+
+### Selección de entorno y member (FE-03)
+
+`/` (`src/pages/EnvironmentSelect.tsx`) tiene dos pasos, con animaciones de Framer Motion (respetan `prefers-reduced-motion`):
+
+1. **Entorno:** una `EnvironmentCard` por entorno de `GET /environments`, pintada con la paleta de ese entorno, con tipo, gravedad y retardo (`src/environments/format.ts`). Al elegir una, `selectEnvironment()` cambia ya el tema y los textos.
+2. **Member:** `MemberList` con `GET /environments/{id}/members`. El puesto (`position`) solo se muestra si el vocabulario lo traduce (`vocabulary.commander` → "comandante"). Al elegir, `selectMember()` y se va a `/dashboard`.
+
+El selector de la cabecera usa el mismo `useEnvironments()`: hay una sola petición compartida.
+
+### Pendiente
+
+- **TODO(FE-28):** `/` solo será accesible para el rol admin; el resto entra directamente en su entorno.
+- **Colores del contrato alineados:** `theme.primary` de `backend/app/data/environments.json` (BE-03) usa los mismos `primary` que `src/environments/themes/` (en `earth`, `#2bb3c9`, no verde). Si cambias uno, cambia el otro.
