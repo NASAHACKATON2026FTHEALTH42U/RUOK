@@ -1,0 +1,148 @@
+[
+  {
+    "id": "iss",
+    "name": "Estación Espacial Internacional",
+    "kind": "space",
+    "gravity_g": 0.0,
+    "comm_delay_s": 0,
+    "radiation_level": "medium",
+    "escalation_ladder": ["self", "crew", "ground"],
+    "liveness": { "stale_after_s": 300, "lost_after_s": 900, "eva_stale_after_s": 30, "ruok_timeout_s": 120 },
+    "vocabulary": {
+      "member": "astronauta",
+      "crew": "tripulación",
+      "ground": "flight surgeon",
+      "medic": "oficial médico",
+      "commander": "comandante",
+      "psych": "psicólogo BHP"
+    },
+    "theme": { "primary": "#1f6feb", "background": "iss.jpg" },
+    "threshold_overrides": {},
+    "indicators": [
+      "heart_rate", "bp_systolic", "bp_diastolic", "spo2", "temperature", "sleep_hours", "mood",
+      "exercise_min", "radiation_dose"
+    ],
+    "routine": [
+      { "task_type": "measure_bp", "times_per_day": 1, "points": 10 },
+      { "task_type": "resistive_exercise", "times_per_day": 1, "points": 20 },
+      { "task_type": "checkin", "times_per_day": 1, "points": 10 }
+    ],
+    "mission": { "start": "2026-10-01", "end": "2027-09-30" }
+  },
+  {
+    "id": "moon",
+    "name": "Base lunar Artemis",
+    "kind": "space",
+    "gravity_g": 0.16,
+    "comm_delay_s": 1,
+    "radiation_level": "high",
+    "escalation_ladder": ["self", "crew", "ground"],
+    "liveness": { "stale_after_s": 300, "lost_after_s": 900, "eva_stale_after_s": 30, "ruok_timeout_s": 120 },
+    "vocabulary": {
+      "member": "astronauta",
+      "crew": "tripulación",
+      "ground": "flight surgeon",
+      "medic": "oficial médico",
+      "commander": "comandante",
+      "psych": "psicólogo BHP"
+    },
+    "theme": { "primary": "#8b949e", "background": "moon.jpg" },
+    "threshold_overrides": {},
+    "indicators": [
+      "heart_rate", "bp_systolic", "bp_diastolic", "spo2", "temperature", "sleep_hours", "mood",
+      "exercise_min", "radiation_dose"
+    ],
+    "routine": [
+      { "task_type": "measure_bp", "times_per_day": 1, "points": 10 },
+      { "task_type": "resistive_exercise", "times_per_day": 1, "points": 20 },
+      { "task_type": "checkin", "times_per_day": 1, "points": 10 }
+    ],
+    "mission": { "start": "2026-10-01", "end": "2027-09-30" }
+  },
+  {
+    "id": "mars",
+    "name": "Base marciana",
+    "kind": "space",
+    "gravity_g": 0.38,
+    "comm_delay_s": 840,
+    "radiation_level": "high",
+    "escalation_ladder": ["self", "crew", "ground"],
+    "liveness": { "stale_after_s": 300, "lost_after_s": 900, "eva_stale_after_s": 30, "ruok_timeout_s": 120 },
+    "vocabulary": {
+      "member": "astronauta",
+      "crew": "tripulación",
+      "ground": "flight surgeon",
+      "medic": "oficial médico",
+      "commander": "comandante",
+      "psych": "psicólogo BHP"
+    },
+    "theme": { "primary": "#c1440e", "background": "mars.jpg" },
+    "threshold_overrides": { "bp_systolic": { "warning": [130, 140] } },
+    "indicators": [
+      "heart_rate", "bp_systolic", "bp_diastolic", "spo2", "temperature", "sleep_hours", "mood",
+      "exercise_min", "radiation_dose"
+    ],
+    "routine": [
+      { "task_type": "measure_bp", "times_per_day": 1, "points": 10 },
+      { "task_type": "resistive_exercise", "times_per_day": 1, "points": 20 },
+      { "task_type": "checkin", "times_per_day": 1, "points": 10 }
+    ],
+    "mission": { "start": "2026-10-01", "end": "2027-09-30" }
+  },
+  {
+    "id": "earth",
+    "name": "Analógico terrestre",
+    "kind": "earth",
+    "gravity_g": 1.0,
+    "comm_delay_s": 0,
+    "radiation_level": "low",
+    "escalation_ladder": ["self", "crew", "ground"],
+    "liveness": { "stale_after_s": 300, "lost_after_s": 900, "eva_stale_after_s": 30, "ruok_timeout_s": 120 },
+    "vocabulary": { "member": "participante", "crew": "equipo", "ground": "médico" },
+    "theme": { "primary": "#2da44e" },
+    "threshold_overrides": {},
+    "indicators": [
+      "heart_rate", "bp_systolic", "bp_diastolic", "spo2", "temperature", "sleep_hours", "mood"
+    ],
+    "routine": [{ "task_type": "checkin", "times_per_day": 1, "points": 10 }]
+  },
+  {
+    "id": "hospital",
+    "name": "Planta de hospital",
+    "kind": "earth",
+    "gravity_g": 1.0,
+    "comm_delay_s": 0,
+    "radiation_level": "none",
+    "escalation_ladder": ["self", "nurse", "doctor"],
+    "liveness": { "stale_after_s": 300, "lost_after_s": 900, "eva_stale_after_s": 30, "ruok_timeout_s": 120 },
+    "vocabulary": { "member": "paciente", "crew": "planta", "ground": "médico", "medic": "enfermería" },
+    "theme": { "primary": "#0969da" },
+    "threshold_overrides": {},
+    "indicators": [
+      "heart_rate", "bp_systolic", "bp_diastolic", "spo2", "temperature", "sleep_hours", "mood"
+    ],
+    "routine": [{ "task_type": "checkin", "times_per_day": 1, "points": 10 }]
+  },
+  {
+    "id": "geriatric",
+    "name": "Residencia geriátrica",
+    "kind": "earth",
+    "gravity_g": 1.0,
+    "comm_delay_s": 0,
+    "radiation_level": "none",
+    "escalation_ladder": ["self", "caregiver", "doctor", "family"],
+    "liveness": { "stale_after_s": 300, "lost_after_s": 900, "eva_stale_after_s": 30, "ruok_timeout_s": 120 },
+    "vocabulary": { "member": "residente", "crew": "residencia", "ground": "médico", "medic": "cuidador" },
+    "theme": { "primary": "#8250df" },
+    "threshold_overrides": {},
+    "indicators": [
+      "heart_rate", "bp_systolic", "bp_diastolic", "spo2", "temperature", "sleep_hours", "mood",
+      "hydration_ml", "weight_kg"
+    ],
+    "routine": [
+      { "task_type": "checkin", "times_per_day": 1, "points": 10 },
+      { "task_type": "walk", "times_per_day": 1, "points": 15 },
+      { "task_type": "hydration", "times_per_day": 3, "points": 5 }
+    ]
+  }
+]
