@@ -1292,3 +1292,33 @@ issues:
     - (P2) Rol `family`, con estado agregado de un member y mensajes, en hospital y geriatría
   acceptance:
     - El admin crea un usuario y este puede iniciar sesión
+
+- id: BE-36
+  title: Login válido tras adelantar el reloj de la demo (iat con clock.now())
+  area: backend
+  comp: auth
+  priority: P0-blocker
+  milestone: h2
+  depends: [BE-26]
+  docs: auth-and-roles.md
+  tasks:
+    - "`decode_token` no debe validar `iat` con la hora del sistema (PyJWT lo hace por defecto): tras `/demo/fast-forward`, un token recién emitido con `clock.now()` da 401"
+    - Comprobar la caducidad solo con `clock.now()`, como ya se hace con `exp`
+  acceptance:
+    - "Test: adelantar el reloj, hacer login y usar el token → 200"
+
+- id: BE-37
+  title: Historial de rutina y juego en el seed (rachas, insignias y puntos variados)
+  area: backend
+  comp: game
+  priority: P1
+  milestone: h2
+  depends: [BE-07, BE-19]
+  docs: demo-script.md
+  tasks:
+    - El seed genera las tareas de los días pasados y sus completados (deterministas y sin emitir eventos), coherentes con las mediciones sembradas
+    - Variedad por member (rachas distintas, algún día completo, alguna tarea manual hecha) para que la demo enseñe racha, insignias y puntos de tripulación
+    - Las insignias ya ganadas quedan en `badge_award`
+  acceptance:
+    - Tras `/demo/reset`, Vega tiene una racha de varios días y alguna insignia, y no todos los members tienen los mismos puntos
+    - El seed sigue siendo determinista (test)
