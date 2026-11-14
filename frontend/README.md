@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41); botón SOS / Pedir ayuda en **FE-13** (#43); login y sesión en **FE-27** (#68); permisos por rol en **FE-28** (#70).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41); botón SOS / Pedir ayuda en **FE-13** (#43); login y sesión en **FE-27** (#68); permisos por rol en **FE-28** (#70); estado del enlace en la cabecera en **FE-17** (#47).
 
 ## Comandos
 
@@ -133,7 +133,7 @@ frontend/
     ├── components/auth/       RequireSession, RequireRole, SessionMenu
     ├── components/alerts/     SosButton, SosDialog + sos.ts (categorías, destinos, protocolo; + test)
     ├── components/body/       BodyFigure (SVG) + regions.ts (buildRegions, formatSinceLabel; + test)
-    ├── components/dashboard/  SystemPanel, IndicatorCard, TrendChart, LinkChip + format.ts y trend.ts (+ tests)
+    ├── components/dashboard/  SystemPanel, IndicatorCard, TrendChart + format.ts y trend.ts (+ tests)
     ├── components/measure/    IndicatorField + measureForm.ts (parseValue, emptyValue; + test)
     ├── components/environment/  EnvironmentCard (pintada con su propia paleta), MemberList
     ├── components/ui/
@@ -141,6 +141,7 @@ frontend/
     │   ├── EnvironmentSelector.tsx
     │   ├── ServerStatus.tsx   chip de conexión con el servidor
     │   ├── StatusBadge.tsx    semáforo: icono (forma + símbolo) + etiqueta
+    │   ├── LinkStatusChip.tsx estado del enlace con tierra en la cabecera + link.ts (+ test)
     │   ├── PendingSyncChip.tsx "N pendientes de sincronizar" en la cabecera
     │   ├── status.ts          statusStyle(), livenessState(), STATUS_COLORS (+ status.test.ts)
     │   ├── MockBanner.tsx     banner obligatorio con datos de ejemplo
@@ -307,12 +308,12 @@ Contenido:
 
 `/dashboard` (`src/pages/Dashboard.tsx`) muestra el panel del member activo (`memberId` del store). Sin member, enlaza a `/` para elegirlo.
 
-- **Cabecera:** `StatusBadge` con el estado general (`overall_status`), el liveness si no es `active` ("Sin datos desde hace X min"), `LinkChip` con el estado del enlace con `{ground}` (en línea / con retardo · 14 min / sin enlace, y los mensajes en cola) y la frescura de los datos ("Actualizado hace…").
+- **Cabecera:** `StatusBadge` con el estado general (`overall_status`), el liveness si no es `active` ("Sin datos desde hace X min") y la frescura de los datos ("Actualizado hace…"). El estado del enlace está en la cabecera global (FE-17).
 - **Izquierda:** `BodyFigure` (fija al hacer scroll en escritorio).
 - **Derecha:** cuadrícula de `IndicatorCard` con todos los indicadores de la evaluación, **ordenados por gravedad** (`bySeverity`: crítico, atención, sin datos, normal). Clic en una tarjeta → `SystemPanel` de su sistema.
 - En móvil, todo en una columna.
 
-**Refresco cada 15 s.** `useAssessment(memberId, 15_000)` y `useLink(envId, 15_000)` usan `useLoad({ refreshMs })`, que recarga en segundo plano sin volver al esqueleto de carga. Si un refresco falla, se mantienen los últimos datos y la cabecera avisa **"No se pudo actualizar: los datos pueden estar desfasados"** (nunca se finge que están al día).
+**Refresco cada 15 s.** `useAssessment(memberId, 15_000)` usa `useLoad({ refreshMs })`, que recarga en segundo plano sin volver al esqueleto de carga. Si un refresco falla, se mantienen los últimos datos y la cabecera avisa **"No se pudo actualizar: los datos pueden estar desfasados"** (nunca se finge que están al día).
 
 `IndicatorCard` (`components/dashboard/`) es la tarjeta de un indicador (valor, semáforo, tendencia y antigüedad). La usan la cuadrícula y el `SystemPanel`; con `showTrend` añade la `TrendChart` (FE-08).
 
@@ -468,6 +469,22 @@ const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el
 - **Cabecera:** usuario y rol con el **vocabulario del entorno** (`userRoleLabel()`: astronauta, oficial médico, flight surgeon…; si no hay término, el `role_label` del servidor).
 - El panel de demo y `/control` ya tienen permiso (`action:demo-panel`, `view:control`) para FE-31/FE-32.
 - Ocultar en la UI **no es seguridad**: el back comprueba rol y propiedad en cada endpoint (BE-27).
+
+## Estado del enlace en la cabecera (FE-17)
+
+`LinkStatusChip` (en `Layout`) muestra el enlace simulado con el control externo en **todas las vistas** en cuanto hay un entorno: `useLink(envId, 5_000)` consulta `GET /link?env=` **cada 5 s**, así que cambia en vivo cuando alguien lo fuerza desde los controles de demo (`POST /demo/link`, FE-32). Cuando llegue el tiempo real (FE-29) se actualizará por eventos.
+
+| Estado    | Icono | Texto                                                   |
+| --------- | ----- | ------------------------------------------------------- |
+| `online`  | ●     | Enlace con flight surgeon: en línea                     |
+| `delayed` | ◐     | … con retardo · 14 min                                  |
+| `los`     | ○     | … **sin enlace (LOS) desde las 14:02** (destacado)      |
+| sin datos | ?     | … **estado desconocido** (nunca el último estado visto) |
+
+- Se añaden los mensajes en cola: "· 2 en cola". La lógica está en `link.ts` (`describeLink()`, con tests).
+- El otro extremo según quién mira: a bordo, "Enlace con {ground}"; para `responder` y `psych`, "Enlace con {crew}".
+- En móvil se muestra en corto (icono + "14 min", "Sin enlace"…) y el texto completo va en el `title`.
+- Sustituye al `LinkChip` que había en la cabecera del dashboard (FE-07).
 
 ## Pendiente
 
