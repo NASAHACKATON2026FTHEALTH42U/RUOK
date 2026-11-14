@@ -21,7 +21,7 @@ AHEAD_DAYS = 60
 
 
 @pytest.fixture(autouse=True)
-def clean(client, vega_auth):  # vega_auth: login antes de adelantar el reloj
+def clean(client):
     with Session(engine) as s:
         s.exec(delete(models.BadgeAward))
         s.exec(delete(models.TaskCompletion))

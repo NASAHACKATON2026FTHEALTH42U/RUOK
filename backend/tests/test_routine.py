@@ -56,7 +56,7 @@ def task_events() -> list[models.EventLog]:
 
 
 @pytest.fixture(autouse=True)
-def clean(client, vega_auth):  # vega_auth: login antes de adelantar el reloj
+def clean(client):
     """Sin tareas, completados ni mediciones de DAY de otros tests (la BD es compartida)."""
     with Session(engine) as s:
         s.exec(delete(models.Measurement).where(
