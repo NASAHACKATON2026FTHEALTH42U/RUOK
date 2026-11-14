@@ -32,7 +32,7 @@
 | `GET /environments/{id}/members`, `GET /members/{id}`, `PATCH /members/{id}/privacy` (BE-05, **PR #110**) | |
 | `POST`/`GET /members/{id}/measurements` (BE-06) | `GET /members/{id}/assessment` (BE-11: el servicio existe, falta conectarlo) |
 | `POST /demo/fast-forward` (a medias: no persiste el reloj, BE-32) | alertas y consola ground (BE-14, BE-15, BE-17) |
-| | juego: racha, insignias y leaderboard (BE-19) · intervenciones (BE-21) · *tareas del día y completado: reales (BE-18)* |
+| | intervenciones (BE-21) · *rutina y juego: reales (BE-18, BE-19)* |
 | | eventos SSE, dispositivos, control y network-info (BE-28, BE-29, BE-30) |
 | | enlace y demo (BE-13, BE-07) |
 

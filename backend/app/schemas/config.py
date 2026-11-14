@@ -82,6 +82,25 @@ class TaskType(ApiModel):
     )
 
 
+class BadgeRule(ApiModel):
+    """Cuándo se gana una insignia (app/data/badges.json, BE-19)."""
+
+    kind: Literal["tasks_completed", "points", "streak", "perfect_days"]
+    threshold: int = Field(ge=1)
+    task_type: Slug | None = Field(
+        default=None, description="Solo con tasks_completed: cuenta solo ese tipo de tarea"
+    )
+
+
+class BadgeDef(ApiModel):
+    """Insignia del catálogo. Uso interno: la API devuelve `Badge` (id, name, earned_at)."""
+
+    id: Slug
+    name: str
+    description: str
+    rule: BadgeRule
+
+
 class Mission(ApiModel):
     start: date
     end: date
