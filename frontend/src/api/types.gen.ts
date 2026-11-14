@@ -744,7 +744,7 @@ export interface paths {
         put?: never;
         /**
          * Reiniciar la BD con el seed determinista
-         * @description STUB(FS-02) → BE-07
+         * @description Vacía la BD, vuelve al reloj real y siembra 30 días de datos sintéticos (mismos datos en cada reset).
          */
         post: operations["demo_reset_api_v1_demo_reset_post"];
         delete?: never;
@@ -764,7 +764,7 @@ export interface paths {
         put?: never;
         /**
          * Cargar un escenario de demo
-         * @description mars_sleep_bp | eva_no_contact | geriatric_fall_risk. STUB(FS-02) → BE-07
+         * @description mars_sleep_bp | eva_no_contact | geriatric_fall_risk. Se aplica encima de los datos actuales sin borrar nada; aplicarlo dos veces no duplica mediciones.
          */
         post: operations["demo_scenario_api_v1_demo_scenarios__name__post"];
         delete?: never;
