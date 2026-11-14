@@ -11,6 +11,7 @@ import { PendingSyncChip } from './PendingSyncChip'
 import { ServerStatus } from './ServerStatus'
 import { getDevice } from '../../offline/device'
 import { SosButton } from '../alerts/SosButton'
+import { LivenessGuard } from '../liveness/LivenessGuard'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Entornos' },
@@ -41,8 +42,9 @@ export function Layout() {
           <NavLink to={role ? homeFor(role) : '/'} className="text-lg font-bold tracking-tight">
             R U OK<span className="text-env-primary">?</span>
           </NavLink>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <LinkStatusChip />
+            <LivenessGuard />
             <PendingSyncChip />
             <SessionMenu />
             <ServerStatus />
