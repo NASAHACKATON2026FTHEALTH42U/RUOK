@@ -27,9 +27,9 @@ def restore_member(client):
         s.commit()
 
 
-def beat(client, **body):
+def beat(client, headers, **body):  # headers: sesión de vega (solo el member)
     payload = {"device_id": str(uuid.uuid4()), **body}
-    r = client.post(f"{API}/members/{MEMBER}/heartbeat", json=payload)
+    r = client.post(f"{API}/members/{MEMBER}/heartbeat", json=payload, headers=headers)
     assert r.status_code == 200, r.text
     return payload, r.json()
 
@@ -42,8 +42,8 @@ def overall_of(client):
     return client.get(f"{API}/members/{MEMBER}/assessment").json()["overall_status"]
 
 
-def test_heartbeat_marks_active_and_updates_member(client):
-    payload, body = beat(client, activity="eva")
+def test_heartbeat_marks_active_and_updates_member(client, vega_auth):
+    payload, body = beat(client, vega_auth, activity="eva")
     assert body["liveness"] == "active"
     with Session(engine) as s:
         m = s.get(models.Member, MEMBER)
@@ -52,16 +52,16 @@ def test_heartbeat_marks_active_and_updates_member(client):
         assert abs((m.last_seen_at - clock.now()).total_seconds()) < 5
 
 
-def test_heartbeat_registers_device(client):
-    payload, _ = beat(client, pending_outbox=3, device_kind="mobile")
+def test_heartbeat_registers_device(client, vega_auth):
+    payload, _ = beat(client, vega_auth, pending_outbox=3, device_kind="mobile")
     with Session(engine) as s:
         d = s.get(models.Device, payload["device_id"])
         assert (d.kind, d.pending_outbox) == ("mobile", 3)
 
 
-def test_liveness_goes_stale_and_lost_with_fast_forward(client):
+def test_liveness_goes_stale_and_lost_with_fast_forward(client, vega_auth):
     """Criterio de aceptación: sin heartbeat, nunca overall normal."""
-    beat(client)
+    beat(client, vega_auth)
     assert liveness_of(client) == "active"
 
     clock.advance(300)  # 5 min
@@ -73,22 +73,24 @@ def test_liveness_goes_stale_and_lost_with_fast_forward(client):
     assert overall_of(client) == "critical"
 
 
-def test_eva_uses_stricter_thresholds(client):
-    beat(client, activity="eva")
+def test_eva_uses_stricter_thresholds(client, vega_auth):
+    beat(client, vega_auth, activity="eva")
     clock.advance(30)
     assert liveness_of(client) == "stale"
 
 
-def test_checkin_required_when_coming_back_from_stale(client):
-    _, first = beat(client)
+def test_checkin_required_when_coming_back_from_stale(client, vega_auth):
+    _, first = beat(client, vega_auth)
     assert first["checkin_required"] is False
     clock.advance(timedelta(minutes=6).total_seconds())
-    _, back = beat(client)
+    _, back = beat(client, vega_auth)
     assert back == {"liveness": "active", "checkin_required": True}
-    _, again = beat(client)
+    _, again = beat(client, vega_auth)
     assert again["checkin_required"] is False
 
 
-def test_unknown_member_is_404(client):
-    r = client.post(f"{API}/members/9999/heartbeat", json={"device_id": str(uuid.uuid4())})
+def test_unknown_member_is_404(client, vega_auth):
+    r = client.post(
+        f"{API}/members/9999/heartbeat", json={"device_id": str(uuid.uuid4())}, headers=vega_auth
+    )
     assert r.status_code == 404

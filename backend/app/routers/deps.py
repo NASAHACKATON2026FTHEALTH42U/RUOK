@@ -1,48 +1,49 @@
 """Dependencias comunes de los routers.
 
-- `get_current_user` (BE-26): usuario del token. 401 si falta, es inválido o caduca.
-- `require_roles(...)` (BE-26): 403 si el rol del usuario no está en la lista.
-- `AuthDep` sigue siendo **opcional** (STUB de FS-02) en el resto de routers: BE-27
-  lo sustituye por la comprobación de rol y propiedad del dato en cada endpoint.
-- BE-29: registro del dispositivo a partir de X-Device-Id.
+Autenticación (BE-26) y autorización (BE-27, matriz en `app/auth/permissions.py`):
+
+- `get_current_user` / `AuthDep`: usuario del token. 401 si falta, es inválido o caduca.
+- `optional_user`: el usuario si hay un token válido; si no, `None` (SOS sin sesión).
+- `allow(permiso)`: comprueba el rol (403).
+- `allow_member(permiso)`, `allow_env(permiso)`, `allow_alert(permiso)`: rol + ámbito del
+  dato (el `member_id`, `env_id` o `alert_id` de la ruta). Si el recurso no existe, no se
+  corta aquí: el endpoint responde su 404 como siempre.
+- `device_id_header`: X-Device-Id. Uno mal formado NO da 422 (rompería el SOS): se
+  registra en el log y se ignora. BE-29 lo usará para el registro de dispositivos.
 """
 
+import logging
 from collections.abc import Callable
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import Depends, Header, HTTPException
+from fastapi import Depends, Header, HTTPException, Query
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlmodel import Session
 
 from app import models
+from app.auth import permissions
 from app.auth.security import InvalidToken, decode_token
 from app.db import get_session
 from app.schemas import ErrorResponse
 
+log = logging.getLogger(__name__)
+
 bearer_scheme = HTTPBearer(auto_error=False, description="JWT local (POST /auth/login)")
 
-
-def optional_bearer(
-    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
-) -> HTTPAuthorizationCredentials | None:
-    """STUB(FS-02): acepta cualquier token o ninguno. BE-26 lo sustituye."""
-    return credentials
+SessionDep = Annotated[Session, Depends(get_session)]
+Credentials = Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)]
 
 
 def _unauthorized(detail: str) -> HTTPException:
     return HTTPException(401, detail, headers={"WWW-Authenticate": "Bearer"})
 
 
-def get_current_user(
-    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
-    session: Annotated[Session, Depends(get_session)],
-) -> models.UserAccount:
-    """Usuario de la sesión. 401 si no hay token, es inválido, caduca o la cuenta no existe."""
-    if credentials is None:
+def _user_from_token(session: Session, token: str | None) -> models.UserAccount:
+    if not token:
         raise _unauthorized("Falta el token de sesión")
     try:
-        claims = decode_token(session, credentials.credentials)
+        claims = decode_token(session, token)
     except InvalidToken as exc:
         raise _unauthorized(str(exc)) from exc
     user = session.get(models.UserAccount, claims.user_id)
@@ -51,7 +52,110 @@ def get_current_user(
     return user
 
 
+def get_current_user(credentials: Credentials, session: SessionDep) -> models.UserAccount:
+    """Usuario de la sesión. 401 si no hay token, es inválido, caduca o la cuenta no existe."""
+    return _user_from_token(session, credentials.credentials if credentials else None)
+
+
+def optional_user(credentials: Credentials, session: SessionDep) -> models.UserAccount | None:
+    """Como `get_current_user`, pero sin 401: `None` si no hay sesión válida."""
+    try:
+        return get_current_user(credentials, session)
+    except HTTPException:
+        return None
+
+
+def stream_user(
+    credentials: Credentials,
+    session: SessionDep,
+    token: Annotated[str | None, Query(description="JWT (EventSource no admite cabeceras)")] = None,
+) -> models.UserAccount:
+    """Para SSE: el token va en `?token=` (o en la cabecera, si el cliente puede)."""
+    return _user_from_token(session, token or (credentials.credentials if credentials else None))
+
+
 CurrentUser = Annotated[models.UserAccount, Depends(get_current_user)]
+OptionalUser = Annotated[models.UserAccount | None, Depends(optional_user)]
+
+
+def _forbidden(exc: permissions.Forbidden) -> HTTPException:
+    return HTTPException(403, str(exc))
+
+
+def check(user: models.UserAccount, permission: str) -> None:
+    """Comprobación de rol dentro de un endpoint (403)."""
+    try:
+        permissions.check_role(user, permission)
+    except permissions.Forbidden as exc:
+        raise _forbidden(exc) from exc
+
+
+def check_member(user: models.UserAccount, member: models.Member) -> None:
+    """Comprobación de ámbito dentro de un endpoint (403)."""
+    try:
+        permissions.check_member(user, member)
+    except permissions.Forbidden as exc:
+        raise _forbidden(exc) from exc
+
+
+def check_env(user: models.UserAccount, env_id: str) -> None:
+    try:
+        permissions.check_env(user, env_id)
+    except permissions.Forbidden as exc:
+        raise _forbidden(exc) from exc
+
+
+def allow(permission: str) -> Callable[..., models.UserAccount]:
+    """Dependencia: el rol del usuario tiene `permission` (403 si no)."""
+    permissions.PERMISSIONS[permission]  # KeyError al importar si el permiso no existe
+
+    def dependency(user: CurrentUser) -> models.UserAccount:
+        check(user, permission)
+        return user
+
+    return dependency
+
+
+def allow_member(permission: str) -> Callable[..., models.UserAccount]:
+    """Dependencia: rol + el `member_id` de la ruta es suyo o de su entorno."""
+    permissions.PERMISSIONS[permission]
+
+    def dependency(member_id: int, user: CurrentUser, session: SessionDep) -> models.UserAccount:
+        check(user, permission)
+        member = session.get(models.Member, member_id)
+        if member is not None:
+            check_member(user, member)
+        return user
+
+    return dependency
+
+
+def allow_env(permission: str) -> Callable[..., models.UserAccount]:
+    """Dependencia: rol + el `env_id` de la ruta es el suyo (o es admin)."""
+    permissions.PERMISSIONS[permission]
+
+    def dependency(env_id: str, user: CurrentUser) -> models.UserAccount:
+        check(user, permission)
+        check_env(user, env_id)
+        return user
+
+    return dependency
+
+
+def allow_alert(permission: str) -> Callable[..., models.UserAccount]:
+    """Dependencia: rol + la alerta `alert_id` es de un member al que tiene acceso."""
+    permissions.PERMISSIONS[permission]
+
+    def dependency(alert_id: UUID, user: CurrentUser, session: SessionDep) -> models.UserAccount:
+        check(user, permission)
+        alert = session.get(models.Alert, str(alert_id))
+        if alert is not None:
+            member = session.get(models.Member, alert.member_id)
+            if member is not None:
+                check_member(user, member)
+        return user
+
+    return dependency
 
 
 def require_roles(*roles: str) -> Callable[..., models.UserAccount]:
@@ -68,14 +172,21 @@ def require_roles(*roles: str) -> Callable[..., models.UserAccount]:
 
 def device_id_header(
     x_device_id: Annotated[
-        UUID | None,
+        str | None,
         Header(description="UUID del dispositivo (docs/control-center-and-devices.md §4)"),
     ] = None,
 ) -> UUID | None:
-    return x_device_id
+    if x_device_id is None:
+        return None
+    try:
+        return UUID(x_device_id)
+    except ValueError:
+        log.warning("X-Device-Id mal formado, se ignora: %r", x_device_id[:64])
+        return None
 
 
-AuthDep = Depends(optional_bearer)
+AuthDep = Depends(get_current_user)
+AdminDep = Depends(allow("admin"))
 
 ERRORS_AUTH = {
     401: {"model": ErrorResponse, "description": "Sin sesión válida"},

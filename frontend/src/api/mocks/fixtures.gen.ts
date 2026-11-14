@@ -1827,6 +1827,25 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "status": "critical",
         "indicators": [
           {
+            "indicator_id": "mood",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T05:16:01.516209Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
+            "range": {
+              "normal": [
+                3.0,
+                5.0
+              ],
+              "warning": [
+                1.5,
+                2.9
+              ]
+            }
+          },
+          {
             "indicator_id": "sleep_hours",
             "last_value": 3.5,
             "unit": "h",
@@ -1842,6 +1861,139 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               "warning": [
                 4.0,
                 6.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "stress",
+            "last_value": 2.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T06:26:18.206621Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 1.875,
+            "range": {
+              "normal": [
+                1.0,
+                3.0
+              ],
+              "warning": [
+                3.1,
+                4.5
+              ]
+            }
+          },
+          {
+            "indicator_id": "energy",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T09:16:31.086323Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
+            "range": {
+              "normal": [
+                3.0,
+                5.0
+              ],
+              "warning": [
+                1.5,
+                2.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "loneliness",
+            "last_value": 2.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T06:58:53.450517Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 2.0,
+            "range": {
+              "normal": [
+                1.0,
+                3.0
+              ],
+              "warning": [
+                3.1,
+                4.5
+              ]
+            }
+          },
+          {
+            "indicator_id": "sleep_quality",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T08:30:59.412608Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
+            "range": {
+              "normal": [
+                3.0,
+                5.0
+              ],
+              "warning": [
+                1.5,
+                2.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "crew_relation",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T07:43:00.053317Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
+            "range": {
+              "normal": [
+                3.0,
+                5.0
+              ],
+              "warning": [
+                1.5,
+                2.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "pvt_mean_rt_ms",
+            "last_value": 198.0,
+            "unit": "ms",
+            "taken_at": "2026-11-14T07:37:27.240673Z",
+            "status": "normal",
+            "trend": "rising",
+            "baseline": 203.42857142857142,
+            "range": {
+              "normal": [
+                100.0,
+                354.0
+              ],
+              "warning": [
+                355.0,
+                500.0
+              ]
+            }
+          },
+          {
+            "indicator_id": "pvt_lapses",
+            "last_value": 1.0,
+            "unit": "lapsos",
+            "taken_at": "2026-11-14T07:14:42.159041Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 1.2857142857142858,
+            "range": {
+              "normal": [
+                0.0,
+                2.0
+              ],
+              "warning": [
+                3.0,
+                6.0
               ]
             }
           }
@@ -1893,7 +2045,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
     ],
     "behavioral": {
       "status": "critical",
-      "details_visible": false
+      "details_visible": true
     },
     "provisional": false
   },
@@ -2069,6 +2221,25 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "status": "critical",
         "indicators": [
           {
+            "indicator_id": "mood",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T05:16:01.516209Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
+            "range": {
+              "normal": [
+                3.0,
+                5.0
+              ],
+              "warning": [
+                1.5,
+                2.9
+              ]
+            }
+          },
+          {
             "indicator_id": "sleep_hours",
             "last_value": 3.5,
             "unit": "h",
@@ -2084,6 +2255,139 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               "warning": [
                 4.0,
                 6.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "stress",
+            "last_value": 2.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T06:26:18.206621Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 1.875,
+            "range": {
+              "normal": [
+                1.0,
+                3.0
+              ],
+              "warning": [
+                3.1,
+                4.5
+              ]
+            }
+          },
+          {
+            "indicator_id": "energy",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T09:16:31.086323Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
+            "range": {
+              "normal": [
+                3.0,
+                5.0
+              ],
+              "warning": [
+                1.5,
+                2.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "loneliness",
+            "last_value": 2.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T06:58:53.450517Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 2.0,
+            "range": {
+              "normal": [
+                1.0,
+                3.0
+              ],
+              "warning": [
+                3.1,
+                4.5
+              ]
+            }
+          },
+          {
+            "indicator_id": "sleep_quality",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T08:30:59.412608Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
+            "range": {
+              "normal": [
+                3.0,
+                5.0
+              ],
+              "warning": [
+                1.5,
+                2.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "crew_relation",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T07:43:00.053317Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
+            "range": {
+              "normal": [
+                3.0,
+                5.0
+              ],
+              "warning": [
+                1.5,
+                2.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "pvt_mean_rt_ms",
+            "last_value": 198.0,
+            "unit": "ms",
+            "taken_at": "2026-11-14T07:37:27.240673Z",
+            "status": "normal",
+            "trend": "rising",
+            "baseline": 203.42857142857142,
+            "range": {
+              "normal": [
+                100.0,
+                354.0
+              ],
+              "warning": [
+                355.0,
+                500.0
+              ]
+            }
+          },
+          {
+            "indicator_id": "pvt_lapses",
+            "last_value": 1.0,
+            "unit": "lapsos",
+            "taken_at": "2026-11-14T07:14:42.159041Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 1.2857142857142858,
+            "range": {
+              "normal": [
+                0.0,
+                2.0
+              ],
+              "warning": [
+                3.0,
+                6.0
               ]
             }
           }
@@ -2135,7 +2439,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
     ],
     "behavioral": {
       "status": "critical",
-      "details_visible": false
+      "details_visible": true
     },
     "provisional": false
   },
@@ -2311,6 +2615,25 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "status": "critical",
         "indicators": [
           {
+            "indicator_id": "mood",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T05:16:01.516209Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
+            "range": {
+              "normal": [
+                3.0,
+                5.0
+              ],
+              "warning": [
+                1.5,
+                2.9
+              ]
+            }
+          },
+          {
             "indicator_id": "sleep_hours",
             "last_value": 3.5,
             "unit": "h",
@@ -2326,6 +2649,139 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               "warning": [
                 4.0,
                 6.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "stress",
+            "last_value": 2.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T06:26:18.206621Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 1.875,
+            "range": {
+              "normal": [
+                1.0,
+                3.0
+              ],
+              "warning": [
+                3.1,
+                4.5
+              ]
+            }
+          },
+          {
+            "indicator_id": "energy",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T09:16:31.086323Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
+            "range": {
+              "normal": [
+                3.0,
+                5.0
+              ],
+              "warning": [
+                1.5,
+                2.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "loneliness",
+            "last_value": 2.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T06:58:53.450517Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 2.0,
+            "range": {
+              "normal": [
+                1.0,
+                3.0
+              ],
+              "warning": [
+                3.1,
+                4.5
+              ]
+            }
+          },
+          {
+            "indicator_id": "sleep_quality",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T08:30:59.412608Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
+            "range": {
+              "normal": [
+                3.0,
+                5.0
+              ],
+              "warning": [
+                1.5,
+                2.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "crew_relation",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T07:43:00.053317Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
+            "range": {
+              "normal": [
+                3.0,
+                5.0
+              ],
+              "warning": [
+                1.5,
+                2.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "pvt_mean_rt_ms",
+            "last_value": 198.0,
+            "unit": "ms",
+            "taken_at": "2026-11-14T07:37:27.240673Z",
+            "status": "normal",
+            "trend": "rising",
+            "baseline": 203.42857142857142,
+            "range": {
+              "normal": [
+                100.0,
+                354.0
+              ],
+              "warning": [
+                355.0,
+                500.0
+              ]
+            }
+          },
+          {
+            "indicator_id": "pvt_lapses",
+            "last_value": 1.0,
+            "unit": "lapsos",
+            "taken_at": "2026-11-14T07:14:42.159041Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 1.2857142857142858,
+            "range": {
+              "normal": [
+                0.0,
+                2.0
+              ],
+              "warning": [
+                3.0,
+                6.0
               ]
             }
           }
@@ -2377,7 +2833,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
     ],
     "behavioral": {
       "status": "critical",
-      "details_visible": false
+      "details_visible": true
     },
     "provisional": false
   },
@@ -2519,6 +2975,25 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "status": "critical",
         "indicators": [
           {
+            "indicator_id": "mood",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T05:16:01.516209Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
+            "range": {
+              "normal": [
+                3.0,
+                5.0
+              ],
+              "warning": [
+                1.5,
+                2.9
+              ]
+            }
+          },
+          {
             "indicator_id": "sleep_hours",
             "last_value": 3.5,
             "unit": "h",
@@ -2551,7 +3026,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
     ],
     "behavioral": {
       "status": "critical",
-      "details_visible": false
+      "details_visible": true
     },
     "provisional": false
   },
@@ -2693,6 +3168,25 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "status": "critical",
         "indicators": [
           {
+            "indicator_id": "mood",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T05:16:01.516209Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
+            "range": {
+              "normal": [
+                3.0,
+                5.0
+              ],
+              "warning": [
+                1.5,
+                2.9
+              ]
+            }
+          },
+          {
             "indicator_id": "sleep_hours",
             "last_value": 3.5,
             "unit": "h",
@@ -2725,7 +3219,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
     ],
     "behavioral": {
       "status": "critical",
-      "details_visible": false
+      "details_visible": true
     },
     "provisional": false
   },
@@ -2916,6 +3410,25 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "status": "critical",
         "indicators": [
           {
+            "indicator_id": "mood",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T05:16:01.516209Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
+            "range": {
+              "normal": [
+                3.0,
+                5.0
+              ],
+              "warning": [
+                1.5,
+                2.9
+              ]
+            }
+          },
+          {
             "indicator_id": "sleep_hours",
             "last_value": 3.5,
             "unit": "h",
@@ -2948,7 +3461,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
     ],
     "behavioral": {
       "status": "critical",
-      "details_visible": false
+      "details_visible": true
     },
     "provisional": false
   }

@@ -35,7 +35,8 @@ def _bearer(token):
 # ── Login con contraseña ────────────────────────────────────────────
 
 
-def test_login_ok_returns_jwt_and_user(client):
+def test_login_ok_returns_jwt_and_user(client, monkeypatch):
+    monkeypatch.setenv("RUOK_JWT_TTL_HOURS", "12")  # el valor por defecto (conftest lo sube)
     resp = client.post(API + "/auth/login", json=VEGA)
     assert resp.status_code == 200, resp.text
     body = resp.json()
@@ -92,8 +93,8 @@ def test_me_returns_current_user(client):
     assert resp.json()["username"] == "vega"
 
 
-def test_me_without_token_is_401(client):
-    resp = client.get(API + "/auth/me")
+def test_me_without_token_is_401(anon_client):
+    resp = anon_client.get(API + "/auth/me")
     assert resp.status_code == 401
     assert resp.headers["www-authenticate"] == "Bearer"
 
@@ -108,7 +109,8 @@ def test_token_signed_with_other_key_is_401(client):
     assert client.get(API + "/auth/me", headers=_bearer(forged)).status_code == 401
 
 
-def test_expired_token_is_401_with_demo_clock(client):
+def test_expired_token_is_401_with_demo_clock(client, monkeypatch):
+    monkeypatch.setenv("RUOK_JWT_TTL_HOURS", "12")
     token = client.post(API + "/auth/login", json=VEGA).json()["access_token"]
     clock.advance(12 * 3600 - 60)
     assert client.get(API + "/auth/me", headers=_bearer(token)).status_code == 200

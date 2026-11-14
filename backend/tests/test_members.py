@@ -26,8 +26,12 @@ def clean(client):
 
 
 def post_measurement(client, member_id, taken_at):
-    item = {"id": str(uuid.uuid4()), "indicator_id": "heart_rate", "value": 70,
-            "taken_at": taken_at.isoformat().replace("+00:00", "Z")}
+    item = {
+        "id": str(uuid.uuid4()),
+        "indicator_id": "heart_rate",
+        "value": 70,
+        "taken_at": taken_at.isoformat().replace("+00:00", "Z"),
+    }
     r = client.post(f"{API}/members/{member_id}/measurements", json={"measurements": [item]})
     assert r.status_code == 200
 
@@ -106,8 +110,12 @@ def test_get_member(client):
     body = r.json()
     assert body["last_seen_at"] is not None
     assert {k: v for k, v in body.items() if k != "last_seen_at"} == {
-        "id": 1, "env_id": "mars", "name": "Cmdr. Vega", "position": "commander",
-        "share_behavioral_details": False, "liveness": "active",
+        "id": 1,
+        "env_id": "mars",
+        "name": "Cmdr. Vega",
+        "position": "commander",
+        "share_behavioral_details": False,
+        "liveness": "active",
     }
 
 
@@ -120,21 +128,27 @@ def test_unknown_member_is_404(client):
 # ── PATCH /members/{id}/privacy ──────────────────────────────────────
 
 
-def test_privacy_is_saved(client):
-    r = client.patch(f"{API}/members/1/privacy", json={"share_behavioral_details": True})
+def test_privacy_is_saved(client, vega_auth):
+    r = client.patch(
+        f"{API}/members/1/privacy", json={"share_behavioral_details": True}, headers=vega_auth
+    )
     assert r.status_code == 200
     assert r.json()["share_behavioral_details"] is True
     assert client.get(f"{API}/members/1").json()["share_behavioral_details"] is True
     listed = client.get(f"{API}/environments/mars/members").json()
     assert next(m for m in listed if m["id"] == 1)["share_behavioral_details"] is True
 
-    r = client.patch(f"{API}/members/1/privacy", json={"share_behavioral_details": False})
+    r = client.patch(
+        f"{API}/members/1/privacy", json={"share_behavioral_details": False}, headers=vega_auth
+    )
     assert r.json()["share_behavioral_details"] is False
     assert client.get(f"{API}/members/1").json()["share_behavioral_details"] is False
 
 
-def test_privacy_only_changes_that_member(client):
-    client.patch(f"{API}/members/1/privacy", json={"share_behavioral_details": True})
+def test_privacy_only_changes_that_member(client, vega_auth):
+    client.patch(
+        f"{API}/members/1/privacy", json={"share_behavioral_details": True}, headers=vega_auth
+    )
     assert client.get(f"{API}/members/2").json()["share_behavioral_details"] is False
 
 
@@ -142,10 +156,12 @@ def test_privacy_only_changes_that_member(client):
     "body",
     [{}, {"share_behavioral_details": True, "extra": 1}, {"share_behavioral_details": "maybe"}],
 )
-def test_privacy_invalid_body_is_422(client, body):
-    assert client.patch(f"{API}/members/1/privacy", json=body).status_code == 422
+def test_privacy_invalid_body_is_422(client, vega_auth, body):
+    assert client.patch(f"{API}/members/1/privacy", json=body, headers=vega_auth).status_code == 422
 
 
-def test_privacy_unknown_member_is_404(client):
-    r = client.patch(f"{API}/members/999/privacy", json={"share_behavioral_details": True})
+def test_privacy_unknown_member_is_404(client, vega_auth):
+    r = client.patch(
+        f"{API}/members/999/privacy", json={"share_behavioral_details": True}, headers=vega_auth
+    )
     assert r.status_code == 404

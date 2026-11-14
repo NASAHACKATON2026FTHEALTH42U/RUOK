@@ -25,6 +25,7 @@ from datetime import datetime, timedelta
 from sqlmodel import Session, col, delete, select
 
 from app import clock, models
+from app.auth.security import SECRET_KEY as JWT_SECRET_KEY
 from app.schemas import Indicator
 from app.services import accounts, app_state, catalog, environments
 
@@ -194,10 +195,17 @@ _TABLES = [
 
 
 def reset(session: Session) -> tuple[int, int]:
-    """Vacía la BD, vuelve al reloj real y siembra. Devuelve (members, mediciones)."""
+    """Vacía la BD, vuelve al reloj real y siembra. Devuelve (members, mediciones).
+
+    Conserva la clave JWT (``app_state.jwt_secret``): un reset durante la demo no cierra
+    la sesión de los dispositivos. Los usuarios se siembran con los mismos ids.
+    """
+    jwt_secret = app_state.get_value(session, JWT_SECRET_KEY)
     for table in _TABLES:
         session.exec(delete(table))
     session.commit()
+    if jwt_secret:
+        app_state.set_value(session, JWT_SECRET_KEY, jwt_secret)
     clock.reset()
     return seed(session)
 

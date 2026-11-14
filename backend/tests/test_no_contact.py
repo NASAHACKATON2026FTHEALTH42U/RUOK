@@ -120,9 +120,7 @@ def test_no_duplicate_no_contact(session, frozen):
     liveness_watch.check_all(session)
     frozen(60)
     liveness_watch.check_all(session)
-    rows = session.exec(
-        select(models.Alert).where(models.Alert.category == "no_contact")
-    ).all()
+    rows = session.exec(select(models.Alert).where(models.Alert.category == "no_contact")).all()
     assert len(rows) == 1
 
 
@@ -161,14 +159,14 @@ def test_ruok_need_help_creates_critical_alert(session, frozen):
 
 @pytest.fixture
 def api(client):
-    client.post("/api/v1/demo/reset")
+    client.post("/api/v1/demo/reset")  # conserva la clave JWT: el token sigue valiendo
     yield client
     client.post("/api/v1/demo/reset")
 
 
-def test_api_ruok_and_fast_forward(api):
+def test_api_ruok_and_fast_forward(api, vega_auth):
     hb = {"device_id": str(DEVICE), "activity": "eva"}
-    assert api.post("/api/v1/members/1/heartbeat", json=hb).status_code == 200
+    assert api.post("/api/v1/members/1/heartbeat", json=hb, headers=vega_auth).status_code == 200
     api.post("/api/v1/demo/fast-forward", json={"seconds": 150})  # EVA: lost a los 2 min
     body = api.get("/api/v1/members/1/alerts").json()
     assert any(a["category"] == "no_contact" for a in body)

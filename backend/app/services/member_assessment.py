@@ -196,6 +196,42 @@ def load_protocols(path: Path = PROTOCOLS_FILE) -> list[dict]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _emergency_open(session: Session, member: models.Member) -> bool:
+    return (
+        session.exec(
+            select(models.Alert.id).where(
+                models.Alert.member_id == member.id,
+                models.Alert.severity == "emergency",
+                models.Alert.status != "resolved",
+            )
+        ).first()
+        is not None
+    )
+
+
+def for_viewer(
+    session: Session,
+    assessment: Assessment,
+    member: models.Member,
+    viewer: models.UserAccount | None,
+) -> Assessment:
+    """El assessment tal y como lo puede ver ``viewer`` (BE-27, privacidad conductual).
+
+    Recalcula ``behavioral.details_visible`` con el rol de quien consulta (el propio
+    member, ``psych`` y ``admin`` siempre; ``medic``/``responder`` si comparte o hay
+    emergencia; el resto nunca) y quita los indicadores privados si no puede verlos.
+    """
+    visible = behavioral.details_visible(
+        share_behavioral_details=member.share_behavioral_details,
+        emergency_open=_emergency_open(session, member),
+        viewer_role=viewer.role if viewer else None,
+        viewer_is_owner=viewer is not None and viewer.member_id == member.id,
+    )
+    out = assessment.model_copy(deep=True)
+    out.behavioral.details_visible = visible
+    return behavioral.redact(out)
+
+
 def assess_member(
     session: Session, member: models.Member, env_id: str | None = None
 ) -> Assessment:
@@ -213,13 +249,7 @@ def assess_member(
         series[row.indicator_id].append(row)
 
     liveness = member_liveness(member)
-    emergency_open = session.exec(
-        select(models.Alert.id).where(
-            models.Alert.member_id == member.id,
-            models.Alert.severity == "emergency",
-            models.Alert.status != "resolved",
-        )
-    ).first() is not None
+    emergency_open = _emergency_open(session, member)
     assessment = build_assessment(
         member_id=member.id,
         env=env,

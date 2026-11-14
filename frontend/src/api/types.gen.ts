@@ -291,7 +291,7 @@ export interface paths {
         head?: never;
         /**
          * Compartir o no los detalles conductuales (solo el propio member)
-         * @description Se guarda en la BD. El permiso (solo el propio member) llega con BE-27.
+         * @description Se guarda en la BD. Solo el propio member (403 para cualquier otro rol).
          */
         patch: operations["set_privacy_api_v1_members__member_id__privacy_patch"];
         trace?: never;
@@ -395,7 +395,7 @@ export interface paths {
         put?: never;
         /**
          * Pedir ayuda / SOS (idempotente por UUID)
-         * @description Idempotente por el UUID del cliente (mismo id y contenido → la misma alerta; contenido distinto → 409). Destino: `target_role` (se pueden saltar niveles); si no, emergency/critical suben hasta el primer nivel externo (a bordo al instante, tierra por el enlace) y warning va a la tripulación. El SOS sin token llega con BE-27.
+         * @description Idempotente por el UUID del cliente (mismo id y contenido → la misma alerta; contenido distinto → 409). Destino: `target_role` (se pueden saltar niveles); si no, emergency/critical suben hasta el primer nivel externo (a bordo al instante, tierra por el enlace) y warning va a la tripulación. Con `category=emergency` se acepta SIN token (o con un token sin permiso sobre ese member) y la alerta queda `authenticated=false`.
          */
         post: operations["create_alert_api_v1_members__member_id__alerts_post"];
         delete?: never;
@@ -570,26 +570,6 @@ export interface paths {
          * @description STUB(FS-02) → BE-19
          */
         get: operations["leaderboard_api_v1_environments__env_id__leaderboard_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/events/stream": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Stream SSE de eventos (filtrado por rol)
-         * @description `text/event-stream`. Cada mensaje: `id` (= Event.id, usable como Last-Event-ID), `event` (= Event.type) y `data` (= Event en JSON). El token va en `?token=` porque EventSource no admite cabeceras. STUB(FS-02): emite los eventos de ejemplo y cierra → BE-28
-         */
-        get: operations["events_stream_api_v1_events_stream_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -792,6 +772,26 @@ export interface paths {
          * @description Avanza el reloj de la demo (app/clock.py), entrega los mensajes del enlace cuya ETA ya ha pasado y reevalúa las alertas abiertas.
          */
         post: operations["demo_fast_forward_api_v1_demo_fast_forward_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/events/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Stream SSE de eventos (filtrado por rol)
+         * @description `text/event-stream`. Cada mensaje: `id` (= Event.id, usable como Last-Event-ID), `event` (= Event.type) y `data` (= Event en JSON). El token va en `?token=` porque EventSource no admite cabeceras (sin token válido → 401). STUB(FS-02): emite los eventos de ejemplo y cierra → BE-28 (que filtra cada evento según el rol del token).
+         */
+        get: operations["events_stream_api_v1_events_stream_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2488,24 +2488,6 @@ export interface operations {
                     "application/json": components["schemas"]["Environment"][];
                 };
             };
-            /** @description Sin sesión válida */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Rol sin permiso o dato ajeno */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -2538,24 +2520,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Environment"];
-                };
-            };
-            /** @description Sin sesión válida */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Rol sin permiso o dato ajeno */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Recurso inexistente */
@@ -2599,24 +2563,6 @@ export interface operations {
                     "application/json": components["schemas"]["Indicator"][];
                 };
             };
-            /** @description Sin sesión válida */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Rol sin permiso o dato ajeno */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -2649,24 +2595,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Indicator"];
-                };
-            };
-            /** @description Sin sesión válida */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Rol sin permiso o dato ajeno */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Recurso inexistente */
@@ -2710,24 +2638,6 @@ export interface operations {
                     "application/json": components["schemas"]["BodySystem"][];
                 };
             };
-            /** @description Sin sesión válida */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Rol sin permiso o dato ajeno */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -2761,24 +2671,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Intervention"][];
-                };
-            };
-            /** @description Sin sesión válida */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Rol sin permiso o dato ajeno */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Validation Error */
@@ -4049,60 +3941,6 @@ export interface operations {
             };
         };
     };
-    events_stream_api_v1_events_stream_get: {
-        parameters: {
-            query?: {
-                token?: string | null;
-                types?: string | null;
-                env_id?: string | null;
-            };
-            header?: {
-                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
-                "x-device-id"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Stream de eventos */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "text/event-stream": components["schemas"]["Event"];
-                };
-            };
-            /** @description Sin sesión válida */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Rol sin permiso o dato ajeno */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     list_events_api_v1_events_get: {
         parameters: {
             query?: {
@@ -4634,6 +4472,61 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DemoClock"];
+                };
+            };
+            /** @description Sin sesión válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rol sin permiso o dato ajeno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    events_stream_api_v1_events_stream_get: {
+        parameters: {
+            query?: {
+                /** @description JWT (EventSource no admite cabeceras) */
+                token?: string | null;
+                types?: string | null;
+                env_id?: string | null;
+            };
+            header?: {
+                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
+                "x-device-id"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Stream de eventos */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": components["schemas"]["Event"];
                 };
             };
             /** @description Sin sesión válida */

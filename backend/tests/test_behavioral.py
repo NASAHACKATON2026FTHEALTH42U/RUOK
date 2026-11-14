@@ -227,7 +227,7 @@ def test_space_envs_evaluate_checkin_and_pvt(env_id):
 
 
 @pytest.fixture
-def vega(client):
+def vega(client, vega_auth):
     """Cmdr. Vega (member 1, Marte) sin mediciones ni alertas y sin compartir."""
     with Session(engine) as s:
         s.exec(delete(models.AlertEvent))
@@ -235,7 +235,11 @@ def vega(client):
         s.exec(delete(models.Alert))
         s.exec(delete(models.Measurement))
         s.commit()
-    client.patch(f"{API}/members/1/privacy", json={"share_behavioral_details": False})
+    client.patch(
+        f"{API}/members/1/privacy",
+        json={"share_behavioral_details": False},
+        headers=vega_auth,
+    )
     now = clock.now().isoformat().replace("+00:00", "Z")
     body = {"measurements": [
         {"id": str(uuid.uuid4()), "indicator_id": ind, "value": v, "taken_at": now}
@@ -244,7 +248,11 @@ def vega(client):
     r = client.post(f"{API}/members/1/measurements", json=body)
     assert r.status_code == 200, r.text
     yield 1
-    client.patch(f"{API}/members/1/privacy", json={"share_behavioral_details": False})
+    client.patch(
+        f"{API}/members/1/privacy",
+        json={"share_behavioral_details": False},
+        headers=vega_auth,
+    )
 
 
 def neuro_ids(assessment):
@@ -252,31 +260,35 @@ def neuro_ids(assessment):
     return {i["indicator_id"] for i in system["indicators"]}
 
 
-def test_api_hides_details_when_member_does_not_share(client, vega):
-    a = client.get(f"{API}/members/{vega}/assessment").json()
+def test_api_hides_details_when_member_does_not_share(client, vega, vega_auth, medic_auth):
+    a = client.get(f"{API}/members/{vega}/assessment", headers=medic_auth).json()
     assert a["behavioral"]["details_visible"] is False
     ids = neuro_ids(a)
     assert "sleep_hours" in ids
     assert not ids & {"mood", "loneliness", "stress", "pvt_mean_rt_ms"}
 
 
-def test_api_post_measurements_response_is_redacted_too(client, vega):
+def test_api_post_measurements_response_is_redacted_too(client, vega, vega_auth, medic_auth):
     item = {"id": str(uuid.uuid4()), "indicator_id": "mood", "value": 3,
             "taken_at": clock.now().isoformat().replace("+00:00", "Z")}
     a = client.post(f"{API}/members/{vega}/measurements",
-                    json={"measurements": [item]}).json()["assessment"]
+                    json={"measurements": [item]}, headers=medic_auth).json()["assessment"]
     assert "mood" not in neuro_ids(a)
 
 
-def test_api_shows_details_when_member_shares(client, vega):
-    client.patch(f"{API}/members/{vega}/privacy", json={"share_behavioral_details": True})
-    a = client.get(f"{API}/members/{vega}/assessment").json()
+def test_api_shows_details_when_member_shares(client, vega, vega_auth, medic_auth):
+    client.patch(
+        f"{API}/members/{vega}/privacy",
+        json={"share_behavioral_details": True},
+        headers=vega_auth,
+    )
+    a = client.get(f"{API}/members/{vega}/assessment", headers=medic_auth).json()
     assert a["behavioral"]["details_visible"] is True
     mood = next(i for s in a["systems"] for i in s["indicators"] if i["indicator_id"] == "mood")
     assert mood["last_value"] == 4
 
 
-def test_api_shows_details_with_open_emergency(client, vega):
+def test_api_shows_details_with_open_emergency(client, vega, vega_auth, medic_auth):
     with Session(engine) as s:
         s.add(models.Alert(
             id=str(uuid.uuid4()), member_id=vega, env_id="mars", origin="manual",
@@ -284,6 +296,6 @@ def test_api_shows_details_with_open_emergency(client, vega):
             delivery_mode="realtime",
         ))
         s.commit()
-    a = client.get(f"{API}/members/{vega}/assessment").json()
+    a = client.get(f"{API}/members/{vega}/assessment", headers=medic_auth).json()
     assert a["behavioral"]["details_visible"] is True
     assert "mood" in neuro_ids(a)

@@ -12,7 +12,14 @@ from sqlmodel import Session
 
 from app import models
 from app.db import get_session
-from app.routers.deps import ERRORS_404, ERRORS_409, ERRORS_AUTH, AuthDep
+from app.routers.deps import (
+    ERRORS_404,
+    ERRORS_409,
+    ERRORS_AUTH,
+    AuthDep,
+    allow_env,
+    allow_member,
+)
 from app.schemas import (
     Assessment,
     HeartbeatIn,
@@ -27,8 +34,8 @@ from app.schemas import (
     RuokResult,
     Slug,
 )
-from app.services import alerts, behavioral, environments, liveness, measurements, members
-from app.services.member_assessment import UnknownEnvironment, assess_member
+from app.services import alerts, environments, liveness, measurements, members
+from app.services.member_assessment import UnknownEnvironment, assess_member, for_viewer
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -49,6 +56,7 @@ def _member(session: Session, member_id: int) -> models.Member:
     summary="Members del entorno con su resumen",
     description="Members de la BD con `last_measurement_at` real. "
     "`liveness`, `overall_status` y `open_alerts` reales (BE-12, BE-11, BE-14).",
+    dependencies=[Depends(allow_env("members:list"))],
 )
 def list_members(env_id: Slug, session: SessionDep) -> list[MemberSummary]:
     if environments.get_environment(env_id) is None:
@@ -62,6 +70,7 @@ def list_members(env_id: Slug, session: SessionDep) -> list[MemberSummary]:
     tags=["members"],
     summary="Un member",
     description="Member de la BD. `liveness`: STUB(FS-02) → BE-12.",
+    dependencies=[Depends(allow_member("member:read"))],
 )
 def get_member(member_id: int, session: SessionDep) -> Member:
     return members.to_schema(_member(session, member_id))
@@ -72,7 +81,8 @@ def get_member(member_id: int, session: SessionDep) -> Member:
     response_model=Member,
     tags=["members"],
     summary="Compartir o no los detalles conductuales (solo el propio member)",
-    description="Se guarda en la BD. El permiso (solo el propio member) llega con BE-27.",
+    description="Se guarda en la BD. Solo el propio member (403 para cualquier otro rol).",
+    dependencies=[Depends(allow_member("privacy:write"))],
 )
 def set_privacy(member_id: int, body: PrivacyIn, session: SessionDep) -> Member:
     m = members.set_privacy(session, _member(session, member_id), body.share_behavioral_details)
@@ -91,7 +101,10 @@ def set_privacy(member_id: int, body: PrivacyIn, session: SessionDep) -> Member:
     "no se guarda ninguna. Devuelve el `assessment` recalculado con el lote ya guardado.",
 )
 def post_measurements(
-    member_id: int, body: MeasurementBatchIn, session: SessionDep
+    member_id: int,
+    body: MeasurementBatchIn,
+    session: SessionDep,
+    user: Annotated[models.UserAccount, Depends(allow_member("measurements:write"))],
 ) -> MeasurementBatchResult:
     m = _member(session, member_id)
     try:
@@ -103,7 +116,9 @@ def post_measurements(
     assessment = assess_member(session, m)
     alerts.evaluate(session, m, assessment)  # abre, actualiza o escala alertas (BE-14)
     return MeasurementBatchResult(
-        accepted=accepted, duplicates=duplicates, assessment=behavioral.redact(assessment)
+        accepted=accepted,
+        duplicates=duplicates,
+        assessment=for_viewer(session, assessment, m, user),
     )
 
 
@@ -114,6 +129,7 @@ def post_measurements(
     summary="Serie temporal de mediciones (orden: taken_at)",
     description="Filtros opcionales por indicador y por intervalo de `taken_at` (inclusivo). "
     "`from` posterior a `to` → 422.",
+    dependencies=[Depends(allow_member("history:read"))],
 )
 def list_measurements(
     member_id: int,
@@ -138,11 +154,16 @@ def list_measurements(
     "un `env` inexistente → 404. Si `behavioral.details_visible` es false, los "
     "indicadores conductuales no aparecen en `systems[].indicators` (solo el estado agregado).",
 )
-def get_assessment(member_id: int, session: SessionDep, env: Slug | None = None) -> Assessment:
+def get_assessment(
+    member_id: int,
+    session: SessionDep,
+    user: Annotated[models.UserAccount, Depends(allow_member("history:read"))],
+    env: Slug | None = None,
+) -> Assessment:
     m = _member(session, member_id)
     try:
-        # Detalles conductuales ocultos salvo `details_visible` (BE-20).
-        return behavioral.redact(assess_member(session, m, env))
+        # Detalles conductuales según quién consulta (BE-20 + BE-27).
+        return for_viewer(session, assess_member(session, m, env), m, user)
     except UnknownEnvironment as exc:
         raise HTTPException(404, f"Entorno desconocido: {exc}") from exc
 
@@ -154,6 +175,7 @@ def get_assessment(member_id: int, session: SessionDep, env: Slug | None = None)
     summary="Señal de vida del dispositivo del member",
     description="Actualiza `last_seen_at` y la actividad del member y el registro del "
     "dispositivo. `checkin_required` es true si el member venía de `stale` o `lost`.",
+    dependencies=[Depends(allow_member("heartbeat:write"))],
 )
 def heartbeat(member_id: int, body: HeartbeatIn, session: SessionDep) -> HeartbeatResult:
     m = _member(session, member_id)
@@ -168,6 +190,7 @@ def heartbeat(member_id: int, body: HeartbeatIn, session: SessionDep) -> Heartbe
     description="Cierra el check-in pendiente y cuenta como señal de vida. ok=false "
     "('Necesito ayuda') crea una alerta critical y devuelve su id; ok=true resuelve la "
     "alerta no_contact abierta.",
+    dependencies=[Depends(allow_member("checkin:write"))],
 )
 def ruok(member_id: int, body: RuokIn, session: SessionDep) -> RuokResult:
     # Import local: así esta PR no toca la línea de imports que también cambia BE-20 (#152).

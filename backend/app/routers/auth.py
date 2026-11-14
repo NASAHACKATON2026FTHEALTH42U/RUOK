@@ -17,7 +17,7 @@ from sqlmodel import Session, select
 from app import clock, models, stubs
 from app.auth.security import create_token
 from app.db import get_session
-from app.routers.deps import ERRORS_AUTH, AuthDep, CurrentUser
+from app.routers.deps import ERRORS_AUTH, AdminDep, CurrentUser
 from app.schemas import (
     DemoUser,
     ErrorResponse,
@@ -143,7 +143,7 @@ def demo_users(session: SessionDep) -> list[DemoUser]:
     "/users",
     response_model=list[User],
     responses=ERRORS_AUTH,
-    dependencies=[AuthDep],
+    dependencies=[AdminDep],
     summary="Listar usuarios (admin)",
     description="STUB(FS-02) → FS-07",
 )
@@ -156,7 +156,7 @@ def list_users(env_id: Slug | None = None) -> list[User]:
     response_model=User,
     status_code=201,
     responses=ERRORS_AUTH,
-    dependencies=[AuthDep],
+    dependencies=[AdminDep],
     summary="Crear usuario (admin)",
     description="STUB(FS-02) → FS-07",
 )
