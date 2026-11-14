@@ -6,7 +6,7 @@
 | Frontend | React 18 + Vite 6 + TypeScript 5.6 (strict), Tailwind 4 (`@tailwindcss/vite`), React Router 6, Zustand 5, Recharts 3, Framer Motion, IndexedDB (`idb`). ESLint 9 + Prettier. Versiones y estructura en [`frontend/README.md`](../frontend/README.md) |
 | Backend | Python 3.11+, FastAPI, SQLModel, SQLite (modo WAL), pytest |
 | Contrato | OpenAPI generado por FastAPI → tipos TS con `openapi-typescript` (`npm run gen:api`) → cliente tipado `openapi-fetch` (`frontend/src/api/client.ts`) |
-| Ejecución | Local: `docker compose up` o dos terminales. FastAPI sirve `frontend/dist` en modo "a bordo", escuchando en `0.0.0.0` para que se conecten **móviles y tablets por la red local** ([control-center-and-devices.md](control-center-and-devices.md)) |
+| Ejecución | Local: dos terminales (hoy). `docker compose up` llegará con BE-24 (#39). FastAPI sirve `frontend/dist` en modo "a bordo", escuchando en `0.0.0.0` para que se conecten **móviles y tablets por la red local** ([control-center-and-devices.md](control-center-and-devices.md)) |
 | Tiempo real | Server-Sent Events (`/events/stream`) + tabla `event_log` |
 
 ## Principio local-first
@@ -71,15 +71,16 @@ RUOK/
 ├── backend/                    FastAPI + SQLModel + SQLite
 │   ├── pyproject.toml
 │   ├── app/
-│   │   ├── main.py  db.py  models.py  schemas.py  clock.py
+│   │   ├── main.py  db.py  models.py  clock.py  stubs.py
+│   │   ├── schemas/            un módulo por dominio (common, config, auth, members, alerts, link, game, realtime)
 │   │   ├── data/               environments.json, indicators.json, systems.json,
 │   │   │                       interventions.json, protocols.json
 │   │   ├── auth/               security.py (hash, JWT), permissions.py (matriz)
-│   │   ├── services/           assessment.py, alerts.py, liveness.py, comm_link.py,
-│   │   │                       gamification.py, routine.py, events.py (event_log + SSE), devices.py
-│   │   ├── routers/            health, auth, environments, catalog, members, measurements,
-│   │   │                       assessment, alerts, tasks, game, link, demo, events,
-│   │   │                       devices, control, system
+│   │   ├── services/           hoy: assessment, member_assessment, trends, catalog, environments,
+│   │   │                       app_state. Llegan: alerts, liveness, comm_link, gamification,
+│   │   │                       routine, events (event_log + SSE), devices
+│   │   ├── routers/            hoy: health, auth, catalog, members, alerts, game, realtime
+│   │   │                       (+ deps.py); se pueden dividir por dominio al implementarlos
 │   │   └── seed.py             datos sintéticos y escenarios de demo
 │   └── tests/
 └── presentation/               slides, vídeo y capturas

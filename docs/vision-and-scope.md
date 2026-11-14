@@ -19,7 +19,7 @@ El Human Research Program (HRP) identifica **5 peligros**:
 | Entorno cerrado hostil | Sistema inmune, CO₂, microbiología | Temperatura, síntomas e indicadores inmunes |
 
 ## Idea central
-> La misma plataforma, el mismo motor de reglas y la misma interfaz sirven en Marte (con 20 minutos de retardo y sin médico), en la Luna, en la ISS y en una residencia de mayores en la Tierra. Lo que cambia es el **perfil de entorno**.
+> La misma plataforma, el mismo motor de reglas y la misma interfaz sirven en Marte (con 4–24 minutos de retardo, 14 en la demo, y sin médico), en la Luna, en la ISS y en una residencia de mayores en la Tierra. Lo que cambia es el **perfil de entorno**.
 
 ## Diferenciadores
 1. **Cuerpo humano clicable.** Cada sistema (cardio, musculoesquelético, inmune, metabólico, neuro-conductual, ojos) se colorea según su estado; la radiación se muestra como un halo. Al hacer clic se ven su función, los riesgos y las acciones recomendadas.
@@ -50,7 +50,7 @@ El Human Research Program (HRP) identifica **5 peligros**:
 - mensajes a casa con retardo;
 - kudos y misiones de tripulación;
 - galería Earth view;
-- rejilla de Amsler (SANS).
+- rejilla de Amsler (SANS) *(sin issue: solo si sobra tiempo)*.
 
 ## Fuera de alcance (roadmap del pitch)
 - Wearables reales y streaming continuo de constantes.

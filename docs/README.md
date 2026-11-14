@@ -9,6 +9,7 @@ Presentación: **domingo 16:00**.
 
 | Documento | Para quién | Qué contiene |
 |---|---|---|
+| [status.md](status.md) | Todos | **Estado actual**: qué está hecho, endpoints reales y stubs, P0 pendientes e inconsistencias detectadas |
 | [vision-and-scope.md](vision-and-scope.md) | Todos | Reto, idea central, diferenciadores, alcance del MVP y roadmap |
 | [architecture.md](architecture.md) | Dev | Stack, estructura de carpetas, principio local-first y despliegue |
 | [backend.md](backend.md) | Back | **Guía del backend**: cómo arrancar, estructura actual, SQLite en WAL, reloj inyectable y cómo añadir endpoints |
