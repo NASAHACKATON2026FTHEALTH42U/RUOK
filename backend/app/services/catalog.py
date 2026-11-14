@@ -1,4 +1,5 @@
-"""Catálogo de indicadores, sistemas del cuerpo (BE-04) e intervenciones (BE-21).
+"""Catálogo de indicadores, sistemas del cuerpo (BE-04), intervenciones (BE-21) y
+protocolos (CNT-02).
 
 Carga y valida app/data/indicators.json y app/data/systems.json con los schemas
 del contrato (app/schemas/config.py), que rechazan campos desconocidos. Además
@@ -15,18 +16,20 @@ from pathlib import Path
 
 from pydantic import TypeAdapter
 
-from app.schemas import BodySystem, Environment, Indicator, Intervention
+from app.schemas import BodySystem, Environment, Indicator, Intervention, Protocol
 from app.services import environments
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 INDICATORS_FILE = DATA_DIR / "indicators.json"
 SYSTEMS_FILE = DATA_DIR / "systems.json"
 INTERVENTIONS_FILE = DATA_DIR / "interventions.json"
+PROTOCOLS_FILE = DATA_DIR / "protocols.json"
 SOURCES_FILE = DATA_DIR.parents[2] / "docs" / "sources.md"
 
 _INDICATORS = TypeAdapter(list[Indicator])
 _SYSTEMS = TypeAdapter(list[BodySystem])
 _INTERVENTIONS = TypeAdapter(list[Intervention])
+_PROTOCOLS = TypeAdapter(list[Protocol])
 
 
 def _check_unique(ids: list[str], filename: str) -> None:
@@ -193,3 +196,55 @@ def list_interventions(
 
 def get_intervention(intervention_id: str) -> Intervention | None:
     return next((i for i in _interventions() if i.id == intervention_id), None)
+
+
+# ── Protocolos (CNT-02) ────────────────────────────────────────────────
+
+
+def load_protocols(path: Path = PROTOCOLS_FILE) -> list[Protocol]:
+    """Lee y valida protocols.json. Sin caché (útil en tests)."""
+    items = _PROTOCOLS.validate_json(path.read_bytes())
+    _check_unique([p.id for p in items], path.name)
+    return items
+
+
+def check_protocols(
+    protocols: list[Protocol],
+    systems: list[BodySystem],
+    source_ids: set[str] | None = None,
+) -> None:
+    """Lanza ValueError si un protocolo apunta a un sistema o fuente que no existe, si dos
+    cubren el mismo sistema y estado (solo se usaría el primero) o si se repite el id de
+    una recomendación. ``source_ids=None`` no comprueba fuentes."""
+    sys_ids = {s.id for s in systems}
+    errors: list[str] = []
+    covered: dict[tuple[str, str], str] = {}
+    rec_ids: list[str] = []
+    for item in protocols:
+        if item.system_id not in sys_ids:
+            errors.append(f"{item.id}: system_id '{item.system_id}' no existe")
+        for status in item.statuses:
+            other = covered.setdefault((item.system_id, status), item.id)
+            if other != item.id:
+                errors.append(f"{item.id}: {item.system_id}/{status} ya lo cubre '{other}'")
+        rec_ids += [r.id for r in item.recommendations]
+        if source_ids is not None:
+            for src in item.sources:
+                if src not in source_ids:
+                    errors.append(f"{item.id}: la fuente '{src}' no está en docs/sources.md")
+    for rec_id in sorted({r for r in rec_ids if rec_ids.count(r) > 1}):
+        errors.append(f"recomendación repetida: '{rec_id}'")
+    if errors:
+        raise ValueError("protocols.json incoherente:\n- " + "\n- ".join(errors))
+
+
+@lru_cache(maxsize=1)
+def _protocols() -> tuple[Protocol, ...]:
+    items = load_protocols()
+    check_protocols(items, list_systems(), source_ids())
+    return tuple(items)
+
+
+def list_protocols() -> list[Protocol]:
+    """Los protocolos, en el orden del JSON (valida el fichero)."""
+    return list(_protocols())

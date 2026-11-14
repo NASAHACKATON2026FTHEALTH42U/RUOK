@@ -11,7 +11,6 @@ pasar otro ``env``: las series y el member no cambian.
 
 from __future__ import annotations
 
-import json
 from collections import defaultdict
 from collections.abc import Iterable, Mapping
 from datetime import datetime
@@ -53,7 +52,7 @@ __all__ = [
     "load_protocols",
 ]
 
-PROTOCOLS_FILE = Path(__file__).resolve().parent.parent / "data" / "protocols.json"
+PROTOCOLS_FILE = catalog.PROTOCOLS_FILE
 
 # Sistema cuyo estado se resume en `Assessment.behavioral` (ver BE-20).
 BEHAVIORAL_SYSTEM_ID = "neuro_behavioral"
@@ -202,11 +201,16 @@ class UnknownEnvironment(LookupError):
     """``env`` no existe en environments.json (el router responde 404)."""
 
 
-def load_protocols(path: Path = PROTOCOLS_FILE) -> list[dict]:
-    """Protocolos de ``data/protocols.json`` (CNT-03). Sin fichero, lista vacía."""
+def load_protocols(path: Path | None = None) -> list[dict]:
+    """Protocolos de ``data/protocols.json`` (CNT-02), validados por ``services/catalog``.
+
+    Con ``path`` lee ese fichero (tests); si no existe, lista vacía.
+    """
+    if path is None:
+        return [p.model_dump() for p in catalog.list_protocols()]
     if not path.exists():
         return []
-    return json.loads(path.read_text(encoding="utf-8"))
+    return [p.model_dump() for p in catalog.load_protocols(path)]
 
 
 def _emergency_open(session: Session, member: models.Member) -> bool:

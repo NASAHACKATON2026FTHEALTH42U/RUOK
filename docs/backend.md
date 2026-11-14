@@ -61,6 +61,7 @@ backend/
 │   │   ├── environments.json  los 6 perfiles de entorno (BE-03)
 │   │   ├── indicators.json    20 indicadores con rangos revisados en CNT-01 (BE-04)
 │   │   ├── systems.json       7 sistemas del cuerpo con su región del SVG (BE-04)
+│   │   ├── protocols.json     protocolo por sistema y estado: mensaje y recomendaciones, con fuentes (CNT-02)
 │   │   ├── task_types.json    tipos de tarea de la rutina: título, momento del día, indicador (BE-18)
 │   │   └── badges.json        insignias y sus reglas (tasks_completed, points, streak, perfect_days) (BE-19)
 │   ├── services/
@@ -190,6 +191,7 @@ La configuración de dominio (entornos, indicadores, sistemas, intervenciones…
 |---|---|---|
 | `environments.json` | `services/environments.py` | BE-03 |
 | `indicators.json`, `systems.json` | `services/catalog.py` | BE-04 |
+| `protocols.json` | `services/catalog.py` (`list_protocols`) | CNT-02 |
 | `task_types.json` | `services/routine.py` | BE-18 |
 | `badges.json` | `services/gamification.py` | BE-19 |
 | `interventions.json` | — | BE-21 |
