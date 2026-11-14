@@ -9,7 +9,6 @@ import {
   type ReactNode,
 } from 'react'
 import holographicHuman from '../../assets/holographic-human.webp'
-import fireRays from '../../assets/fire-rays.webp'
 import { STATUS_COLORS, statusStyle, type Liveness } from '../ui/status'
 import { StatusBadge } from '../ui/StatusBadge'
 import { isFigureStale, type BodyRegion, type RegionState } from './regions'
@@ -30,17 +29,22 @@ interface Tooltip {
 }
 
 /**
- * Figura humana con un color por sistema (estado de la evaluación) y halo de radiación.
+ * Figura humana con un color por sistema (estado de la evaluación); la radiación se ve en el
+ * tamaño e intensidad del aura amarilla de detrás.
  * - Cada región es enfocable y clicable: emite `onSelectSystem`.
  * - Con liveness stale o lost, toda la figura pasa a gris rayado (nunca el último verde).
  * - Debajo hay una leyenda con StatusBadge: el estado nunca depende solo del color.
  */
-/** Intensidad visual del anillo de radiación según el estado (el estado lo dicen tooltip y leyenda). */
-const RADIATION_INTENSITY: Partial<Record<RegionState['status'], number>> = {
-  normal: 0.45,
-  warning: 0.75,
-  critical: 1,
+/**
+ * Aura amarilla detrás del cuerpo según la radiación: cuanto peor el estado, más grande e
+ * intensa. Sin dato de radiación (`unknown`) se queda en el tamaño base; nunca "tranquiliza".
+ */
+const RADIATION_AURA: Record<string, { scale: number; opacity: number }> = {
+  normal: { scale: 1, opacity: 0.75 },
+  warning: { scale: 1.25, opacity: 0.9 },
+  critical: { scale: 1.5, opacity: 1 },
 }
+const AURA_BASE = { scale: 1, opacity: 0.75 }
 
 export function BodyFigure({
   regions,
@@ -61,6 +65,9 @@ export function BodyFigure({
   const reducedMotion = useReducedMotion()
   const pulse = !stale && !reducedMotion
   const byRegion = new Map(regions.map((r) => [r.region, r]))
+  // Tamaño e intensidad del aura según el estado de la radiación (sistema en la zona `halo`).
+  const radiation = byRegion.get('halo')
+  const aura = (radiation && RADIATION_AURA[radiation.status]) ?? AURA_BASE
 
   const showTooltip = (region: RegionState, target: Element) => {
     const box = boxRef.current?.getBoundingClientRect()
@@ -166,39 +173,6 @@ export function BodyFigure({
 
   /** Zonas del cuerpo, en coordenadas de la imagen original (887 × 1774). */
   const zones: [BodyRegion, (r: RegionState) => ReactNode][] = [
-    // Radiación (todo el cuerpo): anillo de rayos de fuego en óvalo alrededor de la figura. Va
-    // primero para quedar debajo de los órganos. Más intenso cuanto peor el estado; gris y tenue
-    // sin datos fiables. Solo el borde del óvalo recibe el ratón (no tapa los órganos).
-    [
-      'halo',
-      (r) => {
-        const noData = stale || statusStyle(r.status).striped
-        return (
-          <g>
-            <ellipse
-              cx="443.5"
-              cy="887"
-              rx="470"
-              ry="900"
-              fill="none"
-              stroke="transparent"
-              strokeWidth="70"
-            />
-            <image
-              href={fireRays}
-              x="-183"
-              y="-313"
-              width="1253"
-              height="2400"
-              preserveAspectRatio="none"
-              pointerEvents="none"
-              opacity={noData ? 0.35 : (RADIATION_INTENSITY[r.status] ?? 0.5)}
-              style={noData ? { filter: 'grayscale(1)' } : undefined}
-            />
-          </g>
-        )
-      },
-    ],
     // Huesos (musculoesquelético): húmero, antebrazo, fémur y tibia
     [
       'bones',
@@ -296,8 +270,12 @@ export function BodyFigure({
           }}
           animate={
             !pulse
-              ? { opacity: 0.8, scale: 1 }
-              : { opacity: [0.7, 1, 0.7], scale: [0.97, 1.05, 0.97] } // un latido por ciclo
+              ? { opacity: stale ? 0.8 : aura.opacity, scale: stale ? 1 : aura.scale }
+              : {
+                  // un latido por ciclo, alrededor del tamaño que marca la radiación
+                  opacity: [aura.opacity * 0.85, aura.opacity, aura.opacity * 0.85],
+                  scale: [0.97 * aura.scale, 1.05 * aura.scale, 0.97 * aura.scale],
+                }
           }
           transition={
             !pulse ? { duration: 0.4 } : { duration: 4, repeat: Infinity, ease: 'easeInOut' }
