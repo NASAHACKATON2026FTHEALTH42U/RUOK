@@ -4,6 +4,7 @@ import { useAssessment } from '../api/useAssessment'
 import { useEnvironments } from '../api/useEnvironments'
 import { useIndicators } from '../api/useIndicators'
 import { useMeasurements } from '../api/useMeasurements'
+import { CHECKIN_INDICATORS } from '../components/behavioral/checkin'
 import { formatSource, formatValue } from '../components/dashboard/format'
 import { PeriodSwitch, TrendPlot } from '../components/dashboard/TrendChart'
 import {
@@ -39,8 +40,11 @@ export default function History() {
     () => new Map((catalog.state === 'ready' ? catalog.data : []).map((i) => [i.id, i])),
     [catalog],
   )
-  // Indicadores activos del entorno, en su orden; sin entorno, todo el catálogo.
-  const options = (env?.indicators ?? [...byId.keys()]).filter((id) => byId.has(id))
+  // Indicadores activos del entorno, en su orden, más los del check-in diario (FE-19), que se
+  // registran en todos los entornos; sin entorno, todo el catálogo.
+  const options = [
+    ...new Set([...(env?.indicators ?? [...byId.keys()]), ...CHECKIN_INDICATORS]),
+  ].filter((id) => byId.has(id))
 
   const daysParam = Number(params.get('days'))
   const days: Period = (PERIODS as readonly number[]).includes(daysParam)
