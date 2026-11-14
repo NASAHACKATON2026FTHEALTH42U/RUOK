@@ -185,7 +185,7 @@ export const CONTRACT_OPERATIONS = [
 
 export const health: Schema<'HealthResponse'> = {
   "status": "ok",
-  "server_time": "2026-11-14T17:16:01.841748Z"
+  "server_time": "2026-11-14T18:11:41.620998Z"
 }
 
 export const environments: Schema<'Environment'>[] = [
@@ -205,7 +205,11 @@ export const environments: Schema<'Environment'>[] = [
       "stale_after_s": 300,
       "lost_after_s": 900,
       "eva_stale_after_s": 30,
-      "ruok_timeout_s": 120
+      "eva_lost_after_s": 120,
+      "sleep_factor": 3.0,
+      "ruok_timeout_s": 120,
+      "morning_checkin_by": null,
+      "warning_escalate_after_s": 21600
     },
     "vocabulary": {
       "member": "astronauta",
@@ -269,7 +273,11 @@ export const environments: Schema<'Environment'>[] = [
       "stale_after_s": 300,
       "lost_after_s": 900,
       "eva_stale_after_s": 30,
-      "ruok_timeout_s": 120
+      "eva_lost_after_s": 120,
+      "sleep_factor": 3.0,
+      "ruok_timeout_s": 120,
+      "morning_checkin_by": null,
+      "warning_escalate_after_s": 21600
     },
     "vocabulary": {
       "member": "astronauta",
@@ -333,7 +341,11 @@ export const environments: Schema<'Environment'>[] = [
       "stale_after_s": 300,
       "lost_after_s": 900,
       "eva_stale_after_s": 30,
-      "ruok_timeout_s": 120
+      "eva_lost_after_s": 120,
+      "sleep_factor": 3.0,
+      "ruok_timeout_s": 120,
+      "morning_checkin_by": null,
+      "warning_escalate_after_s": 21600
     },
     "vocabulary": {
       "member": "astronauta",
@@ -407,7 +419,11 @@ export const environments: Schema<'Environment'>[] = [
       "stale_after_s": 300,
       "lost_after_s": 900,
       "eva_stale_after_s": 30,
-      "ruok_timeout_s": 120
+      "eva_lost_after_s": 120,
+      "sleep_factor": 3.0,
+      "ruok_timeout_s": 120,
+      "morning_checkin_by": null,
+      "warning_escalate_after_s": 43200
     },
     "vocabulary": {
       "member": "participante",
@@ -453,7 +469,11 @@ export const environments: Schema<'Environment'>[] = [
       "stale_after_s": 300,
       "lost_after_s": 900,
       "eva_stale_after_s": 30,
-      "ruok_timeout_s": 120
+      "eva_lost_after_s": 120,
+      "sleep_factor": 3.0,
+      "ruok_timeout_s": 120,
+      "morning_checkin_by": null,
+      "warning_escalate_after_s": 7200
     },
     "vocabulary": {
       "member": "paciente",
@@ -501,7 +521,11 @@ export const environments: Schema<'Environment'>[] = [
       "stale_after_s": 300,
       "lost_after_s": 900,
       "eva_stale_after_s": 30,
-      "ruok_timeout_s": 120
+      "eva_lost_after_s": 120,
+      "sleep_factor": 3.0,
+      "ruok_timeout_s": 120,
+      "morning_checkin_by": "10:00",
+      "warning_escalate_after_s": 14400
     },
     "vocabulary": {
       "member": "residente",
@@ -1343,11 +1367,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Dra. Lindqvist",
       "position": "flight_engineer",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "active",
-      "overall_status": "normal",
+      "overall_status": "warning",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T16:26:07.358968Z"
+      "last_measurement_at": "2026-11-14T17:21:07.358968Z"
     },
     {
       "id": 6,
@@ -1355,11 +1379,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Cmdte. Moreau",
       "position": "commander",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T16:02:32.828547Z"
+      "last_measurement_at": "2026-11-14T16:57:32.828547Z"
     },
     {
       "id": 7,
@@ -1367,11 +1391,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Esp. Rao",
       "position": "scientist",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T15:56:38.751314Z"
+      "last_measurement_at": "2026-11-14T16:51:38.751314Z"
     }
   ],
   "moon": [
@@ -1381,11 +1405,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Cmdr. Ito",
       "position": "commander",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T16:22:49.203535Z"
+      "last_measurement_at": "2026-11-14T17:17:49.203535Z"
     },
     {
       "id": 9,
@@ -1393,11 +1417,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Ing. Silva",
       "position": "engineer",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
-      "overall_status": "unknown",
+      "overall_status": "warning",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T15:48:06.841820Z"
+      "last_measurement_at": "2026-11-14T16:43:06.841820Z"
     },
     {
       "id": 10,
@@ -1405,11 +1429,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Dra. Weber",
       "position": "geologist",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T16:59:26.383471Z"
+      "last_measurement_at": "2026-11-14T17:54:26.383471Z"
     }
   ],
   "mars": [
@@ -1419,11 +1443,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Cmdr. Vega",
       "position": "commander",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "active",
-      "overall_status": "warning",
+      "overall_status": "critical",
       "open_alerts": 1,
-      "last_measurement_at": "2026-11-14T16:49:30.350583Z"
+      "last_measurement_at": "2026-11-14T18:11:41.608898Z"
     },
     {
       "id": 2,
@@ -1431,11 +1455,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Ing. Okafor",
       "position": "engineer",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
-      "overall_status": "unknown",
+      "overall_status": "warning",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T16:38:44.115693Z"
+      "last_measurement_at": "2026-11-14T17:33:44.115693Z"
     },
     {
       "id": 4,
@@ -1443,11 +1467,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Dra. Haddad",
       "position": "medical_officer",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T16:11:02.360034Z"
+      "last_measurement_at": "2026-11-14T17:06:02.360034Z"
     },
     {
       "id": 5,
@@ -1455,11 +1479,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Esp. Tanaka",
       "position": "scientist",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T15:55:00.634194Z"
+      "last_measurement_at": "2026-11-14T16:50:00.634194Z"
     }
   ],
   "earth": [
@@ -1469,11 +1493,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Ana Ruiz",
       "position": "participant",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T17:05:17.059793Z"
+      "last_measurement_at": "2026-11-14T18:00:17.059793Z"
     },
     {
       "id": 12,
@@ -1481,11 +1505,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Leo Park",
       "position": "participant",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T16:46:12.728452Z"
+      "last_measurement_at": "2026-11-14T17:41:12.728452Z"
     },
     {
       "id": 13,
@@ -1493,11 +1517,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Marta Gil",
       "position": "participant",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T16:34:49.251217Z"
+      "last_measurement_at": "2026-11-14T17:29:49.251217Z"
     }
   ],
   "hospital": [
@@ -1507,11 +1531,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Joan Puig",
       "position": "patient",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T16:40:15.212296Z"
+      "last_measurement_at": "2026-11-14T17:35:15.212296Z"
     },
     {
       "id": 15,
@@ -1519,11 +1543,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Laura Sanz",
       "position": "patient",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T16:11:44.511251Z"
+      "last_measurement_at": "2026-11-14T17:06:44.511251Z"
     },
     {
       "id": 16,
@@ -1531,11 +1555,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Pedro Díaz",
       "position": "patient",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T15:54:09.500902Z"
+      "last_measurement_at": "2026-11-14T16:49:09.500902Z"
     }
   ],
   "geriatric": [
@@ -1545,11 +1569,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Rosa Martí",
       "position": "resident",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T16:18:13.903601Z"
+      "last_measurement_at": "2026-11-14T17:13:13.903601Z"
     },
     {
       "id": 18,
@@ -1557,11 +1581,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Josep Vidal",
       "position": "resident",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T16:51:29.210944Z"
+      "last_measurement_at": "2026-11-14T17:46:29.210944Z"
     },
     {
       "id": 19,
@@ -1569,11 +1593,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Carmen López",
       "position": "resident",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T15:17:13.417633Z"
+      "last_measurement_at": "2026-11-14T16:12:13.417633Z"
     },
     {
       "id": 20,
@@ -1581,11 +1605,11 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "name": "Antonio Ferrer",
       "position": "resident",
       "share_behavioral_details": false,
-      "last_seen_at": "2026-11-14T17:16:00Z",
+      "last_seen_at": "2026-11-14T18:11:00Z",
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T16:09:07.371617Z"
+      "last_measurement_at": "2026-11-14T17:04:07.371617Z"
     }
   ]
 }
@@ -1594,23 +1618,42 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "iss": {
     "member_id": 1,
     "env_id": "iss",
-    "generated_at": "2026-11-14T17:16:01.888019Z",
+    "generated_at": "2026-11-14T18:11:41.737581Z",
     "overall_status": "critical",
     "liveness": "active",
-    "last_seen_at": "2026-11-14T10:00:00Z",
+    "last_seen_at": "2026-11-14T18:11:00Z",
     "systems": [
       {
         "system_id": "cardiovascular",
         "status": "warning",
         "indicators": [
           {
+            "indicator_id": "heart_rate",
+            "last_value": 88.0,
+            "unit": "lpm",
+            "taken_at": "2026-11-14T17:44:30.350583Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 80.375,
+            "range": {
+              "normal": [
+                50.0,
+                100.0
+              ],
+              "warning": [
+                101.0,
+                120.0
+              ]
+            }
+          },
+          {
             "indicator_id": "bp_systolic",
-            "last_value": 142.0,
+            "last_value": 145.0,
             "unit": "mmHg",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "taken_at": "2026-11-14T18:11:41.608898Z",
             "status": "warning",
             "trend": "rising",
-            "baseline": 118.0,
+            "baseline": 104.0,
             "range": {
               "normal": [
                 90.0,
@@ -1618,81 +1661,45 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 130.0,
-                140.0
+                159.0
               ]
             }
-          }
-        ],
-        "recommendations": [
+          },
           {
-            "id": "rec_bp_repeat",
-            "text": "Repite la medición en reposo en 15 min",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Sigue el protocolo de tensión alta; si persiste, se avisará a tierra.",
-          "protocol_id": "proto_bp_high"
-        }
-      },
-      {
-        "system_id": "neuro_behavioral",
-        "status": "unknown",
-        "indicators": [
-          {
-            "indicator_id": "mood",
-            "last_value": null,
-            "unit": "1-5",
-            "taken_at": null,
-            "status": "unknown",
-            "trend": "insufficient_data",
-            "baseline": null,
-            "range": {
-              "normal": [
-                3.0,
-                5.0
-              ]
-            }
-          }
-        ],
-        "recommendations": [
-          {
-            "id": "rec_checkin",
-            "text": "Haz tu check-in diario",
-            "priority": 2,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Sin datos recientes: haz el check-in.",
-          "protocol_id": null
-        }
-      },
-      {
-        "system_id": "musculoskeletal",
-        "status": "normal",
-        "indicators": [
-          {
-            "indicator_id": "exercise_min",
-            "last_value": 135.0,
-            "unit": "min",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "indicator_id": "bp_diastolic",
+            "last_value": 69.0,
+            "unit": "mmHg",
+            "taken_at": "2026-11-14T16:41:56.022220Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": null,
+            "baseline": 72.42857142857143,
             "range": {
               "normal": [
-                120.0,
-                300.0
+                60.0,
+                84.0
+              ],
+              "warning": [
+                85.0,
+                99.0
+              ]
+            }
+          },
+          {
+            "indicator_id": "spo2",
+            "last_value": 98.0,
+            "unit": "%",
+            "taken_at": "2026-11-14T12:25:44.945317Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 98.0,
+            "range": {
+              "normal": [
+                95.0,
+                100.0
+              ],
+              "warning": [
+                91.0,
+                94.0
               ]
             }
           }
@@ -1703,7 +1710,41 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "Sin acciones necesarias.",
+          "message": "",
+          "protocol_id": null
+        }
+      },
+      {
+        "system_id": "musculoskeletal",
+        "status": "warning",
+        "indicators": [
+          {
+            "indicator_id": "exercise_min",
+            "last_value": 90.0,
+            "unit": "min",
+            "taken_at": "2026-11-14T18:11:41.608898Z",
+            "status": "warning",
+            "trend": "falling",
+            "baseline": 217.14285714285714,
+            "range": {
+              "normal": [
+                120.0,
+                300.0
+              ],
+              "warning": [
+                60.0,
+                119.0
+              ]
+            }
+          }
+        ],
+        "recommendations": [],
+        "escalation": {
+          "level": 0,
+          "target_role": "self",
+          "mode": "realtime",
+          "delay_s": 0,
+          "message": "",
           "protocol_id": null
         }
       },
@@ -1713,16 +1754,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "indicators": [
           {
             "indicator_id": "temperature",
-            "last_value": 36.7,
+            "last_value": 36.3,
             "unit": "°C",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "taken_at": "2026-11-14T12:49:19.478569Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": null,
+            "baseline": 36.5125,
             "range": {
               "normal": [
                 36.0,
                 37.4
+              ],
+              "warning": [
+                37.5,
+                38.4
               ]
             }
           }
@@ -1733,63 +1778,83 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       },
       {
-        "system_id": "metabolic",
+        "system_id": "neuro_behavioral",
         "status": "critical",
         "indicators": [
           {
-            "indicator_id": "glucose",
-            "last_value": 58.0,
-            "unit": "mg/dL",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "critical",
-            "trend": "falling",
-            "baseline": null,
+            "indicator_id": "mood",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T13:27:01.516209Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
             "range": {
               "normal": [
-                70.0,
-                140.0
+                3.0,
+                5.0
+              ],
+              "warning": [
+                2.0,
+                2.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "sleep_hours",
+            "last_value": 3.5,
+            "unit": "h",
+            "taken_at": "2026-11-14T18:06:41.601963Z",
+            "status": "critical",
+            "trend": "falling",
+            "baseline": 8.428571428571429,
+            "range": {
+              "normal": [
+                7.0,
+                10.0
+              ],
+              "warning": [
+                5.0,
+                6.9
               ]
             }
           }
         ],
-        "recommendations": [
-          {
-            "id": "rec_metabolic",
-            "text": "Toma 15 g de hidratos rápidos y repite en 15 min",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
+        "recommendations": [],
         "escalation": {
           "level": 1,
           "target_role": "crew",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "Avisa al oficial médico de a bordo.",
+          "message": "",
           "protocol_id": null
         }
       },
       {
-        "system_id": "eyes",
-        "status": "normal",
+        "system_id": "radiation",
+        "status": "unknown",
         "indicators": [
           {
-            "indicator_id": "vision_changes",
-            "last_value": 1.0,
-            "unit": "1-5",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "normal",
-            "trend": "stable",
+            "indicator_id": "radiation_dose",
+            "last_value": null,
+            "unit": "mSv",
+            "taken_at": null,
+            "status": "unknown",
+            "trend": "insufficient_data",
             "baseline": null,
             "range": {
               "normal": [
-                1.0,
-                1.9
+                0.0,
+                250.0
+              ],
+              "warning": [
+                251.0,
+                500.0
               ]
             }
           }
@@ -1800,74 +1865,56 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "Sin acciones necesarias.",
-          "protocol_id": null
-        }
-      },
-      {
-        "system_id": "radiation",
-        "status": "warning",
-        "indicators": [
-          {
-            "indicator_id": "radiation_dose",
-            "last_value": 310.0,
-            "unit": "mSv",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "warning",
-            "trend": "rising",
-            "baseline": null,
-            "range": {
-              "normal": [
-                0.0,
-                250.0
-              ]
-            }
-          }
-        ],
-        "recommendations": [
-          {
-            "id": "rec_radiation",
-            "text": "Reduce el tiempo fuera del refugio hasta nueva revisión",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       }
     ],
     "behavioral": {
-      "status": "unknown",
-      "details_visible": true
+      "status": "critical",
+      "details_visible": false
     },
     "provisional": false
   },
   "moon": {
     "member_id": 1,
     "env_id": "moon",
-    "generated_at": "2026-11-14T17:16:01.893192Z",
+    "generated_at": "2026-11-14T18:11:41.750002Z",
     "overall_status": "critical",
     "liveness": "active",
-    "last_seen_at": "2026-11-14T10:00:00Z",
+    "last_seen_at": "2026-11-14T18:11:00Z",
     "systems": [
       {
         "system_id": "cardiovascular",
         "status": "warning",
         "indicators": [
           {
+            "indicator_id": "heart_rate",
+            "last_value": 88.0,
+            "unit": "lpm",
+            "taken_at": "2026-11-14T17:44:30.350583Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 80.375,
+            "range": {
+              "normal": [
+                50.0,
+                100.0
+              ],
+              "warning": [
+                101.0,
+                120.0
+              ]
+            }
+          },
+          {
             "indicator_id": "bp_systolic",
-            "last_value": 142.0,
+            "last_value": 145.0,
             "unit": "mmHg",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "taken_at": "2026-11-14T18:11:41.608898Z",
             "status": "warning",
             "trend": "rising",
-            "baseline": 118.0,
+            "baseline": 104.0,
             "range": {
               "normal": [
                 90.0,
@@ -1875,81 +1922,45 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 130.0,
-                140.0
+                159.0
               ]
             }
-          }
-        ],
-        "recommendations": [
+          },
           {
-            "id": "rec_bp_repeat",
-            "text": "Repite la medición en reposo en 15 min",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
-          "delay_s": 1,
-          "message": "Sigue el protocolo de tensión alta; si persiste, se avisará a tierra.",
-          "protocol_id": "proto_bp_high"
-        }
-      },
-      {
-        "system_id": "neuro_behavioral",
-        "status": "unknown",
-        "indicators": [
-          {
-            "indicator_id": "mood",
-            "last_value": null,
-            "unit": "1-5",
-            "taken_at": null,
-            "status": "unknown",
-            "trend": "insufficient_data",
-            "baseline": null,
-            "range": {
-              "normal": [
-                3.0,
-                5.0
-              ]
-            }
-          }
-        ],
-        "recommendations": [
-          {
-            "id": "rec_checkin",
-            "text": "Haz tu check-in diario",
-            "priority": 2,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Sin datos recientes: haz el check-in.",
-          "protocol_id": null
-        }
-      },
-      {
-        "system_id": "musculoskeletal",
-        "status": "normal",
-        "indicators": [
-          {
-            "indicator_id": "exercise_min",
-            "last_value": 135.0,
-            "unit": "min",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "indicator_id": "bp_diastolic",
+            "last_value": 69.0,
+            "unit": "mmHg",
+            "taken_at": "2026-11-14T16:41:56.022220Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": null,
+            "baseline": 72.42857142857143,
             "range": {
               "normal": [
-                120.0,
-                300.0
+                60.0,
+                84.0
+              ],
+              "warning": [
+                85.0,
+                99.0
+              ]
+            }
+          },
+          {
+            "indicator_id": "spo2",
+            "last_value": 98.0,
+            "unit": "%",
+            "taken_at": "2026-11-14T12:25:44.945317Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 98.0,
+            "range": {
+              "normal": [
+                95.0,
+                100.0
+              ],
+              "warning": [
+                91.0,
+                94.0
               ]
             }
           }
@@ -1960,7 +1971,41 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 1,
-          "message": "Sin acciones necesarias.",
+          "message": "",
+          "protocol_id": null
+        }
+      },
+      {
+        "system_id": "musculoskeletal",
+        "status": "warning",
+        "indicators": [
+          {
+            "indicator_id": "exercise_min",
+            "last_value": 90.0,
+            "unit": "min",
+            "taken_at": "2026-11-14T18:11:41.608898Z",
+            "status": "warning",
+            "trend": "falling",
+            "baseline": 217.14285714285714,
+            "range": {
+              "normal": [
+                120.0,
+                300.0
+              ],
+              "warning": [
+                60.0,
+                119.0
+              ]
+            }
+          }
+        ],
+        "recommendations": [],
+        "escalation": {
+          "level": 0,
+          "target_role": "self",
+          "mode": "realtime",
+          "delay_s": 1,
+          "message": "",
           "protocol_id": null
         }
       },
@@ -1970,16 +2015,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "indicators": [
           {
             "indicator_id": "temperature",
-            "last_value": 36.7,
+            "last_value": 36.3,
             "unit": "°C",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "taken_at": "2026-11-14T12:49:19.478569Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": null,
+            "baseline": 36.5125,
             "range": {
               "normal": [
                 36.0,
                 37.4
+              ],
+              "warning": [
+                37.5,
+                38.4
               ]
             }
           }
@@ -1990,141 +2039,143 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 1,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       },
       {
-        "system_id": "metabolic",
+        "system_id": "neuro_behavioral",
         "status": "critical",
         "indicators": [
           {
-            "indicator_id": "glucose",
-            "last_value": 58.0,
-            "unit": "mg/dL",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "critical",
-            "trend": "falling",
-            "baseline": null,
+            "indicator_id": "mood",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T13:27:01.516209Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
             "range": {
               "normal": [
-                70.0,
-                140.0
+                3.0,
+                5.0
+              ],
+              "warning": [
+                2.0,
+                2.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "sleep_hours",
+            "last_value": 3.5,
+            "unit": "h",
+            "taken_at": "2026-11-14T18:06:41.601963Z",
+            "status": "critical",
+            "trend": "falling",
+            "baseline": 8.428571428571429,
+            "range": {
+              "normal": [
+                7.0,
+                10.0
+              ],
+              "warning": [
+                5.0,
+                6.9
               ]
             }
           }
         ],
-        "recommendations": [
-          {
-            "id": "rec_metabolic",
-            "text": "Toma 15 g de hidratos rápidos y repite en 15 min",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
+        "recommendations": [],
         "escalation": {
           "level": 1,
           "target_role": "crew",
           "mode": "realtime",
-          "delay_s": 0,
-          "message": "Avisa al oficial médico de a bordo.",
-          "protocol_id": null
-        }
-      },
-      {
-        "system_id": "eyes",
-        "status": "normal",
-        "indicators": [
-          {
-            "indicator_id": "vision_changes",
-            "last_value": 1.0,
-            "unit": "1-5",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "normal",
-            "trend": "stable",
-            "baseline": null,
-            "range": {
-              "normal": [
-                1.0,
-                1.9
-              ]
-            }
-          }
-        ],
-        "recommendations": [],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
           "delay_s": 1,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       },
       {
         "system_id": "radiation",
-        "status": "warning",
+        "status": "unknown",
         "indicators": [
           {
             "indicator_id": "radiation_dose",
-            "last_value": 310.0,
+            "last_value": null,
             "unit": "mSv",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "warning",
-            "trend": "rising",
+            "taken_at": null,
+            "status": "unknown",
+            "trend": "insufficient_data",
             "baseline": null,
             "range": {
               "normal": [
                 0.0,
                 250.0
+              ],
+              "warning": [
+                251.0,
+                500.0
               ]
             }
           }
         ],
-        "recommendations": [
-          {
-            "id": "rec_radiation",
-            "text": "Reduce el tiempo fuera del refugio hasta nueva revisión",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
+        "recommendations": [],
         "escalation": {
           "level": 0,
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 1,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       }
     ],
     "behavioral": {
-      "status": "unknown",
-      "details_visible": true
+      "status": "critical",
+      "details_visible": false
     },
     "provisional": false
   },
   "mars": {
     "member_id": 1,
     "env_id": "mars",
-    "generated_at": "2026-11-14T17:16:01.898109Z",
+    "generated_at": "2026-11-14T18:11:41.761343Z",
     "overall_status": "critical",
     "liveness": "active",
-    "last_seen_at": "2026-11-14T10:00:00Z",
+    "last_seen_at": "2026-11-14T18:11:00Z",
     "systems": [
       {
         "system_id": "cardiovascular",
-        "status": "warning",
+        "status": "critical",
         "indicators": [
           {
+            "indicator_id": "heart_rate",
+            "last_value": 88.0,
+            "unit": "lpm",
+            "taken_at": "2026-11-14T17:44:30.350583Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 80.375,
+            "range": {
+              "normal": [
+                50.0,
+                100.0
+              ],
+              "warning": [
+                101.0,
+                120.0
+              ]
+            }
+          },
+          {
             "indicator_id": "bp_systolic",
-            "last_value": 142.0,
+            "last_value": 145.0,
             "unit": "mmHg",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "warning",
+            "taken_at": "2026-11-14T18:11:41.608898Z",
+            "status": "critical",
             "trend": "rising",
-            "baseline": 118.0,
+            "baseline": 104.0,
             "range": {
               "normal": [
                 90.0,
@@ -2135,78 +2186,76 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 140.0
               ]
             }
-          }
-        ],
-        "recommendations": [
+          },
           {
-            "id": "rec_bp_repeat",
-            "text": "Repite la medición en reposo en 15 min",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "autonomous",
-          "delay_s": 840,
-          "message": "Sigue el protocolo de tensión alta; si persiste, se avisará a tierra.",
-          "protocol_id": "proto_bp_high"
-        }
-      },
-      {
-        "system_id": "neuro_behavioral",
-        "status": "unknown",
-        "indicators": [
-          {
-            "indicator_id": "mood",
-            "last_value": null,
-            "unit": "1-5",
-            "taken_at": null,
-            "status": "unknown",
-            "trend": "insufficient_data",
-            "baseline": null,
+            "indicator_id": "bp_diastolic",
+            "last_value": 69.0,
+            "unit": "mmHg",
+            "taken_at": "2026-11-14T16:41:56.022220Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 72.42857142857143,
             "range": {
               "normal": [
-                3.0,
-                5.0
+                60.0,
+                84.0
+              ],
+              "warning": [
+                85.0,
+                99.0
+              ]
+            }
+          },
+          {
+            "indicator_id": "spo2",
+            "last_value": 98.0,
+            "unit": "%",
+            "taken_at": "2026-11-14T12:25:44.945317Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 98.0,
+            "range": {
+              "normal": [
+                95.0,
+                100.0
+              ],
+              "warning": [
+                91.0,
+                94.0
               ]
             }
           }
         ],
-        "recommendations": [
-          {
-            "id": "rec_checkin",
-            "text": "Haz tu check-in diario",
-            "priority": 2,
-            "intervention_id": null
-          }
-        ],
+        "recommendations": [],
         "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Sin datos recientes: haz el check-in.",
+          "level": 1,
+          "target_role": "crew",
+          "mode": "autonomous",
+          "delay_s": 840,
+          "message": "",
           "protocol_id": null
         }
       },
       {
         "system_id": "musculoskeletal",
-        "status": "normal",
+        "status": "warning",
         "indicators": [
           {
             "indicator_id": "exercise_min",
-            "last_value": 135.0,
+            "last_value": 90.0,
             "unit": "min",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "normal",
-            "trend": "stable",
-            "baseline": null,
+            "taken_at": "2026-11-14T18:11:41.608898Z",
+            "status": "warning",
+            "trend": "falling",
+            "baseline": 217.14285714285714,
             "range": {
               "normal": [
                 120.0,
                 300.0
+              ],
+              "warning": [
+                60.0,
+                119.0
               ]
             }
           }
@@ -2215,9 +2264,9 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "escalation": {
           "level": 0,
           "target_role": "self",
-          "mode": "realtime",
+          "mode": "delayed",
           "delay_s": 840,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       },
@@ -2227,16 +2276,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "indicators": [
           {
             "indicator_id": "temperature",
-            "last_value": 36.7,
+            "last_value": 36.3,
             "unit": "°C",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "taken_at": "2026-11-14T12:49:19.478569Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": null,
+            "baseline": 36.5125,
             "range": {
               "normal": [
                 36.0,
                 37.4
+              ],
+              "warning": [
+                37.5,
+                38.4
               ]
             }
           }
@@ -2245,143 +2298,145 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "escalation": {
           "level": 0,
           "target_role": "self",
-          "mode": "realtime",
+          "mode": "delayed",
           "delay_s": 840,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       },
       {
-        "system_id": "metabolic",
+        "system_id": "neuro_behavioral",
         "status": "critical",
         "indicators": [
           {
-            "indicator_id": "glucose",
-            "last_value": 58.0,
-            "unit": "mg/dL",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "critical",
-            "trend": "falling",
-            "baseline": null,
-            "range": {
-              "normal": [
-                70.0,
-                140.0
-              ]
-            }
-          }
-        ],
-        "recommendations": [
-          {
-            "id": "rec_metabolic",
-            "text": "Toma 15 g de hidratos rápidos y repite en 15 min",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 1,
-          "target_role": "crew",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Avisa al oficial médico de a bordo.",
-          "protocol_id": null
-        }
-      },
-      {
-        "system_id": "eyes",
-        "status": "normal",
-        "indicators": [
-          {
-            "indicator_id": "vision_changes",
-            "last_value": 1.0,
+            "indicator_id": "mood",
+            "last_value": 4.0,
             "unit": "1-5",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "taken_at": "2026-11-14T13:27:01.516209Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": null,
+            "baseline": 4.0,
             "range": {
               "normal": [
-                1.0,
-                1.9
+                3.0,
+                5.0
+              ],
+              "warning": [
+                2.0,
+                2.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "sleep_hours",
+            "last_value": 3.5,
+            "unit": "h",
+            "taken_at": "2026-11-14T18:06:41.601963Z",
+            "status": "critical",
+            "trend": "falling",
+            "baseline": 8.428571428571429,
+            "range": {
+              "normal": [
+                7.0,
+                10.0
+              ],
+              "warning": [
+                5.0,
+                6.9
               ]
             }
           }
         ],
         "recommendations": [],
         "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
+          "level": 1,
+          "target_role": "crew",
+          "mode": "autonomous",
           "delay_s": 840,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       },
       {
         "system_id": "radiation",
-        "status": "warning",
+        "status": "unknown",
         "indicators": [
           {
             "indicator_id": "radiation_dose",
-            "last_value": 310.0,
+            "last_value": null,
             "unit": "mSv",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "warning",
-            "trend": "rising",
+            "taken_at": null,
+            "status": "unknown",
+            "trend": "insufficient_data",
             "baseline": null,
             "range": {
               "normal": [
                 0.0,
                 250.0
+              ],
+              "warning": [
+                251.0,
+                500.0
               ]
             }
           }
         ],
-        "recommendations": [
-          {
-            "id": "rec_radiation",
-            "text": "Reduce el tiempo fuera del refugio hasta nueva revisión",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
+        "recommendations": [],
         "escalation": {
           "level": 0,
           "target_role": "self",
-          "mode": "realtime",
+          "mode": "delayed",
           "delay_s": 840,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       }
     ],
     "behavioral": {
-      "status": "unknown",
-      "details_visible": true
+      "status": "critical",
+      "details_visible": false
     },
     "provisional": false
   },
   "earth": {
     "member_id": 1,
     "env_id": "earth",
-    "generated_at": "2026-11-14T17:16:01.902897Z",
+    "generated_at": "2026-11-14T18:11:41.775878Z",
     "overall_status": "critical",
     "liveness": "active",
-    "last_seen_at": "2026-11-14T10:00:00Z",
+    "last_seen_at": "2026-11-14T18:11:00Z",
     "systems": [
       {
         "system_id": "cardiovascular",
         "status": "warning",
         "indicators": [
           {
+            "indicator_id": "heart_rate",
+            "last_value": 88.0,
+            "unit": "lpm",
+            "taken_at": "2026-11-14T17:44:30.350583Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 80.375,
+            "range": {
+              "normal": [
+                50.0,
+                100.0
+              ],
+              "warning": [
+                101.0,
+                120.0
+              ]
+            }
+          },
+          {
             "indicator_id": "bp_systolic",
-            "last_value": 142.0,
+            "last_value": 145.0,
             "unit": "mmHg",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "taken_at": "2026-11-14T18:11:41.608898Z",
             "status": "warning",
             "trend": "rising",
-            "baseline": 118.0,
+            "baseline": 104.0,
             "range": {
               "normal": [
                 90.0,
@@ -2389,81 +2444,45 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 130.0,
-                140.0
+                159.0
               ]
             }
-          }
-        ],
-        "recommendations": [
+          },
           {
-            "id": "rec_bp_repeat",
-            "text": "Repite la medición en reposo en 15 min",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Sigue el protocolo de tensión alta; si persiste, se avisará a tierra.",
-          "protocol_id": "proto_bp_high"
-        }
-      },
-      {
-        "system_id": "neuro_behavioral",
-        "status": "unknown",
-        "indicators": [
-          {
-            "indicator_id": "mood",
-            "last_value": null,
-            "unit": "1-5",
-            "taken_at": null,
-            "status": "unknown",
-            "trend": "insufficient_data",
-            "baseline": null,
-            "range": {
-              "normal": [
-                3.0,
-                5.0
-              ]
-            }
-          }
-        ],
-        "recommendations": [
-          {
-            "id": "rec_checkin",
-            "text": "Haz tu check-in diario",
-            "priority": 2,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Sin datos recientes: haz el check-in.",
-          "protocol_id": null
-        }
-      },
-      {
-        "system_id": "musculoskeletal",
-        "status": "normal",
-        "indicators": [
-          {
-            "indicator_id": "exercise_min",
-            "last_value": 135.0,
-            "unit": "min",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "indicator_id": "bp_diastolic",
+            "last_value": 69.0,
+            "unit": "mmHg",
+            "taken_at": "2026-11-14T16:41:56.022220Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": null,
+            "baseline": 72.42857142857143,
             "range": {
               "normal": [
-                120.0,
-                300.0
+                60.0,
+                84.0
+              ],
+              "warning": [
+                85.0,
+                99.0
+              ]
+            }
+          },
+          {
+            "indicator_id": "spo2",
+            "last_value": 98.0,
+            "unit": "%",
+            "taken_at": "2026-11-14T12:25:44.945317Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 98.0,
+            "range": {
+              "normal": [
+                95.0,
+                100.0
+              ],
+              "warning": [
+                91.0,
+                94.0
               ]
             }
           }
@@ -2474,7 +2493,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       },
@@ -2484,16 +2503,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "indicators": [
           {
             "indicator_id": "temperature",
-            "last_value": 36.7,
+            "last_value": 36.3,
             "unit": "°C",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "taken_at": "2026-11-14T12:49:19.478569Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": null,
+            "baseline": 36.5125,
             "range": {
               "normal": [
                 36.0,
                 37.4
+              ],
+              "warning": [
+                37.5,
+                38.4
               ]
             }
           }
@@ -2504,141 +2527,109 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       },
       {
-        "system_id": "metabolic",
+        "system_id": "neuro_behavioral",
         "status": "critical",
         "indicators": [
           {
-            "indicator_id": "glucose",
-            "last_value": 58.0,
-            "unit": "mg/dL",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "critical",
-            "trend": "falling",
-            "baseline": null,
+            "indicator_id": "mood",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T13:27:01.516209Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
             "range": {
               "normal": [
-                70.0,
-                140.0
+                3.0,
+                5.0
+              ],
+              "warning": [
+                2.0,
+                2.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "sleep_hours",
+            "last_value": 3.5,
+            "unit": "h",
+            "taken_at": "2026-11-14T18:06:41.601963Z",
+            "status": "critical",
+            "trend": "falling",
+            "baseline": 8.428571428571429,
+            "range": {
+              "normal": [
+                7.0,
+                10.0
+              ],
+              "warning": [
+                5.0,
+                6.9
               ]
             }
           }
         ],
-        "recommendations": [
-          {
-            "id": "rec_metabolic",
-            "text": "Toma 15 g de hidratos rápidos y repite en 15 min",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
+        "recommendations": [],
         "escalation": {
           "level": 1,
           "target_role": "crew",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "Avisa al oficial médico de a bordo.",
-          "protocol_id": null
-        }
-      },
-      {
-        "system_id": "eyes",
-        "status": "normal",
-        "indicators": [
-          {
-            "indicator_id": "vision_changes",
-            "last_value": 1.0,
-            "unit": "1-5",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "normal",
-            "trend": "stable",
-            "baseline": null,
-            "range": {
-              "normal": [
-                1.0,
-                1.9
-              ]
-            }
-          }
-        ],
-        "recommendations": [],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Sin acciones necesarias.",
-          "protocol_id": null
-        }
-      },
-      {
-        "system_id": "radiation",
-        "status": "warning",
-        "indicators": [
-          {
-            "indicator_id": "radiation_dose",
-            "last_value": 310.0,
-            "unit": "mSv",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "warning",
-            "trend": "rising",
-            "baseline": null,
-            "range": {
-              "normal": [
-                0.0,
-                250.0
-              ]
-            }
-          }
-        ],
-        "recommendations": [
-          {
-            "id": "rec_radiation",
-            "text": "Reduce el tiempo fuera del refugio hasta nueva revisión",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       }
     ],
     "behavioral": {
-      "status": "unknown",
-      "details_visible": true
+      "status": "critical",
+      "details_visible": false
     },
     "provisional": false
   },
   "hospital": {
     "member_id": 1,
     "env_id": "hospital",
-    "generated_at": "2026-11-14T17:16:01.907802Z",
+    "generated_at": "2026-11-14T18:11:41.790329Z",
     "overall_status": "critical",
     "liveness": "active",
-    "last_seen_at": "2026-11-14T10:00:00Z",
+    "last_seen_at": "2026-11-14T18:11:00Z",
     "systems": [
       {
         "system_id": "cardiovascular",
         "status": "warning",
         "indicators": [
           {
+            "indicator_id": "heart_rate",
+            "last_value": 88.0,
+            "unit": "lpm",
+            "taken_at": "2026-11-14T17:44:30.350583Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 80.375,
+            "range": {
+              "normal": [
+                50.0,
+                100.0
+              ],
+              "warning": [
+                101.0,
+                120.0
+              ]
+            }
+          },
+          {
             "indicator_id": "bp_systolic",
-            "last_value": 142.0,
+            "last_value": 145.0,
             "unit": "mmHg",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "taken_at": "2026-11-14T18:11:41.608898Z",
             "status": "warning",
             "trend": "rising",
-            "baseline": 118.0,
+            "baseline": 104.0,
             "range": {
               "normal": [
                 90.0,
@@ -2646,81 +2637,45 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 130.0,
-                140.0
+                159.0
               ]
             }
-          }
-        ],
-        "recommendations": [
+          },
           {
-            "id": "rec_bp_repeat",
-            "text": "Repite la medición en reposo en 15 min",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Sigue el protocolo de tensión alta; si persiste, se avisará a tierra.",
-          "protocol_id": "proto_bp_high"
-        }
-      },
-      {
-        "system_id": "neuro_behavioral",
-        "status": "unknown",
-        "indicators": [
-          {
-            "indicator_id": "mood",
-            "last_value": null,
-            "unit": "1-5",
-            "taken_at": null,
-            "status": "unknown",
-            "trend": "insufficient_data",
-            "baseline": null,
-            "range": {
-              "normal": [
-                3.0,
-                5.0
-              ]
-            }
-          }
-        ],
-        "recommendations": [
-          {
-            "id": "rec_checkin",
-            "text": "Haz tu check-in diario",
-            "priority": 2,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Sin datos recientes: haz el check-in.",
-          "protocol_id": null
-        }
-      },
-      {
-        "system_id": "musculoskeletal",
-        "status": "normal",
-        "indicators": [
-          {
-            "indicator_id": "exercise_min",
-            "last_value": 135.0,
-            "unit": "min",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "indicator_id": "bp_diastolic",
+            "last_value": 69.0,
+            "unit": "mmHg",
+            "taken_at": "2026-11-14T16:41:56.022220Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": null,
+            "baseline": 72.42857142857143,
             "range": {
               "normal": [
-                120.0,
-                300.0
+                60.0,
+                84.0
+              ],
+              "warning": [
+                85.0,
+                99.0
+              ]
+            }
+          },
+          {
+            "indicator_id": "spo2",
+            "last_value": 98.0,
+            "unit": "%",
+            "taken_at": "2026-11-14T12:25:44.945317Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 98.0,
+            "range": {
+              "normal": [
+                95.0,
+                100.0
+              ],
+              "warning": [
+                91.0,
+                94.0
               ]
             }
           }
@@ -2731,7 +2686,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       },
@@ -2741,16 +2696,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "indicators": [
           {
             "indicator_id": "temperature",
-            "last_value": 36.7,
+            "last_value": 36.3,
             "unit": "°C",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "taken_at": "2026-11-14T12:49:19.478569Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": null,
+            "baseline": 36.5125,
             "range": {
               "normal": [
                 36.0,
                 37.4
+              ],
+              "warning": [
+                37.5,
+                38.4
               ]
             }
           }
@@ -2761,141 +2720,109 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       },
       {
-        "system_id": "metabolic",
+        "system_id": "neuro_behavioral",
         "status": "critical",
         "indicators": [
           {
-            "indicator_id": "glucose",
-            "last_value": 58.0,
-            "unit": "mg/dL",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "critical",
-            "trend": "falling",
-            "baseline": null,
-            "range": {
-              "normal": [
-                70.0,
-                140.0
-              ]
-            }
-          }
-        ],
-        "recommendations": [
-          {
-            "id": "rec_metabolic",
-            "text": "Toma 15 g de hidratos rápidos y repite en 15 min",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 1,
-          "target_role": "crew",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Avisa al oficial médico de a bordo.",
-          "protocol_id": null
-        }
-      },
-      {
-        "system_id": "eyes",
-        "status": "normal",
-        "indicators": [
-          {
-            "indicator_id": "vision_changes",
-            "last_value": 1.0,
+            "indicator_id": "mood",
+            "last_value": 4.0,
             "unit": "1-5",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "taken_at": "2026-11-14T13:27:01.516209Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": null,
+            "baseline": 4.0,
             "range": {
               "normal": [
-                1.0,
-                1.9
+                3.0,
+                5.0
+              ],
+              "warning": [
+                2.0,
+                2.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "sleep_hours",
+            "last_value": 3.5,
+            "unit": "h",
+            "taken_at": "2026-11-14T18:06:41.601963Z",
+            "status": "critical",
+            "trend": "falling",
+            "baseline": 8.428571428571429,
+            "range": {
+              "normal": [
+                7.0,
+                10.0
+              ],
+              "warning": [
+                5.0,
+                6.9
               ]
             }
           }
         ],
         "recommendations": [],
         "escalation": {
-          "level": 0,
-          "target_role": "self",
+          "level": 1,
+          "target_role": "nurse",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "Sin acciones necesarias.",
-          "protocol_id": null
-        }
-      },
-      {
-        "system_id": "radiation",
-        "status": "warning",
-        "indicators": [
-          {
-            "indicator_id": "radiation_dose",
-            "last_value": 310.0,
-            "unit": "mSv",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "warning",
-            "trend": "rising",
-            "baseline": null,
-            "range": {
-              "normal": [
-                0.0,
-                250.0
-              ]
-            }
-          }
-        ],
-        "recommendations": [
-          {
-            "id": "rec_radiation",
-            "text": "Reduce el tiempo fuera del refugio hasta nueva revisión",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       }
     ],
     "behavioral": {
-      "status": "unknown",
-      "details_visible": true
+      "status": "critical",
+      "details_visible": false
     },
     "provisional": false
   },
   "geriatric": {
     "member_id": 1,
     "env_id": "geriatric",
-    "generated_at": "2026-11-14T17:16:01.912550Z",
+    "generated_at": "2026-11-14T18:11:41.804094Z",
     "overall_status": "critical",
     "liveness": "active",
-    "last_seen_at": "2026-11-14T10:00:00Z",
+    "last_seen_at": "2026-11-14T18:11:00Z",
     "systems": [
       {
         "system_id": "cardiovascular",
         "status": "warning",
         "indicators": [
           {
+            "indicator_id": "heart_rate",
+            "last_value": 88.0,
+            "unit": "lpm",
+            "taken_at": "2026-11-14T17:44:30.350583Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 80.375,
+            "range": {
+              "normal": [
+                50.0,
+                100.0
+              ],
+              "warning": [
+                101.0,
+                120.0
+              ]
+            }
+          },
+          {
             "indicator_id": "bp_systolic",
-            "last_value": 142.0,
+            "last_value": 145.0,
             "unit": "mmHg",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "taken_at": "2026-11-14T18:11:41.608898Z",
             "status": "warning",
             "trend": "rising",
-            "baseline": 118.0,
+            "baseline": 104.0,
             "range": {
               "normal": [
                 90.0,
@@ -2903,81 +2830,45 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 130.0,
-                140.0
+                159.0
               ]
             }
-          }
-        ],
-        "recommendations": [
+          },
           {
-            "id": "rec_bp_repeat",
-            "text": "Repite la medición en reposo en 15 min",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Sigue el protocolo de tensión alta; si persiste, se avisará a tierra.",
-          "protocol_id": "proto_bp_high"
-        }
-      },
-      {
-        "system_id": "neuro_behavioral",
-        "status": "unknown",
-        "indicators": [
-          {
-            "indicator_id": "mood",
-            "last_value": null,
-            "unit": "1-5",
-            "taken_at": null,
-            "status": "unknown",
-            "trend": "insufficient_data",
-            "baseline": null,
-            "range": {
-              "normal": [
-                3.0,
-                5.0
-              ]
-            }
-          }
-        ],
-        "recommendations": [
-          {
-            "id": "rec_checkin",
-            "text": "Haz tu check-in diario",
-            "priority": 2,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 0,
-          "target_role": "self",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Sin datos recientes: haz el check-in.",
-          "protocol_id": null
-        }
-      },
-      {
-        "system_id": "musculoskeletal",
-        "status": "normal",
-        "indicators": [
-          {
-            "indicator_id": "exercise_min",
-            "last_value": 135.0,
-            "unit": "min",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "indicator_id": "bp_diastolic",
+            "last_value": 69.0,
+            "unit": "mmHg",
+            "taken_at": "2026-11-14T16:41:56.022220Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": null,
+            "baseline": 72.42857142857143,
             "range": {
               "normal": [
-                120.0,
-                300.0
+                60.0,
+                84.0
+              ],
+              "warning": [
+                85.0,
+                99.0
+              ]
+            }
+          },
+          {
+            "indicator_id": "spo2",
+            "last_value": 98.0,
+            "unit": "%",
+            "taken_at": "2026-11-14T12:25:44.945317Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 98.0,
+            "range": {
+              "normal": [
+                95.0,
+                100.0
+              ],
+              "warning": [
+                91.0,
+                94.0
               ]
             }
           }
@@ -2988,7 +2879,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       },
@@ -2998,16 +2889,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "indicators": [
           {
             "indicator_id": "temperature",
-            "last_value": 36.7,
+            "last_value": 36.3,
             "unit": "°C",
-            "taken_at": "2026-11-14T10:00:00Z",
+            "taken_at": "2026-11-14T12:49:19.478569Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": null,
+            "baseline": 36.5125,
             "range": {
               "normal": [
                 36.0,
                 37.4
+              ],
+              "warning": [
+                37.5,
+                38.4
               ]
             }
           }
@@ -3018,63 +2913,45 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       },
       {
         "system_id": "metabolic",
-        "status": "critical",
+        "status": "unknown",
         "indicators": [
           {
-            "indicator_id": "glucose",
-            "last_value": 58.0,
-            "unit": "mg/dL",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "critical",
-            "trend": "falling",
+            "indicator_id": "hydration_ml",
+            "last_value": null,
+            "unit": "ml",
+            "taken_at": null,
+            "status": "unknown",
+            "trend": "insufficient_data",
             "baseline": null,
             "range": {
               "normal": [
-                70.0,
-                140.0
+                1500.0,
+                4000.0
+              ],
+              "warning": [
+                801.0,
+                1499.0
               ]
             }
-          }
-        ],
-        "recommendations": [
+          },
           {
-            "id": "rec_metabolic",
-            "text": "Toma 15 g de hidratos rápidos y repite en 15 min",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
-        "escalation": {
-          "level": 1,
-          "target_role": "crew",
-          "mode": "realtime",
-          "delay_s": 0,
-          "message": "Avisa al oficial médico de a bordo.",
-          "protocol_id": null
-        }
-      },
-      {
-        "system_id": "eyes",
-        "status": "normal",
-        "indicators": [
-          {
-            "indicator_id": "vision_changes",
-            "last_value": 1.0,
-            "unit": "1-5",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "normal",
-            "trend": "stable",
+            "indicator_id": "weight_kg",
+            "last_value": null,
+            "unit": "kg",
+            "taken_at": null,
+            "status": "unknown",
+            "trend": "insufficient_data",
             "baseline": null,
             "range": {
               "normal": [
-                1.0,
-                1.9
+                45.0,
+                110.0
               ]
             }
           }
@@ -3085,51 +2962,67 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       },
       {
-        "system_id": "radiation",
-        "status": "warning",
+        "system_id": "neuro_behavioral",
+        "status": "critical",
         "indicators": [
           {
-            "indicator_id": "radiation_dose",
-            "last_value": 310.0,
-            "unit": "mSv",
-            "taken_at": "2026-11-14T10:00:00Z",
-            "status": "warning",
-            "trend": "rising",
-            "baseline": null,
+            "indicator_id": "mood",
+            "last_value": 4.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T13:27:01.516209Z",
+            "status": "normal",
+            "trend": "stable",
+            "baseline": 4.0,
             "range": {
               "normal": [
-                0.0,
-                250.0
+                3.0,
+                5.0
+              ],
+              "warning": [
+                2.0,
+                2.9
+              ]
+            }
+          },
+          {
+            "indicator_id": "sleep_hours",
+            "last_value": 3.5,
+            "unit": "h",
+            "taken_at": "2026-11-14T18:06:41.601963Z",
+            "status": "critical",
+            "trend": "falling",
+            "baseline": 8.428571428571429,
+            "range": {
+              "normal": [
+                7.0,
+                10.0
+              ],
+              "warning": [
+                5.0,
+                6.9
               ]
             }
           }
         ],
-        "recommendations": [
-          {
-            "id": "rec_radiation",
-            "text": "Reduce el tiempo fuera del refugio hasta nueva revisión",
-            "priority": 1,
-            "intervention_id": null
-          }
-        ],
+        "recommendations": [],
         "escalation": {
-          "level": 0,
-          "target_role": "self",
+          "level": 1,
+          "target_role": "caregiver",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "Sin acciones necesarias.",
+          "message": "",
           "protocol_id": null
         }
       }
     ],
     "behavioral": {
-      "status": "unknown",
-      "details_visible": true
+      "status": "critical",
+      "details_visible": false
     },
     "provisional": false
   }
@@ -3140,2597 +3033,2553 @@ export const measurements: Schema<'Measurement'>[] = [
     "id": "008b36e8-6b98-53e1-980f-65cf2c288f03",
     "indicator_id": "spo2",
     "value": 99.0,
-    "taken_at": "2026-10-16T11:24:50.655403Z",
+    "taken_at": "2026-10-16T12:19:50.655403Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-16T11:25:30.655403Z"
+    "received_at": "2026-10-16T12:20:30.655403Z"
   },
   {
     "id": "d3356888-4cda-5ab4-b743-a351ee0ab2e4",
     "indicator_id": "exercise_min",
     "value": 225.0,
-    "taken_at": "2026-10-16T11:57:00.969069Z",
+    "taken_at": "2026-10-16T12:52:00.969069Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-16T11:57:49.969069Z"
+    "received_at": "2026-10-16T12:52:49.969069Z"
   },
   {
     "id": "2ee3ccbc-bd07-5317-97d9-b93bd5e79350",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-10-16T12:34:09.683152Z",
+    "taken_at": "2026-10-16T13:29:09.683152Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-16T12:34:18.683152Z"
+    "received_at": "2026-10-16T13:29:18.683152Z"
   },
   {
     "id": "e3544847-c19e-53ce-a0fd-f0175bf21a8d",
     "indicator_id": "temperature",
     "value": 36.5,
-    "taken_at": "2026-10-16T12:37:15.575321Z",
+    "taken_at": "2026-10-16T13:32:15.575321Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-16T12:37:58.575321Z"
+    "received_at": "2026-10-16T13:32:58.575321Z"
   },
   {
     "id": "6a9b584a-6e6e-5073-810b-6defa1344512",
     "indicator_id": "bp_systolic",
     "value": 104.0,
-    "taken_at": "2026-10-16T14:33:00.363064Z",
+    "taken_at": "2026-10-16T15:28:00.363064Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-16T14:34:14.363064Z"
+    "received_at": "2026-10-16T15:29:14.363064Z"
   },
   {
     "id": "129d71ba-2949-5744-b9cc-3e0282adffc7",
     "indicator_id": "sleep_hours",
     "value": 8.0,
-    "taken_at": "2026-10-16T14:55:03.242063Z",
+    "taken_at": "2026-10-16T15:50:03.242063Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-16T14:56:14.242063Z"
+    "received_at": "2026-10-16T15:51:14.242063Z"
   },
   {
     "id": "fa0eb64a-9d13-5a21-b0ad-11761ddf44ad",
     "indicator_id": "bp_diastolic",
     "value": 74.0,
-    "taken_at": "2026-10-16T16:27:11.275192Z",
+    "taken_at": "2026-10-16T17:22:11.275192Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-16T16:27:18.275192Z"
+    "received_at": "2026-10-16T17:22:18.275192Z"
   },
   {
     "id": "ba27f517-3425-5ab3-9abc-586ec3596c8f",
     "indicator_id": "heart_rate",
     "value": 80.0,
-    "taken_at": "2026-10-16T16:50:14.913705Z",
+    "taken_at": "2026-10-16T17:45:14.913705Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-16T16:51:25.913705Z"
+    "received_at": "2026-10-16T17:46:25.913705Z"
   },
   {
     "id": "066aec54-c283-54f2-8f7a-6ef927168a5a",
     "indicator_id": "exercise_min",
     "value": 200.0,
-    "taken_at": "2026-10-17T11:35:04.436756Z",
+    "taken_at": "2026-10-17T12:30:04.436756Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-17T11:36:23.436756Z"
+    "received_at": "2026-10-17T12:31:23.436756Z"
   },
   {
     "id": "4ce35266-176a-5000-9952-b262b7d45263",
     "indicator_id": "temperature",
     "value": 36.6,
-    "taken_at": "2026-10-17T11:51:17.294913Z",
+    "taken_at": "2026-10-17T12:46:17.294913Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-17T11:52:32.294913Z"
+    "received_at": "2026-10-17T12:47:32.294913Z"
   },
   {
     "id": "4a90b68d-d52e-59d0-a7d5-5ad78b3595fd",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-10-17T12:17:46.950058Z",
+    "taken_at": "2026-10-17T13:12:46.950058Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-17T12:18:35.950058Z"
+    "received_at": "2026-10-17T13:13:35.950058Z"
   },
   {
     "id": "212434b4-79b8-5e28-b439-308c60fb73a8",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-10-17T13:08:36.227455Z",
+    "taken_at": "2026-10-17T14:03:36.227455Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-17T13:09:40.227455Z"
+    "received_at": "2026-10-17T14:04:40.227455Z"
   },
   {
     "id": "f7e3e624-5998-5dfd-a27f-d0570405831f",
     "indicator_id": "bp_systolic",
     "value": 106.0,
-    "taken_at": "2026-10-17T14:22:04.503855Z",
+    "taken_at": "2026-10-17T15:17:04.503855Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-17T14:22:42.503855Z"
+    "received_at": "2026-10-17T15:17:42.503855Z"
   },
   {
     "id": "500cadaf-4338-518a-8887-3a831f36b00a",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-10-17T14:59:41.838044Z",
+    "taken_at": "2026-10-17T15:54:41.838044Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-17T15:00:47.838044Z"
+    "received_at": "2026-10-17T15:55:47.838044Z"
   },
   {
     "id": "1c214c38-7b87-54bb-a014-8b4ae1c99bda",
     "indicator_id": "bp_diastolic",
     "value": 72.0,
-    "taken_at": "2026-10-17T16:08:52.298618Z",
+    "taken_at": "2026-10-17T17:03:52.298618Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-17T16:09:51.298618Z"
+    "received_at": "2026-10-17T17:04:51.298618Z"
   },
   {
     "id": "01d16998-ee56-58ec-979d-7bd29fe2309b",
     "indicator_id": "heart_rate",
     "value": 82.0,
-    "taken_at": "2026-10-17T16:31:56.353943Z",
+    "taken_at": "2026-10-17T17:26:56.353943Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-17T16:32:07.353943Z"
-  },
-  {
-    "id": "bb38e0ce-c310-577d-bad6-0fa4221a669f",
-    "indicator_id": "radiation_dose",
-    "value": 51.0,
-    "taken_at": "2026-10-17T16:36:22.319577Z",
-    "source": "manual",
-    "note": null,
-    "member_id": 1,
-    "unit": "mSv",
-    "received_at": "2026-10-17T16:37:52.319577Z"
+    "received_at": "2026-10-17T17:27:07.353943Z"
   },
   {
     "id": "5f16bacf-6567-5d17-b115-f360d799f3d6",
     "indicator_id": "exercise_min",
     "value": 205.0,
-    "taken_at": "2026-10-18T11:46:44.718004Z",
+    "taken_at": "2026-10-18T12:41:44.718004Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-18T11:48:12.718004Z"
+    "received_at": "2026-10-18T12:43:12.718004Z"
   },
   {
     "id": "5ae46685-c747-5b69-bce8-e112743ed19a",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-10-18T12:05:45.813754Z",
+    "taken_at": "2026-10-18T13:00:45.813754Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-18T12:06:25.813754Z"
+    "received_at": "2026-10-18T13:01:25.813754Z"
   },
   {
     "id": "7d9d8965-1525-533e-9c41-b4adb1fdb7e9",
     "indicator_id": "temperature",
     "value": 36.5,
-    "taken_at": "2026-10-18T12:37:26.397192Z",
+    "taken_at": "2026-10-18T13:32:26.397192Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-18T12:37:58.397192Z"
+    "received_at": "2026-10-18T13:32:58.397192Z"
   },
   {
     "id": "e095c3c1-bea2-510d-a2eb-05996e87e3e7",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-10-18T12:47:33.101068Z",
+    "taken_at": "2026-10-18T13:42:33.101068Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-18T12:48:19.101068Z"
+    "received_at": "2026-10-18T13:43:19.101068Z"
   },
   {
     "id": "68071ee7-30e7-5060-92bd-70170990933e",
     "indicator_id": "bp_systolic",
     "value": 99.0,
-    "taken_at": "2026-10-18T14:52:07.971942Z",
+    "taken_at": "2026-10-18T15:47:07.971942Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-18T14:52:29.971942Z"
+    "received_at": "2026-10-18T15:47:29.971942Z"
   },
   {
     "id": "3e21a661-abf3-5453-af0d-396f103a9ac1",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-10-18T14:59:46.253124Z",
+    "taken_at": "2026-10-18T15:54:46.253124Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-18T15:00:28.253124Z"
+    "received_at": "2026-10-18T15:55:28.253124Z"
   },
   {
     "id": "5979ae2e-6e95-5ce5-8999-7f78adf873fc",
     "indicator_id": "bp_diastolic",
     "value": 77.0,
-    "taken_at": "2026-10-18T16:23:51.883708Z",
+    "taken_at": "2026-10-18T17:18:51.883708Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-18T16:24:06.883708Z"
+    "received_at": "2026-10-18T17:19:06.883708Z"
   },
   {
     "id": "ddba1f30-c594-576f-b67d-cd6b3e50a951",
     "indicator_id": "heart_rate",
     "value": 84.0,
-    "taken_at": "2026-10-18T17:08:59.522835Z",
+    "taken_at": "2026-10-18T18:03:59.522835Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-18T17:09:40.522835Z"
+    "received_at": "2026-10-18T18:04:40.522835Z"
   },
   {
     "id": "0f963842-cdf5-52e2-9aab-8d85e0260f97",
     "indicator_id": "spo2",
     "value": 99.0,
-    "taken_at": "2026-10-19T11:37:04.207716Z",
+    "taken_at": "2026-10-19T12:32:04.207716Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-19T11:38:08.207716Z"
+    "received_at": "2026-10-19T12:33:08.207716Z"
   },
   {
     "id": "642d5640-eb87-5fce-aa92-4ecb510559d3",
     "indicator_id": "temperature",
     "value": 36.4,
-    "taken_at": "2026-10-19T11:55:03.265614Z",
+    "taken_at": "2026-10-19T12:50:03.265614Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-19T11:56:16.265614Z"
+    "received_at": "2026-10-19T12:51:16.265614Z"
   },
   {
     "id": "9d10e394-1afe-5909-883a-4aacad1cb613",
     "indicator_id": "exercise_min",
     "value": 240.0,
-    "taken_at": "2026-10-19T12:11:15.001482Z",
+    "taken_at": "2026-10-19T13:06:15.001482Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-19T12:11:46.001482Z"
+    "received_at": "2026-10-19T13:06:46.001482Z"
   },
   {
     "id": "d7415868-1c84-58a6-acea-5c661d61d3cb",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-10-19T12:33:06.923221Z",
+    "taken_at": "2026-10-19T13:28:06.923221Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-19T12:34:11.923221Z"
+    "received_at": "2026-10-19T13:29:11.923221Z"
   },
   {
     "id": "bd8328af-b6a2-5e24-ba75-31370ecbac1b",
     "indicator_id": "sleep_hours",
     "value": 9.0,
-    "taken_at": "2026-10-19T14:39:54.165043Z",
+    "taken_at": "2026-10-19T15:34:54.165043Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-19T14:41:00.165043Z"
+    "received_at": "2026-10-19T15:36:00.165043Z"
   },
   {
     "id": "cac017b8-b3ab-5990-878f-177b3d48cf68",
     "indicator_id": "bp_systolic",
     "value": 106.0,
-    "taken_at": "2026-10-19T14:55:21.542679Z",
+    "taken_at": "2026-10-19T15:50:21.542679Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-19T14:56:18.542679Z"
+    "received_at": "2026-10-19T15:51:18.542679Z"
   },
   {
     "id": "a2639039-4102-5684-a11e-cff8c21fad1d",
     "indicator_id": "bp_diastolic",
     "value": 72.0,
-    "taken_at": "2026-10-19T16:10:59.854120Z",
+    "taken_at": "2026-10-19T17:05:59.854120Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-19T16:11:42.854120Z"
+    "received_at": "2026-10-19T17:06:42.854120Z"
   },
   {
     "id": "f7f1da4a-321d-5c02-b923-ee723964228a",
     "indicator_id": "heart_rate",
     "value": 75.0,
-    "taken_at": "2026-10-19T16:21:21.277196Z",
+    "taken_at": "2026-10-19T17:16:21.277196Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-19T16:22:32.277196Z"
+    "received_at": "2026-10-19T17:17:32.277196Z"
   },
   {
     "id": "49be7461-3d45-56a7-9099-37a204acc12e",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-10-20T11:27:27.073984Z",
+    "taken_at": "2026-10-20T12:22:27.073984Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-20T11:27:45.073984Z"
+    "received_at": "2026-10-20T12:22:45.073984Z"
   },
   {
     "id": "f2875ab7-852d-5263-b7b4-ebb94019e3b2",
     "indicator_id": "exercise_min",
     "value": 210.0,
-    "taken_at": "2026-10-20T11:35:52.237368Z",
+    "taken_at": "2026-10-20T12:30:52.237368Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-20T11:36:16.237368Z"
+    "received_at": "2026-10-20T12:31:16.237368Z"
   },
   {
     "id": "21fff843-59fe-517c-aa36-f15c756bc44f",
     "indicator_id": "temperature",
     "value": 36.5,
-    "taken_at": "2026-10-20T12:09:29.529828Z",
+    "taken_at": "2026-10-20T13:04:29.529828Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-20T12:10:58.529828Z"
+    "received_at": "2026-10-20T13:05:58.529828Z"
   },
   {
     "id": "28e62a70-00f3-54fc-99ef-739257d1b051",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-10-20T13:02:53.147885Z",
+    "taken_at": "2026-10-20T13:57:53.147885Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-20T13:03:13.147885Z"
+    "received_at": "2026-10-20T13:58:13.147885Z"
   },
   {
     "id": "83a81113-f3d7-57c7-8cdc-c32c7437bdfe",
     "indicator_id": "bp_systolic",
     "value": 106.0,
-    "taken_at": "2026-10-20T14:09:47.644250Z",
+    "taken_at": "2026-10-20T15:04:47.644250Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-20T14:10:03.644250Z"
+    "received_at": "2026-10-20T15:05:03.644250Z"
   },
   {
     "id": "9d0ece06-c1f3-5d13-95ce-bdfb015232ca",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-10-20T15:05:29.210820Z",
+    "taken_at": "2026-10-20T16:00:29.210820Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-20T15:06:15.210820Z"
+    "received_at": "2026-10-20T16:01:15.210820Z"
   },
   {
     "id": "d6b719c6-c335-5814-b5d0-12ee11fa4618",
     "indicator_id": "bp_diastolic",
     "value": 71.0,
-    "taken_at": "2026-10-20T15:44:06.808977Z",
+    "taken_at": "2026-10-20T16:39:06.808977Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-20T15:45:07.808977Z"
+    "received_at": "2026-10-20T16:40:07.808977Z"
   },
   {
     "id": "fec866b3-85a1-50d1-b1a6-3af1575819c5",
     "indicator_id": "heart_rate",
     "value": 77.0,
-    "taken_at": "2026-10-20T16:28:12.634185Z",
+    "taken_at": "2026-10-20T17:23:12.634185Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-20T16:29:05.634185Z"
+    "received_at": "2026-10-20T17:24:05.634185Z"
   },
   {
     "id": "23966b43-34ec-5bcb-a800-ca5c0a5da4f2",
     "indicator_id": "spo2",
     "value": 97.0,
-    "taken_at": "2026-10-21T11:34:02.974361Z",
+    "taken_at": "2026-10-21T12:29:02.974361Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-21T11:34:14.974361Z"
+    "received_at": "2026-10-21T12:29:14.974361Z"
   },
   {
     "id": "2c193682-1b0a-5e57-8462-abf66ad9285f",
     "indicator_id": "exercise_min",
     "value": 220.0,
-    "taken_at": "2026-10-21T12:17:02.052753Z",
+    "taken_at": "2026-10-21T13:12:02.052753Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-21T12:18:15.052753Z"
+    "received_at": "2026-10-21T13:13:15.052753Z"
   },
   {
     "id": "8831039f-0bf6-5be3-90a2-1c6c4a6f3a04",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-10-21T12:30:20.729754Z",
+    "taken_at": "2026-10-21T13:25:20.729754Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-21T12:30:41.729754Z"
+    "received_at": "2026-10-21T13:25:41.729754Z"
   },
   {
     "id": "b17d6e67-ccf7-56aa-b901-a3ef26d9d3d8",
     "indicator_id": "temperature",
     "value": 36.5,
-    "taken_at": "2026-10-21T12:35:20.291061Z",
+    "taken_at": "2026-10-21T13:30:20.291061Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-21T12:35:32.291061Z"
+    "received_at": "2026-10-21T13:30:32.291061Z"
   },
   {
     "id": "cb95e37e-9b4f-5060-9ab3-bf004ed52415",
     "indicator_id": "bp_systolic",
     "value": 103.0,
-    "taken_at": "2026-10-21T14:28:12.498142Z",
+    "taken_at": "2026-10-21T15:23:12.498142Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-21T14:28:43.498142Z"
+    "received_at": "2026-10-21T15:23:43.498142Z"
   },
   {
     "id": "8216e2ea-b06b-51b1-a133-a3511fb29fa3",
     "indicator_id": "sleep_hours",
     "value": 8.0,
-    "taken_at": "2026-10-21T14:59:52.973335Z",
+    "taken_at": "2026-10-21T15:54:52.973335Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-21T15:01:06.973335Z"
+    "received_at": "2026-10-21T15:56:06.973335Z"
   },
   {
     "id": "6cf09371-718d-5573-ac8f-ab217bb46cdc",
     "indicator_id": "bp_diastolic",
     "value": 73.0,
-    "taken_at": "2026-10-21T15:45:29.011009Z",
+    "taken_at": "2026-10-21T16:40:29.011009Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-21T15:45:50.011009Z"
+    "received_at": "2026-10-21T16:40:50.011009Z"
   },
   {
     "id": "8d6784a6-e220-5b31-85ae-8c0434e82952",
     "indicator_id": "heart_rate",
     "value": 83.0,
-    "taken_at": "2026-10-21T16:32:36.523422Z",
+    "taken_at": "2026-10-21T17:27:36.523422Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-21T16:32:52.523422Z"
+    "received_at": "2026-10-21T17:27:52.523422Z"
   },
   {
     "id": "06bc701b-e561-5ce9-bebb-757788e84df0",
     "indicator_id": "exercise_min",
     "value": 220.0,
-    "taken_at": "2026-10-22T11:36:31.792167Z",
+    "taken_at": "2026-10-22T12:31:31.792167Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-22T11:37:29.792167Z"
+    "received_at": "2026-10-22T12:32:29.792167Z"
   },
   {
     "id": "a96cba76-e4b6-5fc3-9938-89ed0dcb9a21",
     "indicator_id": "spo2",
     "value": 97.0,
-    "taken_at": "2026-10-22T11:47:23.014642Z",
+    "taken_at": "2026-10-22T12:42:23.014642Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-22T11:48:13.014642Z"
+    "received_at": "2026-10-22T12:43:13.014642Z"
   },
   {
     "id": "08f5c676-8c4e-5b9f-b44d-38987b381fc9",
     "indicator_id": "temperature",
     "value": 36.7,
-    "taken_at": "2026-10-22T12:29:06.525514Z",
+    "taken_at": "2026-10-22T13:24:06.525514Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-22T12:29:09.525514Z"
+    "received_at": "2026-10-22T13:24:09.525514Z"
   },
   {
     "id": "51f19993-f820-5e80-b359-3c1030f11ffd",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-10-22T13:19:45.468634Z",
+    "taken_at": "2026-10-22T14:14:45.468634Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-22T13:21:10.468634Z"
+    "received_at": "2026-10-22T14:16:10.468634Z"
   },
   {
     "id": "19fd364b-48b3-54bd-8091-280ef75a7d13",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-10-22T14:36:17.275756Z",
+    "taken_at": "2026-10-22T15:31:17.275756Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-22T14:37:42.275756Z"
+    "received_at": "2026-10-22T15:32:42.275756Z"
   },
   {
     "id": "b0d158f3-23c3-5a17-a3ce-f9567e44b98d",
     "indicator_id": "bp_systolic",
     "value": 98.0,
-    "taken_at": "2026-10-22T14:48:26.366259Z",
+    "taken_at": "2026-10-22T15:43:26.366259Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-22T14:48:34.366259Z"
+    "received_at": "2026-10-22T15:43:34.366259Z"
   },
   {
     "id": "f25e3642-2617-5406-bd31-2397f088d186",
     "indicator_id": "bp_diastolic",
     "value": 68.0,
-    "taken_at": "2026-10-22T15:32:26.141411Z",
+    "taken_at": "2026-10-22T16:27:26.141411Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-22T15:33:31.141411Z"
+    "received_at": "2026-10-22T16:28:31.141411Z"
   },
   {
     "id": "7bf983c3-107c-51c9-9a64-4502c4d77b85",
     "indicator_id": "heart_rate",
     "value": 75.0,
-    "taken_at": "2026-10-22T17:03:55.938861Z",
+    "taken_at": "2026-10-22T17:58:55.938861Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-22T17:05:21.938861Z"
+    "received_at": "2026-10-22T18:00:21.938861Z"
   },
   {
     "id": "298441d5-7f07-5c38-8024-4a8f91926968",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-10-23T12:02:53.187394Z",
+    "taken_at": "2026-10-23T12:57:53.187394Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-23T12:03:47.187394Z"
+    "received_at": "2026-10-23T12:58:47.187394Z"
   },
   {
     "id": "dd6af69c-4858-59fa-aa85-883d9dd2d4b1",
     "indicator_id": "exercise_min",
     "value": 230.0,
-    "taken_at": "2026-10-23T12:24:09.748553Z",
+    "taken_at": "2026-10-23T13:19:09.748553Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-23T12:24:54.748553Z"
+    "received_at": "2026-10-23T13:19:54.748553Z"
   },
   {
     "id": "f42f95a8-93fa-5a7d-b3d0-0cbe9aaf83fa",
     "indicator_id": "temperature",
     "value": 36.4,
-    "taken_at": "2026-10-23T12:35:39.647300Z",
+    "taken_at": "2026-10-23T13:30:39.647300Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-23T12:36:19.647300Z"
+    "received_at": "2026-10-23T13:31:19.647300Z"
   },
   {
     "id": "c2f76fa8-9038-5da4-930d-771e17bab103",
     "indicator_id": "mood",
     "value": 3.0,
-    "taken_at": "2026-10-23T13:18:26.639840Z",
+    "taken_at": "2026-10-23T14:13:26.639840Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-23T13:19:51.639840Z"
+    "received_at": "2026-10-23T14:14:51.639840Z"
   },
   {
     "id": "93f37a48-4168-5131-b454-4ea9250e30bc",
     "indicator_id": "bp_systolic",
     "value": 110.0,
-    "taken_at": "2026-10-23T14:32:03.122988Z",
+    "taken_at": "2026-10-23T15:27:03.122988Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-23T14:32:25.122988Z"
+    "received_at": "2026-10-23T15:27:25.122988Z"
   },
   {
     "id": "4486006f-beb7-5eb0-8f1a-b9a93d931029",
     "indicator_id": "sleep_hours",
     "value": 9.0,
-    "taken_at": "2026-10-23T15:00:06.162725Z",
+    "taken_at": "2026-10-23T15:55:06.162725Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-23T15:01:24.162725Z"
+    "received_at": "2026-10-23T15:56:24.162725Z"
   },
   {
     "id": "5b84ade9-541b-5b62-a174-0b56e2bb3206",
     "indicator_id": "heart_rate",
     "value": 87.0,
-    "taken_at": "2026-10-23T16:16:21.428323Z",
+    "taken_at": "2026-10-23T17:11:21.428323Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-23T16:17:11.428323Z"
+    "received_at": "2026-10-23T17:12:11.428323Z"
   },
   {
     "id": "b16301a9-5204-5a64-9959-8dc7f1bb76c3",
     "indicator_id": "bp_diastolic",
     "value": 71.0,
-    "taken_at": "2026-10-23T16:29:53.264329Z",
+    "taken_at": "2026-10-23T17:24:53.264329Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-23T16:30:35.264329Z"
+    "received_at": "2026-10-23T17:25:35.264329Z"
   },
   {
     "id": "c7761f25-4902-5598-83a3-a9c4855c8de9",
     "indicator_id": "exercise_min",
     "value": 230.0,
-    "taken_at": "2026-10-24T12:17:29.702718Z",
+    "taken_at": "2026-10-24T13:12:29.702718Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-24T12:18:28.702718Z"
+    "received_at": "2026-10-24T13:13:28.702718Z"
   },
   {
     "id": "3d940f77-7ae9-58ef-9c91-a498e929f9a8",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-10-24T12:18:10.707661Z",
+    "taken_at": "2026-10-24T13:13:10.707661Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-24T12:19:27.707661Z"
+    "received_at": "2026-10-24T13:14:27.707661Z"
   },
   {
     "id": "3ee3ff6d-f132-5eae-af21-00d2603be651",
     "indicator_id": "temperature",
     "value": 36.4,
-    "taken_at": "2026-10-24T12:22:37.286800Z",
+    "taken_at": "2026-10-24T13:17:37.286800Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-24T12:22:40.286800Z"
+    "received_at": "2026-10-24T13:17:40.286800Z"
   },
   {
     "id": "e1f0b6d9-fc39-5b45-89ef-939c3795680a",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-10-24T13:23:12.975815Z",
+    "taken_at": "2026-10-24T14:18:12.975815Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-24T13:24:36.975815Z"
+    "received_at": "2026-10-24T14:19:36.975815Z"
   },
   {
     "id": "067d9ddf-5949-5ded-90ff-c0ec39913f90",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-10-24T14:32:32.657421Z",
+    "taken_at": "2026-10-24T15:27:32.657421Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-24T14:32:37.657421Z"
+    "received_at": "2026-10-24T15:27:37.657421Z"
   },
   {
     "id": "abd59d24-616b-5dad-96f4-a5fbfbc3c506",
     "indicator_id": "bp_systolic",
     "value": 104.0,
-    "taken_at": "2026-10-24T14:57:16.742823Z",
+    "taken_at": "2026-10-24T15:52:16.742823Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-24T14:57:35.742823Z"
+    "received_at": "2026-10-24T15:52:35.742823Z"
   },
   {
     "id": "7a654e0d-c125-5910-ba82-edfaadf431ab",
     "indicator_id": "bp_diastolic",
     "value": 69.0,
-    "taken_at": "2026-10-24T15:41:59.288638Z",
+    "taken_at": "2026-10-24T16:36:59.288638Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-24T15:42:12.288638Z"
-  },
-  {
-    "id": "1661cece-5e22-5604-9c07-6901654564d0",
-    "indicator_id": "radiation_dose",
-    "value": 56.0,
-    "taken_at": "2026-10-24T16:22:19.402279Z",
-    "source": "manual",
-    "note": null,
-    "member_id": 1,
-    "unit": "mSv",
-    "received_at": "2026-10-24T16:22:42.402279Z"
+    "received_at": "2026-10-24T16:37:12.288638Z"
   },
   {
     "id": "0bcf8c47-4afd-5a0c-be46-6359952604eb",
     "indicator_id": "heart_rate",
     "value": 88.0,
-    "taken_at": "2026-10-24T16:33:16.415767Z",
+    "taken_at": "2026-10-24T17:28:16.415767Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-24T16:33:26.415767Z"
+    "received_at": "2026-10-24T17:28:26.415767Z"
   },
   {
     "id": "8586e138-fbab-552e-9bf8-f0ae5f4bdffe",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-10-25T11:56:12.745080Z",
+    "taken_at": "2026-10-25T12:51:12.745080Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-25T11:57:30.745080Z"
+    "received_at": "2026-10-25T12:52:30.745080Z"
   },
   {
     "id": "b259bbee-5779-5e61-bf04-5e075b6eb024",
     "indicator_id": "temperature",
     "value": 36.3,
-    "taken_at": "2026-10-25T12:12:09.296390Z",
+    "taken_at": "2026-10-25T13:07:09.296390Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-25T12:13:15.296390Z"
+    "received_at": "2026-10-25T13:08:15.296390Z"
   },
   {
     "id": "2fbf5b6b-3b6d-5bb8-8a0c-1bfac3f0dd84",
     "indicator_id": "exercise_min",
     "value": 225.0,
-    "taken_at": "2026-10-25T12:15:07.944282Z",
+    "taken_at": "2026-10-25T13:10:07.944282Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-25T12:15:42.944282Z"
+    "received_at": "2026-10-25T13:10:42.944282Z"
   },
   {
     "id": "fbc6b214-1300-5db6-9404-2500ff1d13b2",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-10-25T12:32:24.306255Z",
+    "taken_at": "2026-10-25T13:27:24.306255Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-25T12:33:38.306255Z"
+    "received_at": "2026-10-25T13:28:38.306255Z"
   },
   {
     "id": "5c12b44d-58f2-5b88-ad6a-c256140a773c",
     "indicator_id": "bp_systolic",
     "value": 109.0,
-    "taken_at": "2026-10-25T14:25:49.129767Z",
+    "taken_at": "2026-10-25T15:20:49.129767Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-25T14:26:24.129767Z"
+    "received_at": "2026-10-25T15:21:24.129767Z"
   },
   {
     "id": "7918b5b4-b452-5a36-b1a8-b241d30cea20",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-10-25T15:02:53.657649Z",
+    "taken_at": "2026-10-25T15:57:53.657649Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-25T15:04:09.657649Z"
+    "received_at": "2026-10-25T15:59:09.657649Z"
   },
   {
     "id": "4fd0bcd9-d17d-596e-ab46-6c50ae931ad1",
     "indicator_id": "bp_diastolic",
     "value": 69.0,
-    "taken_at": "2026-10-25T15:42:40.513361Z",
+    "taken_at": "2026-10-25T16:37:40.513361Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-25T15:42:55.513361Z"
+    "received_at": "2026-10-25T16:37:55.513361Z"
   },
   {
     "id": "aaf030cb-315a-5413-a7d3-56818719d7ae",
     "indicator_id": "heart_rate",
     "value": 78.0,
-    "taken_at": "2026-10-25T16:43:20.285933Z",
+    "taken_at": "2026-10-25T17:38:20.285933Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-25T16:43:35.285933Z"
+    "received_at": "2026-10-25T17:38:35.285933Z"
   },
   {
     "id": "7982bfbc-ad74-5e81-b6a0-ac39ea5d86eb",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-10-26T11:33:12.180897Z",
+    "taken_at": "2026-10-26T12:28:12.180897Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-26T11:33:36.180897Z"
+    "received_at": "2026-10-26T12:28:36.180897Z"
   },
   {
     "id": "fef4ca18-fe13-51c0-bdcd-888ad9074151",
     "indicator_id": "exercise_min",
     "value": 210.0,
-    "taken_at": "2026-10-26T11:45:18.040940Z",
+    "taken_at": "2026-10-26T12:40:18.040940Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-26T11:45:21.040940Z"
+    "received_at": "2026-10-26T12:40:21.040940Z"
   },
   {
     "id": "61dcd1fc-8bea-594c-924f-b5c051b254f9",
     "indicator_id": "temperature",
     "value": 36.3,
-    "taken_at": "2026-10-26T11:59:10.058391Z",
+    "taken_at": "2026-10-26T12:54:10.058391Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-26T12:00:06.058391Z"
+    "received_at": "2026-10-26T12:55:06.058391Z"
   },
   {
     "id": "2ff37b7b-99d1-586c-879e-9f7b0d5f5a8b",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-10-26T13:21:42.258816Z",
+    "taken_at": "2026-10-26T14:16:42.258816Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-26T13:21:56.258816Z"
+    "received_at": "2026-10-26T14:16:56.258816Z"
   },
   {
     "id": "ed468896-fa81-5b7e-a37d-df08e9470bb5",
     "indicator_id": "bp_systolic",
     "value": 115.0,
-    "taken_at": "2026-10-26T14:14:45.290297Z",
+    "taken_at": "2026-10-26T15:09:45.290297Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-26T14:15:08.290297Z"
+    "received_at": "2026-10-26T15:10:08.290297Z"
   },
   {
     "id": "3b0105e1-a103-52ff-9414-20006858268e",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-10-26T14:41:24.923717Z",
+    "taken_at": "2026-10-26T15:36:24.923717Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-26T14:42:07.923717Z"
+    "received_at": "2026-10-26T15:37:07.923717Z"
   },
   {
     "id": "efd96d75-d332-5f9b-978e-622ec8e9c305",
     "indicator_id": "heart_rate",
     "value": 86.0,
-    "taken_at": "2026-10-26T16:10:45.035604Z",
+    "taken_at": "2026-10-26T17:05:45.035604Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-26T16:11:26.035604Z"
+    "received_at": "2026-10-26T17:06:26.035604Z"
   },
   {
     "id": "8f213497-2d97-5a98-99e8-727035f464ad",
     "indicator_id": "bp_diastolic",
     "value": 74.0,
-    "taken_at": "2026-10-26T16:31:23.327730Z",
+    "taken_at": "2026-10-26T17:26:23.327730Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-26T16:31:42.327730Z"
+    "received_at": "2026-10-26T17:26:42.327730Z"
   },
   {
     "id": "5c21b5e0-746b-5a06-9c10-7abc0f0b5350",
     "indicator_id": "exercise_min",
     "value": 225.0,
-    "taken_at": "2026-10-27T11:49:02.705569Z",
+    "taken_at": "2026-10-27T12:44:02.705569Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-27T11:50:16.705569Z"
+    "received_at": "2026-10-27T12:45:16.705569Z"
   },
   {
     "id": "7dd9a3df-eeab-5546-8736-8990806c453a",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-10-27T12:02:25.487164Z",
+    "taken_at": "2026-10-27T12:57:25.487164Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-27T12:03:14.487164Z"
+    "received_at": "2026-10-27T12:58:14.487164Z"
   },
   {
     "id": "cec774cc-9018-5f60-889d-567416687ca9",
     "indicator_id": "temperature",
     "value": 36.7,
-    "taken_at": "2026-10-27T12:16:55.451476Z",
+    "taken_at": "2026-10-27T13:11:55.451476Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-27T12:17:16.451476Z"
+    "received_at": "2026-10-27T13:12:16.451476Z"
   },
   {
     "id": "ed6ab8e5-aa22-512f-a7aa-778cbf4a6041",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-10-27T12:37:44.397689Z",
+    "taken_at": "2026-10-27T13:32:44.397689Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-27T12:38:56.397689Z"
+    "received_at": "2026-10-27T13:33:56.397689Z"
   },
   {
     "id": "895ce59e-a9cf-53a9-9cda-eec58cfa04ca",
     "indicator_id": "bp_systolic",
     "value": 105.0,
-    "taken_at": "2026-10-27T14:16:41.387514Z",
+    "taken_at": "2026-10-27T15:11:41.387514Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-27T14:18:00.387514Z"
+    "received_at": "2026-10-27T15:13:00.387514Z"
   },
   {
     "id": "b011b2fd-8415-5b7a-a86d-22dff64c23b4",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-10-27T14:49:40.578690Z",
+    "taken_at": "2026-10-27T15:44:40.578690Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-27T14:50:08.578690Z"
+    "received_at": "2026-10-27T15:45:08.578690Z"
   },
   {
     "id": "913cdc48-6843-52f2-adf1-e32e7763c7a4",
     "indicator_id": "heart_rate",
     "value": 85.0,
-    "taken_at": "2026-10-27T16:29:38.731540Z",
+    "taken_at": "2026-10-27T17:24:38.731540Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-27T16:30:31.731540Z"
+    "received_at": "2026-10-27T17:25:31.731540Z"
   },
   {
     "id": "f56893ef-1481-592d-b36d-158bf6213c3b",
     "indicator_id": "bp_diastolic",
     "value": 70.0,
-    "taken_at": "2026-10-27T16:31:05.477787Z",
+    "taken_at": "2026-10-27T17:26:05.477787Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-27T16:31:49.477787Z"
+    "received_at": "2026-10-27T17:26:49.477787Z"
   },
   {
     "id": "c9fd8a08-de17-53c2-98a2-a3f405092d92",
     "indicator_id": "temperature",
     "value": 36.6,
-    "taken_at": "2026-10-28T12:14:08.041621Z",
+    "taken_at": "2026-10-28T13:09:08.041621Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-28T12:14:21.041621Z"
+    "received_at": "2026-10-28T13:09:21.041621Z"
   },
   {
     "id": "0fb564c3-6f84-5894-883e-315f2791e419",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-10-28T12:14:10.499167Z",
+    "taken_at": "2026-10-28T13:09:10.499167Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-28T12:15:35.499167Z"
+    "received_at": "2026-10-28T13:10:35.499167Z"
   },
   {
     "id": "989c69e1-023f-5912-a960-5259c86fd0a0",
     "indicator_id": "exercise_min",
     "value": 245.0,
-    "taken_at": "2026-10-28T12:25:00.608014Z",
+    "taken_at": "2026-10-28T13:20:00.608014Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-28T12:25:28.608014Z"
+    "received_at": "2026-10-28T13:20:28.608014Z"
   },
   {
     "id": "424f5938-42fe-57d6-bf14-199a35d5cb16",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-10-28T13:16:14.019719Z",
+    "taken_at": "2026-10-28T14:11:14.019719Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-28T13:16:31.019719Z"
+    "received_at": "2026-10-28T14:11:31.019719Z"
   },
   {
     "id": "308b98cf-b739-508e-bf17-97961beca94b",
     "indicator_id": "bp_systolic",
     "value": 105.0,
-    "taken_at": "2026-10-28T14:56:33.989551Z",
+    "taken_at": "2026-10-28T15:51:33.989551Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-28T14:57:33.989551Z"
+    "received_at": "2026-10-28T15:52:33.989551Z"
   },
   {
     "id": "3298fdcd-fc71-51a1-9905-72f97e495805",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-10-28T15:05:21.283196Z",
+    "taken_at": "2026-10-28T16:00:21.283196Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-28T15:06:27.283196Z"
+    "received_at": "2026-10-28T16:01:27.283196Z"
   },
   {
     "id": "d5c7f5f9-8047-587b-a685-b848f8f8a596",
     "indicator_id": "heart_rate",
     "value": 82.0,
-    "taken_at": "2026-10-28T16:14:00.443610Z",
+    "taken_at": "2026-10-28T17:09:00.443610Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-28T16:15:20.443610Z"
+    "received_at": "2026-10-28T17:10:20.443610Z"
   },
   {
     "id": "a5036c66-fd5c-52d3-a4db-2ef7c4290988",
     "indicator_id": "bp_diastolic",
     "value": 74.0,
-    "taken_at": "2026-10-28T16:29:00.776077Z",
+    "taken_at": "2026-10-28T17:24:00.776077Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-28T16:30:28.776077Z"
+    "received_at": "2026-10-28T17:25:28.776077Z"
   },
   {
     "id": "65794c7e-dfc9-5f4f-9d34-0c99784bc623",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-10-29T11:39:56.950830Z",
+    "taken_at": "2026-10-29T12:34:56.950830Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-29T11:40:05.950830Z"
+    "received_at": "2026-10-29T12:35:05.950830Z"
   },
   {
     "id": "a7d479fb-9de8-5bed-ae46-271ae6852fd9",
     "indicator_id": "temperature",
     "value": 36.7,
-    "taken_at": "2026-10-29T12:16:02.937316Z",
+    "taken_at": "2026-10-29T13:11:02.937316Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-29T12:17:21.937316Z"
+    "received_at": "2026-10-29T13:12:21.937316Z"
   },
   {
     "id": "e5772333-a7a5-517f-bf02-2e795224b456",
     "indicator_id": "exercise_min",
     "value": 235.0,
-    "taken_at": "2026-10-29T12:26:57.592569Z",
+    "taken_at": "2026-10-29T13:21:57.592569Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-29T12:28:23.592569Z"
+    "received_at": "2026-10-29T13:23:23.592569Z"
   },
   {
     "id": "d63de4b1-b00b-5a97-beb3-fe831b84b126",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-10-29T13:27:47.520192Z",
+    "taken_at": "2026-10-29T14:22:47.520192Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-29T13:29:12.520192Z"
+    "received_at": "2026-10-29T14:24:12.520192Z"
   },
   {
     "id": "2052d3c2-4b65-5db1-9fb1-c605fde488fd",
     "indicator_id": "bp_systolic",
     "value": 106.0,
-    "taken_at": "2026-10-29T14:48:11.932249Z",
+    "taken_at": "2026-10-29T15:43:11.932249Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-29T14:48:45.932249Z"
+    "received_at": "2026-10-29T15:43:45.932249Z"
   },
   {
     "id": "1a1a0279-20de-580e-8069-e0288e01f916",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-10-29T14:50:40.716462Z",
+    "taken_at": "2026-10-29T15:45:40.716462Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-29T14:51:43.716462Z"
+    "received_at": "2026-10-29T15:46:43.716462Z"
   },
   {
     "id": "ae3c6b67-a652-598e-9322-75d4cf88d78b",
     "indicator_id": "bp_diastolic",
     "value": 70.0,
-    "taken_at": "2026-10-29T16:12:24.605392Z",
+    "taken_at": "2026-10-29T17:07:24.605392Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-29T16:13:40.605392Z"
+    "received_at": "2026-10-29T17:08:40.605392Z"
   },
   {
     "id": "47ce21e7-5a08-533e-ba59-d6341261ab44",
     "indicator_id": "heart_rate",
     "value": 89.0,
-    "taken_at": "2026-10-29T16:18:39.463022Z",
+    "taken_at": "2026-10-29T17:13:39.463022Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-29T16:18:57.463022Z"
+    "received_at": "2026-10-29T17:13:57.463022Z"
   },
   {
     "id": "63d8ff96-20ea-5696-9dae-60b8657af2a7",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-10-30T11:35:12.519534Z",
+    "taken_at": "2026-10-30T12:30:12.519534Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-30T11:36:22.519534Z"
+    "received_at": "2026-10-30T12:31:22.519534Z"
   },
   {
     "id": "c149ba3a-821f-59e4-a815-181dd96364f1",
     "indicator_id": "exercise_min",
     "value": 235.0,
-    "taken_at": "2026-10-30T12:23:02.824047Z",
+    "taken_at": "2026-10-30T13:18:02.824047Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-30T12:24:27.824047Z"
+    "received_at": "2026-10-30T13:19:27.824047Z"
   },
   {
     "id": "9725c770-64c5-527e-822d-698fc34a9f02",
     "indicator_id": "temperature",
     "value": 36.7,
-    "taken_at": "2026-10-30T12:45:35.209127Z",
+    "taken_at": "2026-10-30T13:40:35.209127Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-30T12:45:47.209127Z"
+    "received_at": "2026-10-30T13:40:47.209127Z"
   },
   {
     "id": "b76aaf55-6745-5c3a-b55a-52614d8d8f1b",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-10-30T13:24:11.974578Z",
+    "taken_at": "2026-10-30T14:19:11.974578Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-30T13:25:27.974578Z"
+    "received_at": "2026-10-30T14:20:27.974578Z"
   },
   {
     "id": "be2baf92-2799-59f4-aeaa-b27df21fd40c",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-10-30T14:36:45.632543Z",
+    "taken_at": "2026-10-30T15:31:45.632543Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-30T14:37:38.632543Z"
+    "received_at": "2026-10-30T15:32:38.632543Z"
   },
   {
     "id": "afc075a3-219a-5360-81dc-527c8fd2d72f",
     "indicator_id": "bp_systolic",
     "value": 105.0,
-    "taken_at": "2026-10-30T15:03:19.064159Z",
+    "taken_at": "2026-10-30T15:58:19.064159Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-30T15:04:16.064159Z"
+    "received_at": "2026-10-30T15:59:16.064159Z"
   },
   {
     "id": "f2b18fe5-0837-5435-96f7-3c3acf4aacb1",
     "indicator_id": "bp_diastolic",
     "value": 76.0,
-    "taken_at": "2026-10-30T16:13:47.987643Z",
+    "taken_at": "2026-10-30T17:08:47.987643Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-30T16:15:13.987643Z"
+    "received_at": "2026-10-30T17:10:13.987643Z"
   },
   {
     "id": "0d5bd37e-b076-5a90-a1ac-9c6053a1f3a9",
     "indicator_id": "heart_rate",
     "value": 83.0,
-    "taken_at": "2026-10-30T16:16:30.586137Z",
+    "taken_at": "2026-10-30T17:11:30.586137Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-30T16:17:19.586137Z"
+    "received_at": "2026-10-30T17:12:19.586137Z"
   },
   {
     "id": "c3ae9a4d-e4ec-5a83-867f-0c2174c65b56",
     "indicator_id": "exercise_min",
     "value": 220.0,
-    "taken_at": "2026-10-31T11:43:25.442319Z",
+    "taken_at": "2026-10-31T12:38:25.442319Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-10-31T11:44:51.442319Z"
+    "received_at": "2026-10-31T12:39:51.442319Z"
   },
   {
     "id": "6862daaf-8924-55ae-80d3-a4bae5fa6750",
     "indicator_id": "spo2",
     "value": 97.0,
-    "taken_at": "2026-10-31T12:00:02.003698Z",
+    "taken_at": "2026-10-31T12:55:02.003698Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-10-31T12:00:58.003698Z"
+    "received_at": "2026-10-31T12:55:58.003698Z"
   },
   {
     "id": "6105d6ef-11cb-5589-a343-c51e7db37220",
     "indicator_id": "temperature",
     "value": 36.7,
-    "taken_at": "2026-10-31T12:21:14.554645Z",
+    "taken_at": "2026-10-31T13:16:14.554645Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-10-31T12:22:25.554645Z"
+    "received_at": "2026-10-31T13:17:25.554645Z"
   },
   {
     "id": "de8d56cb-41bd-5fde-bd62-eb0884805d34",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-10-31T12:43:54.094964Z",
+    "taken_at": "2026-10-31T13:38:54.094964Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-10-31T12:45:00.094964Z"
+    "received_at": "2026-10-31T13:40:00.094964Z"
   },
   {
     "id": "b37f69d8-b94d-5879-965a-55a69385d057",
     "indicator_id": "bp_systolic",
     "value": 105.0,
-    "taken_at": "2026-10-31T14:40:20.663126Z",
+    "taken_at": "2026-10-31T15:35:20.663126Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-31T14:41:09.663126Z"
+    "received_at": "2026-10-31T15:36:09.663126Z"
   },
   {
     "id": "4b9765e5-3fdf-5537-ac13-74941c3fe384",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-10-31T14:45:01.021558Z",
+    "taken_at": "2026-10-31T15:40:01.021558Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-10-31T14:45:42.021558Z"
+    "received_at": "2026-10-31T15:40:42.021558Z"
   },
   {
     "id": "cc42d565-9260-5a91-bbde-f9ce24c25c02",
     "indicator_id": "bp_diastolic",
     "value": 73.0,
-    "taken_at": "2026-10-31T16:19:01.798699Z",
+    "taken_at": "2026-10-31T17:14:01.798699Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-10-31T16:20:22.798699Z"
+    "received_at": "2026-10-31T17:15:22.798699Z"
   },
   {
     "id": "79bca99b-fc52-5cfa-9664-7cfd2d371856",
     "indicator_id": "heart_rate",
     "value": 80.0,
-    "taken_at": "2026-10-31T16:27:28.335076Z",
+    "taken_at": "2026-10-31T17:22:28.335076Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-10-31T16:27:47.335076Z"
-  },
-  {
-    "id": "5ed76d6b-e329-5c68-a786-d508e5955217",
-    "indicator_id": "radiation_dose",
-    "value": 60.0,
-    "taken_at": "2026-10-31T16:45:55.358257Z",
-    "source": "manual",
-    "note": null,
-    "member_id": 1,
-    "unit": "mSv",
-    "received_at": "2026-10-31T16:47:02.358257Z"
+    "received_at": "2026-10-31T17:22:47.335076Z"
   },
   {
     "id": "40a5d35e-065f-50c8-adea-86e66122dd10",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-11-01T11:59:20.524702Z",
+    "taken_at": "2026-11-01T12:54:20.524702Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-11-01T12:00:21.524702Z"
+    "received_at": "2026-11-01T12:55:21.524702Z"
   },
   {
     "id": "259a2ac7-51e6-5bfa-9e8c-e4990d356307",
     "indicator_id": "temperature",
     "value": 36.5,
-    "taken_at": "2026-11-01T12:07:50.252268Z",
+    "taken_at": "2026-11-01T13:02:50.252268Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-11-01T12:08:19.252268Z"
+    "received_at": "2026-11-01T13:03:19.252268Z"
   },
   {
     "id": "7680c291-b6eb-58df-b60b-4ab5d650a3e5",
     "indicator_id": "exercise_min",
     "value": 220.0,
-    "taken_at": "2026-11-01T12:20:22.447523Z",
+    "taken_at": "2026-11-01T13:15:22.447523Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-11-01T12:21:16.447523Z"
+    "received_at": "2026-11-01T13:16:16.447523Z"
   },
   {
     "id": "e8676edd-b1cf-54b3-87c4-536e167265a0",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-11-01T12:50:18.468052Z",
+    "taken_at": "2026-11-01T13:45:18.468052Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-11-01T12:50:52.468052Z"
+    "received_at": "2026-11-01T13:45:52.468052Z"
   },
   {
     "id": "e4aa01b6-5232-5fd0-8ced-bd2bb8518f51",
     "indicator_id": "bp_systolic",
     "value": 98.0,
-    "taken_at": "2026-11-01T14:17:16.901939Z",
+    "taken_at": "2026-11-01T15:12:16.901939Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-01T14:17:57.901939Z"
+    "received_at": "2026-11-01T15:12:57.901939Z"
   },
   {
     "id": "f8dafbc9-3c38-5dec-8291-c8848be1b00f",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-11-01T15:07:55.655969Z",
+    "taken_at": "2026-11-01T16:02:55.655969Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-11-01T15:08:24.655969Z"
+    "received_at": "2026-11-01T16:03:24.655969Z"
   },
   {
     "id": "d182962a-e6a1-5a10-8ec0-cb53fdbdf0b4",
     "indicator_id": "bp_diastolic",
     "value": 75.0,
-    "taken_at": "2026-11-01T15:57:56.648399Z",
+    "taken_at": "2026-11-01T16:52:56.648399Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-01T15:58:28.648399Z"
+    "received_at": "2026-11-01T16:53:28.648399Z"
   },
   {
     "id": "0eff4808-1667-59ee-b6ac-722b0cebbc9c",
     "indicator_id": "heart_rate",
     "value": 85.0,
-    "taken_at": "2026-11-01T16:13:15.709894Z",
+    "taken_at": "2026-11-01T17:08:15.709894Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-11-01T16:13:24.709894Z"
+    "received_at": "2026-11-01T17:08:24.709894Z"
   },
   {
     "id": "5e487921-a75a-5cfa-babc-914285513bd3",
     "indicator_id": "temperature",
     "value": 36.5,
-    "taken_at": "2026-11-02T11:52:01.098322Z",
+    "taken_at": "2026-11-02T12:47:01.098322Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-11-02T11:52:56.098322Z"
+    "received_at": "2026-11-02T12:47:56.098322Z"
   },
   {
     "id": "26b2f1b6-fa11-5022-86af-3a3245d029fe",
     "indicator_id": "exercise_min",
     "value": 255.0,
-    "taken_at": "2026-11-02T11:59:01.521969Z",
+    "taken_at": "2026-11-02T12:54:01.521969Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-11-02T12:00:13.521969Z"
+    "received_at": "2026-11-02T12:55:13.521969Z"
   },
   {
     "id": "b8b088a1-592c-5a94-9b6d-530ab2b50536",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-11-02T12:18:17.540970Z",
+    "taken_at": "2026-11-02T13:13:17.540970Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-11-02T12:19:22.540970Z"
+    "received_at": "2026-11-02T13:14:22.540970Z"
   },
   {
     "id": "90aa37d2-7be2-56a7-bd7a-f7c32d4a726f",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-11-02T12:47:04.587600Z",
+    "taken_at": "2026-11-02T13:42:04.587600Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-11-02T12:47:23.587600Z"
+    "received_at": "2026-11-02T13:42:23.587600Z"
   },
   {
     "id": "5cdbb479-e1a4-51f3-a7f2-6b56ee033856",
     "indicator_id": "bp_systolic",
     "value": 101.0,
-    "taken_at": "2026-11-02T14:21:16.018994Z",
+    "taken_at": "2026-11-02T15:16:16.018994Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-02T14:22:09.018994Z"
+    "received_at": "2026-11-02T15:17:09.018994Z"
   },
   {
     "id": "30261841-1384-5310-bace-8fe53cee7ad0",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-11-02T14:57:28.758596Z",
+    "taken_at": "2026-11-02T15:52:28.758596Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-11-02T14:57:52.758596Z"
+    "received_at": "2026-11-02T15:52:52.758596Z"
   },
   {
     "id": "5605b3d9-2277-56d1-9d5f-90d94d3e6c02",
     "indicator_id": "bp_diastolic",
     "value": 72.0,
-    "taken_at": "2026-11-02T16:20:45.547423Z",
+    "taken_at": "2026-11-02T17:15:45.547423Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-02T16:21:44.547423Z"
+    "received_at": "2026-11-02T17:16:44.547423Z"
   },
   {
     "id": "9780a95e-94f9-5f3d-962f-17d34d1e0351",
     "indicator_id": "heart_rate",
     "value": 82.0,
-    "taken_at": "2026-11-02T16:57:12.149076Z",
+    "taken_at": "2026-11-02T17:52:12.149076Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-11-02T16:58:21.149076Z"
+    "received_at": "2026-11-02T17:53:21.149076Z"
   },
   {
     "id": "f01a2400-df5f-5898-9cb0-3963325fd04c",
     "indicator_id": "spo2",
     "value": 97.0,
-    "taken_at": "2026-11-03T11:20:20.565108Z",
+    "taken_at": "2026-11-03T12:15:20.565108Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-11-03T11:20:42.565108Z"
+    "received_at": "2026-11-03T12:15:42.565108Z"
   },
   {
     "id": "69102c21-2926-5752-996a-cbd1e537ee2d",
     "indicator_id": "temperature",
     "value": 36.7,
-    "taken_at": "2026-11-03T11:52:47.152056Z",
+    "taken_at": "2026-11-03T12:47:47.152056Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-11-03T11:54:05.152056Z"
+    "received_at": "2026-11-03T12:49:05.152056Z"
   },
   {
     "id": "74c90d8d-e850-5e5b-8ddb-ed510b9d6ba3",
     "indicator_id": "exercise_min",
     "value": 210.0,
-    "taken_at": "2026-11-03T11:58:02.125600Z",
+    "taken_at": "2026-11-03T12:53:02.125600Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-11-03T11:59:16.125600Z"
+    "received_at": "2026-11-03T12:54:16.125600Z"
   },
   {
     "id": "0b695344-0462-57cd-9aa6-e1c2c5fa79f0",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-11-03T12:54:24.524570Z",
+    "taken_at": "2026-11-03T13:49:24.524570Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-11-03T12:55:52.524570Z"
+    "received_at": "2026-11-03T13:50:52.524570Z"
   },
   {
     "id": "4cfbd688-29b0-5bfc-ab4a-d57650d9acb0",
     "indicator_id": "bp_systolic",
     "value": 108.0,
-    "taken_at": "2026-11-03T14:22:06.212001Z",
+    "taken_at": "2026-11-03T15:17:06.212001Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-03T14:22:46.212001Z"
+    "received_at": "2026-11-03T15:17:46.212001Z"
   },
   {
     "id": "d9e62009-8135-5d0e-802b-9deb2ca6163e",
     "indicator_id": "sleep_hours",
     "value": 9.0,
-    "taken_at": "2026-11-03T15:19:43.191058Z",
+    "taken_at": "2026-11-03T16:14:43.191058Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-11-03T15:20:35.191058Z"
+    "received_at": "2026-11-03T16:15:35.191058Z"
   },
   {
     "id": "f3eeebc9-d038-5605-9024-11025807b918",
     "indicator_id": "bp_diastolic",
     "value": 69.0,
-    "taken_at": "2026-11-03T15:35:36.649848Z",
+    "taken_at": "2026-11-03T16:30:36.649848Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-03T15:35:41.649848Z"
+    "received_at": "2026-11-03T16:30:41.649848Z"
   },
   {
     "id": "88dbeaef-7895-5acb-93c5-8be59d797659",
     "indicator_id": "heart_rate",
     "value": 80.0,
-    "taken_at": "2026-11-03T16:47:30.605589Z",
+    "taken_at": "2026-11-03T17:42:30.605589Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-11-03T16:48:40.605589Z"
+    "received_at": "2026-11-03T17:43:40.605589Z"
   },
   {
     "id": "67168c0d-14b3-59ba-ab35-7366a5962bb5",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-11-04T11:21:57.159335Z",
+    "taken_at": "2026-11-04T12:16:57.159335Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-11-04T11:22:49.159335Z"
+    "received_at": "2026-11-04T12:17:49.159335Z"
   },
   {
     "id": "1a8af855-6c18-5b74-9ed9-3366c8eb6f8b",
     "indicator_id": "exercise_min",
     "value": 210.0,
-    "taken_at": "2026-11-04T11:56:40.932187Z",
+    "taken_at": "2026-11-04T12:51:40.932187Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-11-04T11:57:55.932187Z"
+    "received_at": "2026-11-04T12:52:55.932187Z"
   },
   {
     "id": "6f44feb9-b06b-5a26-87db-0ffb5fa151be",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-11-04T12:33:28.306650Z",
+    "taken_at": "2026-11-04T13:28:28.306650Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-11-04T12:33:37.306650Z"
+    "received_at": "2026-11-04T13:28:37.306650Z"
   },
   {
     "id": "af886d83-386a-58ac-958f-83df655e0547",
     "indicator_id": "temperature",
     "value": 36.6,
-    "taken_at": "2026-11-04T12:44:01.323305Z",
+    "taken_at": "2026-11-04T13:39:01.323305Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-11-04T12:44:20.323305Z"
+    "received_at": "2026-11-04T13:39:20.323305Z"
   },
   {
     "id": "8c6edd22-cd20-5987-aeaf-98f6bdef160f",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-11-04T14:46:43.509058Z",
+    "taken_at": "2026-11-04T15:41:43.509058Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-11-04T14:47:26.509058Z"
+    "received_at": "2026-11-04T15:42:26.509058Z"
   },
   {
     "id": "8187cd48-d575-52d2-b897-43b8a9e34d9f",
     "indicator_id": "bp_systolic",
     "value": 101.0,
-    "taken_at": "2026-11-04T15:01:18.394796Z",
+    "taken_at": "2026-11-04T15:56:18.394796Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-04T15:01:35.394796Z"
+    "received_at": "2026-11-04T15:56:35.394796Z"
   },
   {
     "id": "0fdd3561-397b-5507-b23e-f42b1726aaf1",
     "indicator_id": "bp_diastolic",
     "value": 72.0,
-    "taken_at": "2026-11-04T15:42:03.893690Z",
+    "taken_at": "2026-11-04T16:37:03.893690Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-04T15:43:17.893690Z"
+    "received_at": "2026-11-04T16:38:17.893690Z"
   },
   {
     "id": "d3e8d981-4e0b-5aba-b906-86945927ade6",
     "indicator_id": "heart_rate",
     "value": 88.0,
-    "taken_at": "2026-11-04T16:28:28.674953Z",
+    "taken_at": "2026-11-04T17:23:28.674953Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-11-04T16:28:43.674953Z"
+    "received_at": "2026-11-04T17:23:43.674953Z"
   },
   {
     "id": "d9b689fa-2dbd-5bea-a586-5bf6cbdf9b00",
     "indicator_id": "spo2",
     "value": 99.0,
-    "taken_at": "2026-11-05T11:47:42.362435Z",
+    "taken_at": "2026-11-05T12:42:42.362435Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-11-05T11:49:01.362435Z"
+    "received_at": "2026-11-05T12:44:01.362435Z"
   },
   {
     "id": "814cb824-bd09-598d-8654-c29f02c9e502",
     "indicator_id": "exercise_min",
     "value": 220.0,
-    "taken_at": "2026-11-05T12:06:37.924621Z",
+    "taken_at": "2026-11-05T13:01:37.924621Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-11-05T12:07:25.924621Z"
+    "received_at": "2026-11-05T13:02:25.924621Z"
   },
   {
     "id": "19250ae4-6822-5796-bc78-fbe3e3928dda",
     "indicator_id": "temperature",
     "value": 36.5,
-    "taken_at": "2026-11-05T12:36:24.895233Z",
+    "taken_at": "2026-11-05T13:31:24.895233Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-11-05T12:37:17.895233Z"
+    "received_at": "2026-11-05T13:32:17.895233Z"
   },
   {
     "id": "df2f1bc4-4c93-5e2a-ac72-a46279fee774",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-11-05T12:59:33.761946Z",
+    "taken_at": "2026-11-05T13:54:33.761946Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-11-05T13:00:55.761946Z"
+    "received_at": "2026-11-05T13:55:55.761946Z"
   },
   {
     "id": "16da00f8-9ab5-5897-a9fa-65d431b88d69",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-11-05T14:24:15.612113Z",
+    "taken_at": "2026-11-05T15:19:15.612113Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-11-05T14:25:42.612113Z"
+    "received_at": "2026-11-05T15:20:42.612113Z"
   },
   {
     "id": "fa56004a-c5c7-5748-900a-edfdf72ee5ce",
     "indicator_id": "bp_systolic",
     "value": 110.0,
-    "taken_at": "2026-11-05T14:57:05.266274Z",
+    "taken_at": "2026-11-05T15:52:05.266274Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-05T14:58:04.266274Z"
+    "received_at": "2026-11-05T15:53:04.266274Z"
   },
   {
     "id": "ae40729f-11b7-5bee-abbd-7934b45aa066",
     "indicator_id": "bp_diastolic",
     "value": 71.0,
-    "taken_at": "2026-11-05T15:42:12.386966Z",
+    "taken_at": "2026-11-05T16:37:12.386966Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-05T15:43:03.386966Z"
+    "received_at": "2026-11-05T16:38:03.386966Z"
   },
   {
     "id": "c0a39fef-40ce-5648-8dee-d86ba3ada321",
     "indicator_id": "heart_rate",
     "value": 77.0,
-    "taken_at": "2026-11-05T16:54:32.185499Z",
+    "taken_at": "2026-11-05T17:49:32.185499Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-11-05T16:55:07.185499Z"
+    "received_at": "2026-11-05T17:50:07.185499Z"
   },
   {
     "id": "8c50e27c-6c5d-53da-b9fa-2e6897d5ae08",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-11-06T11:24:33.340862Z",
+    "taken_at": "2026-11-06T12:19:33.340862Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-11-06T11:25:54.340862Z"
+    "received_at": "2026-11-06T12:20:54.340862Z"
   },
   {
     "id": "f2034183-a0cc-5e8b-9467-17fdf18664e9",
     "indicator_id": "exercise_min",
     "value": 225.0,
-    "taken_at": "2026-11-06T11:42:00.129412Z",
+    "taken_at": "2026-11-06T12:37:00.129412Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-11-06T11:43:02.129412Z"
+    "received_at": "2026-11-06T12:38:02.129412Z"
   },
   {
     "id": "40ab4660-ce43-5f31-9218-63e3030e2c52",
     "indicator_id": "temperature",
     "value": 36.7,
-    "taken_at": "2026-11-06T12:34:06.970317Z",
+    "taken_at": "2026-11-06T13:29:06.970317Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-11-06T12:35:09.970317Z"
+    "received_at": "2026-11-06T13:30:09.970317Z"
   },
   {
     "id": "ee1f8f99-d67b-5960-95e9-b39c3bd28213",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-11-06T12:40:01.144189Z",
+    "taken_at": "2026-11-06T13:35:01.144189Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-11-06T12:40:38.144189Z"
+    "received_at": "2026-11-06T13:35:38.144189Z"
   },
   {
     "id": "153cb087-1f06-5ae8-acc8-24f52cae0c38",
     "indicator_id": "bp_systolic",
     "value": 108.0,
-    "taken_at": "2026-11-06T14:23:20.099013Z",
+    "taken_at": "2026-11-06T15:18:20.099013Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-06T14:23:25.099013Z"
+    "received_at": "2026-11-06T15:18:25.099013Z"
   },
   {
     "id": "1d7c8f55-0ea6-5b1e-bff9-bc839e6c3d02",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-11-06T15:13:38.780331Z",
+    "taken_at": "2026-11-06T16:08:38.780331Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-11-06T15:14:55.780331Z"
+    "received_at": "2026-11-06T16:09:55.780331Z"
   },
   {
     "id": "24fd006c-79c9-5696-acb7-38d1468ffb3c",
     "indicator_id": "bp_diastolic",
     "value": 71.0,
-    "taken_at": "2026-11-06T16:04:54.475788Z",
+    "taken_at": "2026-11-06T16:59:54.475788Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-06T16:06:22.475788Z"
+    "received_at": "2026-11-06T17:01:22.475788Z"
   },
   {
     "id": "53561943-a9a2-58e3-9e3c-f5806fcbbebf",
     "indicator_id": "heart_rate",
     "value": 82.0,
-    "taken_at": "2026-11-06T16:12:19.435153Z",
+    "taken_at": "2026-11-06T17:07:19.435153Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-11-06T16:13:44.435153Z"
+    "received_at": "2026-11-06T17:08:44.435153Z"
   },
   {
     "id": "81ad0946-2366-5ca5-83db-08fdb4c70240",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-11-07T11:49:22.479362Z",
+    "taken_at": "2026-11-07T12:44:22.479362Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-11-07T11:50:10.479362Z"
+    "received_at": "2026-11-07T12:45:10.479362Z"
   },
   {
     "id": "66e6a739-8520-51d8-bd78-62ddb10171c2",
     "indicator_id": "exercise_min",
     "value": 210.0,
-    "taken_at": "2026-11-07T12:25:34.580920Z",
+    "taken_at": "2026-11-07T13:20:34.580920Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-11-07T12:26:45.580920Z"
+    "received_at": "2026-11-07T13:21:45.580920Z"
   },
   {
     "id": "19bfbdb7-ca09-5fb2-b8d4-42e6bdac2356",
     "indicator_id": "temperature",
     "value": 36.4,
-    "taken_at": "2026-11-07T12:34:48.988905Z",
+    "taken_at": "2026-11-07T13:29:48.988905Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-11-07T12:35:26.988905Z"
+    "received_at": "2026-11-07T13:30:26.988905Z"
   },
   {
     "id": "49896416-7aba-551f-9e97-bada1f66993b",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-11-07T13:07:25.886236Z",
+    "taken_at": "2026-11-07T14:02:25.886236Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-11-07T13:08:01.886236Z"
+    "received_at": "2026-11-07T14:03:01.886236Z"
   },
   {
     "id": "e0a3429f-e47c-59ee-b631-0e06b0b61a4d",
     "indicator_id": "bp_systolic",
     "value": 104.0,
-    "taken_at": "2026-11-07T14:38:42.419858Z",
+    "taken_at": "2026-11-07T15:33:42.419858Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-07T14:39:01.419858Z"
+    "received_at": "2026-11-07T15:34:01.419858Z"
   },
   {
     "id": "ea89251f-a8e1-50b1-bae0-758a96a3fafc",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-11-07T15:03:52.161068Z",
+    "taken_at": "2026-11-07T15:58:52.161068Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-11-07T15:05:15.161068Z"
+    "received_at": "2026-11-07T16:00:15.161068Z"
   },
   {
     "id": "33129f40-1855-52d9-bf6f-78b4b292117f",
     "indicator_id": "bp_diastolic",
     "value": 73.0,
-    "taken_at": "2026-11-07T15:59:36.804914Z",
+    "taken_at": "2026-11-07T16:54:36.804914Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-07T16:00:49.804914Z"
-  },
-  {
-    "id": "dcd7ffe4-fb29-5078-bd6f-f3187c5c98e9",
-    "indicator_id": "radiation_dose",
-    "value": 64.0,
-    "taken_at": "2026-11-07T16:29:49.844759Z",
-    "source": "manual",
-    "note": null,
-    "member_id": 1,
-    "unit": "mSv",
-    "received_at": "2026-11-07T16:30:14.844759Z"
+    "received_at": "2026-11-07T16:55:49.804914Z"
   },
   {
     "id": "96139263-9a70-54c0-a231-8cf5e2ab4c66",
     "indicator_id": "heart_rate",
     "value": 80.0,
-    "taken_at": "2026-11-07T16:56:23.758545Z",
+    "taken_at": "2026-11-07T17:51:23.758545Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-11-07T16:56:46.758545Z"
+    "received_at": "2026-11-07T17:51:46.758545Z"
   },
   {
     "id": "4eace80b-2597-540d-a3fa-09fd90684810",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-11-08T12:00:10.611180Z",
+    "taken_at": "2026-11-08T12:55:10.611180Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-11-08T12:01:06.611180Z"
+    "received_at": "2026-11-08T12:56:06.611180Z"
   },
   {
     "id": "2fcf463a-d134-5710-9de5-6e331ab7f01b",
     "indicator_id": "exercise_min",
     "value": 220.0,
-    "taken_at": "2026-11-08T12:15:34.626928Z",
+    "taken_at": "2026-11-08T13:10:34.626928Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-11-08T12:16:55.626928Z"
+    "received_at": "2026-11-08T13:11:55.626928Z"
   },
   {
     "id": "09c2c0fb-d995-5818-9965-1d981253ca38",
     "indicator_id": "temperature",
     "value": 36.4,
-    "taken_at": "2026-11-08T12:29:59.582874Z",
+    "taken_at": "2026-11-08T13:24:59.582874Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-11-08T12:31:00.582874Z"
+    "received_at": "2026-11-08T13:26:00.582874Z"
   },
   {
     "id": "34bbde99-f4a4-55d3-bf9e-5cde161262af",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-11-08T12:39:25.682338Z",
+    "taken_at": "2026-11-08T13:34:25.682338Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-11-08T12:40:50.682338Z"
+    "received_at": "2026-11-08T13:35:50.682338Z"
   },
   {
     "id": "854e20a4-025f-5718-a184-5ec041fff371",
     "indicator_id": "bp_systolic",
     "value": 101.0,
-    "taken_at": "2026-11-08T14:32:32.259170Z",
+    "taken_at": "2026-11-08T15:27:32.259170Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-08T14:33:54.259170Z"
+    "received_at": "2026-11-08T15:28:54.259170Z"
   },
   {
     "id": "ab6d2578-ba8b-5775-b6a4-8afd63cc9e54",
     "indicator_id": "sleep_hours",
     "value": 8.5,
-    "taken_at": "2026-11-08T15:02:55.009513Z",
+    "taken_at": "2026-11-08T15:57:55.009513Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-11-08T15:03:34.009513Z"
+    "received_at": "2026-11-08T15:58:34.009513Z"
   },
   {
     "id": "a79fc209-b668-5a79-8e35-80e4ffc7caa4",
     "indicator_id": "bp_diastolic",
     "value": 70.0,
-    "taken_at": "2026-11-08T16:00:18.448443Z",
+    "taken_at": "2026-11-08T16:55:18.448443Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-08T16:00:20.448443Z"
+    "received_at": "2026-11-08T16:55:20.448443Z"
   },
   {
     "id": "4fd0fd31-c1cc-5455-aa7e-3953b986b745",
     "indicator_id": "heart_rate",
     "value": 85.0,
-    "taken_at": "2026-11-08T16:32:11.068703Z",
+    "taken_at": "2026-11-08T17:27:11.068703Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-11-08T16:32:20.068703Z"
+    "received_at": "2026-11-08T17:27:20.068703Z"
   },
   {
     "id": "482024c2-da0c-5771-a0f6-e14f461dc1db",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-11-09T11:37:58.691748Z",
+    "taken_at": "2026-11-09T12:32:58.691748Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-11-09T11:38:59.691748Z"
+    "received_at": "2026-11-09T12:33:59.691748Z"
   },
   {
     "id": "ec43329a-6be2-50c6-b271-3e20a92b4f0d",
     "indicator_id": "exercise_min",
     "value": 195.0,
-    "taken_at": "2026-11-09T11:52:31.171432Z",
+    "taken_at": "2026-11-09T12:47:31.171432Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-11-09T11:53:38.171432Z"
+    "received_at": "2026-11-09T12:48:38.171432Z"
   },
   {
     "id": "ddb8f600-6050-5452-9fdd-c65c0deb3d35",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-11-09T12:35:35.277011Z",
+    "taken_at": "2026-11-09T13:30:35.277011Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-11-09T12:36:32.277011Z"
+    "received_at": "2026-11-09T13:31:32.277011Z"
   },
   {
     "id": "11381c25-aedb-58de-9528-e3fc7aeed3df",
     "indicator_id": "temperature",
     "value": 36.4,
-    "taken_at": "2026-11-09T12:45:11.308323Z",
+    "taken_at": "2026-11-09T13:40:11.308323Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-11-09T12:45:15.308323Z"
+    "received_at": "2026-11-09T13:40:15.308323Z"
   },
   {
     "id": "b2931c0d-29e3-566f-ac42-df6c908a0c0f",
     "indicator_id": "sleep_hours",
     "value": 9.0,
-    "taken_at": "2026-11-09T14:49:56.977875Z",
+    "taken_at": "2026-11-09T15:44:56.977875Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "h",
-    "received_at": "2026-11-09T14:50:46.977875Z"
+    "received_at": "2026-11-09T15:45:46.977875Z"
   },
   {
     "id": "0a01c1a6-4e4b-583b-82a8-139539ec27e1",
     "indicator_id": "bp_systolic",
     "value": 100.0,
-    "taken_at": "2026-11-09T15:00:10.180582Z",
+    "taken_at": "2026-11-09T15:55:10.180582Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-09T15:00:30.180582Z"
+    "received_at": "2026-11-09T15:55:30.180582Z"
   },
   {
     "id": "ce305f94-a1a5-584c-8944-d920b54a7b48",
     "indicator_id": "bp_diastolic",
     "value": 70.0,
-    "taken_at": "2026-11-09T16:20:30.607818Z",
+    "taken_at": "2026-11-09T17:15:30.607818Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-09T16:21:42.607818Z"
+    "received_at": "2026-11-09T17:16:42.607818Z"
   },
   {
     "id": "ee461053-c10c-5b9d-af5e-8fcb89b4010d",
     "indicator_id": "heart_rate",
     "value": 82.0,
-    "taken_at": "2026-11-09T16:41:11.711964Z",
+    "taken_at": "2026-11-09T17:36:11.711964Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-11-09T16:42:19.711964Z"
+    "received_at": "2026-11-09T17:37:19.711964Z"
   },
   {
     "id": "7c1c6814-08be-59ae-af07-5b3c51486e58",
     "indicator_id": "exercise_min",
     "value": 225.0,
-    "taken_at": "2026-11-10T12:00:58.271190Z",
+    "taken_at": "2026-11-10T12:55:58.271190Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-11-10T12:01:36.271190Z"
+    "received_at": "2026-11-10T12:56:36.271190Z"
   },
   {
     "id": "1b32ed65-4e5c-5e6f-854d-bc998fb96191",
     "indicator_id": "temperature",
     "value": 36.3,
-    "taken_at": "2026-11-10T12:04:16.086242Z",
+    "taken_at": "2026-11-10T12:59:16.086242Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-11-10T12:05:01.086242Z"
+    "received_at": "2026-11-10T13:00:01.086242Z"
   },
   {
     "id": "0f591ae6-5b22-589e-a87e-57265c69ff6f",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-11-10T12:10:53.561243Z",
+    "taken_at": "2026-11-10T13:05:53.561243Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-11-10T12:12:19.561243Z"
+    "received_at": "2026-11-10T13:07:19.561243Z"
   },
   {
     "id": "372476b4-2e27-5dd3-ba43-e8154253a806",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-11-10T13:05:10.407799Z",
+    "taken_at": "2026-11-10T14:00:10.407799Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-11-10T13:05:20.407799Z"
-  },
-  {
-    "id": "5b1c22ba-ce4e-543f-977d-447f7c38a416",
-    "indicator_id": "bp_systolic",
-    "value": 102.0,
-    "taken_at": "2026-11-10T14:30:55.768060Z",
-    "source": "manual",
-    "note": null,
-    "member_id": 1,
-    "unit": "mmHg",
-    "received_at": "2026-11-10T14:30:58.768060Z"
-  },
-  {
-    "id": "348049e7-931b-559d-99f6-bca4243f3be2",
-    "indicator_id": "sleep_hours",
-    "value": 8.5,
-    "taken_at": "2026-11-10T14:57:35.516610Z",
-    "source": "manual",
-    "note": null,
-    "member_id": 1,
-    "unit": "h",
-    "received_at": "2026-11-10T14:58:18.516610Z"
+    "received_at": "2026-11-10T14:00:20.407799Z"
   },
   {
     "id": "c64d664e-5f0c-53c2-ba00-02a9ce0036e8",
     "indicator_id": "bp_diastolic",
     "value": 68.0,
-    "taken_at": "2026-11-10T16:28:25.351243Z",
+    "taken_at": "2026-11-10T17:23:25.351243Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-10T16:29:16.351243Z"
+    "received_at": "2026-11-10T17:24:16.351243Z"
   },
   {
     "id": "3a9a0b19-1342-5a12-8929-8116e966958d",
     "indicator_id": "heart_rate",
     "value": 83.0,
-    "taken_at": "2026-11-10T17:02:02.015734Z",
+    "taken_at": "2026-11-10T17:57:02.015734Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-11-10T17:02:37.015734Z"
+    "received_at": "2026-11-10T17:57:37.015734Z"
+  },
+  {
+    "id": "a2566e99-f76b-51ff-94b5-68699555b6c8",
+    "indicator_id": "sleep_hours",
+    "value": 5.5,
+    "taken_at": "2026-11-10T18:06:41.601963Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "h",
+    "received_at": "2026-11-14T18:11:41.603440Z"
+  },
+  {
+    "id": "3aa9a1b7-915e-5080-a06f-23d4655dc7af",
+    "indicator_id": "bp_systolic",
+    "value": 128.0,
+    "taken_at": "2026-11-10T18:06:41.604742Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "mmHg",
+    "received_at": "2026-11-14T18:11:41.605423Z"
   },
   {
     "id": "0f69d85f-9ee0-520c-b3cc-3b4635de83e4",
     "indicator_id": "spo2",
     "value": 97.0,
-    "taken_at": "2026-11-11T11:19:59.243718Z",
+    "taken_at": "2026-11-11T12:14:59.243718Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-11-11T11:20:40.243718Z"
+    "received_at": "2026-11-11T12:15:40.243718Z"
   },
   {
     "id": "5e192722-6755-57e4-b478-4ac2f808a7a2",
     "indicator_id": "exercise_min",
     "value": 230.0,
-    "taken_at": "2026-11-11T11:32:55.409082Z",
+    "taken_at": "2026-11-11T12:27:55.409082Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-11-11T11:34:19.409082Z"
+    "received_at": "2026-11-11T12:29:19.409082Z"
   },
   {
     "id": "d13f14c9-32ff-5c79-99fa-f218f2cfed59",
     "indicator_id": "temperature",
     "value": 36.5,
-    "taken_at": "2026-11-11T12:39:58.970250Z",
+    "taken_at": "2026-11-11T13:34:58.970250Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-11-11T12:40:10.970250Z"
+    "received_at": "2026-11-11T13:35:10.970250Z"
   },
   {
     "id": "cb38e023-9e6f-5acf-b599-df0b73f689ff",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-11-11T13:24:43.812159Z",
+    "taken_at": "2026-11-11T14:19:43.812159Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-11-11T13:25:52.812159Z"
-  },
-  {
-    "id": "8f574282-d50f-5cfb-9e03-1bb2e674c32e",
-    "indicator_id": "bp_systolic",
-    "value": 107.0,
-    "taken_at": "2026-11-11T14:53:45.353924Z",
-    "source": "manual",
-    "note": null,
-    "member_id": 1,
-    "unit": "mmHg",
-    "received_at": "2026-11-11T14:54:10.353924Z"
-  },
-  {
-    "id": "4560e847-86c6-5d08-8742-5f4f2d97978f",
-    "indicator_id": "sleep_hours",
-    "value": 8.5,
-    "taken_at": "2026-11-11T15:09:50.858003Z",
-    "source": "manual",
-    "note": null,
-    "member_id": 1,
-    "unit": "h",
-    "received_at": "2026-11-11T15:10:39.858003Z"
+    "received_at": "2026-11-11T14:20:52.812159Z"
   },
   {
     "id": "b2ed9868-dc1a-5ffe-918c-31a9a299a825",
     "indicator_id": "bp_diastolic",
     "value": 73.0,
-    "taken_at": "2026-11-11T16:19:58.898217Z",
+    "taken_at": "2026-11-11T17:14:58.898217Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-11T16:20:26.898217Z"
+    "received_at": "2026-11-11T17:15:26.898217Z"
   },
   {
     "id": "ac4b606d-961c-5453-8434-c16d70b91b8e",
     "indicator_id": "heart_rate",
     "value": 88.0,
-    "taken_at": "2026-11-11T16:20:46.592829Z",
+    "taken_at": "2026-11-11T17:15:46.592829Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-11-11T16:21:05.592829Z"
+    "received_at": "2026-11-11T17:16:05.592829Z"
+  },
+  {
+    "id": "9953120d-660b-563d-9994-74a595614cb8",
+    "indicator_id": "sleep_hours",
+    "value": 5.0,
+    "taken_at": "2026-11-11T18:06:41.601963Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "h",
+    "received_at": "2026-11-14T18:11:41.603831Z"
+  },
+  {
+    "id": "8dbefbd2-0e7c-5dac-9f4e-05f62a729718",
+    "indicator_id": "bp_systolic",
+    "value": 131.0,
+    "taken_at": "2026-11-11T18:06:41.604742Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "mmHg",
+    "received_at": "2026-11-14T18:11:41.605719Z"
   },
   {
     "id": "d75a990d-aa06-5969-b5fd-0f7ce7a248fe",
     "indicator_id": "temperature",
     "value": 36.6,
-    "taken_at": "2026-11-12T11:56:33.462662Z",
+    "taken_at": "2026-11-12T12:51:33.462662Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-11-12T11:57:13.462662Z"
+    "received_at": "2026-11-12T12:52:13.462662Z"
   },
   {
     "id": "91e243a9-e5a5-5230-a4ec-601d3c4dbbe3",
     "indicator_id": "spo2",
     "value": 97.0,
-    "taken_at": "2026-11-12T12:03:57.411588Z",
+    "taken_at": "2026-11-12T12:58:57.411588Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-11-12T12:04:23.411588Z"
+    "received_at": "2026-11-12T12:59:23.411588Z"
   },
   {
     "id": "21396ed3-8f0a-5ac5-849b-6a1d3b201912",
     "indicator_id": "exercise_min",
     "value": 220.0,
-    "taken_at": "2026-11-12T12:13:02.994436Z",
+    "taken_at": "2026-11-12T13:08:02.994436Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-11-12T12:14:28.994436Z"
+    "received_at": "2026-11-12T13:09:28.994436Z"
   },
   {
     "id": "157bde0b-7572-5de1-91e7-4aff4561b206",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-11-12T12:33:20.030926Z",
+    "taken_at": "2026-11-12T13:28:20.030926Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-11-12T12:34:26.030926Z"
-  },
-  {
-    "id": "181dd134-943b-571c-9aaa-f896a3636a6a",
-    "indicator_id": "bp_systolic",
-    "value": 99.0,
-    "taken_at": "2026-11-12T14:36:19.412177Z",
-    "source": "manual",
-    "note": null,
-    "member_id": 1,
-    "unit": "mmHg",
-    "received_at": "2026-11-12T14:36:55.412177Z"
-  },
-  {
-    "id": "5af0141e-0e43-5a95-951f-9b67e8969f31",
-    "indicator_id": "sleep_hours",
-    "value": 8.0,
-    "taken_at": "2026-11-12T15:10:46.679626Z",
-    "source": "manual",
-    "note": null,
-    "member_id": 1,
-    "unit": "h",
-    "received_at": "2026-11-12T15:10:52.679626Z"
+    "received_at": "2026-11-12T13:29:26.030926Z"
   },
   {
     "id": "8c960a24-9082-59e1-95e5-f4537414b33a",
     "indicator_id": "bp_diastolic",
     "value": 72.0,
-    "taken_at": "2026-11-12T15:45:47.909532Z",
+    "taken_at": "2026-11-12T16:40:47.909532Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-12T15:47:06.909532Z"
+    "received_at": "2026-11-12T16:42:06.909532Z"
   },
   {
     "id": "d9d0a749-af2e-5b54-9846-987ff5977eeb",
     "indicator_id": "heart_rate",
     "value": 87.0,
-    "taken_at": "2026-11-12T16:19:30.685979Z",
+    "taken_at": "2026-11-12T17:14:30.685979Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-11-12T16:20:13.685979Z"
+    "received_at": "2026-11-12T17:15:13.685979Z"
+  },
+  {
+    "id": "4ba82b77-8cc3-5655-aaa5-435c1fbce2fc",
+    "indicator_id": "sleep_hours",
+    "value": 4.5,
+    "taken_at": "2026-11-12T18:06:41.601963Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "h",
+    "received_at": "2026-11-14T18:11:41.604132Z"
+  },
+  {
+    "id": "f95fb6da-a88b-562a-8ff0-7c3e932560f3",
+    "indicator_id": "bp_systolic",
+    "value": 133.0,
+    "taken_at": "2026-11-12T18:06:41.604742Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "mmHg",
+    "received_at": "2026-11-14T18:11:41.606009Z"
   },
   {
     "id": "d25b241d-5160-5032-ae1d-67c6ca50bc10",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-11-13T11:47:48.443088Z",
+    "taken_at": "2026-11-13T12:42:48.443088Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-11-13T11:48:48.443088Z"
+    "received_at": "2026-11-13T12:43:48.443088Z"
   },
   {
     "id": "d6357d99-1ea4-5d67-904b-81755372e3b8",
     "indicator_id": "exercise_min",
     "value": 230.0,
-    "taken_at": "2026-11-13T11:51:23.230657Z",
+    "taken_at": "2026-11-13T12:46:23.230657Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-11-13T11:52:03.230657Z"
+    "received_at": "2026-11-13T12:47:03.230657Z"
   },
   {
     "id": "2725f235-3063-5e31-80dc-a1f2cde11e24",
     "indicator_id": "temperature",
     "value": 36.5,
-    "taken_at": "2026-11-13T12:21:28.461895Z",
+    "taken_at": "2026-11-13T13:16:28.461895Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-11-13T12:22:51.461895Z"
+    "received_at": "2026-11-13T13:17:51.461895Z"
   },
   {
     "id": "961ae870-5eff-5a60-85e9-91468cc84f2b",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-11-13T13:21:09.883713Z",
+    "taken_at": "2026-11-13T14:16:09.883713Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-11-13T13:21:32.883713Z"
-  },
-  {
-    "id": "b38aa164-ac42-5f25-83a6-af6c685a54ea",
-    "indicator_id": "bp_systolic",
-    "value": 106.0,
-    "taken_at": "2026-11-13T14:52:48.418120Z",
-    "source": "manual",
-    "note": null,
-    "member_id": 1,
-    "unit": "mmHg",
-    "received_at": "2026-11-13T14:53:59.418120Z"
-  },
-  {
-    "id": "feeb6326-e55b-54d9-8507-48882888e702",
-    "indicator_id": "sleep_hours",
-    "value": 8.5,
-    "taken_at": "2026-11-13T14:57:30.605659Z",
-    "source": "manual",
-    "note": null,
-    "member_id": 1,
-    "unit": "h",
-    "received_at": "2026-11-13T14:57:41.605659Z"
+    "received_at": "2026-11-13T14:16:32.883713Z"
   },
   {
     "id": "24a88391-33ec-5dde-b666-ee3ccdf74bcb",
     "indicator_id": "bp_diastolic",
     "value": 72.0,
-    "taken_at": "2026-11-13T16:04:27.976624Z",
+    "taken_at": "2026-11-13T16:59:27.976624Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-13T16:04:54.976624Z"
+    "received_at": "2026-11-13T16:59:54.976624Z"
   },
   {
     "id": "945818ff-62a8-57fe-98a7-632af071c340",
     "indicator_id": "heart_rate",
     "value": 80.0,
-    "taken_at": "2026-11-13T16:34:49.995487Z",
+    "taken_at": "2026-11-13T17:29:49.995487Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-11-13T16:36:02.995487Z"
+    "received_at": "2026-11-13T17:31:02.995487Z"
+  },
+  {
+    "id": "1976237d-13d8-5856-951f-ba8bb358b33f",
+    "indicator_id": "sleep_hours",
+    "value": 4.0,
+    "taken_at": "2026-11-13T18:06:41.601963Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "h",
+    "received_at": "2026-11-14T18:11:41.604429Z"
+  },
+  {
+    "id": "258a2429-49a7-59ad-af9f-e3f626932fb5",
+    "indicator_id": "bp_systolic",
+    "value": 135.0,
+    "taken_at": "2026-11-13T18:06:41.604742Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "mmHg",
+    "received_at": "2026-11-14T18:11:41.606289Z"
   },
   {
     "id": "0b7e5c1a-3f2d-4e8b-9a6c-1d2e3f4a5b6c",
@@ -5741,106 +5590,117 @@ export const measurements: Schema<'Measurement'>[] = [
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-14T17:16:01.833051Z"
+    "received_at": "2026-11-14T18:11:41.574595Z"
   },
   {
     "id": "663b95f8-6a40-5bdb-86eb-0ad398bd0197",
     "indicator_id": "spo2",
     "value": 98.0,
-    "taken_at": "2026-11-14T11:30:44.945317Z",
+    "taken_at": "2026-11-14T12:25:44.945317Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "%",
-    "received_at": "2026-11-14T11:31:32.945317Z"
+    "received_at": "2026-11-14T12:26:32.945317Z"
   },
   {
     "id": "cc9d130d-0190-5241-bc1e-3d8b78c6f1d8",
     "indicator_id": "exercise_min",
     "value": 225.0,
-    "taken_at": "2026-11-14T11:49:56.227293Z",
+    "taken_at": "2026-11-14T12:44:56.227293Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "min",
-    "received_at": "2026-11-14T11:49:59.227293Z"
+    "received_at": "2026-11-14T12:44:59.227293Z"
   },
   {
     "id": "ab8d1c89-4db0-53b9-9a30-14c3c01b7d1f",
     "indicator_id": "temperature",
     "value": 36.3,
-    "taken_at": "2026-11-14T11:54:19.478569Z",
+    "taken_at": "2026-11-14T12:49:19.478569Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "°C",
-    "received_at": "2026-11-14T11:54:23.478569Z"
+    "received_at": "2026-11-14T12:49:23.478569Z"
   },
   {
     "id": "62d665ab-d858-5be3-9c8b-801102b80a75",
     "indicator_id": "mood",
     "value": 4.0,
-    "taken_at": "2026-11-14T12:32:01.516209Z",
+    "taken_at": "2026-11-14T13:27:01.516209Z",
     "source": "checkin",
     "note": null,
     "member_id": 1,
     "unit": "1-5",
-    "received_at": "2026-11-14T12:32:36.516209Z"
-  },
-  {
-    "id": "fd48d2ed-fea0-5cf0-9dd1-9dc098e94076",
-    "indicator_id": "bp_systolic",
-    "value": 103.0,
-    "taken_at": "2026-11-14T14:16:30.283922Z",
-    "source": "manual",
-    "note": null,
-    "member_id": 1,
-    "unit": "mmHg",
-    "received_at": "2026-11-14T14:17:58.283922Z"
-  },
-  {
-    "id": "8d883aba-bf73-526e-830a-2532529d7740",
-    "indicator_id": "sleep_hours",
-    "value": 8.5,
-    "taken_at": "2026-11-14T15:05:02.253096Z",
-    "source": "manual",
-    "note": null,
-    "member_id": 1,
-    "unit": "h",
-    "received_at": "2026-11-14T15:06:22.253096Z"
+    "received_at": "2026-11-14T13:27:36.516209Z"
   },
   {
     "id": "ad75f82d-e6a3-5c23-81c7-1a2726d60ad0",
     "indicator_id": "bp_diastolic",
     "value": 69.0,
-    "taken_at": "2026-11-14T15:46:56.022220Z",
+    "taken_at": "2026-11-14T16:41:56.022220Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-14T15:47:27.022220Z"
-  },
-  {
-    "id": "dd4ec25b-4eaa-59b7-a2f2-e20e7a9c2609",
-    "indicator_id": "radiation_dose",
-    "value": 69.0,
-    "taken_at": "2026-11-14T16:39:42.533624Z",
-    "source": "manual",
-    "note": null,
-    "member_id": 1,
-    "unit": "mSv",
-    "received_at": "2026-11-14T16:39:44.533624Z"
+    "received_at": "2026-11-14T16:42:27.022220Z"
   },
   {
     "id": "40aed8d7-228a-5f81-9e91-ac11aa408a18",
     "indicator_id": "heart_rate",
     "value": 88.0,
-    "taken_at": "2026-11-14T16:49:30.350583Z",
+    "taken_at": "2026-11-14T17:44:30.350583Z",
     "source": "manual",
     "note": null,
     "member_id": 1,
     "unit": "lpm",
-    "received_at": "2026-11-14T16:49:48.350583Z"
+    "received_at": "2026-11-14T17:44:48.350583Z"
+  },
+  {
+    "id": "35a61105-39b4-5bc5-90ff-ebbbd696c4ac",
+    "indicator_id": "sleep_hours",
+    "value": 3.5,
+    "taken_at": "2026-11-14T18:06:41.601963Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "h",
+    "received_at": "2026-11-14T18:11:41.604710Z"
+  },
+  {
+    "id": "357b7700-41f3-59af-9fb9-a6640908322a",
+    "indicator_id": "bp_systolic",
+    "value": 137.0,
+    "taken_at": "2026-11-14T18:06:41.604742Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "mmHg",
+    "received_at": "2026-11-14T18:11:41.606559Z"
+  },
+  {
+    "id": "3a1a7d3b-63a8-5a7c-bd65-0fc43592b9a3",
+    "indicator_id": "bp_systolic",
+    "value": 145.0,
+    "taken_at": "2026-11-14T18:11:41.608898Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "mmHg",
+    "received_at": "2026-11-14T18:11:41.611679Z"
+  },
+  {
+    "id": "4d7d5ae7-f0b9-5dfc-a5ea-e07c9c22aaa3",
+    "indicator_id": "exercise_min",
+    "value": 90.0,
+    "taken_at": "2026-11-14T18:11:41.608898Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "min",
+    "received_at": "2026-11-14T18:11:41.611841Z"
   }
 ]
 
@@ -5888,7 +5748,7 @@ export const alerts: Schema<'Alert'>[] = [
 export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   "iss": {
     "env_id": "iss",
-    "as_of": "2026-11-14T17:16:01.949358Z",
+    "as_of": "2026-11-14T18:11:41.835448Z",
     "link": {
       "env_id": "iss",
       "state": "online",
@@ -5914,7 +5774,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "moon": {
     "env_id": "moon",
-    "as_of": "2026-11-14T17:16:00.951815Z",
+    "as_of": "2026-11-14T18:11:40.841609Z",
     "link": {
       "env_id": "moon",
       "state": "online",
@@ -5927,7 +5787,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "mars": {
     "env_id": "mars",
-    "as_of": "2026-11-14T17:02:01.953991Z",
+    "as_of": "2026-11-14T17:57:41.847444Z",
     "link": {
       "env_id": "mars",
       "state": "delayed",
@@ -5965,7 +5825,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "earth": {
     "env_id": "earth",
-    "as_of": "2026-11-14T17:16:01.956248Z",
+    "as_of": "2026-11-14T18:11:41.852251Z",
     "link": {
       "env_id": "earth",
       "state": "online",
@@ -5978,7 +5838,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "hospital": {
     "env_id": "hospital",
-    "as_of": "2026-11-14T17:16:01.958363Z",
+    "as_of": "2026-11-14T18:11:41.857747Z",
     "link": {
       "env_id": "hospital",
       "state": "online",
@@ -5991,7 +5851,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "geriatric": {
     "env_id": "geriatric",
-    "as_of": "2026-11-14T17:16:01.960409Z",
+    "as_of": "2026-11-14T18:11:41.862395Z",
     "link": {
       "env_id": "geriatric",
       "state": "online",
@@ -6258,7 +6118,7 @@ export const devices: Schema<'Device'>[] = [
 ]
 
 export const controlOverview: Schema<'ControlOverview'> = {
-  "generated_at": "2026-11-14T17:16:02.007244Z",
+  "generated_at": "2026-11-14T18:11:41.941048Z",
   "environments": [
     {
       "environment": {
@@ -6513,7 +6373,7 @@ export const demoUsers: Schema<'DemoUser'>[] = [
 export const tokenTemplate: Schema<'TokenResponse'> = {
   "access_token": "stub-token-7",
   "token_type": "bearer",
-  "expires_at": "2026-11-15T05:16:02.016023Z",
+  "expires_at": "2026-11-15T06:11:41.959399Z",
   "user": {
     "id": 7,
     "username": "vega",

@@ -6,16 +6,41 @@ Fuente de los datos reales: `app/data/*.json` (BE-03, BE-04, BE-21).
 from datetime import date
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from app.schemas.common import ApiModel, EnvironmentKind, Range, Slug
 
 
 class LivenessThresholds(ApiModel):
-    stale_after_s: int = Field(examples=[300])
-    lost_after_s: int = Field(examples=[900])
-    eva_stale_after_s: int = Field(examples=[30])
-    ruok_timeout_s: int = Field(examples=[120])
+    """Umbrales de liveness y escalado del entorno (docs/offline-and-liveness.md)."""
+
+    stale_after_s: int = Field(gt=0, examples=[300])
+    lost_after_s: int = Field(gt=0, examples=[900])
+    eva_stale_after_s: int = Field(gt=0, examples=[30])
+    eva_lost_after_s: int = Field(gt=0, description="En EVA, sin señal → lost", examples=[120])
+    sleep_factor: float = Field(
+        ge=1, description="Durante el sueño programado los umbrales se multiplican", examples=[3]
+    )
+    ruok_timeout_s: int = Field(gt=0, examples=[120])
+    morning_checkin_by: str | None = Field(
+        default=None,
+        pattern=r"^([01]\d|2[0-3]):[0-5]\d$",
+        description="Hora local HH:MM; sin check-in matinal antes de esa hora → stale (geriatría)",
+        examples=["10:00"],
+    )
+    warning_escalate_after_s: int = Field(
+        gt=0,
+        description="Un warning que persiste este tiempo escala al siguiente nivel",
+        examples=[21600],
+    )
+
+    @model_validator(mode="after")
+    def _lost_after_stale(self) -> "LivenessThresholds":
+        if self.lost_after_s <= self.stale_after_s:
+            raise ValueError("lost_after_s tiene que ser mayor que stale_after_s")
+        if self.eva_lost_after_s <= self.eva_stale_after_s:
+            raise ValueError("eva_lost_after_s tiene que ser mayor que eva_stale_after_s")
+        return self
 
 
 class Theme(ApiModel):

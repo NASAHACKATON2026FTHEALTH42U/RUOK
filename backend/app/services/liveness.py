@@ -5,15 +5,14 @@ Funciones puras. Quien llama pasa ``now=clock.now()`` (nunca
 
 Reglas de docs/offline-and-liveness.md ("Heartbeat y liveness"):
 
-| Liveness | Normal                | EVA                      | Sueño programado |
-|----------|-----------------------|--------------------------|------------------|
-| active   | < ``stale_after_s``   | < ``eva_stale_after_s``  | umbrales ×3      |
-| stale    | ≥ ``stale_after_s``   | ≥ ``eva_stale_after_s``  | ≥ 3 × stale      |
-| lost     | ≥ ``lost_after_s``    | ≥ ``eva_lost_after_s``   | ≥ 3 × lost       |
+| Liveness | Normal                | EVA                      | Sueño programado          |
+|----------|-----------------------|--------------------------|---------------------------|
+| active   | < ``stale_after_s``   | < ``eva_stale_after_s``  | < sleep_factor × stale    |
+| stale    | ≥ ``stale_after_s``   | ≥ ``eva_stale_after_s``  | ≥ sleep_factor × stale    |
+| lost     | ≥ ``lost_after_s``    | ≥ ``eva_lost_after_s``   | ≥ sleep_factor × lost     |
 
-``LivenessThresholds`` no tiene ``eva_lost_after_s``. Mientras no se añada al
-contrato, se usa ``EVA_LOST_FACTOR × eva_stale_after_s`` (30 s × 4 = 2 min,
-como en la tabla del doc). Si el entorno lo define, manda el del entorno.
+Todos los umbrales salen de ``environment.liveness`` (``environments.json``,
+BE-33): no hay valores fijos en el código.
 
 Estado global (``overall = peor(salud, liveness)``):
 
@@ -31,16 +30,10 @@ from app.schemas.common import Activity, Liveness, Status
 from app.services.assessment import _as_dict, worst_status
 
 __all__ = [
-    "EVA_LOST_FACTOR",
-    "SLEEP_FACTOR",
     "combine_overall",
     "compute_liveness",
     "thresholds_for",
 ]
-
-SLEEP_FACTOR = 3
-EVA_LOST_FACTOR = 4
-
 
 def thresholds_for(
     liveness_cfg: Any, activity: Activity | str = Activity.normal
@@ -50,10 +43,10 @@ def thresholds_for(
     activity = Activity(activity)
     stale, lost = cfg["stale_after_s"], cfg["lost_after_s"]
     if activity == Activity.eva:
-        eva_stale = cfg["eva_stale_after_s"]
-        return eva_stale, cfg.get("eva_lost_after_s") or eva_stale * EVA_LOST_FACTOR
+        return cfg["eva_stale_after_s"], cfg["eva_lost_after_s"]
     if activity == Activity.sleep:
-        return stale * SLEEP_FACTOR, lost * SLEEP_FACTOR
+        factor = cfg["sleep_factor"]
+        return round(stale * factor), round(lost * factor)
     return stale, lost
 
 

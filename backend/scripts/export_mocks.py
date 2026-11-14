@@ -15,19 +15,47 @@ import json
 import os
 import sys
 import tempfile
+import uuid
 from pathlib import Path
 
 os.environ["DATABASE_URL"] = f"sqlite:///{tempfile.mkdtemp(prefix='ruok-mocks-')}/mocks.db"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fastapi.testclient import TestClient  # noqa: E402
+from sqlmodel import Session, delete  # noqa: E402
 
-from app import stubs  # noqa: E402
+from app import clock, models, stubs  # noqa: E402
+from app.db import engine  # noqa: E402
 from app.main import app  # noqa: E402
 
 API = "/api/v1"
 OUT = Path(__file__).resolve().parents[2] / "frontend/src/api/mocks/fixtures.gen.ts"
 NOW = "2026-11-14T10:00:00Z"
+
+
+def _demo_state(post) -> None:
+    """Deja a Cmdr. Vega (member 1) con un assessment de demo que mezcla los 4 estados.
+
+    Desde BE-11 el assessment es real y el seed (BE-07) da datos normales, así que
+    los mocks del front se quedarían todo en verde. En Marte:
+    - cardiovascular `critical` (tensión 145 > warning 130–140) → escalado `autonomous`;
+    - neuro-conductual `critical` (escenario `mars_sleep_bp`, sueño 3,5 h);
+    - musculoesquelético `warning` (90 min de ejercicio);
+    - radiación `unknown` (se borran sus mediciones: sin datos = desconocido);
+    - inmune `normal`.
+    """
+    post("/demo/scenarios/mars_sleep_bp")
+    now = clock.now().isoformat().replace("+00:00", "Z")
+    post("/members/1/measurements", {"measurements": [
+        {"id": str(uuid.uuid5(uuid.NAMESPACE_URL, f"mocks:{ind}")), "indicator_id": ind,
+         "value": value, "taken_at": now}
+        for ind, value in (("bp_systolic", 145), ("exercise_min", 90))
+    ]})
+    with Session(engine) as s:
+        s.exec(delete(models.Measurement).where(
+            models.Measurement.member_id == 1, models.Measurement.indicator_id == "radiation_dose"
+        ))
+        s.commit()
 
 
 def main() -> None:
@@ -52,6 +80,8 @@ def main() -> None:
                 mode="json", include={"id", "indicator_id", "value", "taken_at", "source"}
             )]},
         )
+
+        _demo_state(post)
 
         envs = get("/environments")
         env_ids = [e["id"] for e in envs]
