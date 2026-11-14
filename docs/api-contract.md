@@ -1,6 +1,8 @@
-# Contrato de la API — v0
+# Contrato de la API — v0 (cerrado en FS-02)
 
 > **Fuente de verdad entre front y back.** Cualquier cambio se hace primero aquí, en una PR pequeña, y se avisa al equipo. Los tipos TS se generan desde `/openapi.json` (`npm run gen:api`).
+>
+> **Implementación:** los schemas Pydantic están en `backend/app/schemas/` (un módulo por dominio) y los routers stub en `backend/app/routers/`. Los endpoints marcados `STUB(FS-02)` devuelven datos de ejemplo coherentes (`backend/app/stubs.py`) hasta que su issue los implementa. **Swagger (`/docs`) es la referencia detallada** de cada campo. `backend/tests/test_contract.py` comprueba que todo endpoint de este documento existe en el OpenAPI, y viceversa.
 
 ## Convenciones
 - Base: `http://localhost:8000/api/v1`. Swagger en `/docs`.
@@ -31,7 +33,14 @@ AlertSeverity  = warning | critical | emergency
 AlertStatus    = open | escalated | acknowledged | resolved
 AlertCategory  = symptom | physical | psychological | emergency | no_contact | indicator
 Source         = manual | device | camera | checkin | pvt
+Role           = member | medic | commander | responder | psych | family | admin
+Activity       = normal | eva | sleep
+DeviceKind     = mobile | tablet | desktop
+Actor          = system | member | responder
+AlertEventType = created | updated | escalated | queued | delivered | acknowledged | message | resolved
+EventType      = measurement.created | heartbeat | liveness.changed | alert.* | link.* | sync.batch | auth.* | task.completed | device.registered
 ```
+Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, etc.).
 - `unknown` significa que no hay datos o que están caducados. **Nunca se muestra en verde.**
 - Los roles de la escalera (`self`, `crew`, `ground`, `nurse`, `doctor`, `caregiver`, `family`) los define cada entorno.
 
@@ -179,9 +188,11 @@ Source         = manual | device | camera | checkin | pvt
 { "id": 7, "username": "vega", "display_name": "Cmdr. Vega", "role": "member",   // member | medic | commander | responder | psych | family | admin
   "env_id": "mars", "member_id": 1, "role_label": "astronauta" }                   // role_label sale de environment.vocabulary
 
-// Member
-{ "id": 1, "env_id": "mars", "name": "Cmdr. Vega", "role": "commander",
+// Member   (⚠️ `position` = puesto en la misión; NO es el rol de acceso `User.role`)
+{ "id": 1, "env_id": "mars", "name": "Cmdr. Vega", "position": "commander",
   "share_behavioral_details": false, "last_seen_at": "...", "liveness": "active" }
+// MemberSummary = Member + { overall_status, open_alerts, last_measurement_at }
+//   (listas de members, /ground y /control)
 
 // MeasurementIn  (POST, en lote)
 { "id": "uuid", "indicator_id": "bp_systolic", "value": 142, "taken_at": "...",
@@ -198,12 +209,16 @@ Source         = manual | device | camera | checkin | pvt
     "indicators": [{ "indicator_id": "bp_systolic", "last_value": 142, "unit": "mmHg",
                      "taken_at": "...", "status": "warning", "trend": "rising",
                      "baseline": 118, "range": { "normal": [90, 129] } }],
-    "recommendations": [{ "id": "rec_bp_repeat", "text": "Repite en reposo en 15 min", "priority": 1 }],
-    "escalation": { "level": "self", "target_role": "self", "mode": "autonomous",
+    "recommendations": [{ "id": "rec_bp_repeat", "text": "Repite en reposo en 15 min", "priority": 1,
+                         "intervention_id": null }],
+    "escalation": { "level": 0, "target_role": "self", "mode": "autonomous",   // level = índice en escalation_ladder
                     "delay_s": 840, "message": "...", "protocol_id": "proto_bp_high" }
   }],
-  "behavioral": { "status": "normal", "details_visible": true }   // privacidad
+  "behavioral": { "status": "normal", "details_visible": true },  // privacidad
+  "provisional": false                                            // true solo en el cálculo offline del front
 }
+// MeasurementBatchResult = { accepted, duplicates, assessment }
+// HeartbeatResult = { liveness, checkin_required }   ·   RuokResult = { liveness, alert_id? }
 
 // AlertIn  (petición manual)
 { "id": "uuid", "category": "psychological", "severity": "warning",
@@ -226,10 +241,61 @@ Source         = manual | device | camera | checkin | pvt
 { "points": 340, "streak_days": 5, "badges": [{ "id": "early_bird", "name": "...", "earned_at": "..." }],
   "crew_points": 1820 }
 
+// LeaderboardEntry / Leaderboard (cooperativo)
+{ "env_id": "mars", "crew_points": 1820,
+  "members": [{ "member_id": 1, "name": "Cmdr. Vega", "points": 340, "streak_days": 5 }] }
+
+// TokenResponse (login / PIN)
+{ "access_token": "…", "token_type": "bearer", "expires_at": "...", "user": { /* User */ } }
+// DemoUser = { username, display_name, role, env_id, role_label }
+
+// LinkStatus
+{ "env_id": "mars", "state": "delayed", "delay_s": 840, "queued": 1, "since": "..." }
+// LinkMessage = { id, env_id, direction: up|down, kind: alert|alert_event|home_message,
+//                 ref_id, payload, sent_at, eta, delivered_at, state: queued|in_transit|delivered }
+
+// GroundView (GET /environments/{env_id}/alerts?view=ground): solo lo ENTREGADO
+{ "env_id": "mars", "as_of": "...",            // ahora - retardo
+  "link": { /* LinkStatus */ }, "members": [ /* MemberSummary */ ], "alerts": [ /* Alert */ ] }
+
+// Device
+{ "id": "uuid", "user_id": 7, "kind": "mobile", "label": "movil-vega", "ip": "192.168.8.21",
+  "user_agent": "...", "first_seen_at": "...", "last_seen_at": "...",
+  "pending_outbox": 0, "last_sync_at": "..." }
+
+// ControlOverview (GET /control/overview)
+{ "generated_at": "...",
+  "environments": [{ "environment": { "id": "mars", "name": "...", "kind": "space" },
+                     "link": { /* LinkStatus */ }, "members": [ /* MemberSummary */ ],
+                     "open_alerts": { "warning": 1, "critical": 0, "emergency": 0 },
+                     "liveness_paused": false }],
+  "metrics": { "measurements_last_hour": 12, "open_alerts": 1, "active_devices": 1,
+               "avg_alert_response_s": 95.0 } }
+
+// NetworkInfo = { lan_urls: ["http://192.168.8.10:8000"], hostname }
+// OkResponse  = { ok: true, detail? }    (demo/reset, demo/scenarios, control/liveness/pause)
+// DemoClock   = { server_time, offset_s } (demo/fast-forward)
+
 // Intervention
 { "id": "int_box_breathing", "title": "Respiración en caja", "category": "stress",
   "system_id": "neuro_behavioral", "duration_min": 4, "steps": ["..."], "offline": true }
 ```
+
+### SSE: formato de `/events/stream`
+```
+id: 2
+event: alert.created
+data: {"id":2,"type":"alert.created","at":"...","env_id":"mars","member_id":1,...}
+
+```
+- `id` es el `Event.id`. El navegador lo reenvía como `Last-Event-ID` al reconectar.
+- `event` es el `Event.type` y `data` es el `Event` en JSON.
+- El stub emite los eventos de ejemplo y cierra la conexión; el stream continuo llega con BE-28.
+
+### Reglas generales de los schemas
+- **Entrada estricta:** los cuerpos rechazan campos desconocidos con `422` (`extra="forbid"`), así que una errata en un campo no se pierde en silencio.
+- **Fechas:** ISO-8601 con zona. En las query strings usa `Z` (`2026-11-14T10:00:00Z`); un `+00:00` sin codificar llega como espacio.
+- `GET /members/{id}/measurements` usa el parámetro `from` (palabra reservada en Python; en el back es `from_` con alias).
 
 ## Reglas que el front debe respetar
 0. Ocultar vistas por rol es UX y no seguridad. El backend valida siempre. Un `401` nunca borra el outbox: se pide login y se reintenta.
