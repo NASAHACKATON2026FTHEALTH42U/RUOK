@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from 'framer-motion'
 import {
   useId,
   useRef,
@@ -45,6 +46,9 @@ export function BodyFigure({
   const boxRef = useRef<HTMLDivElement>(null)
   const [tooltip, setTooltip] = useState<Tooltip | null>(null)
   const stale = isFigureStale(liveness)
+  // Latido del aura: no si el usuario pide reducir movimiento ni sin datos fiables.
+  const reducedMotion = useReducedMotion()
+  const pulse = !stale && !reducedMotion
   const byRegion = new Map(regions.map((r) => [r.region, r]))
 
   const showTooltip = (region: RegionState, target: Element) => {
@@ -117,10 +121,29 @@ export function BodyFigure({
       {stale && <StatusBadge status={liveness === 'lost' ? 'lost' : 'stale'} label={staleLabel} />}
 
       <div ref={boxRef} className="relative w-full max-w-[300px]">
+        {/* Aura de luz amarilla detrás del cuerpo, con un latido suave (degradado CSS, sin
+            imágenes). Respeta "reducir movimiento"; sin datos fiables se apaga a gris y no late. */}
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-[-55%] top-[-4%] h-[92%] blur-3xl"
+          style={{
+            background: stale
+              ? 'radial-gradient(ellipse 50% 50% at 50% 50%, rgba(200,200,200,0.25) 0%, rgba(137,135,129,0.18) 40%, transparent 72%)'
+              : 'radial-gradient(ellipse 50% 50% at 50% 45%, rgba(255,255,255,0.65) 0%, rgba(254,240,138,0.6) 16%, rgba(253,224,71,0.48) 32%, rgba(234,179,8,0.26) 52%, transparent 74%)',
+          }}
+          animate={
+            !pulse
+              ? { opacity: 0.8, scale: 1 }
+              : { opacity: [0.7, 1, 0.7], scale: [0.97, 1.05, 0.97] } // un latido por ciclo
+          }
+          transition={
+            !pulse ? { duration: 0.4 } : { duration: 4, repeat: Infinity, ease: 'easeInOut' }
+          }
+        />
         {/* Coordenadas en píxeles de la imagen original (887 × 1774). */}
         <svg
           viewBox="0 0 887 1774"
-          className="h-auto w-full"
+          className="relative h-auto w-full"
           role="group"
           aria-label="Estado por sistema del cuerpo"
         >
@@ -163,25 +186,8 @@ export function BodyFigure({
             />
           )}
 
-          {/* Halo de radiación (todo el cuerpo) */}
-          {region('halo', (r) => (
-            <ellipse
-              cx="443"
-              cy="887"
-              rx="425"
-              ry="868"
-              fill="none"
-              stroke={
-                stale || statusStyle(r.status).striped
-                  ? `url(#${stripes})`
-                  : STATUS_COLORS[r.status]
-              }
-              strokeOpacity={selectedSystemId === r.systemId ? 1 : 0.8}
-              strokeWidth={selectedSystemId === r.systemId ? 28 : 18}
-              strokeDasharray="6 24"
-              strokeLinecap="round"
-            />
-          ))}
+          {/* Sin halo alrededor del cuerpo: la radiación (todo el cuerpo) se consulta y se abre
+              desde la leyenda de debajo. */}
 
           {/* Huesos (musculoesquelético): húmero, antebrazo, fémur y tibia */}
           {region('bones', (r) => (
@@ -226,6 +232,19 @@ export function BodyFigure({
               ].map(([cx, cy]) => (
                 <g key={`${cx}-${cy}`}>
                   <circle cx={cx} cy={cy} r="38" fill="transparent" stroke="none" />
+                  {/* Anillo amarillo decorativo (a juego con el aura); el relleno sigue siendo
+                      el color del estado del sistema inmune. */}
+                  {!stale && (
+                    <circle
+                      cx={cx}
+                      cy={cy}
+                      r="27"
+                      fill="none"
+                      stroke="#fde047"
+                      strokeWidth="6"
+                      strokeOpacity="0.9"
+                    />
+                  )}
                   <circle cx={cx} cy={cy} r="18" />
                 </g>
               ))}
