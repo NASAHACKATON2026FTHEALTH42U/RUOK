@@ -18,10 +18,26 @@ from app.services.catalog import (
 
 # Lista de la issue #10 (+ vision_changes, el indicador del sistema `eyes`).
 EXPECTED_INDICATORS = {
-    "heart_rate", "bp_systolic", "bp_diastolic", "spo2", "glucose", "temperature",
-    "sleep_hours", "exercise_min", "hydration_ml", "weight_kg", "radiation_dose",
-    "mood", "stress", "energy", "loneliness", "sleep_quality", "crew_relation",
-    "pvt_mean_rt_ms", "pvt_lapses", "vision_changes",
+    "heart_rate",
+    "bp_systolic",
+    "bp_diastolic",
+    "spo2",
+    "glucose",
+    "temperature",
+    "sleep_hours",
+    "exercise_min",
+    "hydration_ml",
+    "weight_kg",
+    "radiation_dose",
+    "mood",
+    "stress",
+    "energy",
+    "loneliness",
+    "sleep_quality",
+    "crew_relation",
+    "pvt_mean_rt_ms",
+    "pvt_lapses",
+    "vision_changes",
 }
 # Sistema -> región del SVG que pinta BodyFigure en el front (FE-05).
 EXPECTED_SYSTEMS = {
@@ -123,8 +139,9 @@ def test_system_listing_unknown_indicator():
 
 
 def test_indicator_missing_from_its_system():
-    systems = [s.model_copy(update={"indicators": []}) if s.id == "eyes" else s
-               for s in load_systems()]
+    systems = [
+        s.model_copy(update={"indicators": []}) if s.id == "eyes" else s for s in load_systems()
+    ]
     with pytest.raises(ValueError, match="vision_changes"):
         check_consistency(load_indicators(), systems)
 
@@ -163,6 +180,52 @@ def test_environment_with_unknown_indicator():
 def test_ranges_classify_with_engine(ind_id, value, expected):
     ind = catalog.get_indicator(ind_id)
     assert classify(value, merge_ranges(ind)) == expected
+
+
+@pytest.mark.parametrize("ind", load_indicators(), ids=lambda i: i.id)
+def test_no_gap_between_warning_and_critical(ind):
+    """CNT-01: el borde exterior de la banda warning coincide con el umbral crítico.
+
+    El motor trata como critical todo lo que sobrepasa la banda warning por fuera, así que si
+    el umbral `critical_*` quedara más lejos habría valores "critical" antes de tiempo (hueco).
+    """
+    r = ind.ranges
+    if r.warning is None:
+        return
+    if r.warning[0] > r.normal[1] and r.critical_high is not None:  # banda por arriba
+        assert r.warning[1] == r.critical_high, (ind.id, r.warning, r.critical_high)
+    if r.warning[1] < r.normal[0] and r.critical_low is not None:  # banda por abajo
+        assert r.warning[0] == r.critical_low, (ind.id, r.warning, r.critical_low)
+
+
+@pytest.mark.parametrize(
+    ("ind_id", "value", "expected"),
+    [
+        ("bp_systolic", 175, Status.warning),  # hipertensión estadio 2 [S20]
+        ("bp_systolic", 180, Status.critical),  # crisis hipertensiva [S20]
+        ("bp_diastolic", 85, Status.warning),  # estadio 1 [S20]
+        ("bp_diastolic", 120, Status.critical),
+        ("glucose", 60, Status.warning),  # hipoglucemia nivel 1 [S25]
+        ("glucose", 54, Status.critical),  # hipoglucemia nivel 2 [S25]
+        ("temperature", 38.0, Status.warning),  # fiebre [S23]
+        ("temperature", 34.9, Status.critical),  # hipotermia
+        ("heart_rate", 125, Status.warning),  # antes salía critical por el hueco
+        ("sleep_hours", 4.5, Status.warning),  # antes salía critical por el hueco
+        ("radiation_dose", 600, Status.critical),  # límite de carrera [S13]
+        ("pvt_mean_rt_ms", 500, Status.critical),  # umbral de lapso [S12]
+    ],
+)
+def test_sourced_thresholds(ind_id, value, expected):
+    ind = catalog.get_indicator(ind_id)
+    assert classify(value, merge_ranges(ind)) == expected
+
+
+def test_geriatric_fever_override():
+    """Fiebre en mayores de residencias: ≥ 37,8 °C [S24]."""
+    ind = catalog.get_indicator("temperature")
+    geriatric = environments.get_environment("geriatric")
+    assert classify(37.8, merge_ranges(ind)) == Status.normal
+    assert classify(37.8, merge_ranges(ind, geriatric)) == Status.warning
 
 
 def test_mars_override_applies_to_catalog_indicator():
