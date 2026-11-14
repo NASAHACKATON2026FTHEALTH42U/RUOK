@@ -10,6 +10,8 @@ Se define en `environment.escalation_ladder`:
 
 `self` y `crew` (y sus equivalentes en tierra) **se resuelven a bordo**, sin enlace. Los niveles externos (`ground`, `doctor`, `family`) salen por el **enlace simulado**.
 
+El corte lo marca `environment.external_from_level`: el índice del primer nivel externo de la escalera (2 en los 6 entornos). Los niveles anteriores son de a bordo.
+
 ## Alertas automáticas
 1. Cada `POST /measurements` (y cada cambio de liveness) recalcula el assessment.
 2. Un sistema en `warning` crea una alerta de nivel `self`, con recomendaciones de autocuidado.
@@ -51,9 +53,12 @@ El diseño se inspira en las redes tolerantes a retardo (DTN), con **store-and-f
 - Las respuestas de tierra vuelven por la misma cola, con el mismo retardo.
 - La consola `/ground` **solo ve lo entregado**.
 
-### Modo de escalado según el retardo
+### Modo de escalado según el nivel y el retardo
+Las filas con retardo se aplican solo a los niveles **externos**.
+
 | `comm_delay_s` | `escalation.mode` | UX |
 |---|---|---|
+| Cualquiera, si el nivel es **de a bordo** (`level < external_from_level`) | `realtime`, `delay_s` 0 | La tripulación o el personal del centro reciben la alerta al instante |
 | < 5 s | `realtime` | "Contactando con el flight surgeon…" |
 | ≥ 5 s | `delayed` | Cuenta atrás con la ETA |
 | ≥ 60 s y severidad ≥ `critical` | `autonomous` + `delayed` | **Protocolo autónomo** paso a paso mientras llega la respuesta |

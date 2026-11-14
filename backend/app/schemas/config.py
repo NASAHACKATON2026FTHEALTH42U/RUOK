@@ -77,6 +77,12 @@ class Environment(ApiModel):
         description="Roles de escalado en orden. Ej.: self → crew → ground",
         examples=[["self", "crew", "ground"]],
     )
+    external_from_level: int = Field(
+        ge=1,
+        description="Índice del primer nivel externo de escalation_ladder. Los anteriores son "
+        "de a bordo (realtime, sin retardo); los externos salen por el enlace con comm_delay_s",
+        examples=[2],
+    )
     liveness: LivenessThresholds
     vocabulary: dict[str, str] = Field(
         description="Textos visibles: member, crew, ground, roles… "
@@ -87,6 +93,14 @@ class Environment(ApiModel):
     indicators: list[Slug]
     routine: list[RoutineItem] = Field(default_factory=list)
     mission: Mission | None = None
+
+    @model_validator(mode="after")
+    def _external_level_in_ladder(self) -> "Environment":
+        if self.external_from_level > len(self.escalation_ladder):
+            raise ValueError(
+                "external_from_level no puede ser mayor que la longitud de escalation_ladder"
+            )
+        return self
 
 
 class IndicatorRanges(ApiModel):

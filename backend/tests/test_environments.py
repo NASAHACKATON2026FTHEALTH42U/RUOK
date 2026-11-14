@@ -160,3 +160,22 @@ def test_invalid_liveness_is_rejected(tmp_path, change):
     bad.write_text(json.dumps(data))
     with pytest.raises(ValidationError):
         load_environments(bad)
+
+
+# ── BE-31: niveles de a bordo ────────────────────────────────────────
+
+
+@pytest.mark.parametrize("env", load_environments(), ids=lambda e: e.id)
+def test_external_from_level(env):
+    assert env.external_from_level == 2
+    assert env.escalation_ladder[: env.external_from_level][0] == "self"
+
+
+@pytest.mark.parametrize("value", [0, 9])
+def test_external_from_level_out_of_range_is_rejected(tmp_path, value):
+    data = json.loads(DATA_FILE.read_text())
+    data[0]["external_from_level"] = value
+    bad = tmp_path / "environments.json"
+    bad.write_text(json.dumps(data))
+    with pytest.raises(ValidationError):
+        load_environments(bad)

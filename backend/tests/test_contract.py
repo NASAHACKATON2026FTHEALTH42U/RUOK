@@ -244,10 +244,9 @@ def test_assessment_mode_depends_on_environment(client):
             return next(s for s in a["systems"] if s["system_id"] == "neuro_behavioral")
 
         assert neuro(mars)["status"] == "critical"
-        # TODO(BE-31 #111): el escalado de este sistema va a `crew` (a bordo); según el contrato
-        # debe ser `realtime` con delay 0. Hoy el motor le aplica el retardo de Marte. Al
-        # arreglar BE-31, cambia esta línea a: mode == "realtime" y delay_s == 0.
-        assert neuro(mars)["escalation"]["mode"] == "autonomous"  # 840 s de retardo
+        # El escalado de un critical va a `crew` (a bordo): realtime y sin retardo (BE-31).
+        esc = neuro(mars)["escalation"]
+        assert (esc["target_role"], esc["mode"], esc["delay_s"]) == ("crew", "realtime", 0)
         assert neuro(iss)["escalation"]["mode"] == "realtime"  # mismos datos, ISS
     finally:
         client.post(API + "/demo/reset")  # no dejar el escenario a los demás tests
