@@ -22,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fastapi.testclient import TestClient  # noqa: E402
 
+from app import stubs  # noqa: E402
 from app.main import app  # noqa: E402
 
 API = "/api/v1"
@@ -41,6 +42,16 @@ def main() -> None:
             r = c.post(API + path, json=body)
             r.raise_for_status()
             return r.json()
+
+        # Desde BE-06 el GET de mediciones lee la BD (vacía en este script): se
+        # registra antes la medición de ejemplo para que los mocks tengan datos.
+        sample = stubs.measurement(1)
+        post(
+            "/members/1/measurements",
+            {"measurements": [sample.model_dump(
+                mode="json", include={"id", "indicator_id", "value", "taken_at", "source"}
+            )]},
+        )
 
         envs = get("/environments")
         env_ids = [e["id"] for e in envs]
