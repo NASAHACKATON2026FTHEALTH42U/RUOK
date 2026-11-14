@@ -11,6 +11,7 @@ Presentación: **domingo 16:00**.
 |---|---|---|
 | [vision-and-scope.md](vision-and-scope.md) | Todos | Reto, idea central, diferenciadores, alcance del MVP y roadmap |
 | [architecture.md](architecture.md) | Dev | Stack, estructura de carpetas, principio local-first y despliegue |
+| [backend.md](backend.md) | Back | **Guía del backend**: cómo arrancar, estructura actual, SQLite en WAL, reloj inyectable y cómo añadir endpoints |
 | [api-contract.md](api-contract.md) | Front + Back | **Fuente de verdad** de la API v0: convenciones, endpoints y esquemas |
 | [data-model.md](data-model.md) | Back, Front B | **UML de SQLite e IndexedDB**: tablas, índices, stores y flujo de sincronización |
 | [auth-and-roles.md](auth-and-roles.md) | Todos los dev | **Login local y roles**: matriz de acceso por vistas, JWT, PIN, SOS sin sesión |
