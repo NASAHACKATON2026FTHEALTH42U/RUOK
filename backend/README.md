@@ -28,10 +28,11 @@ Ver [`docs/architecture.md`](../docs/architecture.md).
 backend/
 ├── pyproject.toml
 ├── app/
-│   ├── main.py  db.py  models.py  schemas.py  clock.py
+│   ├── main.py  db.py  models.py  clock.py  stubs.py
+│   ├── schemas/     un módulo por dominio
 │   ├── data/        environments.json, indicators.json, systems.json, interventions.json, protocols.json
 │   ├── services/    assessment, alerts, liveness, comm_link, gamification, routine
-│   ├── routers/     health, environments, catalog, members, measurements, assessment, alerts, tasks, game, link, demo
+│   ├── routers/     health, auth, catalog, members, alerts, game, realtime (+ deps.py)
 │   └── seed.py
 └── tests/
 ```

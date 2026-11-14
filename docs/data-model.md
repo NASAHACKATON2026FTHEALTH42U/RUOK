@@ -85,7 +85,7 @@ erDiagram
     text indicator_id "slug -> indicators.json"
     real value
     text unit
-    datetime taken_at "hora del dispositivo"
+    datetime taken_at "instante de la medición (reloj del servidor visto por el dispositivo: serverNow())"
     datetime received_at "hora del servidor (reloj demo)"
     text source "manual | device | camera | checkin | pvt"
     text note
@@ -263,7 +263,8 @@ CREATE INDEX ix_event_type_at          ON event_log(type, at);
 
 **Convenciones:**
 - Todas las fechas se guardan en UTC, en ISO-8601, y se obtienen siempre con `clock.now()`.
-- Los campos `json` se guardan como TEXT con `sa_column=Column(JSON)` en SQLModel.
+- Los campos `json` se guardan como TEXT con `sa_type=JSON` en SQLModel.
+- `event_log` **no declara claves foráneas a propósito**: es una bitácora *append-only* que no debe fallar si se borra un member o un dispositivo. Las relaciones del diagrama son lógicas.
 
 ### Catálogos JSON referenciados (no son tablas)
 
@@ -388,7 +389,7 @@ classDiagram
   }
   class kv {
     <<object store · keyPath key>>
-    +string key — device_id | auth | last_member_id | env_id | last_heartbeat_at
+    +string key — device_id | device_name | auth | last_member_id | last_heartbeat_at
     +any value
   }
   outbox ..> measurements : mismo id
@@ -406,7 +407,7 @@ classDiagram
 | `catalog` | Al arrancar con conexión | Formularios, rangos, protocolos e intervenciones offline | Se sobrescribe |
 | `alerts` | SOS local (`pending=true`) y alertas del servidor | Panel de alertas y aviso "No enviado" | Las resueltas, a los 7 días |
 | `tasks` | Tareas del día y completados locales | Misiones offline | Se conservan los días anteriores al de hoy menos 2 |
-| `kv` | `device_id` (UUID generado una vez), `auth` = `{token, user, exp}` y `last_member_id` (para el SOS sin sesión) | Toda la app | `auth` se borra al cerrar sesión. El outbox **nunca** se borra por un logout o un 401 |
+| `kv` | `device_id` (UUID generado una vez), `device_name` (`?device=`), `auth` = `{token, user, exp}` (FE-27) y `last_member_id` (para el SOS sin sesión). **La sesión de la UI** (entorno, member, vocabulario: store Zustand) **no va aquí**: se guarda en `localStorage` con la clave `ruok-session-<device_id>` (FE-02/FE-30) | Toda la app | `auth` se borra al cerrar sesión. El outbox **nunca** se borra por un logout o un 401 |
 
 ### Flujo de sincronización
 
