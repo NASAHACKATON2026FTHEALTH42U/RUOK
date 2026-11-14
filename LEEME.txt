@@ -39,7 +39,8 @@ Kanban (GitHub Project): https://github.com/orgs/NASAHACKATON2026FTHEALTH42U/pro
     8. Espera a que la CI esté en VERDE (los 3 checks).
     9. 1 aprobación de alguien de tu área o del full-stack.
    10. JUSTO ANTES de mergear, si main ha avanzado: repite el paso 5.
-   11. Merge (squash). Borra la rama.
+   11. Merge con "Create a merge commit" (es lo que usamos) y BORRA la rama
+       (botón "Delete branch" de la PR).
 
   NO se mergea:
     - con la CI en rojo o pendiente;
@@ -47,7 +48,8 @@ Kanban (GitHub Project): https://github.com/orgs/NASAHACKATON2026FTHEALTH42U/pro
       del supervisor; se avisa en el canal del equipo);
     - con force-push sobre main (prohibido siempre).
 
-  EVITAR CONFLICTOS (ya nos han pasado 3: PRs #64, #88 y #89):
+  EVITAR CONFLICTOS (ya nos han pasado: PRs #64, #88, #89 y #100, que dejó
+  FE-09 fuera de main por estar apilada; se rescató en #104):
     - PRs PEQUEÑAS y mergeadas PRONTO. Una rama no debería vivir más de
       3-4 horas: cuanto más vive, más se aleja de main.
     - Sincroniza con main a menudo (git fetch origin && git merge origin/main),
@@ -83,7 +85,7 @@ Kanban (GitHub Project): https://github.com/orgs/NASAHACKATON2026FTHEALTH42U/pro
   Antes de abrir la PR, pasa lo mismo en local:
 
     BACK :  cd backend  && uv run pytest && uv run --with ruff ruff check .
-    FRONT:  cd frontend && npm run lint && npm run build
+    FRONT:  cd frontend && npm run lint && npm run build && npm test
 
   Si la CI falla, lo arreglas tú en tu rama. No se mergea "y luego lo arreglo".
 
@@ -108,9 +110,9 @@ Kanban (GitHub Project): https://github.com/orgs/NASAHACKATON2026FTHEALTH42U/pro
 
   Si cambias la API (BACK):
     1. Actualiza primero docs/api-contract.md (en la misma PR).
-    2. Cambia app/schemas.py y los routers.
-    3. Regenera los tipos del front: cd frontend && npm run gen:api
-    4. Commitea types.gen.ts. Si no, el check "Contrato API" falla.
+    2. Cambia backend/app/schemas/ (un módulo por dominio) y los routers.
+    3. Regenera tipos y mocks del front: cd frontend && npm run gen:api && npm run gen:mocks
+    4. Commitea types.gen.ts y fixtures.gen.ts. Si no, "Contrato API" o el build fallan.
     5. Avisa al equipo FRONT en el canal.
 
   FRONT:
@@ -147,7 +149,8 @@ Kanban (GitHub Project): https://github.com/orgs/NASAHACKATON2026FTHEALTH42U/pro
 
   M0 Setup        sáb, primeras 2 h  scaffolding + contrato + mocks
   Hito 1          sáb noche          dashboard + cuerpo + semáforo, con datos reales
-  Hito 2          dom 09:00          MVP integrado (alertas, offline, liveness, juego)
+  Hito 2          dom 09:00          MVP integrado (alertas, offline, liveness, roles,
+                                     juego, centro de control y tiempo real)
   Freeze          dom 11:00          solo bugs y pulido
   Presentación    dom 16:00
 

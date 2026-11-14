@@ -19,15 +19,15 @@
 | 2 | 0:20 | **`/control`**: panorama de todos los entornos (ISS en verde). Clic en un member de la ISS → cuerpo → corazón | Un único servidor de a bordo, varios dispositivos. La figura explica cada sistema, cómo le afecta el espacio y qué medir. |
 | 3 | 0:45 | **Móvil A (Marte)**: escenario `mars_sleep_bp` y registro de la tensión. En `/control` aparece `measurement.created` al instante | El mismo motor con otro perfil. El cardio pasa a ámbar y el neuro-conductual a rojo. |
 | 4 | 1:05 | Móvil A: alerta con **protocolo autónomo** y ETA de 14 min. `/ground` todavía no la ve | El escalado depende del retardo. Mientras tanto, el astronauta sabe qué hacer. |
-| 5 | 1:25 | En `/control` se pone el enlace en **LOS** y se pulsa **SOS** en el móvil A. La **tablet del médico vibra al instante** (nivel `crew`, local). `/ground`: en cola. Al volver el enlace se hace fast-forward y llega a `/ground` | La tripulación actúa ya; la Tierra se entera cuando llega. Store-and-forward: no se pierde nada. |
-| 6 | 1:50 | Se **apaga el wifi del móvil A** (EVA sin contacto). En `/control` el dispositivo pasa a perdido, la figura a gris y el médico recibe `no_contact`. Al volver el wifi, el outbox se sincroniza (`sync.batch`) | Sin datos no es "todo bien". Y lo que se midió sin conexión no se ha perdido. |
+| 5 | 1:25 | En `/control` se pone el enlace en **LOS** y se pulsa **SOS** en el móvil A. La **tablet del médico recibe la alerta al instante** (nivel `crew`, local; vibra si el navegador lo permite por HTTP). `/ground`: en cola. Al volver el enlace se hace fast-forward y llega a `/ground` | La tripulación actúa ya; la Tierra se entera cuando llega. Store-and-forward: no se pierde nada. |
+| 6 | 1:50 | El móvil A marca la actividad **EVA** y se **apaga su wifi** (EVA sin contacto). Con EVA el umbral es de 30 s (`stale`) y 2 min (`lost`): se hace **fast-forward** desde `/control` para no esperar. En `/control` el dispositivo pasa a perdido, la figura a gris y el médico recibe `no_contact`. Al volver el wifi, el outbox se sincroniza (`sync.batch`) | Sin datos no es "todo bien". Y lo que se midió sin conexión no se ha perdido. |
 | 7 | 2:15 | **Un juez escanea el QR**, entra como member demo y hace el check-in o el **PVT** en su móvil. Aparece en `/control` y gana puntos | Rutina, aislamiento y gamificación cooperativa, en su propio móvil. |
 | 8 | 2:35 | En `/control` se cambia a **residencia geriátrica** | Mismo producto en la Tierra: residentes, cuidadores, soledad y caídas. |
 | 9 | 2:50 | Slide de roadmap y disclaimer | Wearables, rPPG, IA a bordo. Todo esto ha funcionado **sin internet**: el router no tiene salida. |
 
 ## Plan B
 1. **Si la red local falla:** un solo portátil, con cada pestaña como un dispositivo (`?device=movil-vega`, `?device=tablet-medico`) a pantalla partida.
-2. **Si el back cae:** abrir la app con `?mocks=1` (modo demo completo, banner "Datos de ejemplo"), o arrancar el front con `VITE_MOCK_FALLBACK=true` para que solo las lecturas caigan a mocks. Ver `frontend/README.md#mocks`.
+2. **Si el back cae:** abrir la app con `?mocks=1` (modo demo completo, banner "Datos de ejemplo"), o arrancar el front con `VITE_MOCK_FALLBACK=true` para que solo las lecturas caigan a mocks. Ver [`frontend/README.md`](../frontend/README.md#mocks-el-front-sin-backend-fs-04).
 3. Si el portátil falla, se pone el vídeo grabado de la demo (en el Drive del equipo; los vídeos no van a git).
 4. Hay un segundo portátil con el build local ya arrancado.
 
