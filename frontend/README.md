@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20).
 
 ## Comandos
 
@@ -84,7 +84,7 @@ frontend/
     ├── App.tsx                router con todas las rutas
     ├── styles/index.css       Tailwind, colores env-* (variables CSS) y fuente del sistema
     ├── environments/
-    │   ├── index.ts           lista PROVISIONAL de los 6 entornos con su vocabulario (TODO FS-04)
+    │   ├── format.ts          formato de gravedad, retardo y tipo (+ format.test.ts)
     │   ├── useVocab.ts        hook useVocab() + capitalize()
     │   ├── applyTheme.ts      initTheme(): aplica el tema del entorno activo en <html>
     │   └── themes/            un tema por entorno (iss.ts, mars.ts…) + defaultTheme.ts
@@ -94,7 +94,10 @@ frontend/
     │   ├── client.ts          cliente tipado, ApiError/NetworkError, configureApi, serverNow
     │   ├── newId.ts           UUID v4 sin contexto seguro
     │   ├── useServerHealth.ts hook de GET /health
+    │   ├── useEnvironments.ts hook de GET /environments (una petición compartida, con reintento)
+    │   ├── useMembers.ts      hook de GET /environments/{id}/members
     │   └── *.test.ts          tests (Vitest)
+    ├── components/environment/  EnvironmentCard (pintada con su propia paleta), MemberList
     ├── components/ui/
     │   ├── Layout.tsx         cabecera + navegación + <Outlet /> + disclaimer
     │   ├── EnvironmentSelector.tsx
@@ -176,8 +179,16 @@ Reglas:
 - **El semáforo no depende del tema**: `normal`, `warning`, `critical` y `unknown` usan una paleta fija en todos los entornos (FE-04). Ningún `primary` es verde, para no confundirse con "normal".
 - Para añadir un entorno: crea `themes/<id>.ts` y regístralo en `themes/index.ts`.
 
-### Provisional
+### Selección de entorno y member (FE-03)
 
-- `PLACEHOLDER_ENVIRONMENTS` (`src/environments/index.ts`) tiene slug, nombre y vocabulario, copiados de `docs/environments.md`. **TODO(FS-04)**: sustituir por `GET /environments`. No añadas aquí umbrales ni otra configuración.
-- El tipo `Vocabulary` está escrito a mano. **TODO(FS-03)**: usar el tipo generado de `types.gen.ts`.
-- Con FS-04, el `theme.primary` de la API sustituirá al del archivo de tema, para no tener dos fuentes de verdad.
+`/` (`src/pages/EnvironmentSelect.tsx`) tiene dos pasos, con animaciones de Framer Motion (respetan `prefers-reduced-motion`):
+
+1. **Entorno:** una `EnvironmentCard` por entorno de `GET /environments`, pintada con la paleta de ese entorno, con tipo, gravedad y retardo (`src/environments/format.ts`). Al elegir una, `selectEnvironment()` cambia ya el tema y los textos.
+2. **Member:** `MemberList` con `GET /environments/{id}/members`. El puesto (`position`) solo se muestra si el vocabulario lo traduce (`vocabulary.commander` → "comandante"). Al elegir, `selectMember()` y se va a `/dashboard`.
+
+El selector de la cabecera usa el mismo `useEnvironments()`: hay una sola petición compartida.
+
+### Pendiente
+
+- **TODO(FE-28):** `/` solo será accesible para el rol admin; el resto entra directamente en su entorno.
+- **Dos fuentes de color:** el `theme.primary` de la API no coincide con `src/environments/themes/` (en `earth` es verde, `#2da44e`, y se confundiría con el estado "normal"). De momento manda el archivo del front; hay que alinear `environments.json` o decidir qué se usa.

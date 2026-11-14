@@ -1,4 +1,3 @@
-import type { EnvironmentId } from '..'
 import { defaultTheme } from './defaultTheme'
 import { earth } from './earth'
 import { geriatric } from './geriatric'
@@ -12,7 +11,7 @@ export type { Theme } from './types'
 export { defaultTheme }
 
 /** Temas por entorno. Si un entorno no tiene tema, se usa `defaultTheme` (docs/environments.md). */
-export const THEMES: Partial<Record<EnvironmentId, Theme>> = {
+export const THEMES: Record<string, Theme | undefined> = {
   iss,
   moon,
   mars,
@@ -21,6 +20,6 @@ export const THEMES: Partial<Record<EnvironmentId, Theme>> = {
   geriatric,
 }
 
-export function themeFor(envId: EnvironmentId | null): Theme {
+export function themeFor(envId: string | null): Theme {
   return (envId && THEMES[envId]) || defaultTheme
 }
