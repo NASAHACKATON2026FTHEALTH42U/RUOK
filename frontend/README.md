@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21).
 
 ## Comandos
 
@@ -102,6 +102,8 @@ frontend/
     │   ├── Layout.tsx         cabecera + navegación + <Outlet /> + disclaimer
     │   ├── EnvironmentSelector.tsx
     │   ├── ServerStatus.tsx   chip de conexión con el servidor
+    │   ├── StatusBadge.tsx    semáforo: icono (forma + símbolo) + etiqueta
+    │   ├── status.ts          statusStyle(), livenessState(), STATUS_COLORS (+ status.test.ts)
     │   └── PagePlaceholder.tsx
     └── pages/                 una página vacía por ruta
 ```
@@ -187,6 +189,34 @@ Reglas:
 2. **Member:** `MemberList` con `GET /environments/{id}/members`. El puesto (`position`) solo se muestra si el vocabulario lo traduce (`vocabulary.commander` → "comandante"). Al elegir, `selectMember()` y se va a `/dashboard`.
 
 El selector de la cabecera usa el mismo `useEnvironments()`: hay una sola petición compartida.
+
+## Semáforo: `StatusBadge` (FE-04)
+
+Úsalo **siempre** que se muestre un estado de salud o de liveness (members, sistemas, indicadores, /ground). No pintes estados con colores propios.
+
+```tsx
+<StatusBadge status={m.overall_status} />                 // normal | warning | critical | unknown
+<StatusBadge status="stale" label="Sin datos desde hace 12 min" size="sm" />
+const live = livenessState(m.liveness)                      // null si 'active'
+```
+
+| Estado     | Icono           | Color     | Etiqueta            | Rayado |
+| ---------- | --------------- | --------- | ------------------- | ------ |
+| `normal`   | círculo con ✓   | `#0ca30c` | Normal              | no     |
+| `warning`  | triángulo con ! | `#fab219` | Atención            | no     |
+| `critical` | octógono con ✕  | `#d03b3b` | Crítico             | no     |
+| `unknown`  | círculo con ?   | `#898781` | Sin datos           | sí     |
+| `stale`    | círculo con ?   | `#898781` | Sin datos recientes | sí     |
+| `lost`     | señal tachada   | `#d03b3b` | Sin contacto        | sí     |
+
+Reglas:
+
+- **La paleta del semáforo es fija**: no depende del tema del entorno (`STATUS_COLORS` en `status.ts`).
+- **Nunca solo color**: cada estado tiene forma, símbolo y etiqueta propios. Un test comprueba que se distinguen sin color.
+- **`unknown`, `stale` y `lost` nunca son verdes** y llevan fondo rayado (lo comprueba `status.test.ts`).
+- El color se usa en el icono, no en el texto: la etiqueta va en `text-env-text`.
+- **Accesibilidad:** validada con el script de `dataviz` en las superficies de los 7 temas. La separación para daltonismo es ΔE ≥ 9. En los temas oscuros los 4 colores superan 3:1; en hospital y geriatría el verde y el ámbar bajan de 3:1, por eso la etiqueta es siempre visible y el icono lleva un contorno con el color de texto del tema.
+- Si `overall_status` es `unknown` por un liveness `stale`, muestra solo el badge de liveness ("Sin datos recientes"), que explica el motivo (ver `MemberList`).
 
 ### Pendiente
 
