@@ -115,14 +115,15 @@ export default function Missions() {
   }
 
   return (
-    <section className="mx-auto max-w-3xl space-y-6">
+    // Ocupa el alto disponible (Layout `fill`): solo la lista de tareas tiene scroll.
+    <section className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col gap-3 md:gap-4 lg:max-w-5xl">
       {title}
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border border-env-border bg-env-surface p-4">
+      <div className="grid shrink-0 grid-cols-3 gap-2 sm:gap-3">
+        <div className="rounded-xl border border-env-border bg-env-surface p-2.5 sm:p-4">
           <p className="text-sm text-env-muted">Tus puntos</p>
           {current ? (
-            <p className="mt-1 text-3xl font-bold">
+            <p className="mt-1 text-2xl font-bold sm:text-3xl">
               <AnimatedNumber value={current.points + pendingPoints} />
               {pendingPoints > 0 && (
                 <span className="ml-2 align-middle text-xs font-normal text-env-muted">
@@ -134,9 +135,9 @@ export default function Missions() {
             <div className="mt-2 h-8 animate-pulse rounded bg-env-bg" aria-busy="true" />
           )}
         </div>
-        <div className="rounded-xl border border-env-border bg-env-surface p-4">
+        <div className="rounded-xl border border-env-border bg-env-surface p-2.5 sm:p-4">
           <p className="text-sm text-env-muted">Racha</p>
-          <p className="mt-1 text-3xl font-bold">
+          <p className="mt-1 text-2xl font-bold sm:text-3xl">
             {current ? (
               <>
                 <span aria-hidden>🔥 </span>
@@ -150,9 +151,9 @@ export default function Missions() {
             )}
           </p>
         </div>
-        <div className="rounded-xl border border-env-border bg-env-surface p-4">
+        <div className="rounded-xl border border-env-border bg-env-surface p-2.5 sm:p-4">
           <p className="text-sm text-env-muted">Hoy</p>
-          <p className="mt-1 text-3xl font-bold tabular-nums">
+          <p className="mt-1 text-2xl font-bold sm:text-3xl tabular-nums">
             {progress.done} / {progress.total}
           </p>
           <p className="text-xs text-env-muted">
@@ -161,59 +162,68 @@ export default function Missions() {
         </div>
       </div>
 
-      <section>
-        <h2 className="mb-2 font-semibold">Tareas de hoy</h2>
-        {tasks.state === 'loading' ? (
-          <div className="h-32 animate-pulse rounded-xl bg-env-surface" aria-busy="true" />
-        ) : tasks.state === 'error' ? (
-          <p
-            className="rounded-lg border border-env-border bg-env-surface p-3 text-sm"
-            role="alert"
-          >
-            <span aria-hidden>⚠ </span>No se pudieron cargar las tareas.{' '}
-            <button type="button" onClick={tasks.retry} className="underline">
-              Reintentar
-            </button>
-          </p>
-        ) : list.length === 0 ? (
-          <p className="text-env-muted">No hay tareas para hoy.</p>
-        ) : (
-          <ul className="space-y-2">
-            {list.map((t) => (
-              <li key={t.id}>
-                <TaskItem
-                  task={t}
-                  pending={queued.has(t.id) && !serverTasks.find((s) => s.id === t.id)?.completed}
-                  busy={busy !== null}
-                  onComplete={(task) => void onComplete(task)}
-                />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {current && current.badges.length > 0 && (
-        <section>
-          <h2 className="mb-2 font-semibold">Insignias</h2>
-          <ul className="flex flex-wrap gap-2">
-            {current.badges.map((b) => (
-              <li
-                key={b.id}
-                className="rounded-full border border-env-border bg-env-surface px-3 py-1 text-sm"
-                title={`Conseguida el ${new Date(b.earned_at).toLocaleDateString('es-ES')}`}
-              >
-                <span aria-hidden>🏅 </span>
-                {b.name}
-              </li>
-            ))}
-          </ul>
+      {/* Escritorio (≥ lg): tareas a la izquierda y, a la derecha, insignias y tripulación. */}
+      <div className="flex min-h-0 flex-1 flex-col gap-3 md:gap-4 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6">
+        <section className="flex min-h-28 flex-1 flex-col lg:min-h-0">
+          <h2 className="mb-2 shrink-0 font-semibold">Tareas de hoy</h2>
+          {tasks.state === 'loading' ? (
+            <div className="h-32 animate-pulse rounded-xl bg-env-surface" aria-busy="true" />
+          ) : tasks.state === 'error' ? (
+            <p
+              className="rounded-lg border border-env-border bg-env-surface p-3 text-sm"
+              role="alert"
+            >
+              <span aria-hidden>⚠ </span>No se pudieron cargar las tareas.{' '}
+              <button type="button" onClick={tasks.retry} className="underline">
+                Reintentar
+              </button>
+            </p>
+          ) : list.length === 0 ? (
+            <p className="text-env-muted">No hay tareas para hoy.</p>
+          ) : (
+            <ul
+              className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 [scrollbar-color:var(--env-border)_transparent]"
+              tabIndex={0}
+              aria-label="Tareas de hoy"
+            >
+              {list.map((t) => (
+                <li key={t.id}>
+                  <TaskItem
+                    task={t}
+                    pending={queued.has(t.id) && !serverTasks.find((s) => s.id === t.id)?.completed}
+                    busy={busy !== null}
+                    onComplete={(task) => void onComplete(task)}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
-      )}
 
-      {board.state === 'ready' && (
-        <CrewBoard board={board.data} crewWord={vocab.crew} memberId={memberId} />
-      )}
+        <div className="flex shrink-0 flex-col gap-3 md:gap-4 lg:min-h-0 lg:overflow-y-auto">
+          {current && current.badges.length > 0 && (
+            <section>
+              <h2 className="mb-2 font-semibold">Insignias</h2>
+              <ul className="flex flex-wrap gap-2">
+                {current.badges.map((b) => (
+                  <li
+                    key={b.id}
+                    className="rounded-full border border-env-border bg-env-surface px-3 py-1 text-sm"
+                    title={`Conseguida el ${new Date(b.earned_at).toLocaleDateString('es-ES')}`}
+                  >
+                    <span aria-hidden>🏅 </span>
+                    {b.name}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {board.state === 'ready' && (
+            <CrewBoard board={board.data} crewWord={vocab.crew} memberId={memberId} />
+          )}
+        </div>
+      </div>
 
       <div
         aria-live="polite"

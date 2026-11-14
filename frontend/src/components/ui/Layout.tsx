@@ -35,6 +35,8 @@ export function Layout() {
   const { role, can } = useAuth()
   const { pathname } = useLocation()
   const wide = pathname.startsWith('/control')
+  // Páginas que ocupan justo el alto disponible y reparten el scroll por dentro (misiones).
+  const fill = pathname.startsWith('/missions')
   const reducedMotion = useReducedMotion()
   const envId = useEnvironmentStore((s) => s.envId)
   const envs = useEnvironments()
@@ -142,12 +144,13 @@ export function Layout() {
           {/* Contenido. En móvil, cada pantalla debería caber sin scroll (hud-style.md §5). */}
           <main className="bg-grid min-w-0 flex-1 overflow-x-clip overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
             <div
-              className={`mx-auto w-full px-3.5 py-3.5 md:px-6 md:py-6 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
+              className={`mx-auto w-full px-3.5 py-3.5 md:px-6 md:py-6 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'} ${fill ? 'flex h-full flex-col' : ''}`}
             >
               {/* Fundido corto al cambiar de página (FE-26). Solo opacidad: un transform crearía un
                 bloque contenedor y descolocaría las modales `fixed` de las páginas. */}
               <motion.div
                 key={pathname}
+                className={fill ? 'flex min-h-0 flex-1 flex-col' : undefined}
                 initial={reducedMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}
