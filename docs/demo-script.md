@@ -27,7 +27,7 @@
 
 ## Plan B
 1. **Si la red local falla:** un solo portátil, con cada pestaña como un dispositivo (`?device=movil-vega`, `?device=tablet-medico`) a pantalla partida.
-2. Si el back cae, el front cambia a mocks (conmutador) y la demo sigue igual.
+2. **Si el back cae:** abrir la app con `?mocks=1` (modo demo completo, banner "Datos de ejemplo"), o arrancar el front con `VITE_MOCK_FALLBACK=true` para que solo las lecturas caigan a mocks. Ver `frontend/README.md#mocks`.
 3. Si el portátil falla, se pone el vídeo grabado de la demo (en el Drive del equipo; los vídeos no van a git).
 4. Hay un segundo portátil con el build local ya arrancado.
 
