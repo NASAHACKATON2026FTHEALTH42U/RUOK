@@ -70,7 +70,9 @@ export default function Alerts() {
   }
 
   const list = alerts.state === 'ready' ? sortAlerts(alerts.data) : []
-  const current = list.find((a) => a.id === selected) ?? list.find((a) => a.status !== 'resolved')
+  // La elegida; si no, la primera sin resolver; si todas están resueltas, la primera.
+  const current =
+    list.find((a) => a.id === selected) ?? list.find((a) => a.status !== 'resolved') ?? list[0]
   const now = serverNow()
 
   return (
@@ -136,7 +138,10 @@ export default function Alerts() {
                 vocabulary={vocab}
                 assessment={assessment.state === 'ready' ? assessment.data : undefined}
                 interventions={interventions.state === 'ready' ? interventions.data : []}
-                onChanged={alerts.retry}
+                onChanged={() => {
+                  setSelected(current.id) // sigue a la vista tras escalar/recibir/resolver
+                  alerts.refresh()
+                }}
               />
             </div>
           )}
