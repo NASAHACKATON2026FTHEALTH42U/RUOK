@@ -39,6 +39,12 @@ WEEKLY = {"weight_kg", "radiation_dose", "vision_changes"}
 CHECKIN = {"mood", "stress", "energy", "loneliness", "sleep_quality", "crew_relation"}
 
 
+def _source(indicator_id: str) -> str:
+    if indicator_id in CHECKIN:
+        return "checkin"
+    return "pvt" if indicator_id.startswith("pvt_") else "manual"
+
+
 @dataclass(frozen=True)
 class SeedMember:
     id: int
@@ -128,7 +134,7 @@ def _series(member_id: int, indicator: Indicator, anchor: datetime) -> list[mode
                 unit=indicator.unit,
                 taken_at=taken_at,
                 received_at=taken_at + timedelta(seconds=rng.randint(2, 90)),
-                source="checkin" if indicator.id in CHECKIN else "manual",
+                source=_source(indicator.id),
             )
         )
     return rows

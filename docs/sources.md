@@ -58,6 +58,15 @@
 | pvt_mean_rt_ms | ms | 100–354 | 355–499 | ≥ 500 | — | [S12]: 355 ms (lapso en PVT-B) y 500 ms (lapso en PVT); usarlos con el tiempo de reacción **medio** es diseño |
 | pvt_lapses | lapsos | 0–2 | 3–5 | ≥ 6 | — | [S12] (definición de lapso); recuento: diseño |
 
+**Reglas conductuales frente a la línea base** (`behavioral_rules.json`, BE-20; ver [behavioral-health.md](behavioral-health.md)):
+
+| Regla | Umbral | Fuente |
+|---|---|---|
+| Ánimo bajo | media diaria < línea base − 1 durante ≥ 5 días | [S3] BHP (línea base personal); [S10] Mars-500; umbral: diseño |
+| Soledad en aumento | sube 5 días seguidos | [S3] BHP; [S11] análogos; umbral: diseño |
+| PVT con mal sueño | `pvt_mean_rt_ms` > línea base + 20 % **y** sueño < 6 h | [S12] PVT como marcador de fatiga; [S26] sueño; +20 % y 6 h: diseño |
+| Combinación | 2 reglas a la vez → `critical` | Diseño |
+
 **Pendiente:**
 - Confirmar el enlace de S22 y la cita de S24.
 - Revisar con un profesional sanitario los valores marcados como *diseño*.

@@ -1,0 +1,28 @@
+{
+  "private_indicators": [
+    "mood",
+    "stress",
+    "energy",
+    "loneliness",
+    "sleep_quality",
+    "crew_relation",
+    "pvt_mean_rt_ms",
+    "pvt_lapses"
+  ],
+  "low_mood": {
+    "indicator_id": "mood",
+    "below_baseline_by": 1.0,
+    "min_days": 5
+  },
+  "rising_loneliness": {
+    "indicator_id": "loneliness",
+    "min_days": 5
+  },
+  "pvt_with_poor_sleep": {
+    "indicator_id": "pvt_mean_rt_ms",
+    "worse_than_baseline_pct": 20,
+    "sleep_indicator_id": "sleep_hours",
+    "sleep_below": 6.0
+  },
+  "critical_when_rules": 2
+}
