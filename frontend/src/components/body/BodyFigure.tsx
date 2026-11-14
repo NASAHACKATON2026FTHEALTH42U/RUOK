@@ -71,8 +71,6 @@ export function BodyFigure({
   const [tooltip, setTooltip] = useState<Tooltip | null>(null)
   // Zona señalada (ratón, foco de teclado o su botón de la leyenda): se ilumina y el resto se atenúa.
   const [ownHovered, setOwnHovered] = useState<string | null>(null)
-  // Ratón dentro de la figura: el cuerpo se amplía (estable mientras esté dentro).
-  const [overFigure, setOverFigure] = useState(false)
   const hovered = hoveredSystemId !== undefined ? hoveredSystemId : ownHovered
   const setHovered = (id: string | null) => {
     setOwnHovered(id)
@@ -218,6 +216,9 @@ export function BodyFigure({
     const ky = h / 512
     const k = (kx + ky) / 2
     const style = shape(r)
+    // Sin datos: gris liso (no rayado) en los iconos; tampoco es verde, y el "Sin datos" se lee
+    // en el tooltip y en la columna de sistemas.
+    if (stale || statusStyle(r.status).striped) style.fill = STATUS_COLORS.unknown
     return (
       <g transform={`translate(${x} ${y}) scale(${kx} ${ky})`}>
         {/* Zona sensible invisible que cubre el icono (los iconos tienen huecos). El cerebro no
@@ -322,8 +323,6 @@ export function BodyFigure({
           que el panel quepa sin scroll con las fases de la misión debajo. */}
       <div
         ref={boxRef}
-        onPointerEnter={() => setOverFigure(true)}
-        onPointerLeave={() => setOverFigure(false)}
         className="relative w-full"
         style={{ maxWidth: 'min(300px, max(220px, calc((100vh - 350px) / 2)))' }}
       >
@@ -409,15 +408,8 @@ export function BodyFigure({
             </pattern>
           </defs>
 
-          {/* Todo el cuerpo se amplía (×1,12) mientras se señala cualquier zona. */}
-          <g
-            style={{
-              transformBox: 'view-box',
-              transformOrigin: '443.5px 887px',
-              transition: 'transform 250ms ease-out',
-              transform: hovered !== null || overFigure ? 'scale(1.12)' : undefined,
-            }}
-          >
+          {/* La imagen del cuerpo no se amplía al señalar: solo se resalta el órgano. */}
+          <g>
             {/* Cuerpo holográfico. Los órganos se desaturan un poco para que no se confundan con el
               semáforo; sin datos fiables (stale/lost), toda la figura en gris. */}
             {/* Figura de rayos X (900 × 1820) colocada para que cabeza (y 30) y pies (y 1720)
@@ -448,9 +440,8 @@ export function BodyFigure({
 
             {zones.map(([n, d]) => zone(n, d, 'visual'))}
 
-            {/* Zonas sensibles DENTRO del grupo que se amplía: crecen con el dibujo, así lo que se
-                ve y lo que responde coinciden (antes, al crecer, los ojos quedaban sobre la zona
-                del cerebro). No parpadea: la figura se amplía al entrar en ella, no por zona. */}
+            {/* Zonas sensibles (invisibles) encima del dibujo, en las mismas coordenadas: lo que
+                se ve y lo que responde coinciden. */}
             {zones.map(([n, d]) => zone(n, d, 'hit'))}
           </g>
         </svg>
