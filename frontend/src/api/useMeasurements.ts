@@ -14,16 +14,22 @@ export type Measurement = Awaited<ReturnType<typeof getMeasurements>>[number]
 /**
  * Serie temporal de un indicador en los últimos `days` días
  * (`GET /members/{id}/measurements?indicator_id=&from=`), contados con la hora del servidor.
+ * Con `refreshMs` se refresca en segundo plano (el historial usa 15 s para ver lo nuevo).
  */
-export function useMeasurements(memberId: number | null, indicatorId: string, days: number) {
+export function useMeasurements(
+  memberId: number | null,
+  indicatorId: string | null,
+  days: number,
+  refreshMs?: number,
+) {
   return useLoad(
     () =>
       getMeasurements(
         memberId!,
-        indicatorId,
+        indicatorId!,
         new Date(serverNow().getTime() - days * DAY_MS).toISOString(),
       ),
     [memberId, indicatorId, days],
-    { enabled: memberId !== null },
+    { enabled: memberId !== null && indicatorId !== null, refreshMs },
   )
 }

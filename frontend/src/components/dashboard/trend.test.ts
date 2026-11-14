@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bands, toPoints, yDomain } from './trend'
+import { bands, toPoints, yDomain, yTicks } from './trend'
 
 describe('toPoints', () => {
   it('ordena por fecha', () => {
@@ -39,5 +39,12 @@ describe('yDomain', () => {
   it('un único valor sin bandas no colapsa el eje', () => {
     const [lo, hi] = yDomain([{ t: 1, value: 5 }], {})
     expect(hi).toBeGreaterThan(lo)
+  })
+})
+
+describe('yTicks', () => {
+  it('marcas redondas y equiespaciadas dentro del dominio', () => {
+    expect(yTicks([40, 140])).toEqual([40, 60, 80, 100, 120, 140])
+    expect(yTicks([80, 160])).toEqual([80, 100, 120, 140, 160])
   })
 })

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatHazard, formatTrend, formatValue } from './format'
+import { formatHazard, formatSource, formatTrend, formatValue } from './format'
 
 describe('formatTrend', () => {
   it('flecha y texto para cada tendencia', () => {
@@ -27,5 +27,12 @@ describe('formatValue', () => {
   })
   it('sin valor', () => {
     expect(formatValue(null, 'mmHg')).toBe('—')
+  })
+})
+
+describe('formatSource', () => {
+  it('traduce el origen y deja el resto', () => {
+    expect(formatSource('checkin')).toBe('Check-in')
+    expect(formatSource('otro')).toBe('otro')
   })
 })
