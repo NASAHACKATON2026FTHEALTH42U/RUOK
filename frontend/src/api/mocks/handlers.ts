@@ -108,8 +108,34 @@ function addAlertEvent(
   return alert
 }
 
+/**
+ * Usuario del login simulado: los de `fx.users` y, si no está, el perfil demo del selector
+ * (`fx.demoUsers`). Así todos los perfiles que muestra el login entran en modo demo; un member
+ * se enlaza con su ficha del entorno por el nombre (`membersByEnv`).
+ */
+function mockUser(username: string): Schema<'User'> | undefined {
+  const known = fx.users.find((u) => u.username === username)
+  if (known) return known
+  const i = fx.demoUsers.findIndex((d) => d.username === username)
+  if (i < 0) return undefined
+  const d = fx.demoUsers[i]
+  const member =
+    d.role === 'member'
+      ? (fx.membersByEnv[d.env_id ?? ''] ?? []).find((m) => m.name === d.display_name)
+      : undefined
+  return {
+    id: 1000 + i,
+    username: d.username,
+    display_name: d.display_name,
+    role: d.role,
+    env_id: d.env_id ?? null,
+    member_id: member?.id ?? null,
+    role_label: d.role_label,
+  }
+}
+
 function tokenFor(username: string) {
-  const user = fx.users.find((u) => u.username === username)
+  const user = mockUser(username)
   if (!user) return new MockResponse(401, { detail: 'Usuario o contraseña incorrectos (mock)' })
   state.currentUser = user
   const expires = new Date(mockNow().getTime() + 12 * 3600_000).toISOString()

@@ -9,7 +9,8 @@ Autenticación (BE-26) y autorización (BE-27, matriz en `app/auth/permissions.p
   dato (el `member_id`, `env_id` o `alert_id` de la ruta). Si el recurso no existe, no se
   corta aquí: el endpoint responde su 404 como siempre.
 - `device_id_header`: X-Device-Id. Uno mal formado NO da 422 (rompería el SOS): se
-  registra en el log y se ignora. BE-29 lo usará para el registro de dispositivos.
+  registra en el log y se ignora. Uno válido actualiza el registro de dispositivos (BE-29):
+  IP, user agent, última vez visto y, si hay sesión válida, el último usuario.
 """
 
 import logging
@@ -17,7 +18,7 @@ from collections.abc import Callable
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import Depends, Header, HTTPException, Query
+from fastapi import Depends, Header, HTTPException, Query, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlmodel import Session
 
@@ -26,6 +27,7 @@ from app.auth import permissions
 from app.auth.security import InvalidToken, decode_token
 from app.db import get_session
 from app.schemas import ErrorResponse
+from app.services import devices
 
 log = logging.getLogger(__name__)
 
@@ -170,7 +172,37 @@ def require_roles(*roles: str) -> Callable[..., models.UserAccount]:
     return dependency
 
 
+_LOOPBACK = {"127.0.0.1", "::1", "localhost", "testclient"}
+
+
+def _client_ip(request: Request) -> str | None:
+    """IP del dispositivo. Detrás de un proxy local (Vite en desarrollo) se usa
+    `X-Forwarded-For`; solo se le hace caso si la conexión viene del propio servidor."""
+    peer = request.client.host if request.client else None
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded and (peer is None or peer in _LOOPBACK):
+        return forwarded.split(",")[0].strip() or peer
+    return peer
+
+
+def _request_user(request: Request, session: Session) -> models.UserAccount | None:
+    """Usuario de la sesión si el token es válido; si no, `None` (nunca 401 aquí).
+    Se lee la cabecera a mano para no añadir un esquema de seguridad a las rutas públicas."""
+    auth = request.headers.get("authorization", "")
+    scheme, _, token = auth.partition(" ")
+    if scheme.lower() != "bearer" or not token:
+        token = request.query_params.get("token", "")  # SSE: ?token=
+    if not token:
+        return None
+    try:
+        return _user_from_token(session, token.strip())
+    except HTTPException:
+        return None
+
+
 def device_id_header(
+    request: Request,
+    session: SessionDep,
     x_device_id: Annotated[
         str | None,
         Header(description="UUID del dispositivo (docs/control-center-and-devices.md §4)"),
@@ -179,10 +211,23 @@ def device_id_header(
     if x_device_id is None:
         return None
     try:
-        return UUID(x_device_id)
+        device_id = UUID(x_device_id)
     except ValueError:
         log.warning("X-Device-Id mal formado, se ignora: %r", x_device_id[:64])
         return None
+    try:
+        devices.touch(
+            session,
+            str(device_id),
+            user=_request_user(request, session),
+            ip=_client_ip(request),
+            user_agent=request.headers.get("user-agent"),
+        )
+        session.commit()
+    except Exception:  # el registro nunca debe tumbar la petición (ni el SOS)
+        session.rollback()
+        log.exception("No se pudo registrar el dispositivo %s", device_id)
+    return device_id
 
 
 AuthDep = Depends(get_current_user)

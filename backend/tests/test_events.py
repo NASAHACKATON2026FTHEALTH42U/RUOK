@@ -237,7 +237,8 @@ def test_heartbeat_emits_heartbeat_and_liveness_change(client, vega_auth):
     since = _last()
     hb = {"device_id": str(uuid.uuid4())}
     client.post(f"{API}/members/1/heartbeat", json=hb, headers=vega_auth)
-    assert _types_since(since) == ["heartbeat", "liveness.changed"]
+    # Dispositivo nuevo: primero se registra (BE-29).
+    assert _types_since(since) == ["device.registered", "heartbeat", "liveness.changed"]
     since = _last()
     client.post(f"{API}/members/1/heartbeat", json=hb, headers=vega_auth)
     assert _types_since(since) == ["heartbeat"]  # ya estaba activo

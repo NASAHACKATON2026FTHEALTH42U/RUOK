@@ -1,7 +1,7 @@
 """Tiempo real, dispositivos, centro de control, enlace, sistema y demo.
 
 Reales: enlace (BE-13), demo (BE-07), fast-forward (app/clock.py) y eventos/SSE (BE-28).
-STUB(FS-02) → BE-29 (dispositivos) y BE-30 (control y network-info);
+Reales también: dispositivos (BE-29). STUB(FS-02) → BE-30 (control y network-info);
 en /control/overview el `link` ya es real.
 """
 
@@ -44,7 +44,7 @@ from app.schemas import (
     Slug,
 )
 from app.schemas.realtime import AlertCounts, ControlMetrics, EnvironmentOverview, EnvironmentRef
-from app.services import alerts, app_state, comm_link, events, liveness_watch
+from app.services import alerts, app_state, comm_link, devices, events, liveness_watch
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -179,11 +179,16 @@ def list_events(
     response_model=list[Device],
     tags=["realtime"],
     summary="Dispositivos registrados (admin)",
-    description="STUB(FS-02) → BE-29",
+    description="El último visto primero. Se actualizan con cada petición que lleva "
+    "`X-Device-Id` (IP, user agent, usuario) y con cada heartbeat (`pending_outbox`, "
+    "`last_sync_at`). `env_id` filtra por el entorno de su último usuario.",
     dependencies=[AdminDep],
 )
-def list_devices(env_id: Slug | None = None) -> list[Device]:
-    return [stubs.DEVICE]
+def list_devices(session: SessionDep, env_id: Slug | None = None) -> list[Device]:
+    return [
+        Device.model_validate(d, from_attributes=True)
+        for d in devices.list_devices(session, env_id)
+    ]
 
 
 @router.get(

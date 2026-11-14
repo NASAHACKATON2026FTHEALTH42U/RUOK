@@ -21,11 +21,8 @@ from app.schemas import (
     Environment,
     Escalation,
     Event,
-    GameState,
     IndicatorAssessment,
     Intervention,
-    Leaderboard,
-    LeaderboardEntry,
     Measurement,
     Member,
     MemberSummary,
@@ -33,7 +30,6 @@ from app.schemas import (
     SystemAssessment,
     User,
 )
-from app.schemas.game import Badge
 from app.services import environments
 
 # Instante fijo de referencia para que los ejemplos sean deterministas.
@@ -305,25 +301,6 @@ def alert(member_id: int = 1) -> Alert:
         events=[
             AlertEvent(type="created", actor="member", at=T0),
             AlertEvent(type="queued", actor="system", at=T0, payload={"eta_s": 840}),
-        ],
-    )
-
-
-GAME = GameState(
-    points=340,
-    streak_days=5,
-    crew_points=1820,
-    badges=[Badge(id="early_bird", name="Madrugador", earned_at=T0)],
-)
-
-
-def leaderboard(env_id: str = "mars") -> Leaderboard:
-    return Leaderboard(
-        env_id=env_id,
-        crew_points=1820,
-        members=[
-            LeaderboardEntry(member_id=1, name="Cmdr. Vega", points=340, streak_days=5),
-            LeaderboardEntry(member_id=2, name="Ing. Okafor", points=290, streak_days=3),
         ],
     )
 

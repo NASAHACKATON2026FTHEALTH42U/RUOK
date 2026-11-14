@@ -529,7 +529,7 @@ export interface paths {
         put?: never;
         /**
          * Completar una tarea (idempotente por UUID)
-         * @description Reenviar el mismo `id` no suma dos veces; una tarea ya completada (con otro UUID o por una medición) tampoco. El mismo `id` para otra tarea → 409. Emite `task.completed`. Devuelve los puntos; racha e insignias: STUB(FS-02) → BE-19.
+         * @description Reenviar el mismo `id` no suma dos veces; una tarea ya completada (con otro UUID o por una medición) tampoco. El mismo `id` para otra tarea → 409. Emite `task.completed`. Devuelve el `GameState` actualizado (puntos, racha e insignias).
          */
         post: operations["complete_task_api_v1_members__member_id__tasks__task_id__complete_post"];
         delete?: never;
@@ -547,7 +547,7 @@ export interface paths {
         };
         /**
          * Puntos, racha e insignias
-         * @description STUB(FS-02) → BE-19
+         * @description Calculado de las tareas completadas. Racha: días seguidos con alguna tarea completada (hoy, o hasta ayer si hoy aún no). Insignias de `badges.json`; una vez ganadas se conservan. `crew_points`: la suma de toda la tripulación.
          */
         get: operations["game_state_api_v1_members__member_id__game_get"];
         put?: never;
@@ -567,7 +567,7 @@ export interface paths {
         };
         /**
          * Puntos de la tripulación (cooperativo)
-         * @description STUB(FS-02) → BE-19
+         * @description `crew_points` y la aportación de cada member, en el orden de los members (no es un ranking).
          */
         get: operations["leaderboard_api_v1_environments__env_id__leaderboard_get"];
         put?: never;
@@ -607,7 +607,7 @@ export interface paths {
         };
         /**
          * Dispositivos registrados (admin)
-         * @description STUB(FS-02) → BE-29
+         * @description El último visto primero. Se actualizan con cada petición que lleva `X-Device-Id` (IP, user agent, usuario) y con cada heartbeat (`pending_outbox`, `last_sync_at`). `env_id` filtra por el entorno de su último usuario.
          */
         get: operations["list_devices_api_v1_devices_get"];
         put?: never;
