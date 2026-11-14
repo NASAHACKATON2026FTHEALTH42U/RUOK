@@ -25,7 +25,7 @@ const REFRESH_MS = 15_000
  * Panel del member (FE-07): cabecera con estado general, liveness, enlace y frescura de los datos;
  * figura del cuerpo (FE-05); cuadrícula de indicadores ordenada por gravedad; detalle del sistema
  * al hacer clic (FE-06). La evaluación se refresca cada 15 s.
- * TODO(FE-11): mostrar los pendientes de sincronizar del outbox en la cabecera.
+ * Los pendientes de sincronizar del outbox se ven en la cabecera global (PendingSyncChip, FE-11).
  */
 export default function Dashboard() {
   const vocab = useVocab()

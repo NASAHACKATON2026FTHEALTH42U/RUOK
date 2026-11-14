@@ -1,15 +1,17 @@
 """Members, mediciones, evaluación y liveness.
 
-STUB(FS-02) → BE-05 (members), BE-06 (mediciones), BE-11 (assessment),
+Mediciones: reales (BE-06). STUB(FS-02) → BE-05 (members), BE-11 (assessment),
 BE-12 (heartbeat) y BE-16 (R U OK?).
 """
 
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlmodel import Session
 
 from app import stubs
+from app.db import get_session
 from app.routers.deps import ERRORS_404, ERRORS_409, ERRORS_AUTH, AuthDep
 from app.schemas import (
     Assessment,
@@ -25,6 +27,9 @@ from app.schemas import (
     RuokResult,
     Slug,
 )
+from app.services import measurements
+
+SessionDep = Annotated[Session, Depends(get_session)]
 
 router = APIRouter(dependencies=[AuthDep], responses={**ERRORS_AUTH, **ERRORS_404})
 
@@ -78,12 +83,24 @@ def set_privacy(member_id: int, body: PrivacyIn) -> Member:
     tags=["measurements"],
     summary="Registrar un lote de mediciones (idempotente por UUID)",
     description="Repetir un id con el mismo contenido cuenta como `duplicates`; "
-    "con contenido distinto → 409. STUB(FS-02) → BE-06",
+    "con contenido distinto → 409. El lote es atómico: si una medición es inválida "
+    "(indicador desconocido o valor fuera del rango del input → 422) o está en conflicto, "
+    "no se guarda ninguna. `assessment`: STUB(FS-02) → BE-11",
 )
-def post_measurements(member_id: int, body: MeasurementBatchIn) -> MeasurementBatchResult:
+def post_measurements(
+    member_id: int, body: MeasurementBatchIn, session: SessionDep
+) -> MeasurementBatchResult:
     m = _member(member_id)
+    try:
+        accepted, duplicates = measurements.save_batch(session, m.id, body.measurements)
+    except measurements.InvalidMeasurement as exc:
+        raise HTTPException(422, str(exc)) from exc
+    except measurements.MeasurementConflict as exc:
+        raise HTTPException(409, str(exc)) from exc
     return MeasurementBatchResult(
-        accepted=len(body.measurements), duplicates=0, assessment=stubs.assessment(m.id, m.env_id)
+        accepted=accepted,
+        duplicates=duplicates,
+        assessment=stubs.assessment(m.id, m.env_id),  # STUB → BE-11
     )
 
 
@@ -92,16 +109,21 @@ def post_measurements(member_id: int, body: MeasurementBatchIn) -> MeasurementBa
     response_model=list[Measurement],
     tags=["measurements"],
     summary="Serie temporal de mediciones (orden: taken_at)",
-    description="STUB(FS-02) → BE-06",
+    description="Filtros opcionales por indicador y por intervalo de `taken_at` (inclusivo). "
+    "`from` posterior a `to` → 422.",
 )
 def list_measurements(
     member_id: int,
+    session: SessionDep,
     indicator_id: Slug | None = None,
     from_: Annotated[datetime | None, Query(alias="from")] = None,
     to: datetime | None = None,
 ) -> list[Measurement]:
     _member(member_id)
-    return [stubs.measurement(member_id)]
+    if from_ and to and measurements.as_utc(from_) > measurements.as_utc(to):
+        raise HTTPException(422, "`from` no puede ser posterior a `to`")
+    rows = measurements.list_series(session, member_id, indicator_id, from_, to)
+    return [measurements.to_schema(r) for r in rows]
 
 
 @router.get(

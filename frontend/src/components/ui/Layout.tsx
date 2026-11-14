@@ -2,8 +2,11 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { useVocab } from '../../environments/useVocab'
 import { EnvironmentSelector } from './EnvironmentSelector'
 import { MockBanner } from './MockBanner'
+import { SessionMenu } from '../auth/SessionMenu'
+import { PendingSyncChip } from './PendingSyncChip'
 import { ServerStatus } from './ServerStatus'
 import { getDevice } from '../../offline/device'
+import { SosButton } from '../alerts/SosButton'
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Panel' },
@@ -28,6 +31,8 @@ export function Layout() {
             R U OK<span className="text-env-primary">?</span>
           </NavLink>
           <div className="flex items-center gap-3">
+            <PendingSyncChip />
+            <SessionMenu />
             <ServerStatus />
             <EnvironmentSelector />
           </div>
@@ -58,7 +63,7 @@ export function Layout() {
         <Outlet />
       </main>
 
-      <footer className="border-t border-env-border px-4 py-3 text-center text-xs text-env-muted">
+      <footer className="border-t border-env-border px-4 pt-3 pb-20 text-center text-xs text-env-muted">
         Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye el
         criterio de un profesional sanitario.
         {device.mode === 'tab' && (
@@ -67,6 +72,7 @@ export function Layout() {
           </span>
         )}
       </footer>
+      <SosButton />
     </div>
   )
 }

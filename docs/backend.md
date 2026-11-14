@@ -17,7 +17,7 @@
 | BE-10 (#17) | Tendencias, línea base personal (7 días) y regla de "3 días a peor" (`services/trends.py`) | Hecho |
 | BE-11 (#18) | Composición del `Assessment` completo (`services/member_assessment.py`) | **Parcial:** el servicio está hecho, pero `GET /members/{id}/assessment` sigue en stub |
 | FS-04 (#7) | `scripts/export_mocks.py`: mocks del front generados desde la API | Hecho |
-| BE-06 (#13) | Mediciones por lotes e idempotentes | PR #106 abierta |
+| BE-06 (#13) | `POST` de mediciones por lotes (idempotente por UUID, atómico, 409) y `GET` con filtros | Hecho |
 
 Estado global y lista de inconsistencias pendientes: [status.md](status.md).
 
@@ -62,9 +62,11 @@ backend/
 │   │   ├── app_state.py     clave-valor de app_state: get_value/set_value, save_clock/restore_clock
 │   │   ├── assessment.py    motor de evaluación por indicador y por sistema (BE-08, BE-09)
 │   │   ├── catalog.py       indicadores y sistemas: list_indicators(), get_indicator(), list_systems(), check_consistency()
+│   │   ├── environments.py  carga y valida environments.json: list_environments(), get_environment()
+│   │   ├── measurements.py  lotes idempotentes (save_batch), series (list_series), validación (BE-06)
 │   │   ├── member_assessment.py  composición del Assessment completo de un member (BE-11; aún no lo usa el endpoint)
-│   │   ├── trends.py        tendencia, línea base de 7 días y regla de 3 días a peor (BE-10)
-│   │   └── environments.py  carga y valida environments.json: list_environments(), get_environment()
+│   │   ├── members.py       ensure_demo_members(): members de ejemplo en la BD (STUB → BE-07)
+│   │   └── trends.py        tendencia, línea base de 7 días y regla de 3 días a peor (BE-10)
 │   ├── stubs.py          STUB(FS-02): datos de ejemplo de los routers stub (se van retirando)
 │   ├── schemas/          modelos Pydantic del contrato, uno por dominio; se importan desde app.schemas
 │   │   ├── common.py     enumeraciones (Status, Liveness, Role…), Slug, Range, ApiModel, ErrorResponse
@@ -80,7 +82,7 @@ backend/
 │       ├── health.py     GET /health
 │       ├── auth.py       /auth/*, /users
 │       ├── catalog.py    /environments, /indicators, /systems (reales), /interventions (stub)
-│       ├── members.py    /members/{id}, privacy, measurements, assessment, heartbeat, ruok (todo stub)
+│       ├── members.py    /members/{id}, privacy, measurements (real, BE-06), assessment, heartbeat, ruok (stub)
 │       ├── alerts.py     alertas del member, acciones sobre alertas, consola ground
 │       ├── game.py       tareas, game, leaderboard
 │       └── realtime.py   events (SSE), devices, control, system, link, demo (stub salvo /demo/fast-forward)
@@ -98,7 +100,8 @@ backend/
     ├── test_trends.py       tendencias y línea base (BE-10)
     ├── test_member_assessment.py  composición del Assessment (BE-11)
     ├── test_environments.py perfiles vs docs/environments.md, JSON inválido, GET /environments y 404
-    └── test_catalog.py      indicadores y sistemas, coherencia, rangos con el motor, endpoints y 404
+    ├── test_catalog.py      indicadores y sistemas, coherencia, rangos con el motor, endpoints y 404
+    └── test_measurements.py idempotencia, 409, lote atómico, validación, filtros y orden del GET
 ```
 
 La estructura objetivo completa (services, data, seed…) está en [architecture.md](architecture.md#estructura-de-carpetas).
@@ -199,6 +202,30 @@ Si cambias `indicators.json` o `systems.json`, regenera los mocks del front (`cd
 
 **Añadir o cambiar un entorno:** edita `environments.json` siguiendo [environments.md](environments.md), actualiza la tabla de ese documento y `DOC_TABLE` en `tests/test_environments.py`, y pasa los tests. Los valores clínicos (`threshold_overrides`) se citan en [sources.md](sources.md).
 
+### Mediciones (`services/measurements.py`)
+
+Implementa el principio **sin pérdida de datos** ([offline-and-liveness.md](offline-and-liveness.md)). El front guarda cada medición en su outbox con un UUID y la reenvía hasta que el servidor confirma; el servidor tiene que aguantar reenvíos.
+
+`POST /members/{id}/measurements` con `{measurements: [...]}`:
+
+| Caso | Resultado |
+|---|---|
+| id nuevo | se guarda → cuenta en `accepted` |
+| mismo id y mismo contenido (reintento) | no se duplica → cuenta en `duplicates` |
+| mismo id con contenido distinto | **409**, no se guarda **nada** del lote |
+| indicador desconocido, valor fuera de `input.min..max` o `taken_at` sin zona | **422**, no se guarda nada |
+| member inexistente | **404** |
+
+- **"Mismo contenido"** compara member, indicador, valor, `taken_at` (como instante UTC: `12:00+02:00` = `10:00Z`), `source` y `note`.
+- **Lote atómico:** se valida todo antes de escribir y hay un solo `commit`. El cliente corrige y reenvía el lote entero.
+- `unit` sale del catálogo y `received_at` del reloj del servidor (`clock.now()`).
+- **Envíos simultáneos** del mismo lote (dos pestañas): si el `commit` choca con la PK, se reintenta una vez y esas mediciones pasan a `duplicates`.
+- El `assessment` de la respuesta sigue siendo stub hasta **BE-11**; el evento `measurement.created` / `sync.batch` está marcado con `TODO(BE-28)`.
+
+`GET /members/{id}/measurements?indicator_id=&from=&to=`: ordenado por `taken_at`; `from` y `to` son inclusivos; `from > to` → 422.
+
+**Members de ejemplo (temporal):** las mediciones tienen FK a `member`, pero aún no hay seed. Al arrancar, `ensure_demo_members()` inserta los 3 members de `stubs.MEMBERS` si la tabla está vacía. Lo sustituye el seed de **BE-07**.
+
 ### Cabecera `X-Server-Time` y CORS (`app/main.py`)
 
 - Un middleware añade `X-Server-Time` (hora de `clock.now()`, ISO-8601) a **todas** las respuestas, como pide [api-contract.md](api-contract.md).
@@ -226,7 +253,7 @@ Decisiones ya documentadas que todavía no están implementadas. Tenlas en cuent
 
 ## Routers stub (FS-02)
 
-Todos los endpoints del contrato existen. **Reales:** `/health`, `/environments*`, `/indicators*`, `/systems` y `/demo/fast-forward` (a medias). **El resto** devuelve datos de ejemplo de `app/stubs.py` e indica en `description` qué issue lo implementa (`STUB(FS-02) → BE-06`). Tabla completa en [status.md](status.md#endpoints-reales-y-stubs).
+Todos los endpoints del contrato existen. **Reales:** `/health`, `/environments*`, `/indicators*`, `/systems`, `POST`/`GET /members/{id}/measurements` (BE-06) y `/demo/fast-forward` (a medias). **El resto** devuelve datos de ejemplo de `app/stubs.py` e indica en `description` qué issue lo implementa (`STUB(FS-02) → BE-06`). Tabla completa en [status.md](status.md#endpoints-reales-y-stubs).
 
 > ⚠️ El stub de `GET /members/{id}/assessment` **no coincide con lo que calcula el motor** (por ejemplo, 142 mmHg en Marte sale `warning` y el motor diría `critical`). No uses sus valores como referencia de las reglas: la referencia es `services/assessment.py`. Se arregla al conectar el motor en BE-11, y entonces hay que actualizar `test_assessment_mode_depends_on_environment`.
 
