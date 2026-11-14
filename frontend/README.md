@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22).
 
 ## Comandos
 
@@ -96,7 +96,11 @@ frontend/
     │   ├── useServerHealth.ts hook de GET /health
     │   ├── useEnvironments.ts hook de GET /environments (una petición compartida, con reintento)
     │   ├── useMembers.ts      hook de GET /environments/{id}/members
+    │   ├── useSystems.ts      hook de GET /systems (catálogo, una petición compartida)
+    │   ├── useAssessment.ts   hook de GET /members/{id}/assessment
+    │   ├── useLoad.ts         carga genérica (loading / ready / error + retry)
     │   └── *.test.ts          tests (Vitest)
+    ├── components/body/       BodyFigure (SVG) + regions.ts (buildRegions, formatSinceLabel; + test)
     ├── components/environment/  EnvironmentCard (pintada con su propia paleta), MemberList
     ├── components/ui/
     │   ├── Layout.tsx         cabecera + navegación + <Outlet /> + disclaimer
@@ -218,7 +222,41 @@ Reglas:
 - **Accesibilidad:** validada con el script de `dataviz` en las superficies de los 7 temas. La separación para daltonismo es ΔE ≥ 9. En los temas oscuros los 4 colores superan 3:1; en hospital y geriatría el verde y el ámbar bajan de 3:1, por eso la etiqueta es siempre visible y el icono lleva un contorno con el color de texto del tema.
 - Si `overall_status` es `unknown` por un liveness `stale`, muestra solo el badge de liveness ("Sin datos recientes"), que explica el motivo (ver `MemberList`).
 
+## Cuerpo: `BodyFigure` (FE-05)
+
+Figura humana SVG con un color por sistema del cuerpo. Está en `/dashboard` cuando hay un member elegido.
+
+```tsx
+const regions = buildRegions(systems, assessment.systems)   // catálogo (svg_region) + evaluación (status)
+<BodyFigure
+  regions={regions}
+  liveness={assessment.liveness}
+  staleLabel={formatSinceLabel(assessment.last_seen_at, serverNow())}
+  selectedSystemId={selected}
+  onSelectSystem={setSelected}
+/>
+```
+
+| `svg_region` | Dibujo                             | Sistema (stubs)        |
+| ------------ | ---------------------------------- | ---------------------- |
+| `brain`      | cerebro, en la cabeza              | neuro-conductual       |
+| `eyes`       | los dos ojos                       | ojos (SANS)            |
+| `heart`      | corazón, lado izquierdo del cuerpo | cardiovascular         |
+| `immune`     | ganglios (cuello, axilas, ingles)  | inmune                 |
+| `metabolic`  | abdomen                            | metabólico y nutrición |
+| `bones`      | huesos de brazos y piernas         | musculoesquelético     |
+| `halo`       | halo punteado alrededor del cuerpo | radiación              |
+
+- Los colores son los del semáforo (`STATUS_COLORS`). Un sistema sin evaluación es `unknown` (rayado gris), **nunca verde**.
+- Con liveness `stale` o `lost`, **toda la figura** pasa a gris rayado y arriba aparece "Sin datos desde hace X min" (calculado con `serverNow()`, no con el reloj del dispositivo). El tooltip indica el último estado conocido.
+- Cada región es un botón accesible (`role="button"`, `aria-label` con nombre y estado, Enter/Espacio) y muestra un tooltip al pasar el ratón o al enfocarla.
+- Debajo hay una **leyenda clicable** con un `StatusBadge` por sistema: la misma información sin depender del color.
+- Las regiones que no están en el catálogo de sistemas no se dibujan; un `svg_region` desconocido se ignora.
+- `TODO(FE-06)`: el sistema seleccionado abrirá el `SystemPanel`. `TODO(FE-07)`: layout completo del dashboard.
+
 ### Pendiente
+
+- **Cabecera en móvil:** a 390 px el chip de servidor y el selector de entorno no caben y hay scroll horizontal (se arregla en FE-26).
 
 - **TODO(FE-28):** `/` solo será accesible para el rol admin; el resto entra directamente en su entorno.
 - **Dos fuentes de color:** el `theme.primary` de la API no coincide con `src/environments/themes/` (en `earth` es verde, `#2da44e`, y se confundiría con el estado "normal"). De momento manda el archivo del front; hay que alinear `environments.json` o decidir qué se usa.
