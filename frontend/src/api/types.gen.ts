@@ -606,6 +606,83 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/members/{member_id}/kudos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dar un kudos a un compañero (idempotente por UUID)
+         * @description Suma `kudos.points` a los `crew_points`. A uno mismo o a otro entorno → 422. Mismo `id` con otro contenido, o pasar el límite diario → 409.
+         */
+        post: operations["give_kudos_api_v1_members__member_id__kudos_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/environments/{env_id}/kudos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Kudos recientes del entorno */
+        get: operations["list_kudos_api_v1_environments__env_id__kudos_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/environments/{env_id}/missions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Misiones de tripulación del día
+         * @description Catálogo de `crew_game.json` para el entorno, con quién se ha apuntado y si está completada. `date` por defecto: hoy.
+         */
+        get: operations["list_missions_api_v1_environments__env_id__missions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/members/{member_id}/missions/{mission_id}/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Apuntarse a una misión de hoy (idempotente)
+         * @description Al llegar a `min_participants` la misión se completa y suma sus puntos a `crew_points`. Apuntarse dos veces no duplica.
+         */
+        post: operations["join_mission_api_v1_members__member_id__missions__mission_id__join_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/members/{member_id}/home-messages": {
         parameters: {
             query?: never;
@@ -1130,6 +1207,35 @@ export interface components {
             environments: components["schemas"]["EnvironmentOverview"][];
             metrics: components["schemas"]["ControlMetrics"];
         };
+        /**
+         * CrewMission
+         * @description Misión grupal del día: se completa al llegar a `min_participants`.
+         */
+        CrewMission: {
+            /**
+             * Id
+             * @example mars
+             */
+            id: string;
+            /** Title */
+            title: string;
+            /** Points */
+            points: number;
+            /** Min Participants */
+            min_participants: number;
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /**
+             * Participants
+             * @description member_id apuntados
+             */
+            participants: number[];
+            /** Completed */
+            completed: boolean;
+        };
         /** DemoClock */
         DemoClock: {
             /**
@@ -1637,6 +1743,43 @@ export interface components {
              */
             sources: string[];
         };
+        /** Kudos */
+        Kudos: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Env Id
+             * @example mars
+             */
+            env_id: string;
+            /** From Member Id */
+            from_member_id: number;
+            /** To Member Id */
+            to_member_id: number;
+            /** Message */
+            message: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** KudosIn */
+        KudosIn: {
+            /**
+             * Id
+             * Format: uuid
+             * @description UUID v4 generado en el cliente (idempotencia)
+             */
+            id: string;
+            /** To Member Id */
+            to_member_id: number;
+            /** Message */
+            message: string;
+        };
         /**
          * Leaderboard
          * @description Cooperativo: lo importante es crew_points, no el ranking.
@@ -1955,6 +2098,15 @@ export interface components {
              * Format: date
              */
             end: string;
+        };
+        /** MissionJoinIn */
+        MissionJoinIn: {
+            /**
+             * Id
+             * Format: uuid
+             * @description UUID v4 generado en el cliente (idempotencia)
+             */
+            id: string;
         };
         /** NetworkInfo */
         NetworkInfo: {
@@ -4222,6 +4374,279 @@ export interface operations {
             };
             /** @description Recurso inexistente */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    give_kudos_api_v1_members__member_id__kudos_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
+                "x-device-id"?: string | null;
+            };
+            path: {
+                member_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KudosIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Kudos"];
+                };
+            };
+            /** @description Sin sesión válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rol sin permiso o dato ajeno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Mismo id con contenido distinto */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Destinatario no válido */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_kudos_api_v1_environments__env_id__kudos_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: {
+                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
+                "x-device-id"?: string | null;
+            };
+            path: {
+                env_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Kudos"][];
+                };
+            };
+            /** @description Sin sesión válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rol sin permiso o dato ajeno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_missions_api_v1_environments__env_id__missions_get: {
+        parameters: {
+            query?: {
+                date?: string | null;
+            };
+            header?: {
+                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
+                "x-device-id"?: string | null;
+            };
+            path: {
+                env_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CrewMission"][];
+                };
+            };
+            /** @description Sin sesión válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rol sin permiso o dato ajeno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    join_mission_api_v1_members__member_id__missions__mission_id__join_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
+                "x-device-id"?: string | null;
+            };
+            path: {
+                member_id: number;
+                mission_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MissionJoinIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CrewMission"];
+                };
+            };
+            /** @description Sin sesión válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rol sin permiso o dato ajeno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Mismo id con contenido distinto */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -1,6 +1,6 @@
 """Rutina diaria y gamificación cooperativa."""
 
-from datetime import datetime
+from datetime import date, datetime
 from uuid import UUID
 
 from pydantic import Field
@@ -53,3 +53,34 @@ class Leaderboard(ApiModel):
     env_id: Slug
     crew_points: int
     members: list[LeaderboardEntry]
+
+
+class KudosIn(ApiModel):
+    id: UUID = Field(description="UUID v4 generado en el cliente (idempotencia)")
+    to_member_id: int
+    message: str = Field(min_length=1, max_length=200)
+
+
+class Kudos(ApiModel):
+    id: UUID
+    env_id: Slug
+    from_member_id: int
+    to_member_id: int
+    message: str
+    created_at: datetime
+
+
+class MissionJoinIn(ApiModel):
+    id: UUID = Field(description="UUID v4 generado en el cliente (idempotencia)")
+
+
+class CrewMission(ApiModel):
+    """Misión grupal del día: se completa al llegar a `min_participants`."""
+
+    id: Slug
+    title: str
+    points: int
+    min_participants: int
+    date: date
+    participants: list[int] = Field(default_factory=list, description="member_id apuntados")
+    completed: bool

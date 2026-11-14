@@ -64,7 +64,18 @@ from app.schemas.config import (
     ProtocolRecommendation,
     TaskType,
 )
-from app.schemas.game import Badge, GameState, Leaderboard, LeaderboardEntry, Task, TaskCompleteIn
+from app.schemas.game import (
+    Badge,
+    CrewMission,
+    GameState,
+    Kudos,
+    KudosIn,
+    Leaderboard,
+    LeaderboardEntry,
+    MissionJoinIn,
+    Task,
+    TaskCompleteIn,
+)
 from app.schemas.home import HomeMessage, HomeMessageIn
 from app.schemas.link import LinkMessage, LinkStatus
 from app.schemas.members import (
@@ -142,7 +153,11 @@ __all__ = [
     "Event",
     "EventType",
     "FastForwardIn",
+    "CrewMission",
     "GameState",
+    "Kudos",
+    "KudosIn",
+    "MissionJoinIn",
     "GroundView",
     "HealthResponse",
     "HeartbeatIn",

@@ -131,6 +131,17 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 ```
 | GET | `/members/{member_id}/game` | `GameState` |
 | GET | `/environments/{env_id}/leaderboard` | Puntos de la tripulación (cooperativo): `crew_points` y la aportación de cada member, **en el orden de los members** (no es un ranking) |
+| POST | `/members/{member_id}/kudos` *(P2, BE-23)* | member | `{id: UUID, to_member_id, message}` → `Kudos`. Idempotente por `id` (mismo `id` con otro contenido → `409`). `422` = a uno mismo o a otro entorno; `409` también al pasar el límite diario. Suma puntos a `crew_points` |
+| GET | `/environments/{env_id}/kudos?limit=` *(P2, BE-23)* | ✅ | Kudos recientes del entorno, el más nuevo primero |
+| GET | `/environments/{env_id}/missions?date=` *(P2, BE-23)* | ✅ | Misiones de tripulación del día (`CrewMission`): quién participa y si está completada |
+| POST | `/members/{member_id}/missions/{mission_id}/join` *(P2, BE-23)* | member | `{id: UUID}` → `CrewMission` de hoy. Idempotente: apuntarse dos veces no duplica. Al llegar a `min_participants` la misión se completa y suma sus puntos a `crew_points` |
+
+```jsonc
+// Kudos = { id, env_id, from_member_id, to_member_id, message, created_at }
+// CrewMission = { id, title, points, min_participants, date, participants: [member_id],
+//                 completed: bool }   // catálogo, puntos y kudos: app/data/crew_game.json
+// crew_points = puntos de tareas + kudos × kudos.points + misiones completadas × points
+```
 
 ```jsonc
 // GameState — todo se calcula de task_completion; solo las insignias ganadas se guardan (se conservan)

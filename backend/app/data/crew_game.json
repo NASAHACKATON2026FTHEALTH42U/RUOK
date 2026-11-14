@@ -1,0 +1,26 @@
+{
+  "kudos": { "points": 5, "max_per_day": 3, "max_message_length": 200 },
+  "missions": [
+    {
+      "id": "eat_together",
+      "title": "Comer juntos",
+      "points": 30,
+      "min_participants": 2,
+      "envs": ["iss", "moon", "mars", "geriatric"]
+    },
+    {
+      "id": "group_game",
+      "title": "Juego de grupo",
+      "points": 40,
+      "min_participants": 3,
+      "envs": ["iss", "moon", "mars", "hospital", "geriatric"]
+    },
+    {
+      "id": "tend_plants",
+      "title": "Cuidar las plantas",
+      "points": 25,
+      "min_participants": 2,
+      "envs": ["iss", "moon", "mars", "geriatric"]
+    }
+  ]
+}

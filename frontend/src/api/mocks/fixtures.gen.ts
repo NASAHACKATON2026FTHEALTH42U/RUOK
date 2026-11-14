@@ -35,11 +35,19 @@ export const CONTRACT_OPERATIONS = [
   ],
   [
     "GET",
+    "/environments/{env_id}/kudos"
+  ],
+  [
+    "GET",
     "/environments/{env_id}/leaderboard"
   ],
   [
     "GET",
     "/environments/{env_id}/members"
+  ],
+  [
+    "GET",
+    "/environments/{env_id}/missions"
   ],
   [
     "GET",
@@ -179,7 +187,15 @@ export const CONTRACT_OPERATIONS = [
   ],
   [
     "POST",
+    "/members/{member_id}/kudos"
+  ],
+  [
+    "POST",
     "/members/{member_id}/measurements"
+  ],
+  [
+    "POST",
+    "/members/{member_id}/missions/{mission_id}/join"
   ],
   [
     "POST",
