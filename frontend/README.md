@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24).
 
 ## Comandos
 
@@ -100,10 +100,11 @@ frontend/
     │   ├── useSystems.ts      hook de GET /systems (catálogo, una petición compartida)
     │   ├── useAssessment.ts   hook de GET /members/{id}/assessment
     │   ├── useIndicators.ts   hook de GET /indicators (catálogo, una petición compartida)
-    │   ├── useLoad.ts         carga genérica (loading / ready / error + retry)
+    │   ├── useLoad.ts         carga genérica (loading / ready / error + retry, refresco en segundo plano)
+    │   ├── useLink.ts         hook de GET /link?env= (estado del enlace)
     │   └── *.test.ts          tests (Vitest)
     ├── components/body/       BodyFigure (SVG) + regions.ts (buildRegions, formatSinceLabel; + test)
-    ├── components/dashboard/  SystemPanel + format.ts (tendencia, peligros, valores; + test)
+    ├── components/dashboard/  SystemPanel, IndicatorCard, LinkChip + format.ts (tendencia, peligros, valores; + test)
     ├── components/environment/  EnvironmentCard (pintada con su propia paleta), MemberList
     ├── components/ui/
     │   ├── Layout.tsx         cabecera + navegación + <Outlet /> + disclaimer
@@ -255,7 +256,7 @@ const regions = buildRegions(systems, assessment.systems)   // catálogo (svg_re
 - Cada región es un botón accesible (`role="button"`, `aria-label` con nombre y estado, Enter/Espacio) y muestra un tooltip al pasar el ratón o al enfocarla.
 - Debajo hay una **leyenda clicable** con un `StatusBadge` por sistema: la misma información sin depender del color.
 - Las regiones que no están en el catálogo de sistemas no se dibujan; un `svg_region` desconocido se ignora.
-- Al seleccionar un sistema se abre el `SystemPanel` (FE-06). `TODO(FE-07)`: layout completo del dashboard.
+- Al seleccionar un sistema se abre el `SystemPanel` (FE-06).
 
 ## Detalle del sistema: `SystemPanel` (FE-06)
 
@@ -269,7 +270,22 @@ Contenido:
 - Botón **"Medir ahora"** → `/measure?system=<id>` (el formulario que lo lee llega con FE-10).
 - Con liveness `stale` o `lost`, los estados se muestran como "Sin datos recientes", igual que la figura.
 
+## Dashboard (FE-07)
+
+`/dashboard` (`src/pages/Dashboard.tsx`) muestra el panel del member activo (`memberId` del store). Sin member, enlaza a `/` para elegirlo.
+
+- **Cabecera:** `StatusBadge` con el estado general (`overall_status`), el liveness si no es `active` ("Sin datos desde hace X min"), `LinkChip` con el estado del enlace con `{ground}` (en línea / con retardo · 14 min / sin enlace, y los mensajes en cola) y la frescura de los datos ("Actualizado hace…").
+- **Izquierda:** `BodyFigure` (fija al hacer scroll en escritorio).
+- **Derecha:** cuadrícula de `IndicatorCard` con todos los indicadores de la evaluación, **ordenados por gravedad** (`bySeverity`: crítico, atención, sin datos, normal). Clic en una tarjeta → `SystemPanel` de su sistema.
+- En móvil, todo en una columna.
+
+**Refresco cada 15 s.** `useAssessment(memberId, 15_000)` y `useLink(envId, 15_000)` usan `useLoad({ refreshMs })`, que recarga en segundo plano sin volver al esqueleto de carga. Si un refresco falla, se mantienen los últimos datos y la cabecera avisa **"No se pudo actualizar: los datos pueden estar desfasados"** (nunca se finge que están al día).
+
+`IndicatorCard` (`components/dashboard/`) es la tarjeta básica de un indicador (valor, semáforo, tendencia y antigüedad). La usan la cuadrícula y el `SystemPanel`. `TODO(FE-08)`: añadirle la `TrendChart` con las bandas de umbral.
+
 ### Pendiente
+
+- **TODO(FE-11):** los pendientes de sincronizar del outbox en la cabecera del dashboard (aún no existe el outbox).
 
 - **Cabecera en móvil:** a 390 px el chip de servidor y el selector de entorno no caben y hay scroll horizontal (se arregla en FE-26).
 

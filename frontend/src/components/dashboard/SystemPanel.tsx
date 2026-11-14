@@ -1,13 +1,12 @@
 import { motion } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { serverNow } from '../../api/client'
 import type { Assessment } from '../../api/useAssessment'
 import type { Indicator } from '../../api/useIndicators'
 import type { BodySystem } from '../../api/useSystems'
-import { formatAgo } from '../../lib/time'
 import { StatusBadge } from '../ui/StatusBadge'
-import { formatHazard, formatTrend, formatValue } from './format'
+import { formatHazard } from './format'
+import { IndicatorCard } from './IndicatorCard'
 
 type SystemAssessment = Assessment['systems'][number]
 
@@ -38,7 +37,6 @@ export function SystemPanel({
 }: SystemPanelProps) {
   const closeRef = useRef<HTMLButtonElement>(null)
   const titleId = `system-panel-${system.id}`
-  const now = serverNow()
   const byId = new Map(indicators.map((i) => [i.id, i]))
   const recommendations = [...(assessed?.recommendations ?? [])].sort(
     (a, b) => a.priority - b.priority,
@@ -135,33 +133,15 @@ export function SystemPanel({
             </p>
           ) : (
             <ul className="mt-2 space-y-2">
-              {assessed.indicators.map((ind) => {
-                const trend = formatTrend(ind.trend)
-                return (
-                  <li
-                    key={ind.indicator_id}
-                    className="rounded-lg border border-env-border bg-env-surface p-3"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="font-medium">
-                        {byId.get(ind.indicator_id)?.name ?? ind.indicator_id}
-                      </span>
-                      <StatusBadge status={stale ? 'stale' : ind.status} size="sm" />
-                    </div>
-                    <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
-                      <span className="text-lg font-semibold">
-                        {formatValue(ind.last_value, ind.unit)}
-                      </span>
-                      <span className="text-env-muted">
-                        <span aria-hidden>{trend.arrow}</span> {trend.label}
-                      </span>
-                      <span className="text-env-muted">
-                        {ind.taken_at ? formatAgo(ind.taken_at, now) : 'Nunca medido'}
-                      </span>
-                    </div>
-                  </li>
-                )
-              })}
+              {assessed.indicators.map((ind) => (
+                <li key={ind.indicator_id}>
+                  <IndicatorCard
+                    indicator={ind}
+                    name={byId.get(ind.indicator_id)?.name}
+                    stale={stale}
+                  />
+                </li>
+              ))}
             </ul>
           )}
         </section>
