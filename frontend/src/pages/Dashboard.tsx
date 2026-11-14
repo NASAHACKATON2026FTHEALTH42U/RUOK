@@ -13,7 +13,7 @@ import { IndicatorCard } from '../components/dashboard/IndicatorCard'
 import { SystemPanel } from '../components/dashboard/SystemPanel'
 import { SystemsRing } from '../components/dashboard/SystemsRing'
 import { BodyLegend } from '../components/body/BodyLegend'
-import { SidebarPortal } from '../components/ui/SidebarPortal'
+import { TopBarPortal } from '../components/ui/TopBarPortal'
 import { bySeverity, livenessState, statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { capitalize, useVocab } from '../environments/useVocab'
@@ -133,32 +133,47 @@ export default function Dashboard() {
     .sort((x, y) => bySeverity(x.ind.status, y.ind.status))
   const selectedSystem = selected ? systemById.get(selected) : undefined
 
-  // En móvil solo se muestra si hay algo que avisar (liveness o fallo al actualizar): la pantalla
-  // tiene que caber sin scroll (docs/design/hud-style.md §5).
-  const summary = (sidebar: boolean) =>
-    (sidebar || live || assessment.refreshFailed) && (
+  const provisionalText =
+    provisionalIds && provisionalIds.size > 0
+      ? `${provisionalIds.size === 1 ? 'hay 1 indicador' : `hay ${provisionalIds.size} indicadores`} con mediciones sin sincronizar, evaluados en este dispositivo. Se sustituye por la evaluación del servidor al sincronizar.`
+      : null
+
+  // Escritorio: en la barra superior (Layout, TopBarPortal), en línea. Móvil: aquí arriba y solo
+  // si hay algo que avisar (liveness o fallo al actualizar), para caber sin scroll (hud-style §5).
+  const summary = (desktop: boolean) =>
+    (desktop || live || assessment.refreshFailed) && (
       <div
         className={
-          sidebar
-            ? 'flex flex-col items-start gap-1.5 rounded-lg border border-env-border p-2.5 text-xs'
+          desktop
+            ? 'flex min-w-0 flex-wrap items-center gap-2 text-xs'
             : 'mb-3 flex flex-wrap items-center gap-2 md:hidden'
         }
       >
         {/* Si el "sin datos" se debe a un liveness stale, basta el badge de liveness (FE-34).
           En móvil el estado general ya lo cuenta el anillo (SystemsRing). */}
-        {sidebar && !(live === 'stale' && a.overall_status === 'unknown') && (
+        {desktop && !(live === 'stale' && a.overall_status === 'unknown') && (
           <StatusBadge
             status={a.overall_status}
             label={`Estado general: ${statusStyle(a.overall_status).label}`}
-            size={sidebar ? 'sm' : 'md'}
+            size="sm"
           />
         )}
         {live && (
           <StatusBadge status={live} label={formatSinceLabel(a.last_seen_at, serverNow())} />
         )}
+        {desktop && provisionalText && (
+          <span
+            className="rounded-md border border-dashed border-env-border px-2 py-0.5 text-env-muted"
+            title={`Estado provisional: ${provisionalText}`}
+          >
+            <span aria-hidden>⇡ </span>
+            <strong className="text-env-text">Estado provisional</strong>
+            <span className="sr-only">: {provisionalText}</span>
+          </span>
+        )}
         <span
-          className={`${sidebar ? 'text-xs' : 'text-[11px]'} font-mono text-env-muted`}
-          role={sidebar ? 'status' : undefined}
+          className={`${desktop ? 'text-xs' : 'text-[11px]'} font-mono text-env-muted`}
+          role={desktop ? 'status' : undefined}
         >
           {assessment.refreshFailed
             ? '⚠ No se pudo actualizar: los datos pueden estar desfasados'
@@ -171,22 +186,17 @@ export default function Dashboard() {
 
   return (
     <section className="space-y-4 lg:pt-[clamp(2.5rem,calc(100vh-788px),7rem)]">
-      {/* En móvil, `contents`: sin hueco arriba cuando no hay nada que avisar. */}
-      <header className="max-md:contents md:space-y-3">
-        {/* Título solo para lectores de pantalla; el estado general va en la barra lateral. */}
+      {/* `contents`: sin hueco arriba cuando no hay nada que avisar (en escritorio va todo arriba). */}
+      <header className="contents">
+        {/* Título solo para lectores de pantalla; el estado general va en la barra superior. */}
         <div className="sr-only">{title}</div>
-        {/* Estado general: en la barra lateral (escritorio) y, en móvil, aquí arriba. */}
-        <SidebarPortal>{summary(true)}</SidebarPortal>
+        {/* Estado general: en la barra superior (escritorio) y, en móvil, aquí arriba. */}
+        <TopBarPortal>{summary(true)}</TopBarPortal>
         {summary(false)}
-        {provisionalIds && provisionalIds.size > 0 && (
-          <p className="max-md:mb-3 rounded-lg border border-dashed border-env-border px-3 py-2 text-sm text-env-muted">
+        {provisionalText && (
+          <p className="mb-3 rounded-lg border border-dashed border-env-border px-3 py-2 text-sm text-env-muted md:hidden">
             <span aria-hidden>⇡ </span>
-            <strong className="text-env-text">Estado provisional:</strong>{' '}
-            {provisionalIds.size === 1
-              ? 'hay 1 indicador'
-              : `hay ${provisionalIds.size} indicadores`}{' '}
-            con mediciones sin sincronizar, evaluados en este dispositivo. Se sustituye por la
-            evaluación del servidor al sincronizar.
+            <strong className="text-env-text">Estado provisional:</strong> {provisionalText}
           </p>
         )}
       </header>
