@@ -85,7 +85,10 @@ export function BodyFigure({
   const byRegion = new Map(regions.map((r) => [r.region, r]))
   // Tamaño e intensidad del aura según el estado de la radiación (sistema en la zona `halo`).
   const radiation = byRegion.get('halo')
-  const aura = (radiation && RADIATION_AURA[radiation.status]) ?? AURA_BASE
+  const baseAura = (radiation && RADIATION_AURA[radiation.status]) ?? AURA_BASE
+  // Radiación señalada (el aura, su botón en "Sistemas" o el teclado): el aura se intensifica.
+  const auraLit = !!radiation && hovered === radiation.systemId
+  const aura = auraLit ? { scale: baseAura.scale * 1.12, opacity: 1 } : baseAura
 
   const showTooltip = (region: RegionState, target: Element) => {
     const box = boxRef.current?.getBoundingClientRect()
@@ -232,6 +235,13 @@ export function BodyFigure({
 
   /** Zonas del cuerpo, en coordenadas de la imagen original (887 × 1774). */
   const zones: [BodyRegion, (r: RegionState) => ReactNode][] = [
+    // Radiación (todo el cuerpo): el aura de detrás del cuerpo. Va primero, por debajo de los
+    // órganos: señalar un órgano no activa la radiación. Sin relleno propio (lo que se ve es el
+    // aura, que se intensifica al señalarla).
+    [
+      'halo',
+      () => <ellipse cx="443.5" cy="860" rx="470" ry="900" fill="transparent" stroke="none" />,
+    ],
     // Huesos (musculoesquelético): húmero, antebrazo, fémur y tibia
     [
       'bones',
