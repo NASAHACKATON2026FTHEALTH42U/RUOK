@@ -4,16 +4,20 @@ from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from sqlmodel import Session
 
 from app import clock
-from app.db import init_db
+from app.db import engine, init_db
 from app.routers import alerts, auth, catalog, game, health, members, realtime
 from app.routers.deps import device_id_header
+from app.services.app_state import restore_clock
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     init_db()
+    with Session(engine) as session:
+        restore_clock(session)
     yield
 
 

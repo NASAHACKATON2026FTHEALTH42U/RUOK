@@ -7,9 +7,9 @@
 
 | Issue | Qué aporta | Estado |
 |---|---|---|
-| BE-01 (#3) | FastAPI, `/health`, CORS, `X-Server-Time`, SQLite en WAL, reloj inyectable, tests | Hecho (PR pendiente de merge) |
-| BE-02 (#8) | Modelos SQLModel (tablas de [data-model.md](data-model.md)) | Pendiente |
-| FS-02 (#5) | Schemas Pydantic completos del contrato, routers stub de todos los endpoints, test de cobertura del contrato | Hecho (PR pendiente de merge) |
+| BE-01 (#3) | FastAPI, `/health`, CORS, `X-Server-Time`, SQLite en WAL, reloj inyectable, tests | Hecho |
+| FS-02 (#5) | Schemas Pydantic completos del contrato, routers stub de todos los endpoints, test de cobertura del contrato | Hecho |
+| BE-02 (#8) | Modelos SQLModel de **todas** las tablas de [data-model.md](data-model.md) con sus índices, `app_state` y persistencia del reloj | Hecho (PR pendiente de merge) |
 
 ## Arrancar
 
@@ -39,9 +39,12 @@ backend/
 ├── pyproject.toml        dependencias (fastapi, uvicorn, sqlmodel, pydantic; dev: pytest, httpx, ruff)
 ├── uv.lock               versiones exactas (lo genera uv, no se edita a mano)
 ├── app/
-│   ├── main.py           app FastAPI: lifespan (init_db), CORS, cabecera X-Server-Time, router /api/v1
+│   ├── main.py           app FastAPI: lifespan (init_db + restaurar reloj), CORS, X-Server-Time, /api/v1
 │   ├── db.py             engine SQLite (WAL + foreign_keys), init_db(), get_session()
 │   ├── clock.py          reloj inyectable: now(), advance(), set_offset(), get_offset(), reset()
+│   ├── models.py         tablas SQLModel (15) e índices de data-model.md; tipo UTCDateTime
+│   ├── services/
+│   │   └── app_state.py  clave-valor de app_state: get_value/set_value, save_clock/restore_clock
 │   ├── stubs.py          STUB(FS-02): datos de ejemplo de los routers stub (se van retirando)
 │   ├── schemas/          modelos Pydantic del contrato, uno por dominio; se importan desde app.schemas
 │   │   ├── common.py     enumeraciones (Status, Liveness, Role…), Slug, Range, ApiModel, ErrorResponse
@@ -66,7 +69,8 @@ backend/
     ├── test_contract.py  FS-02: todo endpoint del contrato está en el OpenAPI (y viceversa) y su stub responde
     ├── test_health.py    /health, X-Server-Time, CORS, /docs
     ├── test_clock.py     reloj y fast-forward
-    └── test_db.py        WAL, foreign_keys y sesión
+    ├── test_db.py        WAL, foreign_keys y sesión
+    └── test_models.py    tablas, índices, crear/leer cada modelo, restricciones, fechas UTC, app_state
 ```
 
 La estructura objetivo completa (services, data, seed…) está en [architecture.md](architecture.md#estructura-de-carpetas).
@@ -95,7 +99,32 @@ def list_members(session: Session = Depends(get_session)):
     ...
 ```
 
-`init_db()` crea las tablas de todos los modelos SQLModel importados. Los modelos llegan en BE-02; para que se creen, `app/models.py` tiene que importarse antes de `init_db()`.
+`init_db()` importa `app/models.py` y crea las tablas e índices que falten (`create_all`: no borra ni altera tablas existentes). Si cambias una tabla que ya existe en tu `ruok.db`, bórrala (`rm backend/ruok.db*`) para que se vuelva a crear; no hay migraciones.
+
+### Modelos (`app/models.py`)
+
+Una clase `SQLModel` con `table=True` por cada tabla de [data-model.md](data-model.md) §1:
+
+| Grupo | Modelos (tabla) |
+|---|---|
+| Usuarios y members | `Member` (member), `UserAccount` (user_account), `Device` (device) |
+| Mediciones | `Measurement` (measurement) |
+| Rutina y gamificación | `Task` (task), `TaskCompletion` (task_completion), `BadgeAward` (badge_award), `Kudos` (kudos) |
+| Alertas y check-in | `Alert` (alert), `AlertEvent` (alert_event), `RuokCheck` (ruok_check) |
+| Enlace simulado | `LinkMessage` (link_message), `LinkState` (link_state) |
+| Tiempo real y técnico | `EventLog` (event_log), `AppState` (app_state) |
+
+Convenciones:
+- **Fechas:** `sa_type=UTCDateTime`. SQLite no guarda la zona horaria; este tipo convierte a UTC al guardar y devuelve fechas con `tzinfo=UTC` al leer. **Rechaza fechas sin zona** (`datetime(2026, 1, 1)`): usa `clock.now()`. Los valores por defecto usan `clock.now()`, así que respetan el fast-forward.
+- **JSON:** `sa_type=JSON` (`Alert.indicator_ids`, `payload` de `AlertEvent`/`LinkMessage`/`EventLog`, `AppState.value`).
+- **Enumeraciones como `str`:** `role`, `status`, `severity`… se guardan como texto (los valores válidos están comentados en cada campo). La validación va en los schemas de la API (FS-02), para no duplicar los enums.
+- **PK:** UUID del cliente en `measurement`, `task_completion`, `alert`, `device` y `kudos` (idempotencia); id determinista en `task`; enteros autoincrementales en el resto.
+- **Índices:** en `__table_args__`, con los nombres exactos de data-model.md. Los parciales usan `sqlite_where=text(...)`:
+  - `ux_alert_open_dedupe`: como máximo una alerta no resuelta por `dedupe_key`;
+  - `ux_user_member`: un member tiene como máximo un usuario;
+  - `ix_ruok_member_pending`: check-ins sin respuesta.
+
+**Añadir una tabla o columna:** primero en data-model.md, después en `models.py` (con su índice si lo tiene), un test en `test_models.py` y `rm backend/ruok.db*` en local.
 
 ### Reloj inyectable (`app/clock.py`)
 
@@ -108,7 +137,9 @@ def list_members(session: Session = Depends(get_session)):
 | `set_offset(seconds)` / `get_offset()` | Fija o consulta el desfase |
 | `reset()` | Vuelve al reloj real |
 
-El desfase vive en memoria y se pierde al reiniciar. Su persistencia en `app_state.clock_offset_s` llega con BE-02.
+El desfase vive en memoria. Para que sobreviva a un reinicio se guarda en `app_state.clock_offset_s`:
+- `services.app_state.save_clock(session)` lo guarda (lo llamará `/demo/fast-forward`);
+- al arrancar, el `lifespan` llama a `restore_clock(session)` y lo recupera.
 
 ### Cabecera `X-Server-Time` y CORS (`app/main.py`)
 
@@ -123,7 +154,6 @@ Decisiones ya documentadas que todavía no están implementadas. Tenlas en cuent
 - **Autenticación (BE-25/BE-26):** `Authorization: Bearer <jwt>` en todos los endpoints **salvo `/health`**, `/auth/*` y el SOS de emergencia. Código en `app/auth/` (`security.py`, `permissions.py`). Ver [auth-and-roles.md](auth-and-roles.md).
 - **Dispositivo (BE-29):** todas las peticiones llevan `X-Device-Id`. El CORS actual ya acepta cualquier cabecera (`allow_headers=["*"]`).
 - **Tiempo real (BE-28):** los cambios de estado se registran con `events.emit()` en la tabla `event_log` y se emiten por SSE (`/events/stream`).
-- **Tablas nuevas para BE-02:** además de las originales, [data-model.md](data-model.md) incluye ahora `user_account`, `device` y `event_log`.
 
 ## Routers stub (FS-02)
 
