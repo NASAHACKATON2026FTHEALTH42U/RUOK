@@ -8,6 +8,9 @@ services:
       - "8000:8000"
     environment:
       DEMO_MODE: "true"
+      # IP del portátil en la red local para el QR (BE-30). Dentro del contenedor solo se ve
+      # su IP interna: RUOK_LAN_HOST=192.168.8.10 docker compose up
+      RUOK_LAN_HOST: ${RUOK_LAN_HOST:-}
     volumes:
       - ruok-data:/data   # la BD SQLite sobrevive a los reinicios
     restart: unless-stopped

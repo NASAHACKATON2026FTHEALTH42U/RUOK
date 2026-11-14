@@ -23,7 +23,7 @@ from sqlmodel import Session, col, select
 from app import clock, models
 from app.schemas import AlertIn, RuokResult
 from app.schemas.common import AlertStatus, EventType, Liveness, Status
-from app.services import alerts, environments, events
+from app.services import alerts, control, environments, events
 from app.services.liveness import member_liveness
 
 log = logging.getLogger(__name__)
@@ -51,6 +51,8 @@ def check_member(session: Session, member: models.Member) -> models.Alert | None
     """Revisa el liveness de un member. Devuelve la alerta `no_contact` si la crea."""
     if not member.device_id:
         return None  # nunca ha conectado un dispositivo
+    if control.is_liveness_paused(session, member.env_id):
+        return None  # pausado desde /control durante la presentación (BE-30)
     env = environments.get_environment(member.env_id)
     now = clock.now()
     live = member_liveness(member, now)
