@@ -208,8 +208,9 @@ class Alert(SQLModel, table=True):
     indicator_ids: list[str] = Field(default_factory=list, sa_type=JSON)
     message: str = ""
     level: int = 0  # posición en escalation_ladder
-    target_role: str | None = None  # self | crew | ground | nurse | doctor...
-    delivery_mode: str | None = None  # realtime | delayed | autonomous
+    # Obligatorios, como en el schema `Alert` del contrato (BE-35).
+    target_role: str  # self | crew | ground | nurse | doctor...
+    delivery_mode: str  # realtime | delayed | autonomous
     delay_s: int = 0
     eta: dt.datetime | None = Field(default=None, sa_type=UTCDateTime)
     delivered_at: dt.datetime | None = Field(default=None, sa_type=UTCDateTime)
