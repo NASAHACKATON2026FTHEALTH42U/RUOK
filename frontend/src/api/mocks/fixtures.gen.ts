@@ -453,7 +453,10 @@ export const environments: Schema<'Environment'>[] = [
     "vocabulary": {
       "member": "participante",
       "crew": "equipo",
-      "ground": "médico"
+      "ground": "médico",
+      "medic": "sanitario del equipo",
+      "commander": "responsable del equipo",
+      "psych": "psicólogo"
     },
     "theme": {
       "primary": "#2bb3c9",
@@ -505,7 +508,9 @@ export const environments: Schema<'Environment'>[] = [
       "member": "paciente",
       "crew": "planta",
       "ground": "médico",
-      "medic": "enfermería"
+      "medic": "enfermería",
+      "nurse": "enfermería",
+      "doctor": "médico"
     },
     "theme": {
       "primary": "#0b5a96",
@@ -558,7 +563,10 @@ export const environments: Schema<'Environment'>[] = [
       "member": "residente",
       "crew": "residencia",
       "ground": "médico",
-      "medic": "cuidador"
+      "medic": "cuidador",
+      "caregiver": "cuidador",
+      "doctor": "médico",
+      "family": "familia"
     },
     "theme": {
       "primary": "#6a429e",
@@ -10302,17 +10310,17 @@ export const demoUsers: Schema<'DemoUser'>[] = [
   },
   {
     "username": "medic-earth",
-    "display_name": "Medic (Analógico terrestre)",
+    "display_name": "Sanitario del equipo (Analógico terrestre)",
     "role": "medic",
     "env_id": "earth",
-    "role_label": "medic"
+    "role_label": "sanitario del equipo"
   },
   {
     "username": "commander-earth",
-    "display_name": "Commander (Analógico terrestre)",
+    "display_name": "Responsable del equipo (Analógico terrestre)",
     "role": "commander",
     "env_id": "earth",
-    "role_label": "commander"
+    "role_label": "responsable del equipo"
   },
   {
     "username": "responder-earth",
@@ -10323,10 +10331,10 @@ export const demoUsers: Schema<'DemoUser'>[] = [
   },
   {
     "username": "psych-earth",
-    "display_name": "Psych (Analógico terrestre)",
+    "display_name": "Psicólogo (Analógico terrestre)",
     "role": "psych",
     "env_id": "earth",
-    "role_label": "psych"
+    "role_label": "psicólogo"
   },
   {
     "username": "marti",
