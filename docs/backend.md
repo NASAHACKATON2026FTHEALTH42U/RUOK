@@ -8,8 +8,8 @@
 | Issue | Qué aporta | Estado |
 |---|---|---|
 | BE-01 (#3) | FastAPI, `/health`, CORS, `X-Server-Time`, SQLite en WAL, reloj inyectable, tests | Hecho |
+| FS-02 (#5) | Schemas Pydantic completos del contrato, routers stub de todos los endpoints, test de cobertura del contrato | Hecho |
 | BE-02 (#8) | Modelos SQLModel de **todas** las tablas de [data-model.md](data-model.md) con sus índices, `app_state` y persistencia del reloj | Hecho (PR pendiente de merge) |
-| FS-02 (#5) | Schemas Pydantic completos del contrato | Pendiente |
 
 ## Arrancar
 
@@ -43,13 +43,30 @@ backend/
 │   ├── db.py             engine SQLite (WAL + foreign_keys), init_db(), get_session()
 │   ├── clock.py          reloj inyectable: now(), advance(), set_offset(), get_offset(), reset()
 │   ├── models.py         tablas SQLModel (15) e índices de data-model.md; tipo UTCDateTime
-│   ├── schemas.py        modelos Pydantic de la API (de momento solo HealthResponse)
 │   ├── services/
 │   │   └── app_state.py  clave-valor de app_state: get_value/set_value, save_clock/restore_clock
+│   ├── stubs.py          STUB(FS-02): datos de ejemplo de los routers stub (se van retirando)
+│   ├── schemas/          modelos Pydantic del contrato, uno por dominio; se importan desde app.schemas
+│   │   ├── common.py     enumeraciones (Status, Liveness, Role…), Slug, Range, ApiModel, ErrorResponse
+│   │   ├── config.py     Environment, Indicator, BodySystem, Intervention
+│   │   ├── auth.py       User, LoginIn, PinLoginIn, TokenResponse, DemoUser, UserCreate
+│   │   ├── members.py    Member(Summary), Measurement*, Assessment, Heartbeat*, Ruok*
+│   │   ├── alerts.py     Alert, AlertIn, AlertEvent, Escalate/Ack/Resolve/MessageIn, GroundView
+│   │   ├── link.py       LinkStatus, LinkMessage
+│   │   ├── game.py       Task, TaskCompleteIn, GameState, Badge, Leaderboard
+│   │   └── realtime.py   Event, Device, ControlOverview, NetworkInfo, Demo*
 │   └── routers/
-│       └── health.py     GET /api/v1/health
+│       ├── deps.py       Bearer opcional (stub de auth), cabecera X-Device-Id, respuestas de error
+│       ├── health.py     GET /health
+│       ├── auth.py       /auth/*, /users
+│       ├── catalog.py    /environments, /indicators, /systems, /interventions
+│       ├── members.py    /members/{id}, privacy, measurements, assessment, heartbeat, ruok
+│       ├── alerts.py     alertas del member, acciones sobre alertas, consola ground
+│       ├── game.py       tareas, game, leaderboard
+│       └── realtime.py   events (SSE), devices, control, system, link, demo
 └── tests/
     ├── conftest.py       BD temporal, reset del reloj, fixture `client`
+    ├── test_contract.py  FS-02: todo endpoint del contrato está en el OpenAPI (y viceversa) y su stub responde
     ├── test_health.py    /health, X-Server-Time, CORS, /docs
     ├── test_clock.py     reloj y fast-forward
     ├── test_db.py        WAL, foreign_keys y sesión
@@ -138,10 +155,22 @@ Decisiones ya documentadas que todavía no están implementadas. Tenlas en cuent
 - **Dispositivo (BE-29):** todas las peticiones llevan `X-Device-Id`. El CORS actual ya acepta cualquier cabecera (`allow_headers=["*"]`).
 - **Tiempo real (BE-28):** los cambios de estado se registran con `events.emit()` en la tabla `event_log` y se emiten por SSE (`/events/stream`).
 
+## Routers stub (FS-02)
+
+Todos los endpoints del contrato existen ya con datos de ejemplo (`app/stubs.py`), para que el front trabaje contra la API real desde el principio. Cada uno indica en `description` qué issue lo implementa (`STUB(FS-02) → BE-06`).
+
+**Al implementar tu issue:**
+1. Sustituye el cuerpo del endpoint por la llamada a tu servicio (`app/services/…`). **No cambies la firma ni el `response_model`** sin cambiar antes el contrato.
+2. Quita `STUB(FS-02) → …` de la `description`.
+3. Borra de `app/stubs.py` lo que ya no se use.
+4. `tests/test_contract.py` sigue pasando. Si cambias un endpoint del contrato, actualiza `CONTRACT_ENDPOINTS`.
+
+**Auth en los stubs:** `routers/deps.py` declara `Authorization: Bearer` (opcional) para que Swagger muestre el candado, pero **no valida nada** hasta BE-26 y BE-27. Los endpoints públicos (`/health`, `/auth/login`, `/auth/pin`, `/auth/demo-users`, `/system/network-info`) no lo declaran.
+
 ## Cómo añadir un endpoint
 
 1. Primero el contrato: [api-contract.md](api-contract.md).
-2. El schema en `app/schemas.py`.
+2. El schema en `app/schemas/<dominio>.py`, exportado en `app/schemas/__init__.py`.
 3. Un router delgado en `app/routers/<dominio>.py` con `router = APIRouter(tags=["<dominio>"])`; la lógica va en `app/services/`.
 4. Registrarlo en `app/main.py`: `api.include_router(<dominio>.router)`.
 5. Tests en `backend/tests/` usando la fixture `client`.

@@ -56,7 +56,7 @@ class Member(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     env_id: str  # slug -> environments.json
     name: str
-    role: str  # commander, engineer, patient, resident...
+    position: str  # commander, engineer, patient, resident... (no es UserAccount.role)
     share_behavioral_details: bool = False
     device_id: str | None = None  # último dispositivo
     last_seen_at: dt.datetime | None = Field(default=None, sa_type=UTCDateTime)

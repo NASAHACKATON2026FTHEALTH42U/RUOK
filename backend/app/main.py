@@ -2,13 +2,14 @@ import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import APIRouter, FastAPI, Request
+from fastapi import APIRouter, Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
 
 from app import clock
 from app.db import engine, init_db
-from app.routers import health
+from app.routers import alerts, auth, catalog, game, health, members, realtime
+from app.routers.deps import device_id_header
 from app.services.app_state import restore_clock
 
 
@@ -20,7 +21,13 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     yield
 
 
-app = FastAPI(title="RUOK API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(
+    title="RUOK API",
+    version="0.1.0",
+    description="Servidor de a bordo de R U OK?. Contrato: docs/api-contract.md. "
+    "Los endpoints marcados STUB(FS-02) devuelven datos de ejemplo hasta su issue.",
+    lifespan=lifespan,
+)
 
 # CORS abierto en desarrollo. Se puede restringir con CORS_ORIGINS="http://a,http://b".
 _cors_origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "*").split(",") if o.strip()]
@@ -41,6 +48,14 @@ async def add_server_time_header(request: Request, call_next):
     return response
 
 
-api = APIRouter(prefix="/api/v1")
+# X-Device-Id se declara en todas las rutas (docs/control-center-and-devices.md §4).
+api = APIRouter(prefix="/api/v1", dependencies=[Depends(device_id_header)])
 api.include_router(health.router)
+api.include_router(auth.router)
+api.include_router(catalog.router)
+api.include_router(members.router)
+api.include_router(alerts.router)
+api.include_router(game.router)
+api.include_router(realtime.router)
+api.include_router(realtime.public)
 app.include_router(api)

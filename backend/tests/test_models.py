@@ -62,7 +62,7 @@ def session(engine):
 
 @pytest.fixture
 def member(session) -> Member:
-    m = Member(env_id="mars", name="Cmdr. Vega", role="commander")
+    m = Member(env_id="mars", name="Cmdr. Vega", position="commander")
     session.add(m)
     session.commit()
     session.refresh(m)
