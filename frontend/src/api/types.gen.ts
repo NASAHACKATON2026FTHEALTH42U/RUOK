@@ -404,7 +404,7 @@ export interface paths {
         put?: never;
         /**
          * Pedir ayuda / SOS (idempotente por UUID)
-         * @description Con `category=emergency` se acepta SIN token y la alerta queda con `authenticated=false`. STUB(FS-02) → BE-15/BE-27
+         * @description Idempotente por el UUID del cliente (mismo id y contenido → la misma alerta; contenido distinto → 409). Destino: `target_role` (se pueden saltar niveles); si no, emergency/critical suben hasta el primer nivel externo (a bordo al instante, tierra por el enlace) y warning va a la tripulación. El SOS sin token llega con BE-27.
          */
         post: operations["create_alert_api_v1_members__member_id__alerts_post"];
         delete?: never;
@@ -424,7 +424,7 @@ export interface paths {
         put?: never;
         /**
          * Escalar (por defecto al siguiente nivel; permite saltar niveles)
-         * @description STUB(FS-02) → BE-15
+         * @description Los niveles externos salen por el enlace con su ETA. 422 si el destino no está en la escalera o ya está en el último nivel; 409 si está resuelta.
          */
         post: operations["escalate_api_v1_alerts__alert_id__escalate_post"];
         delete?: never;
@@ -442,10 +442,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Reconocer la alerta
-         * @description STUB(FS-02) → BE-15
-         */
+        /** Reconocer la alerta */
         post: operations["ack_api_v1_alerts__alert_id__ack_post"];
         delete?: never;
         options?: never;
@@ -462,10 +459,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Resolver la alerta
-         * @description STUB(FS-02) → BE-15
-         */
+        /** Resolver la alerta */
         post: operations["resolve_api_v1_alerts__alert_id__resolve_post"];
         delete?: never;
         options?: never;
@@ -484,7 +478,7 @@ export interface paths {
         put?: never;
         /**
          * Mensaje en la alerta (viaja por el enlace si va a tierra)
-         * @description STUB(FS-02) → BE-15
+         * @description Si la alerta está en un nivel externo, el mensaje viaja por el enlace (member → tierra, responder → a bordo) y el evento lleva su ETA.
          */
         post: operations["add_message_api_v1_alerts__alert_id__messages_post"];
         delete?: never;
@@ -3416,6 +3410,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description Mismo id con otro contenido, o alerta resuelta */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3474,6 +3477,15 @@ export interface operations {
             };
             /** @description Recurso inexistente */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Mismo id con otro contenido, o alerta resuelta */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3546,6 +3558,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description Mismo id con otro contenido, o alerta resuelta */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3604,6 +3625,15 @@ export interface operations {
             };
             /** @description Recurso inexistente */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Mismo id con otro contenido, o alerta resuelta */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
