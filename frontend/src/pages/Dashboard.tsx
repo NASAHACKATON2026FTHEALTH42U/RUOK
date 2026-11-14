@@ -187,8 +187,24 @@ export default function Dashboard() {
         <MissionPhaseBar mission={env.mission} now={serverNow()} canCheckIn={can('view:checkin')} />
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(240px,320px)_1fr]">
-        <div className="lg:sticky lg:top-4 lg:self-start">
+      {/* Tres columnas en escritorio (≥ 1280 px): sistemas | cuerpo | indicadores. Más estrecho:
+          cuerpo e indicadores lado a lado y los sistemas debajo; en móvil, todo en columna. */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(240px,320px)_1fr] xl:grid-cols-[230px_minmax(240px,320px)_1fr]">
+        <div className="order-3 lg:col-span-2 xl:order-1 xl:col-span-1">
+          <h2 className="mb-3 text-lg font-semibold">Sistemas</h2>
+          <BodyLegend
+            regions={regions}
+            stale={stale}
+            selectedSystemId={selected}
+            onSelectSystem={setSelected}
+            onHoverSystem={setHovered}
+            className="justify-start"
+            compact
+            vertical
+          />
+        </div>
+
+        <div className="order-1 lg:sticky lg:top-4 lg:self-start xl:order-2">
           <BodyFigure
             regions={regions}
             liveness={a.liveness}
@@ -201,45 +217,28 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Indicadores (una columna, en baraja) y sistemas (columna a su derecha). */}
-        <div className="grid gap-6 xl:grid-cols-[1fr_250px]">
-          <div>
-            <h2 className="mb-3 text-lg font-semibold">Indicadores</h2>
-            {cards.length === 0 ? (
-              <p className="text-env-muted">Todavía no hay mediciones.</p>
-            ) : (
-              // Baraja (≥ lg): cartas plegadas que muestran su cabecera; al pasar el ratón o
-              // enfocarla, la carta se despliega hacia abajo. En móvil, lista normal.
-              <ul className="card-deck flex flex-col gap-3">
-                {cards.map(({ systemId, ind }) => (
-                  <li key={`${systemId}-${ind.indicator_id}`}>
-                    <IndicatorCard
-                      indicator={ind}
-                      name={indicatorById.get(ind.indicator_id)?.name}
-                      systemName={systemById.get(systemId)?.name}
-                      stale={stale}
-                      provisional={provisionalIds?.has(ind.indicator_id)}
-                      onClick={() => setSelected(systemId)}
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <div>
-            <h2 className="mb-3 text-lg font-semibold">Sistemas</h2>
-            <BodyLegend
-              regions={regions}
-              stale={stale}
-              selectedSystemId={selected}
-              onSelectSystem={setSelected}
-              onHoverSystem={setHovered}
-              className="justify-start"
-              compact
-              vertical
-            />
-          </div>
+        <div className="order-2 xl:order-3">
+          <h2 className="mb-3 text-lg font-semibold">Indicadores</h2>
+          {cards.length === 0 ? (
+            <p className="text-env-muted">Todavía no hay mediciones.</p>
+          ) : (
+            // Baraja (≥ lg): cartas plegadas que muestran su cabecera; al pasar el ratón o
+            // enfocarla, la carta se despliega hacia abajo. En móvil, lista normal.
+            <ul className="card-deck flex flex-col gap-3">
+              {cards.map(({ systemId, ind }) => (
+                <li key={`${systemId}-${ind.indicator_id}`}>
+                  <IndicatorCard
+                    indicator={ind}
+                    name={indicatorById.get(ind.indicator_id)?.name}
+                    systemName={systemById.get(systemId)?.name}
+                    stale={stale}
+                    provisional={provisionalIds?.has(ind.indicator_id)}
+                    onClick={() => setSelected(systemId)}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 
