@@ -361,3 +361,13 @@ export function resolveAlert(alertId: string, actor: Schema<'Actor'>, note?: str
     }),
   )
 }
+
+/** Respuesta a una alerta (viaja por el enlace con su retardo si va a tierra). No se encola. */
+export function sendAlertMessage(alertId: string, actor: Schema<'Actor'>, text: string) {
+  return unwrap(
+    api.POST('/api/v1/alerts/{alert_id}/messages', {
+      params: { path: { alert_id: alertId } },
+      body: { actor, text },
+    }),
+  )
+}

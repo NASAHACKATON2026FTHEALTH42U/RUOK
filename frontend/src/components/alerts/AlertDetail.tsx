@@ -5,7 +5,7 @@ import type { Assessment } from '../../api/useAssessment'
 import type { Intervention } from '../../api/useInterventions'
 import { useAuth } from '../../auth/useAuth'
 import { formatAgo } from '../../lib/time'
-import { ackAlert, escalateAlert, resolveAlert } from '../../offline/outbox'
+import { ackAlert, escalateAlert, resolveAlert, sendAlertMessage } from '../../offline/outbox'
 import type { Vocabulary } from '../../store/environment'
 import { hhmm } from '../ui/link'
 import { StatusBadge } from '../ui/StatusBadge'
@@ -28,6 +28,12 @@ interface AlertDetailProps {
   assessment: Assessment | undefined
   interventions: Intervention[]
   onChanged: () => void
+  /** Protocolo autónomo (para quien está a bordo). En /ground no se muestra. */
+  showProtocol?: boolean
+  /** Caja para responder (consola /ground). */
+  allowReply?: boolean
+  /** false = alerta psicológica sin permiso para ver el detalle (privacidad). */
+  showDetails?: boolean
 }
 
 /** Hora del servidor que avanza cada segundo (para la cuenta atrás de la ETA). */
@@ -52,6 +58,9 @@ export function AlertDetail({
   assessment,
   interventions,
   onChanged,
+  showProtocol = true,
+  allowReply = false,
+  showDetails = true,
 }: AlertDetailProps) {
   const now = useServerClock()
   const { can } = useAuth()
@@ -62,6 +71,7 @@ export function AlertDetail({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState<Set<string>>(new Set())
+  const [reply, setReply] = useState('')
 
   // Protocolo autónomo: mensaje de escalado del sistema + intervenciones offline del sistema.
   const system = assessment?.systems.find((s) => s.system_id === alert.system_id)
@@ -107,7 +117,14 @@ export function AlertDetail({
         <h2 id={`alert-${alert.id}`} className="text-xl font-semibold">
           {categoryLabel(alert.category)}
         </h2>
-        {alert.message && alert.message !== categoryLabel(alert.category) && <p>{alert.message}</p>}
+        {!showDetails ? (
+          <p className="rounded-md border border-env-border p-2 text-sm text-env-muted">
+            🔒 Alerta conductual activa. El detalle es confidencial (solo el canal de apoyo
+            psicológico), salvo emergencia o si el member decide compartirlo.
+          </p>
+        ) : (
+          alert.message && alert.message !== categoryLabel(alert.category) && <p>{alert.message}</p>
+        )}
         <p className="text-sm text-env-muted">
           Destino:{' '}
           <strong className="text-env-text">{roleLabel(alert.target_role, vocabulary)}</strong>{' '}
@@ -146,7 +163,7 @@ export function AlertDetail({
       )}
 
       {/* Protocolo autónomo */}
-      {!resolved && autonomous && (
+      {!resolved && showProtocol && autonomous && (
         <section>
           <h3 className="font-semibold">Protocolo autónomo (mientras llega la respuesta)</h3>
           {system?.escalation.message && (
@@ -246,6 +263,34 @@ export function AlertDetail({
           )}
         </section>
       )}
+      {!resolved && allowReply && (
+        <form
+          className="flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault()
+            const text = reply.trim()
+            if (text)
+              void act(() => sendAlertMessage(alert.id, actor, text)).then(() => setReply(''))
+          }}
+        >
+          <label className="flex-1 text-sm">
+            <span className="sr-only">Respuesta</span>
+            <input
+              value={reply}
+              onChange={(e) => setReply(e.target.value)}
+              placeholder="Responder (llega a bordo con el retardo del enlace)"
+              className="w-full rounded-md border border-env-border bg-env-surface px-3 py-2 text-env-text"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={busy || !reply.trim()}
+            className="rounded-lg bg-env-primary px-4 py-2 font-medium text-env-primary-text disabled:opacity-60"
+          >
+            Enviar
+          </button>
+        </form>
+      )}
       {error && (
         <p role="alert" className="text-sm">
           ⚠ {error}
@@ -259,7 +304,7 @@ export function AlertDetail({
           {alert.events.map((e, i) => {
             const st = eventStyle(e.type)
             const extra =
-              typeof e.payload?.text === 'string'
+              showDetails && typeof e.payload?.text === 'string'
                 ? `"${e.payload.text}"`
                 : typeof e.payload?.note === 'string'
                   ? e.payload.note
