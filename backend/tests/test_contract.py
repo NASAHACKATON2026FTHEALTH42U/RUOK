@@ -167,6 +167,7 @@ CALLS = [
         {"id": str(uuid.uuid4()), "category": "emergency", "severity": "emergency"},
         200,
     ),
+    # Las acciones (BE-15) son reales: actúan sobre ALERT_ID, que se crea antes (ver abajo).
     ("post", f"/alerts/{ALERT_ID}/escalate", {"target_role": "ground"}, 200),
     ("post", f"/alerts/{ALERT_ID}/ack", {"actor": "responder"}, 200),
     ("post", f"/alerts/{ALERT_ID}/resolve", {"actor": "responder"}, 200),
@@ -195,8 +196,14 @@ CALLS = [
 ]
 
 
+# SOS de ejemplo sobre el que actúan escalate/ack/resolve/messages (warning → crew).
+ALERT_BODY = {"id": ALERT_ID, "category": "symptom", "severity": "warning", "message": "mareo"}
+
+
 @pytest.mark.parametrize(("method", "path", "body", "status"), CALLS)
 def test_stub_responds(client, method, path, body, status):
+    if ALERT_ID in path:  # idempotente: la crea si no existe (o un reset la ha borrado)
+        assert client.post(API + "/members/1/alerts", json=ALERT_BODY).status_code == 200
     resp = client.request(method, API + path, json=body)
     assert resp.status_code == status, resp.text
 
