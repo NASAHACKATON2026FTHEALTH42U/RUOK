@@ -7,6 +7,7 @@ import {
   type PointerEvent,
   type ReactNode,
 } from 'react'
+import holographicHuman from '../../assets/holographic-human.webp'
 import { STATUS_COLORS, statusStyle, type Liveness } from '../ui/status'
 import { StatusBadge } from '../ui/StatusBadge'
 import { isFigureStale, type BodyRegion, type RegionState } from './regions'
@@ -84,13 +85,24 @@ export function BodyFigure({
     }
   }
 
-  /** Estilo común de las formas de una región (contorno más grueso si está seleccionada). */
-  const shape = (r: RegionState) => ({
-    fill: fillFor(r),
-    stroke: 'var(--env-text)',
-    strokeOpacity: selectedSystemId === r.systemId ? 1 : 0.4,
-    strokeWidth: selectedSystemId === r.systemId ? 2.5 : 1,
-  })
+  /**
+   * Estilo común de las zonas sobre la imagen: relleno semitransparente del color del estado
+   * (deja ver el órgano) y contorno del mismo color; más grueso y blanco si está seleccionada.
+   */
+  const shape = (r: RegionState) => {
+    const selected = selectedSystemId === r.systemId
+    return {
+      fill: fillFor(r),
+      fillOpacity: 0.55,
+      stroke: selected
+        ? '#ffffff'
+        : stale || statusStyle(r.status).striped
+          ? STATUS_COLORS.unknown
+          : STATUS_COLORS[r.status],
+      strokeOpacity: 1,
+      strokeWidth: selected ? 9 : 5,
+    }
+  }
 
   // Función (no componente): si fuera un componente definido aquí, React lo remontaría en cada
   // render y se perdería el foco de teclado al mostrar el tooltip.
@@ -104,9 +116,10 @@ export function BodyFigure({
     <div className="flex flex-col items-center gap-4">
       {stale && <StatusBadge status={liveness === 'lost' ? 'lost' : 'stale'} label={staleLabel} />}
 
-      <div ref={boxRef} className="relative w-full max-w-[280px]">
+      <div ref={boxRef} className="relative w-full max-w-[300px]">
+        {/* Coordenadas en píxeles de la imagen original (887 × 1774). */}
         <svg
-          viewBox="0 0 200 420"
+          viewBox="0 0 887 1774"
           className="h-auto w-full"
           role="group"
           aria-label="Estado por sistema del cuerpo"
@@ -114,79 +127,88 @@ export function BodyFigure({
           <defs>
             <pattern
               id={stripes}
-              width="6"
-              height="6"
+              width="24"
+              height="24"
               patternUnits="userSpaceOnUse"
               patternTransform="rotate(45)"
             >
-              <rect width="6" height="6" fill={STATUS_COLORS.unknown} fillOpacity="0.35" />
-              <line x1="0" y1="0" x2="0" y2="6" stroke={STATUS_COLORS.unknown} strokeWidth="3" />
+              <rect width="24" height="24" fill={STATUS_COLORS.unknown} fillOpacity="0.45" />
+              <line x1="0" y1="0" x2="0" y2="24" stroke={STATUS_COLORS.unknown} strokeWidth="12" />
             </pattern>
           </defs>
+
+          {/* Cuerpo holográfico. Los órganos se desaturan un poco para que no se confundan con el
+              semáforo; sin datos fiables (stale/lost), toda la figura en gris. */}
+          <image
+            href={holographicHuman}
+            x="0"
+            y="0"
+            width="887"
+            height="1774"
+            preserveAspectRatio="xMidYMid meet"
+            style={{
+              filter: stale ? 'grayscale(1) brightness(0.75)' : 'saturate(0.55) brightness(0.9)',
+            }}
+            aria-hidden="true"
+          />
+          {stale && (
+            <rect
+              x="0"
+              y="0"
+              width="887"
+              height="1774"
+              fill={`url(#${stripes})`}
+              opacity="0.6"
+              aria-hidden="true"
+            />
+          )}
 
           {/* Halo de radiación (todo el cuerpo) */}
           {region('halo', (r) => (
             <ellipse
-              cx="100"
-              cy="212"
-              rx="94"
-              ry="204"
+              cx="443"
+              cy="887"
+              rx="425"
+              ry="868"
               fill="none"
               stroke={
                 stale || statusStyle(r.status).striped
                   ? `url(#${stripes})`
                   : STATUS_COLORS[r.status]
               }
-              strokeOpacity={selectedSystemId === r.systemId ? 1 : 0.75}
-              strokeWidth={selectedSystemId === r.systemId ? 9 : 6}
-              strokeDasharray="2 6"
+              strokeOpacity={selectedSystemId === r.systemId ? 1 : 0.8}
+              strokeWidth={selectedSystemId === r.systemId ? 28 : 18}
+              strokeDasharray="6 24"
               strokeLinecap="round"
             />
           ))}
 
-          {/* Silueta neutra */}
-          <g
-            fill={stale ? `url(#${stripes})` : 'var(--env-surface)'}
-            stroke="var(--env-border)"
-            strokeWidth="2"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M62 104 Q46 108 42 130 L30 230 Q29 241 38 242 Q47 243 48 232 L62 152 Z" />
-            <path d="M138 104 Q154 108 158 130 L170 230 Q171 241 162 242 Q153 243 152 232 L138 152 Z" />
-            <path d="M58 206 L97 212 L93 392 Q92 404 80 404 Q68 404 69 392 Z" />
-            <path d="M142 206 L103 212 L107 392 Q108 404 120 404 Q132 404 131 392 Z" />
-            <path d="M62 100 Q100 88 138 100 L146 212 Q100 226 54 212 Z" />
-            <rect x="89" y="78" width="22" height="20" rx="6" />
-            <circle cx="100" cy="50" r="31" />
-          </g>
-
-          {/* Huesos (musculoesquelético): extremidades */}
+          {/* Huesos (musculoesquelético): húmero, antebrazo, fémur y tibia */}
           {region('bones', (r) => (
             <g
               {...shape(r)}
               fill="none"
               stroke={fillFor(r)}
-              strokeWidth={selectedSystemId === r.systemId ? 9 : 7}
-              strokeOpacity={1}
+              strokeWidth={selectedSystemId === r.systemId ? 30 : 22}
+              strokeOpacity={0.85}
               strokeLinecap="round"
             >
-              <line x1="53" y1="122" x2="38" y2="230" />
-              <line x1="147" y1="122" x2="162" y2="230" />
-              <line x1="81" y1="224" x2="81" y2="392" />
-              <line x1="119" y1="224" x2="119" y2="392" />
+              <polyline points="262,385 215,620 145,850" />
+              <polyline points="625,385 672,620 742,850" />
+              <polyline points="362,905 376,1190 392,1555" />
+              <polyline points="525,905 511,1190 497,1555" />
             </g>
           ))}
 
-          {/* Metabólico: abdomen */}
+          {/* Metabólico: hígado y estómago */}
           {region('metabolic', (r) => (
-            <ellipse cx="100" cy="172" rx="25" ry="17" {...shape(r)} />
+            <ellipse cx="445" cy="590" rx="140" ry="62" {...shape(r)} />
           ))}
 
-          {/* Corazón: lado izquierdo del cuerpo (derecha de quien mira) */}
+          {/* Corazón */}
           {region('heart', (r) => (
             <path
-              d="M112 146 C92 133 92 114 103 115 C108 115.5 111 119 112 122 C113 119 116 115.5 121 115 C132 114 132 133 112 146 Z"
+              d="M455 535 C385 495 385 425 425 428 C443 429 452 442 455 452 C458 442 467 429 485 428 C525 425 525 495 455 535 Z"
               {...shape(r)}
             />
           ))}
@@ -195,16 +217,16 @@ export function BodyFigure({
           {region('immune', (r) => (
             <g {...shape(r)}>
               {[
-                [90, 92],
-                [110, 92],
-                [68, 114],
-                [132, 114],
-                [80, 210],
-                [120, 210],
+                [398, 268],
+                [489, 268],
+                [306, 430],
+                [581, 430],
+                [372, 930],
+                [514, 930],
               ].map(([cx, cy]) => (
                 <g key={`${cx}-${cy}`}>
-                  <circle cx={cx} cy={cy} r="9" fill="transparent" stroke="none" />
-                  <circle cx={cx} cy={cy} r="4.5" />
+                  <circle cx={cx} cy={cy} r="38" fill="transparent" stroke="none" />
+                  <circle cx={cx} cy={cy} r="18" />
                 </g>
               ))}
             </g>
@@ -212,15 +234,15 @@ export function BodyFigure({
 
           {/* Cerebro (neuro-conductual) */}
           {region('brain', (r) => (
-            <ellipse cx="100" cy="40" rx="22" ry="14" {...shape(r)} />
+            <ellipse cx="443" cy="88" rx="82" ry="58" {...shape(r)} />
           ))}
 
           {/* Ojos (SANS) */}
           {region('eyes', (r) => (
             <g {...shape(r)}>
-              <rect x="80" y="54" width="40" height="12" fill="transparent" stroke="none" />
-              <ellipse cx="90" cy="60" rx="6" ry="3.6" />
-              <ellipse cx="110" cy="60" rx="6" ry="3.6" />
+              <rect x="370" y="122" width="148" height="40" fill="transparent" stroke="none" />
+              <ellipse cx="403" cy="142" rx="24" ry="13" />
+              <ellipse cx="484" cy="142" rx="24" ry="13" />
             </g>
           ))}
         </svg>
