@@ -1,0 +1,26 @@
+import { useNavigate } from 'react-router-dom'
+import { logout, useSession } from '../../auth/session'
+
+/** Usuario de la sesión y "Salir" en la cabecera. Cerrar sesión NO borra el outbox. */
+export function SessionMenu() {
+  const user = useSession((s) => s.user)
+  const navigate = useNavigate()
+  if (!user) return null
+  return (
+    <span className="flex items-center gap-2 text-sm">
+      <span className="text-env-muted">
+        <span className="text-env-text">{user.display_name}</span> · {user.role_label}
+      </span>
+      <button
+        type="button"
+        onClick={async () => {
+          await logout()
+          navigate('/login')
+        }}
+        className="rounded-md border border-env-border px-2 py-0.5 text-env-muted hover:border-env-text hover:text-env-text"
+      >
+        Salir
+      </button>
+    </span>
+  )
+}
