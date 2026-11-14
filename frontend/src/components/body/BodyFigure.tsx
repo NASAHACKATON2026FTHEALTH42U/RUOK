@@ -11,6 +11,7 @@ import {
 import holographicHuman from '../../assets/holographic-human.webp'
 import { STATUS_COLORS, statusStyle, type Liveness } from '../ui/status'
 import { StatusBadge } from '../ui/StatusBadge'
+import { BodyLegend } from './BodyLegend'
 import { isFigureStale, type BodyRegion, type RegionState } from './regions'
 
 interface BodyFigureProps {
@@ -20,6 +21,11 @@ interface BodyFigureProps {
   staleLabel?: string
   selectedSystemId?: string | null
   onSelectSystem?: (systemId: string) => void
+  /** Zona señalada controlada desde fuera (p. ej. por una leyenda en otra columna). */
+  hoveredSystemId?: string | null
+  onHoverSystem?: (systemId: string | null) => void
+  /** Leyenda de sistemas debajo de la figura (por defecto, sí). */
+  showLegend?: boolean
 }
 
 interface Tooltip {
@@ -52,6 +58,9 @@ export function BodyFigure({
   staleLabel,
   selectedSystemId,
   onSelectSystem,
+  hoveredSystemId,
+  onHoverSystem,
+  showLegend = true,
 }: BodyFigureProps) {
   const uid = useId().replace(/:/g, '')
   const stripes = `stripes-${uid}`
@@ -59,7 +68,12 @@ export function BodyFigure({
   const boxRef = useRef<HTMLDivElement>(null)
   const [tooltip, setTooltip] = useState<Tooltip | null>(null)
   // Zona señalada (ratón, foco de teclado o su botón de la leyenda): se ilumina y el resto se atenúa.
-  const [hovered, setHovered] = useState<string | null>(null)
+  const [ownHovered, setOwnHovered] = useState<string | null>(null)
+  const hovered = hoveredSystemId !== undefined ? hoveredSystemId : ownHovered
+  const setHovered = (id: string | null) => {
+    setOwnHovered(id)
+    onHoverSystem?.(id)
+  }
   const stale = isFigureStale(liveness)
   // Latido del aura: no si el usuario pide reducir movimiento ni sin datos fiables.
   const reducedMotion = useReducedMotion()
@@ -374,30 +388,15 @@ export function BodyFigure({
         )}
       </div>
 
-      {/* Leyenda: misma información sin depender del color, y clicable */}
-      <ul className="flex w-full flex-wrap justify-center gap-2" aria-label="Sistemas">
-        {regions.map((r) => (
-          <li key={r.systemId}>
-            <button
-              type="button"
-              onClick={() => onSelectSystem?.(r.systemId)}
-              onPointerEnter={() => setHovered(r.systemId)}
-              onPointerLeave={() => setHovered(null)}
-              onFocus={() => setHovered(r.systemId)}
-              onBlur={() => setHovered(null)}
-              aria-pressed={selectedSystemId === r.systemId}
-              className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
-                selectedSystemId === r.systemId
-                  ? 'border-env-text bg-env-surface'
-                  : 'border-env-border hover:bg-env-surface'
-              }`}
-            >
-              {r.name}
-              <StatusBadge status={stale ? 'stale' : r.status} size="sm" />
-            </button>
-          </li>
-        ))}
-      </ul>
+      {showLegend && (
+        <BodyLegend
+          regions={regions}
+          stale={stale}
+          selectedSystemId={selectedSystemId}
+          onSelectSystem={onSelectSystem}
+          onHoverSystem={setHovered}
+        />
+      )}
     </div>
   )
 }

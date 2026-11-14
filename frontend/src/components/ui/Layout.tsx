@@ -15,6 +15,7 @@ import { LinkStatusChip } from './LinkStatusChip'
 import { MockBanner } from './MockBanner'
 import { PendingSyncChip } from './PendingSyncChip'
 import { ServerStatus } from './ServerStatus'
+import { SIDEBAR_SLOT_ID } from './SidebarPortal'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Entornos' },
@@ -119,6 +120,9 @@ export function Layout() {
 
           <SessionMenu />
 
+          {/* Resumen de la página actual (p. ej. estado general del panel), vía SidebarPortal */}
+          <div id={SIDEBAR_SLOT_ID} className="empty:hidden" />
+
           <nav aria-label="Secciones">
             <ul className="flex flex-col gap-0.5 text-sm">
               {navItems.map((item) => (
@@ -157,7 +161,7 @@ export function Layout() {
         <div className="flex min-w-0 flex-1 flex-col">
           {/* El centro de control usa todo el ancho (proyector o pantalla grande). */}
           <main
-            className={`mx-auto w-full flex-1 px-4 py-6 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
+            className={`mx-auto w-full flex-1 px-4 py-4 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
           >
             <Outlet />
           </main>
