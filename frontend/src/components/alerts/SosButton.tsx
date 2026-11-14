@@ -1,4 +1,3 @@
-import { STATUS_COLORS } from '../ui/status'
 import { useCallback, useState } from 'react'
 import { useEnvironments } from '../../api/useEnvironments'
 import { useInterventions } from '../../api/useInterventions'
@@ -9,10 +8,12 @@ import { useEnvironmentStore } from '../../store/environment'
 import { SosDialog } from './SosDialog'
 
 /**
- * Botón "Pedir ayuda" fijo y siempre visible (FE-13). Carga las intervenciones al arrancar
- * para tenerlas en caché y poder mostrarlas sin conexión.
+ * Botón "Pedir ayuda" siempre visible (FE-13). Carga las intervenciones al arrancar para
+ * tenerlas en caché y poder mostrarlas sin conexión.
+ * - `header`: botón `SOS` de la cabecera HUD (44 px), arriba a la derecha.
+ * - `floating`: flotante abajo a la derecha (pantallas sin cabecera, como el login).
  */
-export function SosButton() {
+export function SosButton({ variant = 'floating' }: { variant?: 'header' | 'floating' }) {
   const [open, setOpen] = useState(false)
   const authenticated = useSession((s) => s.status === 'authenticated')
   const lastMemberId = useSession((s) => s.lastMemberId)
@@ -33,18 +34,29 @@ export function SosButton() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-haspopup="dialog"
-        className="fixed right-4 bottom-4 z-40 flex items-center gap-2 rounded-full px-5 py-3 font-semibold text-white shadow-lg ring-2 ring-white/70 hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
-        style={{ background: STATUS_COLORS.critical }}
-      >
-        <span aria-hidden className="text-lg leading-none">
-          ✚
-        </span>
-        Pedir ayuda
-      </button>
+      {variant === 'header' ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-haspopup="dialog"
+          aria-label="SOS: pedir ayuda"
+          className="hud-btn hud-btn-danger !h-11 shrink-0 !px-3 !text-[11px] !tracking-[0.12em] hover:brightness-125 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
+        >
+          SOS
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-haspopup="dialog"
+          className="hud-btn hud-btn-danger-solid fixed right-4 bottom-4 z-40 shadow-lg hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
+        >
+          <span aria-hidden className="text-base leading-none">
+            ✚
+          </span>
+          Pedir ayuda
+        </button>
+      )}
       {open && (
         <SosDialog
           memberId={memberId}

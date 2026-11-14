@@ -16,6 +16,7 @@ import Login from './pages/Login'
 import Measure from './pages/Measure'
 import Members from './pages/Members'
 import Missions from './pages/Missions'
+import More from './pages/More'
 import NotFound from './pages/NotFound'
 import Pvt from './pages/Pvt'
 
@@ -46,6 +47,8 @@ const router = createBrowserRouter([
           { path: '/alerts', element: guard('/alerts', <Alerts />) },
           { path: '/ground', element: guard('/ground', <Ground />) },
           { path: '/control', element: guard('/control', <Control />) },
+          // «Más» (estilo HUD): cualquier rol con sesión.
+          { path: '/more', element: <More /> },
           { path: '*', element: <NotFound /> },
         ],
       },
