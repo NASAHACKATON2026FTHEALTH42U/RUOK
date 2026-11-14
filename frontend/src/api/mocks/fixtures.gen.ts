@@ -8126,7 +8126,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "liveness": "active",
         "overall_status": "warning",
         "open_alerts": 0,
-        "last_measurement_at": "2026-11-14T09:10:07.358968Z"
+        "last_measurement_at": "2026-11-14T09:15:41.582052Z"
       },
       {
         "id": 6,
@@ -8138,7 +8138,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "liveness": "active",
         "overall_status": "normal",
         "open_alerts": 0,
-        "last_measurement_at": "2026-11-14T08:46:32.828547Z"
+        "last_measurement_at": "2026-11-14T09:42:36.958736Z"
       },
       {
         "id": 7,
@@ -8150,7 +8150,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "liveness": "active",
         "overall_status": "normal",
         "open_alerts": 0,
-        "last_measurement_at": "2026-11-14T08:40:38.751314Z"
+        "last_measurement_at": "2026-11-14T09:02:58.299119Z"
       }
     ],
     "alerts": []
@@ -8176,7 +8176,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "liveness": "active",
         "overall_status": "normal",
         "open_alerts": 0,
-        "last_measurement_at": "2026-11-14T09:06:49.203535Z"
+        "last_measurement_at": "2026-11-14T09:10:46.069797Z"
       },
       {
         "id": 9,
@@ -8188,7 +8188,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "liveness": "active",
         "overall_status": "warning",
         "open_alerts": 0,
-        "last_measurement_at": "2026-11-14T08:32:06.841820Z"
+        "last_measurement_at": "2026-11-14T08:49:35.366850Z"
       },
       {
         "id": 10,
@@ -8238,7 +8238,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "liveness": "active",
         "overall_status": "warning",
         "open_alerts": 0,
-        "last_measurement_at": "2026-11-14T09:22:44.115693Z"
+        "last_measurement_at": "2026-11-14T09:32:49.156823Z"
       },
       {
         "id": 4,
@@ -8248,9 +8248,9 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "share_behavioral_details": false,
         "last_seen_at": "2026-11-14T10:00:00Z",
         "liveness": "active",
-        "overall_status": "normal",
+        "overall_status": "warning",
         "open_alerts": 0,
-        "last_measurement_at": "2026-11-14T08:55:02.360034Z"
+        "last_measurement_at": "2026-11-14T09:55:59.993267Z"
       },
       {
         "id": 5,
