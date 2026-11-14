@@ -148,7 +148,6 @@ html[data-theme-ready] :is(body, header, footer, nav a, select) {
 html[data-hud] .bg-grid {
   background-image: none;
 }
-/* Fondo con rejilla fina en los entornos espaciales (initTheme pone data-hud). */
 html[data-hud] body {
   background-image:
     linear-gradient(rgba(95, 212, 232, 0.045) 1px, transparent 1px),
@@ -189,8 +188,19 @@ html[data-hud] body {
     pointer-events: none;
   }
 
-  /* <div class="hud-panel-head"><b>SYS.01</b>Sistemas<span class="hud-chip">…</span></div> */
-  .hud-panel-head {
+  /* Rejilla con el color del entorno activo (login, FE-27) */
+  .hud-grid {
+    --hud-line: color-mix(in srgb, var(--env-primary) 6%, transparent);
+    background-image:
+      linear-gradient(var(--hud-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--hud-line) 1px, transparent 1px);
+    background-size: 39px 39px;
+  }
+
+  /* <div class="hud-panel-head"><b>SYS.01</b>Sistemas<span class="hud-chip">…</span></div>
+     `hud-head` es el mismo estilo (nombre que usa el login, FE-27). */
+  .hud-panel-head,
+  .hud-head {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -201,13 +211,16 @@ html[data-hud] body {
     text-transform: uppercase;
     color: var(--env-text);
   }
-  .hud-panel-head b {
+  .hud-panel-head b,
+  .hud-head b {
     font-weight: 400;
     color: var(--env-primary);
   }
 
-  /* Chip de estado: el color con text-st-ok / text-st-warn / text-st-crit / text-st-none */
+  /* Chip de estado: el color con text-st-ok / text-st-warn / text-st-crit / text-st-none.
+     Sin clase de color, gris con el cuadrito del color del entorno (login). */
   .hud-chip {
+    color: var(--env-muted);
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -224,8 +237,26 @@ html[data-hud] body {
     height: 5px;
     background: currentColor;
   }
-  .hud-panel-head .hud-chip {
+  .hud-chip:not([class*='text-'])::before {
+    background: var(--env-primary);
+  }
+  .hud-panel-head .hud-chip,
+  .hud-head .hud-chip {
     margin-left: auto;
+  }
+
+  .hud-input {
+    height: 44px;
+    width: 100%;
+    box-sizing: border-box;
+    background: color-mix(in srgb, var(--env-bg) 60%, transparent);
+    border: 1px solid var(--env-border);
+    color: var(--env-text);
+    font: 400 16px var(--font-mono);
+    padding: 0 12px;
+  }
+  .hud-input:focus {
+    border-color: var(--env-primary);
   }
 
   .hud-label {
@@ -267,6 +298,8 @@ html[data-hud] body {
 
   /* Botones con la esquina cortada (objetivo táctil ≥ 44 px) */
   .hud-btn {
+    --hud-edge: var(--env-primary);
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -282,19 +315,54 @@ html[data-hud] body {
     text-transform: uppercase;
     clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
   }
+  /* El recorte se come el borde en la esquina: se dibuja la diagonal con el color del borde. */
+  .hud-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    background: linear-gradient(
+      45deg,
+      transparent calc(50% - 0.7px),
+      var(--hud-edge) calc(50% - 0.7px),
+      var(--hud-edge) calc(50% + 0.7px),
+      transparent calc(50% + 0.7px)
+    );
+    pointer-events: none;
+  }
+  .hud-btn:disabled {
+    opacity: 0.6;
+  }
   .hud-btn-primary {
     background: var(--env-primary);
     color: var(--env-primary-text);
   }
+  .hud-btn-primary:hover:not(:disabled) {
+    filter: brightness(1.1);
+  }
   .hud-btn-danger {
+    --hud-edge: var(--color-st-crit);
     border-color: var(--color-st-crit);
     color: #ff8f8f;
     background: rgba(255, 107, 107, 0.08);
   }
+  .hud-btn-danger:hover {
+    background: rgba(255, 107, 107, 0.16);
+  }
   .hud-btn-danger-solid {
+    --hud-edge: var(--color-st-crit);
     border-color: var(--color-st-crit);
     background: var(--color-st-crit);
     color: #1a0606;
+  }
+
+  /* Dentro de los botones y paneles recortados, el foco va hacia dentro (fuera se recortaría). */
+  .hud-btn:focus-visible,
+  .hud-panel :focus-visible {
+    outline-offset: -3px;
+    box-shadow: none;
   }
 
   /* Barra de pestañas inferior (móvil) */
@@ -338,8 +406,19 @@ html[data-hud] body {
     animation-direction: reverse;
     animation-duration: 60s;
   }
+  /* Nombres que usa el login (FE-27): mismo giro que .hud-spin */
+  .ruok-spin {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: hud-spin 24s linear infinite;
+  }
+  .ruok-spin-reverse {
+    animation-direction: reverse;
+    animation-duration: 60s;
+  }
   @media (prefers-reduced-motion: reduce) {
-    .hud-spin {
+    .hud-spin,
+    .ruok-spin {
       animation: none;
     }
   }
