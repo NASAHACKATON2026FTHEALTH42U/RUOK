@@ -607,7 +607,7 @@ export interface paths {
         };
         /**
          * Dispositivos registrados (admin)
-         * @description STUB(FS-02) → BE-29
+         * @description El último visto primero. Se actualizan con cada petición que lleva `X-Device-Id` (IP, user agent, usuario) y con cada heartbeat (`pending_outbox`, `last_sync_at`). `env_id` filtra por el entorno de su último usuario.
          */
         get: operations["list_devices_api_v1_devices_get"];
         put?: never;

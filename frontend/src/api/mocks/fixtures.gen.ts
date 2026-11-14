@@ -9378,20 +9378,50 @@ export const events: Schema<'Event'>[] = [
       "level": 0,
       "target_role": "self"
     }
+  },
+  {
+    "id": 15,
+    "type": "device.registered",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": 1,
+    "device_id": "a3f9c2d1-7b6e-4f5a-8c9d-0e1f2a3b4c5d",
+    "ref_id": null,
+    "summary": "Nuevo dispositivo (mobile) de Cmdr. Vega",
+    "payload": {
+      "kind": "mobile",
+      "ip": "192.168.8.21"
+    }
+  },
+  {
+    "id": 16,
+    "type": "heartbeat",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": 1,
+    "device_id": "a3f9c2d1-7b6e-4f5a-8c9d-0e1f2a3b4c5d",
+    "ref_id": null,
+    "summary": "Heartbeat de Cmdr. Vega",
+    "payload": {
+      "activity": "normal",
+      "pending_outbox": 2
+    }
   }
 ]
 
 export const devices: Schema<'Device'>[] = [
   {
     "id": "a3f9c2d1-7b6e-4f5a-8c9d-0e1f2a3b4c5d",
-    "user_id": 7,
+    "user_id": 1,
     "kind": "mobile",
-    "label": "movil-vega",
+    "label": null,
     "ip": "192.168.8.21",
-    "user_agent": null,
+    "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile/15E148",
     "first_seen_at": "2026-11-14T10:00:00Z",
     "last_seen_at": "2026-11-14T10:00:00Z",
-    "pending_outbox": 0,
+    "pending_outbox": 2,
     "last_sync_at": "2026-11-14T10:00:00Z"
   }
 ]

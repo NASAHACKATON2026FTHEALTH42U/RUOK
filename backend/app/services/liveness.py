@@ -29,9 +29,9 @@ from typing import Any
 from sqlmodel import Session, col, select
 
 from app import clock, models
-from app.schemas.common import Activity, DeviceKind, EventType, Liveness, Status
+from app.schemas.common import Activity, EventType, Liveness, Status
 from app.schemas.members import HeartbeatIn, HeartbeatResult
-from app.services import environments, events
+from app.services import devices, environments, events
 from app.services.assessment import _as_dict, worst_status
 
 __all__ = [
@@ -106,15 +106,19 @@ def member_liveness(member: models.Member, now: datetime | None = None) -> Liven
 
 
 def record_heartbeat(
-    session: Session, member: models.Member, body: HeartbeatIn, now: datetime | None = None
+    session: Session,
+    member: models.Member,
+    body: HeartbeatIn,
+    now: datetime | None = None,
+    user: models.UserAccount | None = None,
 ) -> HeartbeatResult:
     """Guarda el heartbeat y devuelve el liveness.
 
     - ``checkin_required`` es ``True`` si el member venía de ``stale`` o ``lost``:
       el dispositivo ha vuelto y debe mostrar el "R U OK?" (FE-15).
     - Actualiza ``member.last_seen_at``, ``last_activity`` y ``device_id``.
-    - Registro mínimo del dispositivo (``kind``, ``pending_outbox``,
-      ``last_sync_at``); el resto del registro es BE-29.
+    - Actualiza el registro del dispositivo (BE-29): ``kind``, ``pending_outbox``,
+      ``last_sync_at`` y su usuario.
     """
     now = now or clock.now()
     previous = member_liveness(member, now)
@@ -124,16 +128,21 @@ def record_heartbeat(
     member.device_id = str(body.device_id)
     session.add(member)
 
-    device = session.get(models.Device, str(body.device_id))
-    if device is None:
-        device = models.Device(id=str(body.device_id), first_seen_at=now)
-    device.last_seen_at = now
-    device.pending_outbox = body.pending_outbox
-    device.last_sync_at = body.last_sync_at
-    if body.device_kind is not None:
-        device.kind = DeviceKind(body.device_kind).value
-    session.add(device)
-    common = {"env_id": member.env_id, "member_id": member.id, "device_id": body.device_id}
+    devices.touch(
+        session,
+        str(body.device_id),
+        user=user,
+        kind=body.device_kind,
+        pending_outbox=body.pending_outbox,
+        last_sync_at=body.last_sync_at,
+        now=now,
+    )
+    common = {
+        "env_id": member.env_id,
+        "member_id": member.id,
+        "user_id": user.id if user is not None else None,
+        "device_id": body.device_id,
+    }
     events.emit(
         session, EventType.heartbeat, **common, summary=f"Heartbeat de {member.name}",
         payload={"activity": member.last_activity, "pending_outbox": body.pending_outbox},
