@@ -16,6 +16,7 @@ Presentación: **domingo 16:00**.
 | [api-contract.md](api-contract.md) | Front + Back | **Fuente de verdad** de la API v0: convenciones, endpoints y esquemas |
 | [data-model.md](data-model.md) | Back, Front B | **UML de SQLite e IndexedDB**: tablas, índices, stores y flujo de sincronización |
 | [auth-and-roles.md](auth-and-roles.md) | Todos los dev | **Login local y roles**: matriz de acceso por vistas, JWT, PIN, SOS sin sesión |
+| [design/hud-style.md](design/hud-style.md) | Front | **Estilo HUD** (ISS, Luna, Marte): tokens, clases `hud-*`, regla móvil sin scroll y cambios por pantalla. Maquetas en `design/mockups/` |
 | [control-center-and-devices.md](control-center-and-devices.md) | Todos los dev | **Centro de control**, tiempo real (SSE), multi-dispositivo (móviles) y montaje de la red local |
 | [environments.md](environments.md) | Back A, Front A | Perfiles de entorno (ISS, Luna, Marte, Tierra, Hospital, Geriatría) |
 | [alerts-and-escalation.md](alerts-and-escalation.md) | Back B, Front B | Alertas automáticas y manuales, escalera de escalado y enlace simulado |

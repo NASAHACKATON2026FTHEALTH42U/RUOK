@@ -2,7 +2,7 @@ import { useEnvironmentStore } from '../store/environment'
 import { themeFor, type Theme } from './themes'
 
 /** Token del tema → variable CSS que leen las clases `*-env-*` de Tailwind (styles/index.css). */
-const CSS_VARS: Record<keyof Omit<Theme, 'scheme'>, string> = {
+const CSS_VARS: Record<keyof Omit<Theme, 'scheme' | 'hud'>, string> = {
   bg: '--env-bg',
   surface: '--env-surface',
   border: '--env-border',
@@ -19,6 +19,9 @@ function applyTheme(envId: string | null, theme: Theme) {
   }
   root.style.colorScheme = theme.scheme
   root.dataset.env = envId ?? 'default'
+  root.dataset.scheme = theme.scheme
+  // Fondo con rejilla y clases `hud-*` solo en los entornos con estilo HUD.
+  root.toggleAttribute('data-hud', Boolean(theme.hud))
 }
 
 /**

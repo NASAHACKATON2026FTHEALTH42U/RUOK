@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>R U OK? – Horas de sueño</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&amp;family=Saira:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#E6F1F3;text-decoration:none}a:hover{color:#FFFFFF}
+.scr{background-color:#091317;background-image:linear-gradient(rgba(95,212,232,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(95,212,232,.045) 1px,transparent 1px);background-size:39px 39px}
+.pn{position:relative;background:rgba(9,21,26,.92);border:1px solid #1C3540;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)}
+.pn::after{content:"";position:absolute;top:0;right:0;width:12px;height:12px;background:linear-gradient(45deg,transparent calc(50% - .7px),#1C3540 calc(50% - .7px),#1C3540 calc(50% + .7px),transparent calc(50% + .7px))}
+.ph{display:flex;align-items:center;gap:10px;padding:11px 14px 10px;border-bottom:1px solid #15303A;font:400 11px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#E6F1F3}
+.ph b{font-weight:400;color:#5FD4E8}
+.chip{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:3px 7px;border:1px solid currentColor;font:400 10px 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.chip::before{content:"";width:5px;height:5px;background:currentColor}
+.n{color:#5FD4E8}.w{color:#F5A623}.c{color:#FF6B6B}.u{color:#7C9AA3}
+.lb{font:400 10px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#7C9AA3}
+.mono{font-family:'IBM Plex Mono',monospace}
+.bar{height:7px;background:repeating-linear-gradient(90deg,#163039 0 8px,transparent 8px 10px)}
+.bar>i{display:block;height:100%;background:repeating-linear-gradient(90deg,currentColor 0 8px,transparent 8px 10px)}
+.row{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 14px;border-bottom:1px solid #12272E;font:400 15px Saira,sans-serif;color:#C9D8DC}
+.row.on{background:rgba(95,212,232,.07);box-shadow:inset 2px 0 0 #5FD4E8;color:#FFFFFF}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;height:52px;border:1px solid #5FD4E8;background:rgba(95,212,232,.07);color:#E6F1F3;font:500 12px 'IBM Plex Mono',monospace;letter-spacing:.16em;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}
+.btn.p{background:#5FD4E8;color:#04161B}
+.btn.d{border-color:#FF6B6B;color:#FF8F8F;background:rgba(255,107,107,.08)}
+.btn.df{border-color:#FF6B6B;background:#FF6B6B;color:#1A0606}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid #15303A;padding:0 6px 18px;background:rgba(9,19,23,.96)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 0 8px;font:400 10px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#7C9AA3;border-top:2px solid transparent}
+.tab.on{color:#E6F1F3;border-top-color:#5FD4E8;background:linear-gradient(rgba(95,212,232,.10),transparent)}
+@keyframes ruokSpin{to{transform:rotate(360deg)}}
+.spin{transform-box:fill-box;transform-origin:center;animation:ruokSpin 24s linear infinite}
+.spin.r{animation-direction:reverse;animation-duration:60s}
+@media (prefers-reduced-motion: reduce){.spin{animation:none}}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px; box-sizing: border-box; color: #E6F1F3; font-family: Saira, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <header style="display: flex; align-items: center; gap: 6px; padding: 12px 14px 10px 6px; border-bottom: 1px solid #15303A">
+    <a href="System.dc.html" aria-label="Volver" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+    <div style="flex: 1; min-width: 0">
+      <div class="lb" style="font-size: 9px">IND.02 / Neuro-conductual</div>
+      <h1 style="margin: 0; font-size: 18px; font-weight: 400">Horas de sueño</h1>
+    </div>
+    <a href="Sos.dc.html" class="btn d" style="height: 44px; padding: 0 12px; font-size: 11px; letter-spacing: 0.12em">SOS</a>
+  </header>
+  <section aria-label="Lectura actual" style="display: flex; align-items: flex-end; justify-content: space-between; padding: 16px 18px 0">
+    <div>
+      <div class="lb">Última noche</div>
+      <div class="mono" style="font-size: 52px; font-weight: 300; line-height: 1">4.1<span style="font-size: 18px; color: #7C9AA3"> h</span></div>
+      <div class="mono" style="font-size: 11px; color: #A9BCC1; margin-top: 4px">Hace 6 h · check-in</div>
+    </div>
+    <span class="chip c" style="margin-bottom: 6px">Crítico</span>
+  </section>
+  <div role="group" aria-label="Periodo" style="margin: 16px 14px 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid #1C3540">
+    <button aria-pressed="true" class="mono" style="height: 44px; border: 0; background: rgba(95,212,232,.12); box-shadow: inset 0 -2px 0 #5FD4E8; color: #E6F1F3; font-size: 11px; letter-spacing: 0.14em">7 SOLES</button>
+    <button aria-pressed="false" class="mono" style="height: 44px; border: 0; border-left: 1px solid #1C3540; background: transparent; color: #7C9AA3; font-size: 11px; letter-spacing: 0.14em">30 SOLES</button>
+  </div>
+  <figure class="pn" style="margin: 10px 14px 0">
+    <div class="ph"><b>TRD.01</b>Tendencia<span class="chip c">3 noches bajo umbral</span></div>
+    <svg width="360" height="196" viewBox="0 0 360 196" role="img" aria-label="Horas de sueño de los últimos 7 soles: de 7,2 h a 4,1 h, por debajo del umbral de 6 h las tres últimas noches" style="display: block">
+      <rect x="34" y="14" width="300" height="56" fill="#5FD4E8" opacity="0.06"></rect>
+      <rect x="34" y="98" width="300" height="70" fill="#FF6B6B" opacity="0.07"></rect>
+      <path d="M34 14V168M84 14V168M134 14V168M184 14V168M234 14V168M284 14V168M334 14V168" stroke="#12272E"></path>
+      <line x1="34" y1="70" x2="334" y2="70" stroke="#5FD4E8" stroke-opacity="0.5" stroke-dasharray="3 4"></line>
+      <line x1="34" y1="98" x2="334" y2="98" stroke="#FF6B6B" stroke-opacity="0.6" stroke-dasharray="3 4"></line>
+      <text x="4" y="18" fill="#7C9AA3" font-size="10" font-family="IBM Plex Mono, monospace">9 h</text>
+      <text x="4" y="74" fill="#7C9AA3" font-size="10" font-family="IBM Plex Mono, monospace">7 h</text>
+      <text x="4" y="102" fill="#FF8F8F" font-size="10" font-family="IBM Plex Mono, monospace">6 h</text>
+      <text x="4" y="172" fill="#7C9AA3" font-size="10" font-family="IBM Plex Mono, monospace">3 h</text>
+      <polyline points="34,63 84,56 134,70 184,77 234,105 284,119 334,133" fill="none" stroke="#5FD4E8" stroke-width="2" stroke-linejoin="round"></polyline>
+      <rect x="230" y="101" width="8" height="8" fill="#FF6B6B"></rect>
+      <rect x="280" y="115" width="8" height="8" fill="#FF6B6B"></rect>
+      <circle cx="334" cy="133" r="9" fill="none" stroke="#FF6B6B"></circle>
+      <rect x="330" y="129" width="8" height="8" fill="#FF6B6B"></rect>
+      <text x="34" y="188" fill="#7C9AA3" font-size="10" font-family="IBM Plex Mono, monospace">SOL 38</text>
+      <text x="296" y="188" fill="#7C9AA3" font-size="10" font-family="IBM Plex Mono, monospace">SOL 44</text>
+    </svg>
+  </figure>
+  <section class="pn" aria-label="Referencias" style="margin: 10px 14px 0">
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr))">
+      <div style="padding: 12px 14px; border-right: 1px solid #12272E"><div class="lb" style="font-size: 9px">Media 7 soles</div><div class="mono" style="font-size: 20px; font-weight: 300">5.6 h</div></div>
+      <div style="padding: 12px 14px; border-right: 1px solid #12272E"><div class="lb" style="font-size: 9px">Tu base</div><div class="mono" style="font-size: 20px; font-weight: 300">7.3 h</div></div>
+      <div style="padding: 12px 14px"><div class="lb" style="font-size: 9px">Umbral</div><div class="mono c" style="font-size: 20px; font-weight: 300">6.0 h</div></div>
+    </div>
+  </section>
+  <div style="margin-top: auto; padding: 14px 14px 26px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+    <a href="History.dc.html" class="btn">Historial</a>
+    <a href="CheckIn.dc.html" class="btn p">Registrar</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

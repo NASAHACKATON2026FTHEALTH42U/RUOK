@@ -4,16 +4,16 @@ import { bySeverity, livenessState, STATUS_COLORS, statusStyle, type DisplayStat
 const ALL: DisplayState[] = ['normal', 'warning', 'critical', 'unknown', 'stale', 'lost']
 
 describe('statusStyle', () => {
-  it('unknown, stale y lost nunca son verdes y van rayados', () => {
+  it('unknown, stale y lost nunca van en el color nominal y van rayados', () => {
     for (const s of ['unknown', 'stale', 'lost'] as const) {
       expect(statusStyle(s).color).not.toBe(STATUS_COLORS.normal)
       expect(statusStyle(s).striped).toBe(true)
     }
   })
 
-  it('solo normal es verde', () => {
-    const green = ALL.filter((s) => statusStyle(s).color === STATUS_COLORS.normal)
-    expect(green).toEqual(['normal'])
+  it('solo normal usa el color nominal (cian)', () => {
+    const nominal = ALL.filter((s) => statusStyle(s).color === STATUS_COLORS.normal)
+    expect(nominal).toEqual(['normal'])
   })
 
   it('cada estado tiene etiqueta y símbolo (no depende solo del color)', () => {

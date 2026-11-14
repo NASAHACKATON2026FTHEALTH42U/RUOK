@@ -1,4 +1,4 @@
-import { statusStyle, type DisplayState, type StatusGlyph } from './status'
+import { STATUS_COLORS, statusStyle, type DisplayState, type StatusGlyph } from './status'
 
 interface StatusBadgeProps {
   status: DisplayState
@@ -8,12 +8,13 @@ interface StatusBadgeProps {
   className?: string
 }
 
-const STRIPES =
-  'repeating-linear-gradient(135deg, color-mix(in srgb, #898781 28%, transparent) 0 3px, transparent 3px 7px)'
+const STRIPES = `repeating-linear-gradient(135deg, color-mix(in srgb, ${STATUS_COLORS.unknown} 28%, transparent) 0 3px, transparent 3px 7px)`
 
 /**
- * Semáforo de estado: icono (forma + símbolo) + etiqueta, nunca solo color.
- * `unknown`, `stale` y `lost` llevan fondo rayado y nunca se pintan en verde.
+ * Semáforo de estado con forma de chip HUD (docs/design/hud-style.md): borde de 1 px del
+ * color del estado, icono (forma + símbolo) y etiqueta en mono mayúscula. Nunca solo color:
+ * la etiqueta va con el color de texto del tema. `unknown`, `stale` y `lost` llevan fondo
+ * rayado y nunca se pintan en el color nominal.
  */
 export function StatusBadge({ status, label, size = 'md', className = '' }: StatusBadgeProps) {
   const s = statusStyle(status)
@@ -21,10 +22,10 @@ export function StatusBadge({ status, label, size = 'md', className = '' }: Stat
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border border-env-border bg-env-surface font-mono font-medium text-env-text ${
-        size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-sm'
+      className={`inline-flex items-center gap-1.5 border bg-env-surface font-mono font-normal tracking-[0.1em] whitespace-nowrap text-env-text uppercase ${
+        size === 'sm' ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-1 text-[11px]'
       } ${className}`}
-      style={s.striped ? { backgroundImage: STRIPES } : undefined}
+      style={{ borderColor: s.color, ...(s.striped ? { backgroundImage: STRIPES } : {}) }}
       data-status={status}
     >
       <StatusIcon glyph={s.glyph} color={s.color} size={icon} />

@@ -19,16 +19,18 @@ export interface StatusStyle {
 }
 
 /**
- * Paleta fija del semáforo: NO depende del tema del entorno.
- * Validada con dataviz/validate_palette.js en las superficies de los 7 temas: separación CVD
- * ΔE ≥ 9; en los temas claros el verde y el ámbar bajan de 3:1, por eso la etiqueta es
- * siempre visible y el icono lleva contorno.
+ * Paleta fija del semáforo: NO depende del tema del entorno. Valores del estilo HUD
+ * (docs/design/hud-style.md §2–3): **nominal en cian**, no en verde. Son los mismos que
+ * `--color-st-*` de styles/index.css (clases text-st-ok…); si cambias uno, cambia el otro.
+ * Sobre los fondos oscuros, los cuatro superan 4.5:1. En los temas claros (hospital,
+ * geriatría) el cian y el ámbar tienen poco contraste: por eso la etiqueta va siempre con
+ * el color de texto del tema y el icono lleva contorno (el estado nunca depende del color).
  */
 export const STATUS_COLORS = {
-  normal: '#0ca30c',
-  warning: '#fab219',
-  critical: '#d03b3b',
-  unknown: '#898781',
+  normal: '#5fd4e8',
+  warning: '#f5a623',
+  critical: '#ff6b6b',
+  unknown: '#7c9aa3',
 } as const
 
 const STYLES: Record<DisplayState, StatusStyle> = {

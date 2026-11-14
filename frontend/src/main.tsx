@@ -8,12 +8,13 @@ import { initTheme } from './environments/applyTheme'
 import { getDb } from './offline/db'
 import { getDevice } from './offline/device'
 import { initOutbox } from './offline/outbox'
-// Fuente de los textos (Jura, OFL), empaquetada: nada de CDNs (local-first).
-import '@fontsource/jura/latin-400.css'
-import '@fontsource/jura/latin-500.css'
-import '@fontsource/jura/latin-600.css'
-import '@fontsource/jura/latin-700.css'
-// Mensajes de sistema (estados, badges, leyendas, conexión): IBM Plex Mono (OFL).
+// Fuentes empaquetadas (local-first, sin Google Fonts): estilo HUD, docs/design/hud-style.md.
+// Solo el subconjunto latino (español): menos peso en el build.
+import '@fontsource/saira/latin-300.css'
+import '@fontsource/saira/latin-400.css'
+import '@fontsource/saira/latin-500.css'
+import '@fontsource/saira/latin-600.css'
+import '@fontsource/ibm-plex-mono/latin-300.css'
 import '@fontsource/ibm-plex-mono/latin-400.css'
 import '@fontsource/ibm-plex-mono/latin-500.css'
 import '@fontsource/ibm-plex-mono/latin-600.css'

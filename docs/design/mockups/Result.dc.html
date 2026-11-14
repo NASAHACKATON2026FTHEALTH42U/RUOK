@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>R U OK? – Medición guardada</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&amp;family=Saira:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#E6F1F3;text-decoration:none}a:hover{color:#FFFFFF}
+.scr{background-color:#091317;background-image:linear-gradient(rgba(95,212,232,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(95,212,232,.045) 1px,transparent 1px);background-size:39px 39px}
+.pn{position:relative;background:rgba(9,21,26,.92);border:1px solid #1C3540;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)}
+.pn::after{content:"";position:absolute;top:0;right:0;width:12px;height:12px;background:linear-gradient(45deg,transparent calc(50% - .7px),#1C3540 calc(50% - .7px),#1C3540 calc(50% + .7px),transparent calc(50% + .7px))}
+.ph{display:flex;align-items:center;gap:10px;padding:11px 14px 10px;border-bottom:1px solid #15303A;font:400 11px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#E6F1F3}
+.ph b{font-weight:400;color:#5FD4E8}
+.chip{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:3px 7px;border:1px solid currentColor;font:400 10px 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.chip::before{content:"";width:5px;height:5px;background:currentColor}
+.n{color:#5FD4E8}.w{color:#F5A623}.c{color:#FF6B6B}.u{color:#7C9AA3}
+.lb{font:400 10px 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#7C9AA3}
+.mono{font-family:'IBM Plex Mono',monospace}
+.bar{height:7px;background:repeating-linear-gradient(90deg,#163039 0 8px,transparent 8px 10px)}
+.bar>i{display:block;height:100%;background:repeating-linear-gradient(90deg,currentColor 0 8px,transparent 8px 10px)}
+.row{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 14px;border-bottom:1px solid #12272E;font:400 15px Saira,sans-serif;color:#C9D8DC}
+.row.on{background:rgba(95,212,232,.07);box-shadow:inset 2px 0 0 #5FD4E8;color:#FFFFFF}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;height:52px;border:1px solid #5FD4E8;background:rgba(95,212,232,.07);color:#E6F1F3;font:500 12px 'IBM Plex Mono',monospace;letter-spacing:.16em;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}
+.btn.p{background:#5FD4E8;color:#04161B}
+.btn.d{border-color:#FF6B6B;color:#FF8F8F;background:rgba(255,107,107,.08)}
+.btn.df{border-color:#FF6B6B;background:#FF6B6B;color:#1A0606}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid #15303A;padding:0 6px 18px;background:rgba(9,19,23,.96)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 0 8px;font:400 10px 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#7C9AA3;border-top:2px solid transparent}
+.tab.on{color:#E6F1F3;border-top-color:#5FD4E8;background:linear-gradient(rgba(95,212,232,.10),transparent)}
+@keyframes ruokSpin{to{transform:rotate(360deg)}}
+.spin{transform-box:fill-box;transform-origin:center;animation:ruokSpin 24s linear infinite}
+.spin.r{animation-direction:reverse;animation-duration:60s}
+@media (prefers-reduced-motion: reduce){.spin{animation:none}}
+</style>
+</helmet>
+<div class="scr" style="width: 390px; height: 844px; box-sizing: border-box; color: #E6F1F3; font-family: Saira, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <header style="display: flex; align-items: center; gap: 6px; padding: 12px 14px 10px 6px; border-bottom: 1px solid #15303A">
+    <a href="Main.dc.html" aria-label="Cerrar" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></a>
+    <div style="flex: 1; min-width: 0">
+      <div class="lb" style="font-size: 9px">C-01 / Resultado</div>
+      <h1 style="margin: 0; font-size: 18px; font-weight: 400">Medición guardada</h1>
+    </div>
+    <a href="Sos.dc.html" class="btn d" style="height: 44px; padding: 0 12px; font-size: 11px; letter-spacing: 0.12em">SOS</a>
+  </header>
+  <section aria-label="Resultado" style="position: relative; height: 210px; margin-top: 8px">
+    <svg width="390" height="210" viewBox="0 0 390 210" aria-hidden="true" style="position: absolute; inset: 0">
+      <circle cx="195" cy="105" r="98" fill="none" stroke="#24434D" stroke-width="4" stroke-dasharray="1 4.1"></circle>
+      <circle cx="195" cy="105" r="84" fill="none" stroke="#163039" stroke-width="9"></circle>
+      <circle cx="195" cy="105" r="84" fill="none" stroke="#F5A623" stroke-width="9" stroke-dasharray="342 186" transform="rotate(-90 195 105)"></circle>
+      <circle class="spin" cx="195" cy="105" r="70" fill="none" stroke="#F5A623" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="8 6"></circle>
+      <path d="M20 105H90M300 105H370" stroke="#1F4450"></path>
+    </svg>
+    <div style="position: absolute; left: 0; right: 0; top: 62px; text-align: center">
+      <div class="lb">Tensión</div>
+      <div class="mono" style="font-size: 36px; font-weight: 300; line-height: 1.1">136<span style="color: #7C9AA3">/</span>88</div>
+      <div class="lb w">Atención</div>
+    </div>
+  </section>
+  <div role="status" class="mono" style="margin: 6px 14px 0; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid #1C3540; font-size: 11px; letter-spacing: 0.06em; color: #A9BCC1">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5FD4E8" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>Guardada en el dispositivo · se enviará sola
+  </div>
+  <section class="pn" aria-label="Evaluación actualizada" style="margin: 12px 14px 0">
+    <div class="ph"><b>EVAL.01</b>Evaluación actualizada</div>
+    <div class="row on" style="border-bottom: 0"><span style="flex: 1">Cardiovascular</span><span class="mono n" style="font-size: 10px; letter-spacing: 0.08em">NOMINAL</span><span class="u">→</span><span class="mono w" style="font-size: 10px; letter-spacing: 0.08em">ATENCIÓN</span></div>
+  </section>
+  <section class="pn" aria-label="Qué hacer" style="margin: 12px 14px 0">
+    <div class="ph"><b>REC.02</b>Qué hacer</div>
+    <ol style="margin: 0; padding: 10px 14px 12px; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.4; color: #C9D8DC">
+      <li style="display: flex; gap: 12px"><span class="mono n" style="font-size: 11px; padding-top: 2px">01</span>Repite la medición en 30 min, en reposo.</li>
+      <li style="display: flex; gap: 12px"><span class="mono n" style="font-size: 11px; padding-top: 2px">02</span>Reduce la sal en las próximas comidas.</li>
+      <li style="display: flex; gap: 12px"><span class="mono n" style="font-size: 11px; padding-top: 2px">03</span>Si pasa de 140, se avisará al oficial médico.</li>
+    </ol>
+  </section>
+  <div style="margin-top: auto; padding: 14px 14px 26px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+    <a href="MeasurePick.dc.html" class="btn">Medir otra</a>
+    <a href="Main.dc.html" class="btn p">Ver panel</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
