@@ -110,3 +110,16 @@ html[data-theme-ready] :is(body, header, footer, nav a, select) {
     filter: drop-shadow(0 0 5px rgb(208 59 59 / 0.7));
   }
 }
+
+/*
+ * Marca de agua de cuadrícula suave en el área de contenido (Layout). Usa el color de texto del
+ * entorno al 5 %: se adapta a temas claros y oscuros y no resta contraste a los textos.
+ */
+.bg-grid {
+  --grid-line: color-mix(in srgb, var(--env-text) 5%, transparent);
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
+}

@@ -166,7 +166,7 @@ export function Layout() {
           </p>
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col overflow-x-clip">
+        <div className="bg-grid flex min-w-0 flex-1 flex-col overflow-x-clip">
           {/* El centro de control usa todo el ancho (proyector o pantalla grande). */}
           <main
             className={`mx-auto w-full flex-1 px-4 py-4 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
