@@ -89,3 +89,21 @@ html[data-theme-ready] :is(body, header, footer, nav a, select) {
     transition: none;
   }
 }
+
+/* Onda que late alrededor del marcador de un órgano crítico (BodyFigure). */
+@keyframes critical-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  80%,
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+.critical-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: critical-ping 1.6s ease-out infinite;
+}

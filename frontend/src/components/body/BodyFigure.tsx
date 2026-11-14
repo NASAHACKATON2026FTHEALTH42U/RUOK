@@ -52,6 +52,19 @@ const RADIATION_AURA: Record<string, { scale: number; opacity: number }> = {
 }
 const AURA_BASE = { scale: 1, opacity: 0.75 }
 
+/**
+ * Dónde va el marcador de "crítico" de cada zona (coordenadas de la imagen, 887 × 1774), junto
+ * al órgano sin taparlo. La radiación no lleva marcador: se ve en el aura.
+ */
+const CRITICAL_MARKERS: Partial<Record<BodyRegion, [number, number]>> = {
+  brain: [545, 40],
+  eyes: [560, 142],
+  heart: [545, 420],
+  metabolic: [610, 560],
+  immune: [600, 268],
+  bones: [740, 640],
+}
+
 export function BodyFigure({
   regions,
   liveness,
@@ -363,6 +376,45 @@ export function BodyFigure({
             )}
 
             {zones.map(([n, d]) => zone(n, d, 'visual'))}
+
+            {/* Órganos en estado crítico: marcador con la "X" del badge Crítico y una onda que
+                late (sin animación con "reducir movimiento"). Decorativo: el estado ya está en
+                la etiqueta de cada zona. Sin datos fiables, la figura está en gris y no se marca. */}
+            {!stale &&
+              regions
+                .filter((r) => r.status === 'critical' && CRITICAL_MARKERS[r.region])
+                .map((r) => {
+                  const [x, y] = CRITICAL_MARKERS[r.region]!
+                  return (
+                    <g key={`crit-${r.systemId}`} aria-hidden="true" pointerEvents="none">
+                      {!reducedMotion && (
+                        <circle
+                          cx={x}
+                          cy={y}
+                          r="30"
+                          fill="none"
+                          stroke={STATUS_COLORS.critical}
+                          strokeWidth="8"
+                          className="critical-ping"
+                        />
+                      )}
+                      <circle
+                        cx={x}
+                        cy={y}
+                        r="30"
+                        fill={STATUS_COLORS.critical}
+                        stroke="#ffffff"
+                        strokeWidth="5"
+                      />
+                      <path
+                        d={`M${x - 11} ${y - 11}L${x + 11} ${y + 11}M${x + 11} ${y - 11}L${x - 11} ${y + 11}`}
+                        stroke="#ffffff"
+                        strokeWidth="7"
+                        strokeLinecap="round"
+                      />
+                    </g>
+                  )
+                })}
           </g>
 
           {/* Zonas sensibles, fuera del grupo que se amplía: no se mueven bajo el ratón. */}
