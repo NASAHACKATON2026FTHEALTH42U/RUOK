@@ -31,17 +31,43 @@ Kanban (GitHub Project): https://github.com/orgs/NASAHACKATON2026FTHEALTH42U/pro
                    feat/fe-05-body-figure
                    fix/sos-modal-offline
     4. Commits pequeños con el ID: "BE-08: umbrales por entorno"
-    5. git push -u origin <tu-rama>
-    6. Abre una PR a main con "Closes #<n>" en la descripción.
-    7. Espera a que la CI esté en VERDE (los 3 checks).
-    8. 1 aprobación de alguien de tu área o del full-stack.
-    9. Merge (squash). Borra la rama.
+    5. ANTES de abrir la PR, trae main a tu rama y pasa los tests:
+         git fetch origin && git merge origin/main
+         (resuelve conflictos en local; ver "Evitar conflictos" más abajo)
+    6. git push -u origin <tu-rama>
+    7. Abre una PR a main con "Closes #<n>" en la descripción.
+    8. Espera a que la CI esté en VERDE (los 3 checks).
+    9. 1 aprobación de alguien de tu área o del full-stack.
+   10. JUSTO ANTES de mergear, si main ha avanzado: repite el paso 5.
+   11. Merge (squash). Borra la rama.
 
   NO se mergea:
     - con la CI en rojo o pendiente;
     - sin aprobación (excepción: P0 urgentes de madrugada con el visto bueno
       del supervisor; se avisa en el canal del equipo);
     - con force-push sobre main (prohibido siempre).
+
+  EVITAR CONFLICTOS (ya nos han pasado 3: PRs #64, #88 y #89):
+    - PRs PEQUEÑAS y mergeadas PRONTO. Una rama no debería vivir más de
+      3-4 horas: cuanto más vive, más se aleja de main.
+    - Sincroniza con main a menudo (git fetch origin && git merge origin/main),
+      no solo al final. Siempre antes de abrir la PR y antes de mergear.
+    - Una PR MERGEADA está cerrada: NO subas más commits a esa rama (se quedan
+      fuera de main sin que nadie lo note). Lo siguiente va en una rama nueva
+      desde main actualizado.
+    - Si alguien sigue subiendo commits a una PR, avisa antes de mergearla.
+    - NO apiles PRs (una rama encima de otra sin mergear). Si es inevitable:
+      se mergea primero la de abajo y se avisa en la descripción.
+    - Ficheros GENERADOS en conflicto (types.gen.ts, fixtures.gen.ts,
+      package-lock.json, uv.lock): NO se resuelven a mano. Coge cualquiera de
+      las dos versiones y regenera:
+         cd frontend && npm run gen:api && npm run gen:mocks   (tipos y mocks)
+         cd frontend && npm install                            (package-lock)
+         cd backend  && uv lock                                (uv.lock)
+    - Tras resolver un conflicto, pasa TODOS los tests (back y front) antes
+      de hacer push.
+    - Si resuelves un conflicto en la rama de OTRA persona, déjale un
+      comentario en su PR explicando qué has tocado.
 
 ------------------------------------------------------------------------------
  2. CI (GITHUB ACTIONS) - .github/workflows/ci.yml
