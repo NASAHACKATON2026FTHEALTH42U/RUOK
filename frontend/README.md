@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74).
 
 ## Comandos
 
@@ -103,7 +103,10 @@ frontend/
     │   ├── useVocab.ts        hook useVocab() + capitalize()
     │   ├── applyTheme.ts      initTheme(): aplica el tema del entorno activo en <html>
     │   └── themes/            un tema por entorno (iss.ts, mars.ts…) + defaultTheme.ts
-    ├── offline/outbox.ts      sendMeasurements(): punto único de escritura (IndexedDB en FE-11)
+    ├── offline/
+    │   ├── device.ts          identidad del dispositivo: getDevice(), ?device=<nombre> (+ test)
+    │   ├── db.ts              base IndexedDB ruok-<device_id> con los stores de data-model.md
+    │   └── outbox.ts          sendMeasurements(): punto único de escritura (IndexedDB en FE-11)
     ├── lib/time.ts            formatAgo(): "hace 12 min" con la hora del servidor (+ test)
     ├── store/environment.ts   store Zustand: envId, memberId, vocabulary (persistido)
     ├── api/
@@ -349,6 +352,24 @@ Verificado con una serie sintética de 30 días (interceptando la petición en C
 - **Reintento idempotente:** si falla la red, el formulario conserva los valores, los bloquea y el botón pasa a "Reintentar el envío", que reenvía **los mismos UUID** (el servidor no duplica).
 - **Resultado:** "N mediciones enviadas" y el estado general de la evaluación que devuelve el lote; "Ver el panel" vuelve a `/dashboard`, que vuelve a pedir la evaluación.
 - Toda escritura pasa por `src/offline/outbox.ts` (`sendMeasurements()`). **TODO(FE-11):** guardar primero en IndexedDB para no perder nada sin conexión; hoy, sin red, la medición no se guarda hasta que se reintenta.
+
+## Dispositivo e IndexedDB (FE-30)
+
+Cada dispositivo (o pestaña, en los ensayos) tiene su propia identidad, su base IndexedDB y su sesión. Detalle en [`docs/control-center-and-devices.md`](../docs/control-center-and-devices.md#4-identidad-de-dispositivo-y-aislamiento).
+
+| URL                     | Dispositivo                                           | Se guarda en     |
+| ----------------------- | ----------------------------------------------------- | ---------------- |
+| (sin parámetro)         | el del navegador: UUID aleatorio generado una vez     | `localStorage`   |
+| `?device=tablet-medico` | con nombre: UUID **determinista** a partir del nombre | `sessionStorage` |
+| `?device=tab`           | uno nuevo para esta pestaña                           | `sessionStorage` |
+
+- La pestaña recuerda su dispositivo al navegar o recargar sin el parámetro. En modo pestaña, el pie muestra "Dispositivo: tablet-medico".
+- `getDevice()` (`src/offline/device.ts`) se resuelve **de forma síncrona** al arrancar, porque decide:
+  - la cabecera **`X-Device-Id`** de todas las peticiones (`configureApi` en `main.tsx`);
+  - la base IndexedDB **`ruok-<device_id>`** (`src/offline/db.ts`, librería `idb`), con los stores `outbox`, `measurements`, `assessments`, `catalog`, `alerts`, `tasks` y `kv` de `docs/data-model.md` (el `device_id` y el nombre se copian a `kv`);
+  - la clave de la sesión de Zustand: **`ruok-session-<device_id>`**.
+- El `device_id` es siempre un UUID (el back lo valida).
+- Probado con dos pestañas `?device=a` y `?device=b`: ids, bases, sesión y outbox independientes.
 
 ### Pendiente
 

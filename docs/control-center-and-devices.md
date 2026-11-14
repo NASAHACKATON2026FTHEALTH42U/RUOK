@@ -63,11 +63,13 @@ Es la **vista global, en tiempo real y sin retardo** para operar y gestionar la 
 - **Ejemplo en vivo:** el astronauta pulsa SOS en su móvil → la tablet del médico muestra la alerta y vibra **al instante** → el centro de control ve `alert.created` → `/ground` la recibe **14 min después** (Marte, con el reloj acelerado).
 
 ## 4. Identidad de dispositivo y aislamiento
-- **`device_id`:** UUID generado una vez y guardado en IndexedDB. Va en el heartbeat y en la cabecera `X-Device-Id` de cada petición.
+- **`device_id`:** UUID generado una vez y guardado en `localStorage` (hace falta conocerlo **antes** de abrir IndexedDB, porque decide el nombre de la base); además se copia al store `kv` de su base. Va en el heartbeat y en la cabecera `X-Device-Id` de cada petición. Implementado en `frontend/src/offline/device.ts` (FE-30).
 - **Una base IndexedDB por dispositivo:** `ruok-<device_id>`. Cada base tiene su propio outbox, caché y sesión.
 - **Varios dispositivos en una máquina** (ensayos o demo con un solo portátil):
   - El `device_id` de la pestaña se guarda en `sessionStorage`, que es distinto para cada pestaña.
-  - El parámetro `?device=<nombre>` fija un dispositivo con nombre (por ejemplo, `?device=tablet-medico`).
+  - El parámetro `?device=<nombre>` fija un dispositivo con nombre (por ejemplo, `?device=tablet-medico`). Su `device_id` es un UUID **determinista** derivado del nombre: el mismo nombre es siempre el mismo dispositivo.
+  - `?device=tab` crea un dispositivo nuevo, distinto en cada pestaña.
+  - La pestaña recuerda su dispositivo (en `sessionStorage`) al navegar o recargar.
   - Así dos pestañas no comparten sesión ni outbox.
 - **Registro en el servidor:** tabla `device`. El heartbeat informa de `pending_outbox` y `last_sync_at`.
 
