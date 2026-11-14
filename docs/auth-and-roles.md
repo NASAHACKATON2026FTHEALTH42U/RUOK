@@ -19,7 +19,7 @@
 | `responder` | Flight surgeon (tierra) | Médico/a | Médico/a | Consola `/ground` de su entorno (solo lo entregado por el enlace) |
 | `psych` | Psicólogo/a BHP (tierra) | Psicología | Psicología | Igual que `responder`, más el **canal confidencial** y los detalles conductuales |
 | `family` *(P2)* | — | Familiar | Familiar | Estado agregado de **un** member y mensajes |
-| `admin` | Operador de la demo | — | — | Global: panel de demo, cambio de entorno, usuarios |
+| `admin` | Operador / centro de control | Administración | Administración | Global: **centro de control** (`/control`), demo, cambio de entorno, usuarios |
 
 - Cada usuario pertenece a **un entorno** (`env_id`). Solo `admin` es global y puede cambiar de entorno.
 - Un usuario con rol `member` está vinculado 1:1 a su `member` (`member_id`).
@@ -45,6 +45,8 @@
 | Mensaje a casa *(P2)* | ✅ | 🔒 | 🔒 | 🔒 | 🔒 | ✅ (recibe/responde) | ✅ |
 | Consola `/ground` | 🔒 | 🔒 | 🔒 | ✅ | ✅ | 🔒 | ✅ |
 | Privacidad (`share_behavioral_details`) | ✅ propio | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 |
+| **Centro de control** (`/control`: panorama, flujo de eventos, dispositivos, gestión) | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
+| Stream de eventos en vivo (SSE) | propios | su entorno | su entorno | solo entregados | solo entregados | 🔒 | todo |
 | Panel de demo (`/demo/*`, enlace, fast-forward) | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
 | Gestión de usuarios *(P2)* | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
 
@@ -78,7 +80,8 @@ La matriz vive en código en **un único sitio** por lado: `backend/app/auth/per
 - **Modelo de datos** ([data-model.md](data-model.md)): tabla `user_account` y clave `auth` en IndexedDB `kv`.
 - **Heartbeat:** solo lo envía un `member` autenticado. El token identifica al member y no hace falta enviar `member_id` en el cuerpo.
 - **`/ground`:** acceso solo para `responder`, `psych` y `admin`.
-- **Panel de demo:** solo `admin`.
+- **Panel de demo y centro de control (`/control`):** solo `admin`. Ver [control-center-and-devices.md](control-center-and-devices.md).
+- **SSE:** el stream de eventos se filtra en el servidor según el rol del token.
 - **Privacidad:** el filtro conductual usa el rol (`psych` ve los detalles; el resto, solo si el member comparte o hay emergencia).
 
 ## Usuarios demo (seed)

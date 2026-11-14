@@ -7,7 +7,7 @@
 ```mermaid
 flowchart LR
   subgraph DEV["Dispositivo del member (navegador)"]
-    UI[React app] --> OB[(IndexedDB<br/>ruok-device)]
+    UI[React app<br/>móvil / tablet / pestaña] --> OB[("IndexedDB<br/>ruok-device_id")]
   end
   subgraph SRV["Servidor de a bordo"]
     API[FastAPI] --> DB[(SQLite WAL<br/>ruok.db)]
@@ -37,6 +37,8 @@ erDiagram
   USER_ACCOUNT |o--o| MEMBER : "es (si role=member)"
   USER_ACCOUNT ||--o{ ALERT : "crea / reconoce"
   MEMBER ||--o{ MEASUREMENT : registra
+  USER_ACCOUNT ||--o{ DEVICE : "usa"
+  DEVICE ||--o{ EVENT_LOG : "origen"
   MEMBER ||--o{ TASK : "tiene asignadas"
   TASK ||--o| TASK_COMPLETION : "se completa con"
   MEMBER ||--o{ ALERT : genera
@@ -178,6 +180,32 @@ erDiagram
     datetime earned_at
   }
 
+  DEVICE {
+    text id PK "UUID generado en el dispositivo"
+    int user_id FK "último usuario con sesión"
+    text kind "mobile | tablet | desktop"
+    text label "p. ej. movil-vega, ?device="
+    text ip
+    text user_agent
+    datetime first_seen_at
+    datetime last_seen_at
+    int pending_outbox "informado en el heartbeat"
+    datetime last_sync_at
+  }
+
+  EVENT_LOG {
+    int id PK "autoincremental; sirve como Last-Event-ID"
+    text type "measurement.created | alert.created | ..."
+    datetime at
+    text env_id
+    int member_id "nullable"
+    int user_id "nullable"
+    text device_id "nullable"
+    text ref_id "id del recurso relacionado"
+    text summary
+    json payload
+  }
+
   KUDOS {
     text id PK "UUID"
     text env_id
@@ -206,6 +234,8 @@ Hay además una tabla técnica, fuera del diagrama: **`app_state`** (`key TEXT P
 | `link_state` | Una fila por entorno, modificable desde `/demo/link`. | BE-13 |
 | `badge_award` | `UNIQUE(member_id, badge_id)`. | BE-19 |
 | `kudos` | P2. | BE-23 |
+| `device` | Una fila por dispositivo (móvil, tablet, pestaña). Se actualiza con cada heartbeat o petición (`X-Device-Id`). | BE-29 |
+| `event_log` | Bitácora *append-only* de todo lo que ocurre. Alimenta el SSE y el centro de control. Se purga a los 7 días. | BE-28 |
 
 ### Índices y restricciones
 
@@ -226,6 +256,9 @@ CREATE INDEX ix_alert_event_alert       ON alert_event(alert_id, at);
 CREATE INDEX ix_ruok_member_pending     ON ruok_check(member_id) WHERE responded_at IS NULL;
 CREATE INDEX ix_link_due                ON link_message(env_id, state, eta);
 CREATE UNIQUE INDEX ux_badge_award      ON badge_award(member_id, badge_id);
+CREATE INDEX ix_device_user            ON device(user_id, last_seen_at);
+CREATE INDEX ix_event_env_id           ON event_log(env_id, id);
+CREATE INDEX ix_event_type_at          ON event_log(type, at);
 ```
 
 **Convenciones:**
@@ -286,7 +319,9 @@ classDiagram
 
 ---
 
-## 2. IndexedDB: base `ruok-device` (v1, librería `idb`)
+## 2. IndexedDB: una base por dispositivo, `ruok-<device_id>` (v1, librería `idb`)
+
+> El `device_id` se guarda en `localStorage` (dispositivo real) o en `sessionStorage` (cada pestaña es un dispositivo, para ensayos). Con `?device=<nombre>` se fija uno con nombre. Ver [control-center-and-devices.md](control-center-and-devices.md#4-identidad-de-dispositivo-y-aislamiento).
 
 Un dispositivo puede trabajar sin el servidor de a bordo. IndexedDB guarda:
 - **qué falta por enviar** (outbox);

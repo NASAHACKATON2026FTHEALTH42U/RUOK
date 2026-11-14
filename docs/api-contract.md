@@ -14,6 +14,7 @@
   - `409`: el mismo `id` llega con un contenido distinto.
   - `422`: error de validación.
 - **Idempotencia.** Repetir un `POST` con el mismo `id` devuelve `200` con el recurso existente y no lo duplica.
+- **Dispositivo.** Todas las peticiones llevan la cabecera `X-Device-Id: <uuid>` (ver [control-center-and-devices.md](control-center-and-devices.md#4-identidad-de-dispositivo-y-aislamiento)).
 - **Hora del servidor.** Las respuestas llevan la cabecera `X-Server-Time`, que es el reloj de la demo (puede ir acelerado).
 - **CORS** abierto en desarrollo.
 - **Autenticación:** `Authorization: Bearer <jwt>` en todos los endpoints salvo `/health`, `/auth/*` y el SOS de emergencia. `401` = sin sesión válida; `403` = rol sin permiso o dato ajeno. Ver [auth-and-roles.md](auth-and-roles.md).
@@ -90,7 +91,7 @@ Source         = manual | device | camera | checkin | pvt
 ### Liveness
 | Método | Ruta | Descripción |
 |---|---|---|
-| POST | `/members/{member_id}/heartbeat` | `{device_id, activity?: "normal"\|"eva"\|"sleep"}`. Devuelve `{liveness, checkin_required: bool}` |
+| POST | `/members/{member_id}/heartbeat` | `{device_id, activity?: "normal"\|"eva"\|"sleep", pending_outbox: int, last_sync_at?, device_kind?: "mobile"\|"tablet"\|"desktop"}`. Devuelve `{liveness, checkin_required: bool}`. También actualiza el registro del dispositivo |
 | POST | `/members/{member_id}/ruok` | Respuesta al check-in "R U OK?": `{ok: bool, note?}` |
 
 ### Alertas
@@ -111,6 +112,26 @@ Source         = manual | device | camera | checkin | pvt
 | POST | `/members/{member_id}/tasks/{task_id}/complete` | `{id: uuid, completed_at}`, idempotente. Devuelve `GameState` |
 | GET | `/members/{member_id}/game` | `GameState` |
 | GET | `/environments/{env_id}/leaderboard` | Puntos de la tripulación (cooperativo) |
+
+### Tiempo real, dispositivos y centro de control
+| Método | Ruta | Rol | Descripción |
+|---|---|---|---|
+| GET | `/events/stream?token=&types=&env_id=` | todos (filtrado por rol) | **SSE**. Cada mensaje es un `Event`. Admite `Last-Event-ID` para reanudar |
+| GET | `/events?since_id=&env_id=&type=&limit=` | admin | Historial de `event_log` (y fallback de polling) |
+| GET | `/devices?env_id=` | admin | Dispositivos registrados con `last_seen_at`, `pending_outbox`, `last_sync_at` e IP |
+| GET | `/control/overview` | admin | Todos los entornos: members con `overall_status`, `liveness`, alertas abiertas, enlace y métricas |
+| POST | `/control/liveness/pause` | admin | `{env_id, paused: bool}`: pausa las alertas de liveness durante la presentación |
+| GET | `/system/network-info` | — | `{lan_urls: ["http://192.168.8.10:8000"], hostname}` para el QR de conexión |
+
+```jsonc
+// Event (SSE / event_log)
+{ "id": 1234, "type": "alert.created", "at": "...", "env_id": "mars",
+  "member_id": 1, "user_id": 7, "device_id": "uuid", "ref_id": "alert-uuid",
+  "summary": "SOS emergency de Cmdr. Vega", "payload": {} }
+// type = measurement.created | heartbeat | liveness.changed | alert.created | alert.escalated |
+//        alert.acknowledged | alert.resolved | link.queued | link.delivered | link.state_changed |
+//        sync.batch | auth.login | auth.failed | task.completed | device.registered
+```
 
 ### Enlace con tierra y demo
 | Método | Ruta | Descripción |

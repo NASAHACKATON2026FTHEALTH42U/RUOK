@@ -8,7 +8,7 @@ Uso:
 Es idempotente: identifica cada issue por el prefijo "[ID]" del título.
   1. Crea labels y milestones que falten.
   2. Crea las issues nuevas, en orden.
-  3. Reescribe título, cuerpo (con enlaces #n reales) y labels gestionados de todas.
+  3. Reescribe título, cuerpo (con enlaces #n reales), milestone y labels gestionados de todas.
   4. Añade las issues al Project (Kanban) y rellena Área, Prioridad y Componente.
   5. Regenera docs/backlog.md.
 """
@@ -288,7 +288,8 @@ def main() -> None:
     # 4. Reescribir título, cuerpo y labels gestionados
     for i in issues:
         n = str(numbers[i["id"]])
-        cmd = ["issue", "edit", n, "--title", full_title(i, comps), "--body-file", "-"]
+        cmd = ["issue", "edit", n, "--title", full_title(i, comps), "--body-file", "-",
+               "--milestone", data["milestones"][i["milestone"]]["title"]]
         have = {l["name"] for l in current.get(i["id"], {}).get("labels", [])}
         want = labels_for(i)
         managed_have = {l for l in have if l.startswith(MANAGED_PREFIXES) or l in PRIORITIES}

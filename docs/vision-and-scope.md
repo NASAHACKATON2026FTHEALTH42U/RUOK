@@ -44,9 +44,9 @@ El Human Research Program (HRP) identifica **5 peligros**:
 11. Consola `/ground` (flight surgeon o enfermería) con el estado "as-of".
 12. Datos sintéticos de 30 días y escenarios de demo deterministas.
 13. **Login local y roles**: member, medic, commander, responder, psych y admin, con acceso por vistas ([auth-and-roles.md](auth-and-roles.md)).
+14. **Multi-dispositivo en red local:** cada usuario en su móvil, **centro de control** (`/control`) con todo el flujo de datos en vivo (SSE) y gestión, y QR para unirse ([control-center-and-devices.md](control-center-and-devices.md)).
 
 **P2 (si da tiempo):**
-- test de reacción PVT;
 - mensajes a casa con retardo;
 - kudos y misiones de tripulación;
 - galería Earth view;
