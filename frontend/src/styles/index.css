@@ -90,20 +90,24 @@ html[data-theme-ready] :is(body, header, footer, nav a, select) {
   }
 }
 
-/* Onda que late alrededor del marcador de un órgano crítico (BodyFigure). */
-@keyframes critical-ping {
-  0% {
-    transform: scale(1);
-    opacity: 0.9;
-  }
-  80%,
+/* Órgano en estado crítico (BodyFigure): rojo más intenso que parpadea con resplandor. */
+@keyframes critical-blink {
+  0%,
   100% {
-    transform: scale(2.2);
-    opacity: 0;
+    opacity: 1;
+    filter: brightness(1.15) drop-shadow(0 0 6px rgb(208 59 59 / 0.9));
+  }
+  50% {
+    opacity: 0.55;
+    filter: brightness(1) drop-shadow(0 0 0 rgb(208 59 59 / 0));
   }
 }
-.critical-ping {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: critical-ping 1.6s ease-out infinite;
+.critical-blink {
+  animation: critical-blink 1.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .critical-blink {
+    animation: none;
+    filter: brightness(1.15) drop-shadow(0 0 6px rgb(208 59 59 / 0.9));
+  }
 }
