@@ -41,7 +41,8 @@ export const useEnvironmentStore = create<EnvironmentState>()(
       selectEnvironment: (env) =>
         set((state) => ({
           envId: env.id,
-          vocabulary: { ...env.vocabulary },
+          // Si falta alguna clave, se usa el término neutro en lugar de `undefined`.
+          vocabulary: { ...DEFAULT_VOCABULARY, ...env.vocabulary },
           memberId: state.envId === env.id ? state.memberId : null,
         })),
       selectMember: (memberId) => set({ memberId }),

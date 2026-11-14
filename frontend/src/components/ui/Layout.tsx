@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { useVocab } from '../../environments/useVocab'
 import { EnvironmentSelector } from './EnvironmentSelector'
 
 const NAV_ITEMS = [
@@ -8,10 +9,12 @@ const NAV_ITEMS = [
   { to: '/history', label: 'Historial' },
   { to: '/missions', label: 'Misiones' },
   { to: '/alerts', label: 'Alertas' },
-  { to: '/ground', label: 'Consola externa' },
 ]
 
 export function Layout() {
+  const { ground } = useVocab()
+  const navItems = [...NAV_ITEMS, { to: '/ground', label: `Consola de ${ground}` }]
+
   return (
     <div className="flex min-h-full flex-col">
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur">
@@ -23,7 +26,7 @@ export function Layout() {
         </div>
         <nav className="mx-auto max-w-6xl overflow-x-auto px-4">
           <ul className="flex gap-1 pb-2 text-sm">
-            {NAV_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <li key={item.to}>
                 <NavLink
                   to={item.to}
