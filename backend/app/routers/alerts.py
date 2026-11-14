@@ -1,7 +1,7 @@
 """Alertas, escalado y consola ground.
 
-STUB(FS-02) → BE-14 (automáticas), BE-15 (manuales y acciones), BE-17 (consola ground)
-y BE-27 (SOS de emergencia sin token). En la consola ground el `link` ya es real (BE-13).
+Reales: automáticas (BE-14), manuales y acciones (BE-15). STUB(FS-02) → BE-17 (consola
+ground) y BE-27 (SOS de emergencia sin token). En la consola ground el `link` ya es real (BE-13).
 """
 
 from datetime import timedelta
@@ -17,7 +17,6 @@ from app.routers.deps import ERRORS_404, ERRORS_AUTH, AuthDep
 from app.schemas import (
     AckIn,
     Alert,
-    AlertEvent,
     AlertIn,
     AlertMessageIn,
     AlertStatus,
@@ -26,26 +25,35 @@ from app.schemas import (
     ResolveIn,
     Slug,
 )
+from app.schemas.common import ErrorResponse
 from app.services import alerts as alerts_service
 from app.services import comm_link
 
 router = APIRouter(tags=["alerts"], dependencies=[AuthDep], responses={**ERRORS_AUTH, **ERRORS_404})
 
 
-def _alert(alert_id: UUID) -> Alert:
-    if alert_id != stubs.ALERT_ID:
-        raise HTTPException(404, f"Alerta desconocida: {alert_id}")
-    return stubs.alert()
+SessionDep = Annotated[Session, Depends(get_session)]
+ERRORS_409 = {
+    409: {"model": ErrorResponse, "description": "Mismo id con otro contenido, o alerta resuelta"}
+}
 
 
-def _with_event(
-    alert: Alert, type_: str, actor: str, status: AlertStatus | None = None, **payload
-) -> Alert:
-    ev = AlertEvent(type=type_, actor=actor, at=clock.now(), payload=payload)
-    update = {"events": [*alert.events, ev], "updated_at": ev.at}
-    if status:
-        update["status"] = status
-    return alert.model_copy(update=update)
+def _alert(session: Session, alert_id: UUID) -> models.Alert:
+    try:
+        return alerts_service.get_alert(session, alert_id)
+    except alerts_service.AlertNotFound as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+
+def _run(session: Session, fn, *args, **kwargs) -> Alert:
+    """Ejecuta una acción del servicio y traduce sus errores a HTTP."""
+    try:
+        alert = fn(session, *args, **kwargs)
+    except alerts_service.AlertConflict as exc:
+        raise HTTPException(409, str(exc)) from exc
+    except alerts_service.InvalidAlert as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return alerts_service.to_schema(session, alert)
 
 
 @router.get(
@@ -71,71 +79,70 @@ def list_member_alerts(
 @router.post(
     "/members/{member_id}/alerts",
     response_model=Alert,
+    responses=ERRORS_409,
     summary="Pedir ayuda / SOS (idempotente por UUID)",
-    description="Con `category=emergency` se acepta SIN token y la alerta queda con "
-    "`authenticated=false`. STUB(FS-02) → BE-15/BE-27",
+    description="Idempotente por el UUID del cliente (mismo id y contenido → la misma alerta; "
+    "contenido distinto → 409). Destino: `target_role` (se pueden saltar niveles); si no, "
+    "emergency/critical suben hasta el primer nivel externo (a bordo al instante, tierra por "
+    "el enlace) y warning va a la tripulación. El SOS sin token llega con BE-27.",
 )
-def create_alert(member_id: int, body: AlertIn) -> Alert:
-    now = clock.now()
-    return stubs.alert(member_id).model_copy(
-        update={
-            "id": body.id,
-            "category": body.category,
-            "severity": body.severity,
-            "message": body.message or "",
-            "system_id": body.system_id,
-            "target_role": body.target_role or "crew",
-            "created_at": now,
-            "updated_at": now,
-            "events": [AlertEvent(type="created", actor="member", at=now)],
-        }
-    )
+def create_alert(member_id: int, body: AlertIn, session: SessionDep) -> Alert:
+    member = session.get(models.Member, member_id)
+    if member is None:
+        raise HTTPException(404, f"Member desconocido: {member_id}")
+    try:
+        alert, _created = alerts_service.create_manual(session, member, body)
+    except alerts_service.AlertConflict as exc:
+        raise HTTPException(409, str(exc)) from exc
+    except alerts_service.InvalidAlert as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return alerts_service.to_schema(session, alert)
 
 
 @router.post(
     "/alerts/{alert_id}/escalate",
     response_model=Alert,
+    responses=ERRORS_409,
     summary="Escalar (por defecto al siguiente nivel; permite saltar niveles)",
-    description="STUB(FS-02) → BE-15",
+    description="Los niveles externos salen por el enlace con su ETA. 422 si el destino no "
+    "está en la escalera o ya está en el último nivel; 409 si está resuelta.",
 )
-def escalate(alert_id: UUID, body: EscalateIn) -> Alert:
-    a = _alert(alert_id)
-    a = a.model_copy(
-        update={"level": a.level + 1, "target_role": body.target_role or a.target_role}
-    )
-    return _with_event(a, "escalated", "member", AlertStatus.escalated, message=body.message)
+def escalate(alert_id: UUID, body: EscalateIn, session: SessionDep) -> Alert:
+    alert = _alert(session, alert_id)
+    return _run(session, alerts_service.escalate, alert, body.target_role, body.message)
 
 
 @router.post(
     "/alerts/{alert_id}/ack",
     response_model=Alert,
+    responses=ERRORS_409,
     summary="Reconocer la alerta",
-    description="STUB(FS-02) → BE-15",
 )
-def ack(alert_id: UUID, body: AckIn) -> Alert:
-    return _with_event(_alert(alert_id), "acknowledged", body.actor, AlertStatus.acknowledged)
+def ack(alert_id: UUID, body: AckIn, session: SessionDep) -> Alert:
+    return _run(session, alerts_service.acknowledge, _alert(session, alert_id), body.actor)
 
 
 @router.post(
     "/alerts/{alert_id}/resolve",
     response_model=Alert,
+    responses=ERRORS_409,
     summary="Resolver la alerta",
-    description="STUB(FS-02) → BE-15",
 )
-def resolve(alert_id: UUID, body: ResolveIn) -> Alert:
-    return _with_event(
-        _alert(alert_id), "resolved", body.actor, AlertStatus.resolved, note=body.note
-    )
+def resolve(alert_id: UUID, body: ResolveIn, session: SessionDep) -> Alert:
+    alert = _alert(session, alert_id)
+    return _run(session, alerts_service.resolve, alert, body.actor, body.note)
 
 
 @router.post(
     "/alerts/{alert_id}/messages",
     response_model=Alert,
     summary="Mensaje en la alerta (viaja por el enlace si va a tierra)",
-    description="STUB(FS-02) → BE-15",
+    description="Si la alerta está en un nivel externo, el mensaje viaja por el enlace "
+    "(member → tierra, responder → a bordo) y el evento lleva su ETA.",
 )
-def add_message(alert_id: UUID, body: AlertMessageIn) -> Alert:
-    return _with_event(_alert(alert_id), "message", body.actor, text=body.text)
+def add_message(alert_id: UUID, body: AlertMessageIn, session: SessionDep) -> Alert:
+    alert = _alert(session, alert_id)
+    return _run(session, alerts_service.add_message, alert, body.actor, body.text)
 
 
 @router.get(

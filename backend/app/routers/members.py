@@ -10,7 +10,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session
 
-from app import models, stubs
+from app import models
 from app.db import get_session
 from app.routers.deps import ERRORS_404, ERRORS_409, ERRORS_AUTH, AuthDep
 from app.schemas import (
@@ -27,7 +27,7 @@ from app.schemas import (
     RuokResult,
     Slug,
 )
-from app.services import alerts, environments, liveness, measurements, members
+from app.services import alerts, behavioral, environments, liveness, measurements, members
 from app.services.member_assessment import UnknownEnvironment, assess_member
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -102,7 +102,9 @@ def post_measurements(
         raise HTTPException(409, str(exc)) from exc
     assessment = assess_member(session, m)
     alerts.evaluate(session, m, assessment)  # abre, actualiza o escala alertas (BE-14)
-    return MeasurementBatchResult(accepted=accepted, duplicates=duplicates, assessment=assessment)
+    return MeasurementBatchResult(
+        accepted=accepted, duplicates=duplicates, assessment=behavioral.redact(assessment)
+    )
 
 
 @router.get(
@@ -133,12 +135,14 @@ def list_measurements(
     tags=["assessment"],
     summary="Evaluación del member",
     description="Con `env` se evalúa con otro perfil sin modificar datos; "
-    "un `env` inexistente → 404.",
+    "un `env` inexistente → 404. Si `behavioral.details_visible` es false, los "
+    "indicadores conductuales no aparecen en `systems[].indicators` (solo el estado agregado).",
 )
 def get_assessment(member_id: int, session: SessionDep, env: Slug | None = None) -> Assessment:
     m = _member(session, member_id)
     try:
-        return assess_member(session, m, env)
+        # Detalles conductuales ocultos salvo `details_visible` (BE-20).
+        return behavioral.redact(assess_member(session, m, env))
     except UnknownEnvironment as exc:
         raise HTTPException(404, f"Entorno desconocido: {exc}") from exc
 
@@ -161,8 +165,13 @@ def heartbeat(member_id: int, body: HeartbeatIn, session: SessionDep) -> Heartbe
     response_model=RuokResult,
     tags=["liveness"],
     summary="Respuesta al check-in 'R U OK?'",
-    description="STUB(FS-02) → BE-16",
+    description="Cierra el check-in pendiente y cuenta como señal de vida. ok=false "
+    "('Necesito ayuda') crea una alerta critical y devuelve su id; ok=true resuelve la "
+    "alerta no_contact abierta.",
 )
 def ruok(member_id: int, body: RuokIn, session: SessionDep) -> RuokResult:
-    _member(session, member_id)
-    return RuokResult(liveness="active", alert_id=None if body.ok else stubs.ALERT_ID)
+    # Import local: así esta PR no toca la línea de imports que también cambia BE-20 (#152).
+    from app.services.liveness_watch import answer_ruok
+
+    m = _member(session, member_id)
+    return answer_ruok(session, m, body.ok, body.note)

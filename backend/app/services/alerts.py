@@ -47,9 +47,11 @@ def open_alert(session: Session, key: str) -> models.Alert | None:
     ).first()
 
 
-def _event(session: Session, alert: models.Alert, type_: str, **payload) -> None:
+def _event(
+    session: Session, alert: models.Alert, type_: str, actor: str = "system", **payload
+) -> None:
     session.add(
-        models.AlertEvent(alert_id=alert.id, type=type_, actor="system", payload=payload)
+        models.AlertEvent(alert_id=alert.id, type=type_, actor=actor, payload=payload)
     )
 
 
@@ -100,12 +102,21 @@ def _apply_level(
 
 
 def _escalate(
-    session: Session, alert: models.Alert, to_level: int, status: Status, env: Environment
+    session: Session,
+    alert: models.Alert,
+    to_level: int,
+    status: Status,
+    env: Environment,
+    actor: str = "system",
+    **payload,
 ) -> None:
     """Sube nivel a nivel hasta `to_level` (cada paso queda en la timeline)."""
     while alert.level < to_level:
         level = alert.level + 1
-        _event(session, alert, "escalated", level=level, target_role=env.escalation_ladder[level])
+        _event(
+            session, alert, "escalated", actor,
+            level=level, target_role=env.escalation_ladder[level], **payload,
+        )
         # TODO(BE-28): events.emit("alert.escalated", ...)
         _apply_level(session, alert, level, status, env)
 
@@ -305,3 +316,168 @@ def to_schema(session: Session, alert: models.Alert) -> AlertOut:
             AlertEventOut(type=e.type, actor=e.actor, at=e.at, payload=e.payload) for e in events
         ],
     )
+
+
+# --------------------------------------------------------------------------
+# BE-15: alertas manuales (Pedir ayuda / SOS) y acciones sobre las alertas
+# --------------------------------------------------------------------------
+
+
+class AlertNotFound(LookupError):
+    """La alerta no existe (→ 404)."""
+
+
+class AlertConflict(Exception):
+    """Mismo id con otro contenido, o acción no válida en ese estado (→ 409)."""
+
+
+class InvalidAlert(ValueError):
+    """Destino que no está en la escalera del entorno, o ya en el último nivel (→ 422)."""
+
+
+def _status_for(severity: str) -> Status:
+    """`emergency` se escala como `critical` (modo autónomo si el retardo es >= 60 s)."""
+    return Status.warning if severity == "warning" else Status.critical
+
+
+def _level_of(env: Environment, role: str) -> int:
+    if role not in env.escalation_ladder:
+        raise InvalidAlert(
+            f"'{role}' no está en la escalera de {env.id}: {', '.join(env.escalation_ladder)}"
+        )
+    return env.escalation_ladder.index(role)
+
+
+def get_alert(session: Session, alert_id: str) -> models.Alert:
+    alert = session.get(models.Alert, str(alert_id))
+    if alert is None:
+        raise AlertNotFound(f"Alerta desconocida: {alert_id}")
+    return alert
+
+
+def _same_request(alert: models.Alert, member_id: int, body) -> bool:
+    return (
+        alert.member_id == member_id
+        and alert.origin == "manual"
+        and alert.category == body.category
+        and alert.severity == body.severity
+        and alert.message == (body.message or "")
+        and alert.system_id == body.system_id
+    )
+
+
+def create_manual(
+    session: Session, member: models.Member, body
+) -> tuple[models.Alert, bool]:
+    """Pedir ayuda / SOS (`AlertIn`). Idempotente por el UUID del cliente.
+
+    Devuelve (alerta, creada). Destino: el `target_role` pedido (se pueden saltar
+    niveles); si no, `emergency`/`critical` suben hasta el primer nivel externo
+    (la tripulación lo recibe al instante y tierra por el enlace) y `warning` va a
+    la tripulación (nivel 1).
+    """
+    existing = session.get(models.Alert, str(body.id))
+    if existing is not None:
+        if not _same_request(existing, member.id, body):
+            raise AlertConflict(f"La alerta {body.id} ya existe con otro contenido")
+        return existing, False
+
+    env = environments.get_environment(member.env_id)
+    status = _status_for(body.severity)
+    if body.target_role:
+        to_level = _level_of(env, body.target_role)
+    elif status == Status.critical:
+        to_level = target_level(Status.critical, env)
+    else:
+        to_level = min(1, len(env.escalation_ladder) - 1)
+
+    alert = models.Alert(
+        id=str(body.id),
+        member_id=member.id,
+        env_id=member.env_id,
+        origin="manual",
+        authenticated=True,  # TODO(BE-27): False si llega sin token (SOS de emergencia)
+        category=body.category,
+        severity=body.severity,
+        system_id=body.system_id,
+        message=body.message or "",
+        level=0,
+        target_role=env.escalation_ladder[0],
+        delivery_mode="realtime",
+        status=AlertStatus.open,
+    )
+    session.add(alert)
+    session.flush()
+    _apply_level(session, alert, 0, status, env)
+    _event(session, alert, "created", "member", category=alert.category, severity=alert.severity)
+    # TODO(BE-28): events.emit("alert.created", ...)
+    _escalate(session, alert, to_level, status, env, "member")
+    session.commit()
+    return alert, True
+
+
+def escalate(
+    session: Session,
+    alert: models.Alert,
+    target_role: str | None = None,
+    message: str | None = None,
+    actor: str = "member",
+) -> models.Alert:
+    """Sube la alerta al siguiente nivel, o al `target_role` (saltando niveles)."""
+    if alert.status == AlertStatus.resolved:
+        raise AlertConflict("La alerta ya está resuelta")
+    env = environments.get_environment(alert.env_id)
+    to_level = _level_of(env, target_role) if target_role else alert.level + 1
+    if to_level >= len(env.escalation_ladder):
+        raise InvalidAlert("La alerta ya está en el último nivel de la escalera")
+    if to_level <= alert.level:
+        raise InvalidAlert(f"La alerta ya está en '{alert.target_role}' o por encima")
+    extra = {"message": message} if message else {}
+    _escalate(session, alert, to_level, _status_for(alert.severity), env, actor, **extra)
+    session.commit()
+    return alert
+
+
+def acknowledge(session: Session, alert: models.Alert, actor: str) -> models.Alert:
+    if alert.status == AlertStatus.resolved:
+        raise AlertConflict("La alerta ya está resuelta")
+    alert.status = AlertStatus.acknowledged
+    alert.updated_at = clock.now()
+    session.add(alert)
+    _event(session, alert, "acknowledged", actor)
+    session.commit()
+    # TODO(BE-28): events.emit("alert.acknowledged", ...)
+    return alert
+
+
+def resolve(
+    session: Session, alert: models.Alert, actor: str, note: str | None = None
+) -> models.Alert:
+    if alert.status == AlertStatus.resolved:
+        raise AlertConflict("La alerta ya está resuelta")
+    alert.status = AlertStatus.resolved  # libera la dedupe_key para una alerta nueva
+    alert.updated_at = clock.now()
+    session.add(alert)
+    _event(session, alert, "resolved", actor, **({"note": note} if note else {}))
+    session.commit()
+    # TODO(BE-28): events.emit("alert.resolved", ...)
+    return alert
+
+
+def add_message(session: Session, alert: models.Alert, actor: str, text: str) -> models.Alert:
+    """Mensaje en la alerta. Si la alerta está en un nivel externo, viaja por el enlace:
+    el member hacia tierra (`up`) y el responder hacia a bordo (`down`), con su ETA."""
+    env = environments.get_environment(alert.env_id)
+    payload: dict = {"text": text}
+    if alert.level >= env.external_from_level and actor in ("member", "responder"):
+        direction = LinkDirection.up if actor == "member" else LinkDirection.down
+        sent = comm_link.send(
+            session, alert.env_id, direction, "alert_event", ref_id=alert.id,
+            payload={"actor": actor, "text": text},
+        )
+        payload.update(via_link=direction.value, eta=sent.eta.isoformat(), link=sent.state)
+    alert.updated_at = clock.now()
+    session.add(alert)
+    _event(session, alert, "message", actor, **payload)
+    session.commit()
+    return alert

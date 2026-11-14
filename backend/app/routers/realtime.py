@@ -33,7 +33,7 @@ from app.schemas import (
     Slug,
 )
 from app.schemas.realtime import AlertCounts, ControlMetrics, EnvironmentOverview, EnvironmentRef
-from app.services import alerts, comm_link
+from app.services import alerts, comm_link, liveness_watch
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -260,4 +260,5 @@ def demo_fast_forward(body: FastForwardIn, session: SessionDep) -> DemoClock:
     clock.advance(body.seconds)
     comm_link.deliver_due(session)
     alerts.reevaluate_open(session)  # escala los warnings que han persistido (BE-14)
+    liveness_watch.check_all(session)  # R U OK? y no_contact con el reloj adelantado (BE-16)
     return DemoClock(server_time=clock.now(), offset_s=clock.get_offset())
