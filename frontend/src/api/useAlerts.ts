@@ -1,3 +1,4 @@
+import { useLiveRefresh } from '../realtime/events'
 import { api, unwrap } from './client'
 import { useLoad } from './useLoad'
 
@@ -8,12 +9,14 @@ const getMemberAlerts = (memberId: number) =>
 export type Alert = Awaited<ReturnType<typeof getMemberAlerts>>[number]
 
 /**
- * Alertas del member (`GET /members/{id}/alerts`), refrescadas cada `refreshMs`.
- * TODO(FE-29): actualizar por eventos SSE (alert.created / alert.updated) en lugar de consultar.
+ * Alertas del member (`GET /members/{id}/alerts`): se refrescan al instante con los eventos
+ * `alert.*` (FE-29) y, por si acaso, cada `refreshMs`.
  */
-export function useMemberAlerts(memberId: number | null, refreshMs = 10_000) {
-  return useLoad(() => getMemberAlerts(memberId!), [memberId], {
+export function useMemberAlerts(memberId: number | null, refreshMs = 30_000) {
+  const r = useLoad(() => getMemberAlerts(memberId!), [memberId], {
     enabled: memberId !== null,
     refreshMs,
   })
+  useLiveRefresh({ types: ['alert.*'], memberId }, r.refresh)
+  return r
 }

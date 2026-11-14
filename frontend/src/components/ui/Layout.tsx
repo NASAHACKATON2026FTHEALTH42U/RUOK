@@ -11,6 +11,8 @@ import { PendingSyncChip } from './PendingSyncChip'
 import { ServerStatus } from './ServerStatus'
 import { getDevice } from '../../offline/device'
 import { SosButton } from '../alerts/SosButton'
+import { LiveAlertToast } from '../alerts/LiveAlertToast'
+import { RealtimeConnector } from '../../realtime/RealtimeConnector'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Entornos' },
@@ -18,6 +20,7 @@ const NAV_ITEMS = [
   { to: '/dashboard', label: 'Panel' },
   { to: '/measure', label: 'Medir' },
   { to: '/checkin', label: 'Check-in' },
+  { to: '/pvt', label: 'Test PVT' },
   { to: '/history', label: 'Historial' },
   { to: '/missions', label: 'Misiones' },
   { to: '/alerts', label: 'Alertas' },
@@ -85,6 +88,8 @@ export function Layout() {
         )}
       </footer>
       <SosButton />
+      <RealtimeConnector />
+      <LiveAlertToast />
     </div>
   )
 }

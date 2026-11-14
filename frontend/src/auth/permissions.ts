@@ -41,6 +41,7 @@ export const ROUTE_PERMISSIONS: Record<string, Permission> = {
   '/dashboard': 'view:dashboard',
   '/measure': 'view:measure',
   '/checkin': 'view:checkin',
+  '/pvt': 'view:checkin', // el test PVT va con el check-in (docs/auth-and-roles.md)
   '/history': 'view:history',
   '/missions': 'view:missions',
   '/alerts': 'view:alerts',
