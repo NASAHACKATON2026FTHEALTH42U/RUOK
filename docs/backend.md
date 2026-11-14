@@ -57,7 +57,7 @@ backend/
 │   ├── models.py         tablas SQLModel (15) e índices de data-model.md; tipo UTCDateTime
 │   ├── data/
 │   │   ├── environments.json  los 6 perfiles de entorno (BE-03)
-│   │   ├── indicators.json    20 indicadores con rangos provisionales (BE-04)
+│   │   ├── indicators.json    20 indicadores con rangos revisados en CNT-01 (BE-04)
 │   │   └── systems.json       7 sistemas del cuerpo con su región del SVG (BE-04)
 │   ├── services/
 │   │   ├── app_state.py     clave-valor de app_state: get_value/set_value, save_clock/restore_clock
@@ -196,7 +196,7 @@ Cómo funciona `services/environments.py` (patrón que ya sigue `catalog.py`, de
 - un indicador no aparece en la lista de ningún sistema;
 - un entorno de `environments.json` usa un indicador que no está en el catálogo.
 
-Los **rangos son provisionales** hasta CNT-01. Todos están en la tabla de umbrales de [sources.md](sources.md), con las reglas del motor (un valor más allá de la banda `warning` ya es `critical`).
+Los **rangos están revisados en CNT-01**, con una fuente por fila en la tabla de umbrales de [sources.md](sources.md#tabla-de-umbrales-cnt-01). Regla: el borde exterior de la banda `warning` coincide con el umbral crítico, para que no haya huecos; lo comprueba `test_no_gap_between_warning_and_critical`. Algunos valores son *diseño* (sin umbral clínico publicado) y están marcados así.
 
 Si cambias `indicators.json` o `systems.json`, regenera los mocks del front (`cd frontend && npm run gen:mocks`) además de los tipos.
 

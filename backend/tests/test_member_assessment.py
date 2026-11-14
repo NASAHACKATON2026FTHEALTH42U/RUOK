@@ -115,8 +115,11 @@ def test_other_env_gives_other_result_with_same_data():
     assert system(assess("mars", high), "cardiovascular").status == Status.critical
 
     # La escalera y el modo salen del perfil.
+    # critical va a la tripulación (a bordo): tiempo real y sin los 840 s (BE-31).
     crit_mars = system(assess("mars", high), "cardiovascular").escalation
-    assert crit_mars.mode == EscalationMode.autonomous
+    assert (crit_mars.target_role, crit_mars.mode, crit_mars.delay_s) == (
+        "crew", EscalationMode.realtime, 0,
+    )
     assert mars.env_id == "mars" and geriatric.env_id == "geriatric"
 
     crit = {**SERIES, "bp_systolic": daily([170])}

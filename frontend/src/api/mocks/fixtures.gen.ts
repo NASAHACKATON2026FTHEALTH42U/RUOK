@@ -201,6 +201,7 @@ export const environments: Schema<'Environment'>[] = [
       "crew",
       "ground"
     ],
+    "external_from_level": 2,
     "liveness": {
       "stale_after_s": 300,
       "lost_after_s": 900,
@@ -269,6 +270,7 @@ export const environments: Schema<'Environment'>[] = [
       "crew",
       "ground"
     ],
+    "external_from_level": 2,
     "liveness": {
       "stale_after_s": 300,
       "lost_after_s": 900,
@@ -337,6 +339,7 @@ export const environments: Schema<'Environment'>[] = [
       "crew",
       "ground"
     ],
+    "external_from_level": 2,
     "liveness": {
       "stale_after_s": 300,
       "lost_after_s": 900,
@@ -415,6 +418,7 @@ export const environments: Schema<'Environment'>[] = [
       "crew",
       "ground"
     ],
+    "external_from_level": 2,
     "liveness": {
       "stale_after_s": 300,
       "lost_after_s": 900,
@@ -465,6 +469,7 @@ export const environments: Schema<'Environment'>[] = [
       "nurse",
       "doctor"
     ],
+    "external_from_level": 2,
     "liveness": {
       "stale_after_s": 300,
       "lost_after_s": 900,
@@ -517,6 +522,7 @@ export const environments: Schema<'Environment'>[] = [
       "doctor",
       "family"
     ],
+    "external_from_level": 2,
     "liveness": {
       "stale_after_s": 300,
       "lost_after_s": 900,
@@ -537,7 +543,20 @@ export const environments: Schema<'Environment'>[] = [
       "primary": "#6a429e",
       "background": null
     },
-    "threshold_overrides": {},
+    "threshold_overrides": {
+      "temperature": {
+        "normal": [
+          36.0,
+          37.7
+        ],
+        "warning": [
+          37.8,
+          39.5
+        ],
+        "critical_low": null,
+        "critical_high": null
+      }
+    },
     "indicators": [
       "heart_rate",
       "bp_systolic",
@@ -583,7 +602,7 @@ export const indicators: Schema<'Indicator'>[] = [
       ],
       "warning": [
         101.0,
-        120.0
+        130.0
       ],
       "critical_low": 40.0,
       "critical_high": 130.0
@@ -617,10 +636,10 @@ export const indicators: Schema<'Indicator'>[] = [
       ],
       "warning": [
         130.0,
-        159.0
+        180.0
       ],
       "critical_low": 80.0,
-      "critical_high": 160.0
+      "critical_high": 180.0
     },
     "max_age_s": 172800,
     "higher_is_worse": true,
@@ -647,14 +666,14 @@ export const indicators: Schema<'Indicator'>[] = [
     "ranges": {
       "normal": [
         60.0,
-        84.0
+        79.0
       ],
       "warning": [
-        85.0,
-        99.0
+        80.0,
+        120.0
       ],
       "critical_low": 50.0,
-      "critical_high": 100.0
+      "critical_high": 120.0
     },
     "max_age_s": 172800,
     "higher_is_worse": true,
@@ -683,7 +702,7 @@ export const indicators: Schema<'Indicator'>[] = [
         100.0
       ],
       "warning": [
-        91.0,
+        90.0,
         94.0
       ],
       "critical_low": 90.0,
@@ -716,7 +735,7 @@ export const indicators: Schema<'Indicator'>[] = [
         5.0
       ],
       "warning": [
-        2.0,
+        1.5,
         2.9
       ],
       "critical_low": 1.5,
@@ -746,14 +765,14 @@ export const indicators: Schema<'Indicator'>[] = [
     "ranges": {
       "normal": [
         36.0,
-        37.4
+        37.9
       ],
       "warning": [
-        37.5,
-        38.4
+        38.0,
+        39.5
       ],
       "critical_low": 35.0,
-      "critical_high": 38.5
+      "critical_high": 39.5
     },
     "max_age_s": 86400,
     "higher_is_worse": true,
@@ -783,9 +802,9 @@ export const indicators: Schema<'Indicator'>[] = [
       ],
       "warning": [
         141.0,
-        180.0
+        250.0
       ],
-      "critical_low": 60.0,
+      "critical_low": 54.0,
       "critical_high": 250.0
     },
     "max_age_s": 86400,
@@ -815,7 +834,7 @@ export const indicators: Schema<'Indicator'>[] = [
         300.0
       ],
       "warning": [
-        60.0,
+        30.0,
         119.0
       ],
       "critical_low": 30.0,
@@ -848,7 +867,7 @@ export const indicators: Schema<'Indicator'>[] = [
         10.0
       ],
       "warning": [
-        5.0,
+        4.0,
         6.9
       ],
       "critical_low": 4.0,
@@ -882,7 +901,7 @@ export const indicators: Schema<'Indicator'>[] = [
       ],
       "warning": [
         2.0,
-        3.4
+        3.5
       ],
       "critical_low": null,
       "critical_high": 3.5
@@ -911,11 +930,11 @@ export const indicators: Schema<'Indicator'>[] = [
     "ranges": {
       "normal": [
         0.0,
-        250.0
+        299.0
       ],
       "warning": [
-        251.0,
-        500.0
+        300.0,
+        600.0
       ],
       "critical_low": null,
       "critical_high": 600.0
@@ -947,7 +966,7 @@ export const indicators: Schema<'Indicator'>[] = [
         4000.0
       ],
       "warning": [
-        801.0,
+        800.0,
         1499.0
       ],
       "critical_low": 800.0,
@@ -1011,7 +1030,7 @@ export const indicators: Schema<'Indicator'>[] = [
       ],
       "warning": [
         3.1,
-        4.4
+        4.5
       ],
       "critical_low": null,
       "critical_high": 4.5
@@ -1043,7 +1062,7 @@ export const indicators: Schema<'Indicator'>[] = [
         5.0
       ],
       "warning": [
-        2.0,
+        1.5,
         2.9
       ],
       "critical_low": 1.5,
@@ -1077,7 +1096,7 @@ export const indicators: Schema<'Indicator'>[] = [
       ],
       "warning": [
         3.1,
-        4.4
+        4.5
       ],
       "critical_low": null,
       "critical_high": 4.5
@@ -1109,7 +1128,7 @@ export const indicators: Schema<'Indicator'>[] = [
         5.0
       ],
       "warning": [
-        2.0,
+        1.5,
         2.9
       ],
       "critical_low": 1.5,
@@ -1142,7 +1161,7 @@ export const indicators: Schema<'Indicator'>[] = [
         5.0
       ],
       "warning": [
-        2.0,
+        1.5,
         2.9
       ],
       "critical_low": 1.5,
@@ -1172,11 +1191,11 @@ export const indicators: Schema<'Indicator'>[] = [
     "ranges": {
       "normal": [
         100.0,
-        350.0
+        354.0
       ],
       "warning": [
-        351.0,
-        499.0
+        355.0,
+        500.0
       ],
       "critical_low": null,
       "critical_high": 500.0
@@ -1209,7 +1228,7 @@ export const indicators: Schema<'Indicator'>[] = [
       ],
       "warning": [
         3.0,
-        5.0
+        6.0
       ],
       "critical_low": null,
       "critical_high": 6.0
@@ -1642,7 +1661,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 101.0,
-                120.0
+                130.0
               ]
             }
           },
@@ -1661,26 +1680,26 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 130.0,
-                159.0
+                180.0
               ]
             }
           },
           {
             "indicator_id": "bp_diastolic",
-            "last_value": 69.0,
+            "last_value": 67.0,
             "unit": "mmHg",
             "taken_at": "2026-11-14T08:30:56.022220Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": 72.42857142857143,
+            "baseline": 69.85714285714286,
             "range": {
               "normal": [
                 60.0,
-                84.0
+                79.0
               ],
               "warning": [
-                85.0,
-                99.0
+                80.0,
+                120.0
               ]
             }
           },
@@ -1698,7 +1717,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 100.0
               ],
               "warning": [
-                91.0,
+                90.0,
                 94.0
               ]
             }
@@ -1732,7 +1751,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 300.0
               ],
               "warning": [
-                60.0,
+                30.0,
                 119.0
               ]
             }
@@ -1754,20 +1773,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "indicators": [
           {
             "indicator_id": "temperature",
-            "last_value": 36.3,
+            "last_value": 36.4,
             "unit": "°C",
             "taken_at": "2026-11-14T04:38:19.478569Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": 36.5125,
+            "baseline": 36.6625,
             "range": {
               "normal": [
                 36.0,
-                37.4
+                37.9
               ],
               "warning": [
-                37.5,
-                38.4
+                38.0,
+                39.5
               ]
             }
           }
@@ -1800,7 +1819,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 5.0
               ],
               "warning": [
-                2.0,
+                1.5,
                 2.9
               ]
             }
@@ -1819,7 +1838,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 10.0
               ],
               "warning": [
-                5.0,
+                4.0,
                 6.9
               ]
             }
@@ -1850,11 +1869,11 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             "range": {
               "normal": [
                 0.0,
-                250.0
+                299.0
               ],
               "warning": [
-                251.0,
-                500.0
+                300.0,
+                600.0
               ]
             }
           }
@@ -1903,7 +1922,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 101.0,
-                120.0
+                130.0
               ]
             }
           },
@@ -1922,26 +1941,26 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 130.0,
-                159.0
+                180.0
               ]
             }
           },
           {
             "indicator_id": "bp_diastolic",
-            "last_value": 69.0,
+            "last_value": 67.0,
             "unit": "mmHg",
             "taken_at": "2026-11-14T08:30:56.022220Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": 72.42857142857143,
+            "baseline": 69.85714285714286,
             "range": {
               "normal": [
                 60.0,
-                84.0
+                79.0
               ],
               "warning": [
-                85.0,
-                99.0
+                80.0,
+                120.0
               ]
             }
           },
@@ -1959,7 +1978,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 100.0
               ],
               "warning": [
-                91.0,
+                90.0,
                 94.0
               ]
             }
@@ -1970,7 +1989,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "level": 0,
           "target_role": "self",
           "mode": "realtime",
-          "delay_s": 1,
+          "delay_s": 0,
           "message": "",
           "protocol_id": null
         }
@@ -1993,7 +2012,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 300.0
               ],
               "warning": [
-                60.0,
+                30.0,
                 119.0
               ]
             }
@@ -2004,7 +2023,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "level": 0,
           "target_role": "self",
           "mode": "realtime",
-          "delay_s": 1,
+          "delay_s": 0,
           "message": "",
           "protocol_id": null
         }
@@ -2015,20 +2034,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "indicators": [
           {
             "indicator_id": "temperature",
-            "last_value": 36.3,
+            "last_value": 36.4,
             "unit": "°C",
             "taken_at": "2026-11-14T04:38:19.478569Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": 36.5125,
+            "baseline": 36.6625,
             "range": {
               "normal": [
                 36.0,
-                37.4
+                37.9
               ],
               "warning": [
-                37.5,
-                38.4
+                38.0,
+                39.5
               ]
             }
           }
@@ -2038,7 +2057,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "level": 0,
           "target_role": "self",
           "mode": "realtime",
-          "delay_s": 1,
+          "delay_s": 0,
           "message": "",
           "protocol_id": null
         }
@@ -2061,7 +2080,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 5.0
               ],
               "warning": [
-                2.0,
+                1.5,
                 2.9
               ]
             }
@@ -2080,7 +2099,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 10.0
               ],
               "warning": [
-                5.0,
+                4.0,
                 6.9
               ]
             }
@@ -2091,7 +2110,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "level": 1,
           "target_role": "crew",
           "mode": "realtime",
-          "delay_s": 1,
+          "delay_s": 0,
           "message": "",
           "protocol_id": null
         }
@@ -2111,11 +2130,11 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             "range": {
               "normal": [
                 0.0,
-                250.0
+                299.0
               ],
               "warning": [
-                251.0,
-                500.0
+                300.0,
+                600.0
               ]
             }
           }
@@ -2125,7 +2144,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "level": 0,
           "target_role": "self",
           "mode": "realtime",
-          "delay_s": 1,
+          "delay_s": 0,
           "message": "",
           "protocol_id": null
         }
@@ -2164,7 +2183,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 101.0,
-                120.0
+                130.0
               ]
             }
           },
@@ -2189,20 +2208,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           },
           {
             "indicator_id": "bp_diastolic",
-            "last_value": 69.0,
+            "last_value": 67.0,
             "unit": "mmHg",
             "taken_at": "2026-11-14T08:30:56.022220Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": 72.42857142857143,
+            "baseline": 69.85714285714286,
             "range": {
               "normal": [
                 60.0,
-                84.0
+                79.0
               ],
               "warning": [
-                85.0,
-                99.0
+                80.0,
+                120.0
               ]
             }
           },
@@ -2220,7 +2239,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 100.0
               ],
               "warning": [
-                91.0,
+                90.0,
                 94.0
               ]
             }
@@ -2230,8 +2249,8 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "escalation": {
           "level": 1,
           "target_role": "crew",
-          "mode": "autonomous",
-          "delay_s": 840,
+          "mode": "realtime",
+          "delay_s": 0,
           "message": "",
           "protocol_id": null
         }
@@ -2254,7 +2273,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 300.0
               ],
               "warning": [
-                60.0,
+                30.0,
                 119.0
               ]
             }
@@ -2264,8 +2283,8 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "escalation": {
           "level": 0,
           "target_role": "self",
-          "mode": "delayed",
-          "delay_s": 840,
+          "mode": "realtime",
+          "delay_s": 0,
           "message": "",
           "protocol_id": null
         }
@@ -2276,20 +2295,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "indicators": [
           {
             "indicator_id": "temperature",
-            "last_value": 36.3,
+            "last_value": 36.4,
             "unit": "°C",
             "taken_at": "2026-11-14T04:38:19.478569Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": 36.5125,
+            "baseline": 36.6625,
             "range": {
               "normal": [
                 36.0,
-                37.4
+                37.9
               ],
               "warning": [
-                37.5,
-                38.4
+                38.0,
+                39.5
               ]
             }
           }
@@ -2298,8 +2317,8 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "escalation": {
           "level": 0,
           "target_role": "self",
-          "mode": "delayed",
-          "delay_s": 840,
+          "mode": "realtime",
+          "delay_s": 0,
           "message": "",
           "protocol_id": null
         }
@@ -2322,7 +2341,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 5.0
               ],
               "warning": [
-                2.0,
+                1.5,
                 2.9
               ]
             }
@@ -2341,7 +2360,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 10.0
               ],
               "warning": [
-                5.0,
+                4.0,
                 6.9
               ]
             }
@@ -2351,8 +2370,8 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "escalation": {
           "level": 1,
           "target_role": "crew",
-          "mode": "autonomous",
-          "delay_s": 840,
+          "mode": "realtime",
+          "delay_s": 0,
           "message": "",
           "protocol_id": null
         }
@@ -2372,11 +2391,11 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             "range": {
               "normal": [
                 0.0,
-                250.0
+                299.0
               ],
               "warning": [
-                251.0,
-                500.0
+                300.0,
+                600.0
               ]
             }
           }
@@ -2385,8 +2404,8 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "escalation": {
           "level": 0,
           "target_role": "self",
-          "mode": "delayed",
-          "delay_s": 840,
+          "mode": "realtime",
+          "delay_s": 0,
           "message": "",
           "protocol_id": null
         }
@@ -2425,7 +2444,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 101.0,
-                120.0
+                130.0
               ]
             }
           },
@@ -2444,26 +2463,26 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 130.0,
-                159.0
+                180.0
               ]
             }
           },
           {
             "indicator_id": "bp_diastolic",
-            "last_value": 69.0,
+            "last_value": 67.0,
             "unit": "mmHg",
             "taken_at": "2026-11-14T08:30:56.022220Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": 72.42857142857143,
+            "baseline": 69.85714285714286,
             "range": {
               "normal": [
                 60.0,
-                84.0
+                79.0
               ],
               "warning": [
-                85.0,
-                99.0
+                80.0,
+                120.0
               ]
             }
           },
@@ -2481,7 +2500,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 100.0
               ],
               "warning": [
-                91.0,
+                90.0,
                 94.0
               ]
             }
@@ -2503,20 +2522,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "indicators": [
           {
             "indicator_id": "temperature",
-            "last_value": 36.3,
+            "last_value": 36.4,
             "unit": "°C",
             "taken_at": "2026-11-14T04:38:19.478569Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": 36.5125,
+            "baseline": 36.6625,
             "range": {
               "normal": [
                 36.0,
-                37.4
+                37.9
               ],
               "warning": [
-                37.5,
-                38.4
+                38.0,
+                39.5
               ]
             }
           }
@@ -2549,7 +2568,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 5.0
               ],
               "warning": [
-                2.0,
+                1.5,
                 2.9
               ]
             }
@@ -2568,7 +2587,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 10.0
               ],
               "warning": [
-                5.0,
+                4.0,
                 6.9
               ]
             }
@@ -2618,7 +2637,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 101.0,
-                120.0
+                130.0
               ]
             }
           },
@@ -2637,26 +2656,26 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 130.0,
-                159.0
+                180.0
               ]
             }
           },
           {
             "indicator_id": "bp_diastolic",
-            "last_value": 69.0,
+            "last_value": 67.0,
             "unit": "mmHg",
             "taken_at": "2026-11-14T08:30:56.022220Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": 72.42857142857143,
+            "baseline": 69.85714285714286,
             "range": {
               "normal": [
                 60.0,
-                84.0
+                79.0
               ],
               "warning": [
-                85.0,
-                99.0
+                80.0,
+                120.0
               ]
             }
           },
@@ -2674,7 +2693,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 100.0
               ],
               "warning": [
-                91.0,
+                90.0,
                 94.0
               ]
             }
@@ -2696,20 +2715,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "indicators": [
           {
             "indicator_id": "temperature",
-            "last_value": 36.3,
+            "last_value": 36.4,
             "unit": "°C",
             "taken_at": "2026-11-14T04:38:19.478569Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": 36.5125,
+            "baseline": 36.6625,
             "range": {
               "normal": [
                 36.0,
-                37.4
+                37.9
               ],
               "warning": [
-                37.5,
-                38.4
+                38.0,
+                39.5
               ]
             }
           }
@@ -2742,7 +2761,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 5.0
               ],
               "warning": [
-                2.0,
+                1.5,
                 2.9
               ]
             }
@@ -2761,7 +2780,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 10.0
               ],
               "warning": [
-                5.0,
+                4.0,
                 6.9
               ]
             }
@@ -2811,7 +2830,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 101.0,
-                120.0
+                130.0
               ]
             }
           },
@@ -2830,26 +2849,26 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               ],
               "warning": [
                 130.0,
-                159.0
+                180.0
               ]
             }
           },
           {
             "indicator_id": "bp_diastolic",
-            "last_value": 69.0,
+            "last_value": 67.0,
             "unit": "mmHg",
             "taken_at": "2026-11-14T08:30:56.022220Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": 72.42857142857143,
+            "baseline": 69.85714285714286,
             "range": {
               "normal": [
                 60.0,
-                84.0
+                79.0
               ],
               "warning": [
-                85.0,
-                99.0
+                80.0,
+                120.0
               ]
             }
           },
@@ -2867,7 +2886,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 100.0
               ],
               "warning": [
-                91.0,
+                90.0,
                 94.0
               ]
             }
@@ -2889,20 +2908,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         "indicators": [
           {
             "indicator_id": "temperature",
-            "last_value": 36.3,
+            "last_value": 36.4,
             "unit": "°C",
             "taken_at": "2026-11-14T04:38:19.478569Z",
             "status": "normal",
             "trend": "stable",
-            "baseline": 36.5125,
+            "baseline": 36.6625,
             "range": {
               "normal": [
                 36.0,
-                37.4
+                37.7
               ],
               "warning": [
-                37.5,
-                38.4
+                37.8,
+                39.5
               ]
             }
           }
@@ -2935,7 +2954,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 4000.0
               ],
               "warning": [
-                801.0,
+                800.0,
                 1499.0
               ]
             }
@@ -2984,7 +3003,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 5.0
               ],
               "warning": [
-                2.0,
+                1.5,
                 2.9
               ]
             }
@@ -3003,7 +3022,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 10.0
               ],
               "warning": [
-                5.0,
+                4.0,
                 6.9
               ]
             }
@@ -3065,7 +3084,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "e3544847-c19e-53ce-a0fd-f0175bf21a8d",
     "indicator_id": "temperature",
-    "value": 36.5,
+    "value": 36.6,
     "taken_at": "2026-10-16T05:21:15.575321Z",
     "source": "manual",
     "note": null,
@@ -3098,7 +3117,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "fa0eb64a-9d13-5a21-b0ad-11761ddf44ad",
     "indicator_id": "bp_diastolic",
-    "value": 74.0,
+    "value": 71.0,
     "taken_at": "2026-10-16T09:11:11.275192Z",
     "source": "manual",
     "note": null,
@@ -3131,7 +3150,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "4ce35266-176a-5000-9952-b262b7d45263",
     "indicator_id": "temperature",
-    "value": 36.6,
+    "value": 36.7,
     "taken_at": "2026-10-17T04:35:17.294913Z",
     "source": "manual",
     "note": null,
@@ -3186,7 +3205,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "1c214c38-7b87-54bb-a014-8b4ae1c99bda",
     "indicator_id": "bp_diastolic",
-    "value": 72.0,
+    "value": 70.0,
     "taken_at": "2026-10-17T08:52:52.298618Z",
     "source": "manual",
     "note": null,
@@ -3230,7 +3249,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "7d9d8965-1525-533e-9c41-b4adb1fdb7e9",
     "indicator_id": "temperature",
-    "value": 36.5,
+    "value": 36.7,
     "taken_at": "2026-10-18T05:21:26.397192Z",
     "source": "manual",
     "note": null,
@@ -3274,7 +3293,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "5979ae2e-6e95-5ce5-8999-7f78adf873fc",
     "indicator_id": "bp_diastolic",
-    "value": 77.0,
+    "value": 73.0,
     "taken_at": "2026-10-18T09:07:51.883708Z",
     "source": "manual",
     "note": null,
@@ -3307,7 +3326,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "642d5640-eb87-5fce-aa92-4ecb510559d3",
     "indicator_id": "temperature",
-    "value": 36.4,
+    "value": 36.5,
     "taken_at": "2026-10-19T04:39:03.265614Z",
     "source": "manual",
     "note": null,
@@ -3362,7 +3381,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "a2639039-4102-5684-a11e-cff8c21fad1d",
     "indicator_id": "bp_diastolic",
-    "value": 72.0,
+    "value": 69.0,
     "taken_at": "2026-10-19T08:54:59.854120Z",
     "source": "manual",
     "note": null,
@@ -3406,7 +3425,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "21fff843-59fe-517c-aa36-f15c756bc44f",
     "indicator_id": "temperature",
-    "value": 36.5,
+    "value": 36.7,
     "taken_at": "2026-10-20T04:53:29.529828Z",
     "source": "manual",
     "note": null,
@@ -3450,7 +3469,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "d6b719c6-c335-5814-b5d0-12ee11fa4618",
     "indicator_id": "bp_diastolic",
-    "value": 71.0,
+    "value": 69.0,
     "taken_at": "2026-10-20T08:28:06.808977Z",
     "source": "manual",
     "note": null,
@@ -3505,7 +3524,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "b17d6e67-ccf7-56aa-b901-a3ef26d9d3d8",
     "indicator_id": "temperature",
-    "value": 36.5,
+    "value": 36.6,
     "taken_at": "2026-10-21T05:19:20.291061Z",
     "source": "manual",
     "note": null,
@@ -3538,7 +3557,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "6cf09371-718d-5573-ac8f-ab217bb46cdc",
     "indicator_id": "bp_diastolic",
-    "value": 73.0,
+    "value": 70.0,
     "taken_at": "2026-10-21T08:29:29.011009Z",
     "source": "manual",
     "note": null,
@@ -3582,7 +3601,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "08f5c676-8c4e-5b9f-b44d-38987b381fc9",
     "indicator_id": "temperature",
-    "value": 36.7,
+    "value": 36.9,
     "taken_at": "2026-10-22T05:13:06.525514Z",
     "source": "manual",
     "note": null,
@@ -3626,7 +3645,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "f25e3642-2617-5406-bd31-2397f088d186",
     "indicator_id": "bp_diastolic",
-    "value": 68.0,
+    "value": 67.0,
     "taken_at": "2026-10-22T08:16:26.141411Z",
     "source": "manual",
     "note": null,
@@ -3670,7 +3689,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "f42f95a8-93fa-5a7d-b3d0-0cbe9aaf83fa",
     "indicator_id": "temperature",
-    "value": 36.4,
+    "value": 36.6,
     "taken_at": "2026-10-23T05:19:39.647300Z",
     "source": "manual",
     "note": null,
@@ -3725,7 +3744,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "b16301a9-5204-5a64-9959-8dc7f1bb76c3",
     "indicator_id": "bp_diastolic",
-    "value": 71.0,
+    "value": 69.0,
     "taken_at": "2026-10-23T09:13:53.264329Z",
     "source": "manual",
     "note": null,
@@ -3758,7 +3777,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "3ee3ff6d-f132-5eae-af21-00d2603be651",
     "indicator_id": "temperature",
-    "value": 36.4,
+    "value": 36.5,
     "taken_at": "2026-10-24T05:06:37.286800Z",
     "source": "manual",
     "note": null,
@@ -3802,7 +3821,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "7a654e0d-c125-5910-ba82-edfaadf431ab",
     "indicator_id": "bp_diastolic",
-    "value": 69.0,
+    "value": 67.0,
     "taken_at": "2026-10-24T08:25:59.288638Z",
     "source": "manual",
     "note": null,
@@ -3835,7 +3854,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "b259bbee-5779-5e61-bf04-5e075b6eb024",
     "indicator_id": "temperature",
-    "value": 36.3,
+    "value": 36.4,
     "taken_at": "2026-10-25T04:56:09.296390Z",
     "source": "manual",
     "note": null,
@@ -3890,7 +3909,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "4fd0bcd9-d17d-596e-ab46-6c50ae931ad1",
     "indicator_id": "bp_diastolic",
-    "value": 69.0,
+    "value": 67.0,
     "taken_at": "2026-10-25T08:26:40.513361Z",
     "source": "manual",
     "note": null,
@@ -3934,7 +3953,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "61dcd1fc-8bea-594c-924f-b5c051b254f9",
     "indicator_id": "temperature",
-    "value": 36.3,
+    "value": 36.5,
     "taken_at": "2026-10-26T04:43:10.058391Z",
     "source": "manual",
     "note": null,
@@ -3989,7 +4008,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "8f213497-2d97-5a98-99e8-727035f464ad",
     "indicator_id": "bp_diastolic",
-    "value": 74.0,
+    "value": 71.0,
     "taken_at": "2026-10-26T09:15:23.327730Z",
     "source": "manual",
     "note": null,
@@ -4022,7 +4041,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "cec774cc-9018-5f60-889d-567416687ca9",
     "indicator_id": "temperature",
-    "value": 36.7,
+    "value": 36.9,
     "taken_at": "2026-10-27T05:00:55.451476Z",
     "source": "manual",
     "note": null,
@@ -4077,7 +4096,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "f56893ef-1481-592d-b36d-158bf6213c3b",
     "indicator_id": "bp_diastolic",
-    "value": 70.0,
+    "value": 68.0,
     "taken_at": "2026-10-27T09:15:05.477787Z",
     "source": "manual",
     "note": null,
@@ -4088,7 +4107,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "c9fd8a08-de17-53c2-98a2-a3f405092d92",
     "indicator_id": "temperature",
-    "value": 36.6,
+    "value": 36.8,
     "taken_at": "2026-10-28T04:58:08.041621Z",
     "source": "manual",
     "note": null,
@@ -4165,7 +4184,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "a5036c66-fd5c-52d3-a4db-2ef7c4290988",
     "indicator_id": "bp_diastolic",
-    "value": 74.0,
+    "value": 71.0,
     "taken_at": "2026-10-28T09:13:00.776077Z",
     "source": "manual",
     "note": null,
@@ -4187,7 +4206,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "a7d479fb-9de8-5bed-ae46-271ae6852fd9",
     "indicator_id": "temperature",
-    "value": 36.7,
+    "value": 37.0,
     "taken_at": "2026-10-29T05:00:02.937316Z",
     "source": "manual",
     "note": null,
@@ -4242,7 +4261,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "ae3c6b67-a652-598e-9322-75d4cf88d78b",
     "indicator_id": "bp_diastolic",
-    "value": 70.0,
+    "value": 68.0,
     "taken_at": "2026-10-29T08:56:24.605392Z",
     "source": "manual",
     "note": null,
@@ -4286,7 +4305,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "9725c770-64c5-527e-822d-698fc34a9f02",
     "indicator_id": "temperature",
-    "value": 36.7,
+    "value": 37.0,
     "taken_at": "2026-10-30T05:29:35.209127Z",
     "source": "manual",
     "note": null,
@@ -4330,7 +4349,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "f2b18fe5-0837-5435-96f7-3c3acf4aacb1",
     "indicator_id": "bp_diastolic",
-    "value": 76.0,
+    "value": 73.0,
     "taken_at": "2026-10-30T08:57:47.987643Z",
     "source": "manual",
     "note": null,
@@ -4374,7 +4393,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "6105d6ef-11cb-5589-a343-c51e7db37220",
     "indicator_id": "temperature",
-    "value": 36.7,
+    "value": 36.9,
     "taken_at": "2026-10-31T05:05:14.554645Z",
     "source": "manual",
     "note": null,
@@ -4418,7 +4437,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "cc42d565-9260-5a91-bbde-f9ce24c25c02",
     "indicator_id": "bp_diastolic",
-    "value": 73.0,
+    "value": 71.0,
     "taken_at": "2026-10-31T09:03:01.798699Z",
     "source": "manual",
     "note": null,
@@ -4451,7 +4470,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "259a2ac7-51e6-5bfa-9e8c-e4990d356307",
     "indicator_id": "temperature",
-    "value": 36.5,
+    "value": 36.7,
     "taken_at": "2026-11-01T04:51:50.252268Z",
     "source": "manual",
     "note": null,
@@ -4506,7 +4525,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "d182962a-e6a1-5a10-8ec0-cb53fdbdf0b4",
     "indicator_id": "bp_diastolic",
-    "value": 75.0,
+    "value": 72.0,
     "taken_at": "2026-11-01T08:41:56.648399Z",
     "source": "manual",
     "note": null,
@@ -4528,7 +4547,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "5e487921-a75a-5cfa-babc-914285513bd3",
     "indicator_id": "temperature",
-    "value": 36.5,
+    "value": 36.7,
     "taken_at": "2026-11-02T04:36:01.098322Z",
     "source": "manual",
     "note": null,
@@ -4594,7 +4613,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "5605b3d9-2277-56d1-9d5f-90d94d3e6c02",
     "indicator_id": "bp_diastolic",
-    "value": 72.0,
+    "value": 69.0,
     "taken_at": "2026-11-02T09:04:45.547423Z",
     "source": "manual",
     "note": null,
@@ -4627,7 +4646,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "69102c21-2926-5752-996a-cbd1e537ee2d",
     "indicator_id": "temperature",
-    "value": 36.7,
+    "value": 37.0,
     "taken_at": "2026-11-03T04:36:47.152056Z",
     "source": "manual",
     "note": null,
@@ -4682,7 +4701,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "f3eeebc9-d038-5605-9024-11025807b918",
     "indicator_id": "bp_diastolic",
-    "value": 69.0,
+    "value": 68.0,
     "taken_at": "2026-11-03T08:19:36.649848Z",
     "source": "manual",
     "note": null,
@@ -4737,7 +4756,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "af886d83-386a-58ac-958f-83df655e0547",
     "indicator_id": "temperature",
-    "value": 36.6,
+    "value": 36.8,
     "taken_at": "2026-11-04T05:28:01.323305Z",
     "source": "manual",
     "note": null,
@@ -4770,7 +4789,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "0fdd3561-397b-5507-b23e-f42b1726aaf1",
     "indicator_id": "bp_diastolic",
-    "value": 72.0,
+    "value": 70.0,
     "taken_at": "2026-11-04T08:26:03.893690Z",
     "source": "manual",
     "note": null,
@@ -4814,7 +4833,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "19250ae4-6822-5796-bc78-fbe3e3928dda",
     "indicator_id": "temperature",
-    "value": 36.5,
+    "value": 36.7,
     "taken_at": "2026-11-05T05:20:24.895233Z",
     "source": "manual",
     "note": null,
@@ -4858,7 +4877,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "ae40729f-11b7-5bee-abbd-7934b45aa066",
     "indicator_id": "bp_diastolic",
-    "value": 71.0,
+    "value": 68.0,
     "taken_at": "2026-11-05T08:26:12.386966Z",
     "source": "manual",
     "note": null,
@@ -4902,7 +4921,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "40ab4660-ce43-5f31-9218-63e3030e2c52",
     "indicator_id": "temperature",
-    "value": 36.7,
+    "value": 36.9,
     "taken_at": "2026-11-06T05:18:06.970317Z",
     "source": "manual",
     "note": null,
@@ -4946,7 +4965,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "24fd006c-79c9-5696-acb7-38d1468ffb3c",
     "indicator_id": "bp_diastolic",
-    "value": 71.0,
+    "value": 68.0,
     "taken_at": "2026-11-06T08:48:54.475788Z",
     "source": "manual",
     "note": null,
@@ -4990,7 +5009,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "19bfbdb7-ca09-5fb2-b8d4-42e6bdac2356",
     "indicator_id": "temperature",
-    "value": 36.4,
+    "value": 36.6,
     "taken_at": "2026-11-07T05:18:48.988905Z",
     "source": "manual",
     "note": null,
@@ -5034,7 +5053,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "33129f40-1855-52d9-bf6f-78b4b292117f",
     "indicator_id": "bp_diastolic",
-    "value": 73.0,
+    "value": 71.0,
     "taken_at": "2026-11-07T08:43:36.804914Z",
     "source": "manual",
     "note": null,
@@ -5078,7 +5097,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "09c2c0fb-d995-5818-9965-1d981253ca38",
     "indicator_id": "temperature",
-    "value": 36.4,
+    "value": 36.6,
     "taken_at": "2026-11-08T05:13:59.582874Z",
     "source": "manual",
     "note": null,
@@ -5122,7 +5141,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "a79fc209-b668-5a79-8e35-80e4ffc7caa4",
     "indicator_id": "bp_diastolic",
-    "value": 70.0,
+    "value": 68.0,
     "taken_at": "2026-11-08T08:44:18.448443Z",
     "source": "manual",
     "note": null,
@@ -5177,7 +5196,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "11381c25-aedb-58de-9528-e3fc7aeed3df",
     "indicator_id": "temperature",
-    "value": 36.4,
+    "value": 36.5,
     "taken_at": "2026-11-09T05:29:11.308323Z",
     "source": "manual",
     "note": null,
@@ -5210,7 +5229,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "ce305f94-a1a5-584c-8944-d920b54a7b48",
     "indicator_id": "bp_diastolic",
-    "value": 70.0,
+    "value": 68.0,
     "taken_at": "2026-11-09T09:04:30.607818Z",
     "source": "manual",
     "note": null,
@@ -5243,7 +5262,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "1b32ed65-4e5c-5e6f-854d-bc998fb96191",
     "indicator_id": "temperature",
-    "value": 36.3,
+    "value": 36.4,
     "taken_at": "2026-11-10T04:48:16.086242Z",
     "source": "manual",
     "note": null,
@@ -5276,7 +5295,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "c64d664e-5f0c-53c2-ba00-02a9ce0036e8",
     "indicator_id": "bp_diastolic",
-    "value": 68.0,
+    "value": 67.0,
     "taken_at": "2026-11-10T09:12:25.351243Z",
     "source": "manual",
     "note": null,
@@ -5342,7 +5361,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "d13f14c9-32ff-5c79-99fa-f218f2cfed59",
     "indicator_id": "temperature",
-    "value": 36.5,
+    "value": 36.6,
     "taken_at": "2026-11-11T05:23:58.970250Z",
     "source": "manual",
     "note": null,
@@ -5364,7 +5383,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "b2ed9868-dc1a-5ffe-918c-31a9a299a825",
     "indicator_id": "bp_diastolic",
-    "value": 73.0,
+    "value": 70.0,
     "taken_at": "2026-11-11T09:03:58.898217Z",
     "source": "manual",
     "note": null,
@@ -5408,7 +5427,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "d75a990d-aa06-5969-b5fd-0f7ce7a248fe",
     "indicator_id": "temperature",
-    "value": 36.6,
+    "value": 36.8,
     "taken_at": "2026-11-12T04:40:33.462662Z",
     "source": "manual",
     "note": null,
@@ -5452,7 +5471,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "8c960a24-9082-59e1-95e5-f4537414b33a",
     "indicator_id": "bp_diastolic",
-    "value": 72.0,
+    "value": 69.0,
     "taken_at": "2026-11-12T08:29:47.909532Z",
     "source": "manual",
     "note": null,
@@ -5518,7 +5537,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "2725f235-3063-5e31-80dc-a1f2cde11e24",
     "indicator_id": "temperature",
-    "value": 36.5,
+    "value": 36.7,
     "taken_at": "2026-11-13T05:05:28.461895Z",
     "source": "manual",
     "note": null,
@@ -5540,7 +5559,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "24a88391-33ec-5dde-b666-ee3ccdf74bcb",
     "indicator_id": "bp_diastolic",
-    "value": 72.0,
+    "value": 69.0,
     "taken_at": "2026-11-13T08:48:27.976624Z",
     "source": "manual",
     "note": null,
@@ -5606,7 +5625,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "ab8d1c89-4db0-53b9-9a30-14c3c01b7d1f",
     "indicator_id": "temperature",
-    "value": 36.3,
+    "value": 36.4,
     "taken_at": "2026-11-14T04:38:19.478569Z",
     "source": "manual",
     "note": null,
@@ -5628,7 +5647,7 @@ export const measurements: Schema<'Measurement'>[] = [
   {
     "id": "ad75f82d-e6a3-5c23-81c7-1a2726d60ad0",
     "indicator_id": "bp_diastolic",
-    "value": 69.0,
+    "value": 67.0,
     "taken_at": "2026-11-14T08:30:56.022220Z",
     "source": "manual",
     "note": null,

@@ -32,7 +32,7 @@ El **perfil de entorno** es el núcleo de RUOK. Es un JSON (`backend/app/data/en
 ## Estado de los datos (BE-03)
 
 Los 6 perfiles están en `backend/app/data/environments.json` y los sirve `GET /environments`. Pendiente:
-- **`threshold_overrides`:** solo está el ejemplo del contrato (`mars`: `bp_systolic.warning = [130, 140]`). El resto queda vacío hasta que CNT-01 rellene la tabla de umbrales de [sources.md](sources.md); no se inventan valores clínicos.
+- **`threshold_overrides` (CNT-01):** `mars` tiene la tensión sistólica más estricta (warning 130–140; desde 141, critical, porque no hay atención médica inmediata) y `geriatric` la fiebre desde 37,8 °C [S24]. Valores y fuentes en [sources.md](sources.md#tabla-de-umbrales-cnt-01).
 - **Riesgo de caídas (geriatría):** no hay todavía un indicador en el catálogo de BE-04. Cuando exista, se añade a `geriatric.indicators`.
 - **Liveness:** los 6 perfiles usan los umbrales de [offline-and-liveness.md](offline-and-liveness.md) (5 min / 15 min; EVA 30 s). El ajuste de sueño (×3) lo aplica BE-12, no está en el perfil.
 

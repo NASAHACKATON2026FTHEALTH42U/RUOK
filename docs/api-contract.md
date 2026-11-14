@@ -160,6 +160,7 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
   "id": "mars", "name": "Base marciana", "kind": "space",   // space | earth
   "gravity_g": 0.38, "comm_delay_s": 840, "radiation_level": "high",
   "escalation_ladder": ["self", "crew", "ground"],
+  "external_from_level": 2,   // índice del primer nivel externo: self y crew son a bordo (realtime, 0 s)
   "liveness": { "stale_after_s": 300, "lost_after_s": 900, "eva_stale_after_s": 30, "eva_lost_after_s": 120,
                 "sleep_factor": 3, "ruok_timeout_s": 120,
                 "morning_checkin_by": null,           // "HH:MM" (geriatría: "10:00"); sin check-in a esa hora → stale

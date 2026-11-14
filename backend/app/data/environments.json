@@ -7,6 +7,7 @@
     "comm_delay_s": 0,
     "radiation_level": "medium",
     "escalation_ladder": ["self", "crew", "ground"],
+    "external_from_level": 2,
     "liveness": {
       "stale_after_s": 300, "lost_after_s": 900,
       "eva_stale_after_s": 30, "eva_lost_after_s": 120,
@@ -42,6 +43,7 @@
     "comm_delay_s": 1,
     "radiation_level": "high",
     "escalation_ladder": ["self", "crew", "ground"],
+    "external_from_level": 2,
     "liveness": {
       "stale_after_s": 300, "lost_after_s": 900,
       "eva_stale_after_s": 30, "eva_lost_after_s": 120,
@@ -77,6 +79,7 @@
     "comm_delay_s": 840,
     "radiation_level": "high",
     "escalation_ladder": ["self", "crew", "ground"],
+    "external_from_level": 2,
     "liveness": {
       "stale_after_s": 300, "lost_after_s": 900,
       "eva_stale_after_s": 30, "eva_lost_after_s": 120,
@@ -112,6 +115,7 @@
     "comm_delay_s": 0,
     "radiation_level": "low",
     "escalation_ladder": ["self", "crew", "ground"],
+    "external_from_level": 2,
     "liveness": {
       "stale_after_s": 300, "lost_after_s": 900,
       "eva_stale_after_s": 30, "eva_lost_after_s": 120,
@@ -134,6 +138,7 @@
     "comm_delay_s": 0,
     "radiation_level": "none",
     "escalation_ladder": ["self", "nurse", "doctor"],
+    "external_from_level": 2,
     "liveness": {
       "stale_after_s": 300, "lost_after_s": 900,
       "eva_stale_after_s": 30, "eva_lost_after_s": 120,
@@ -156,6 +161,7 @@
     "comm_delay_s": 0,
     "radiation_level": "none",
     "escalation_ladder": ["self", "caregiver", "doctor", "family"],
+    "external_from_level": 2,
     "liveness": {
       "stale_after_s": 300, "lost_after_s": 900,
       "eva_stale_after_s": 30, "eva_lost_after_s": 120,
@@ -164,7 +170,7 @@
     },
     "vocabulary": { "member": "residente", "crew": "residencia", "ground": "médico", "medic": "cuidador" },
     "theme": { "primary": "#6a429e" },
-    "threshold_overrides": {},
+    "threshold_overrides": { "temperature": { "normal": [36.0, 37.7], "warning": [37.8, 39.5] } },
     "indicators": [
       "heart_rate", "bp_systolic", "bp_diastolic", "spo2", "temperature", "sleep_hours", "mood",
       "hydration_ml", "weight_kg"
