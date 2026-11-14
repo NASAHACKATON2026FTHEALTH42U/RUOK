@@ -74,7 +74,7 @@ export function Layout() {
         {/* Barra lateral de escritorio */}
         <aside
           aria-label="Menú principal"
-          className="hidden w-64 shrink-0 flex-col gap-3 overflow-y-auto border-r border-hud-line px-4 py-4 [scrollbar-width:none] md:flex [&::-webkit-scrollbar]:hidden"
+          className="hidden w-52 shrink-0 flex-col gap-3 overflow-y-auto border-r border-hud-line px-3 py-4 lg:w-64 lg:px-4 [scrollbar-width:none] md:flex [&::-webkit-scrollbar]:hidden"
         >
           <nav aria-label="Secciones" className="hud-panel">
             <div className="hud-panel-head">
@@ -126,17 +126,21 @@ export function Layout() {
               usuario y el resumen de la página (TopBarPortal: estado general, avisos…) a la
               izquierda; reloj, SOS y «Salir» pegados a la derecha. Fuera
               del área con scroll, para que el SOS esté siempre a la vista. */}
-          <div className="hidden shrink-0 px-6 pt-4 md:block">
+          <div className="hidden shrink-0 px-4 pt-4 md:block lg:px-6">
             <div
-              className={`mx-auto flex w-full flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-env-border bg-env-surface px-4 py-2.5 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
+              className={`mx-auto flex w-full flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-env-border bg-env-surface px-3 py-2.5 lg:gap-x-5 lg:px-4 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
             >
               {logo}
               <SessionMenu part="user" />
               <div
                 id={TOPBAR_SLOT_ID}
-                className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+                // Por debajo de lg no cabe todo en una línea: el resumen de la página baja a una
+                // segunda línea (y no ocupa nada si está vacío) en vez de solaparse con el reloj.
+                className="flex flex-wrap items-center gap-2 max-lg:order-last max-lg:basis-full max-lg:empty:hidden lg:flex-1"
               />
-              <HudClock env={env} />
+              <div className="max-lg:ml-auto">
+                <HudClock env={env} />
+              </div>
               <SosButton variant="header" />
               <SessionMenu part="logout" />
             </div>
@@ -145,7 +149,7 @@ export function Layout() {
           {/* Contenido. En móvil, cada pantalla debería caber sin scroll (hud-style.md §5). */}
           <main className="bg-grid min-w-0 flex-1 overflow-x-clip overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
             <div
-              className={`mx-auto w-full px-3.5 py-3.5 md:px-6 md:py-6 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'} ${fill ? 'flex h-full flex-col' : ''}`}
+              className={`mx-auto w-full px-3.5 py-3.5 md:px-4 md:py-4 lg:px-6 lg:py-6 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'} ${fill ? 'flex h-full flex-col' : ''}`}
             >
               {/* Fundido corto al cambiar de página (FE-26). Solo opacidad: un transform crearía un
                 bloque contenedor y descolocaría las modales `fixed` de las páginas. */}
