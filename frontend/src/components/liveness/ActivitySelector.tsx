@@ -30,7 +30,12 @@ export function ActivitySelector({
           return (
             <label
               key={o.id}
-              className={`relative flex min-h-11 min-w-0 cursor-pointer items-center justify-center border px-1 text-center font-mono text-[11px] tracking-[0.1em] uppercase focus-within:outline-2 focus-within:outline-offset-1 focus-within:outline-env-primary ${
+              // En la barra lateral (compact), letra más pequeña: «Actividad de riesgo» cabe mejor.
+              className={`relative flex min-h-11 min-w-0 cursor-pointer items-center justify-center border px-1 text-center font-mono uppercase focus-within:outline-2 focus-within:outline-offset-1 focus-within:outline-env-primary ${
+                compact
+                  ? 'text-[9px] leading-tight tracking-[0.06em]'
+                  : 'text-[11px] tracking-[0.1em]'
+              } ${
                 on
                   ? 'border-env-primary bg-env-primary/12 text-env-text'
                   : 'border-env-border text-env-muted hover:text-env-text'
