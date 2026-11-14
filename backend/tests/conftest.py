@@ -22,11 +22,33 @@ from app import clock  # noqa: E402
 from app.main import app  # noqa: E402
 
 
+def _forget_saved_clock() -> None:
+    """Borra el offset guardado en la BD de tests (BE-32 lo persiste en cada fast-forward):
+    si no, el arranque de la app del test siguiente lo restauraría."""
+    from sqlalchemy.exc import OperationalError
+    from sqlmodel import Session
+
+    from app.db import engine
+    from app.models import AppState
+    from app.services.app_state import CLOCK_OFFSET_KEY
+
+    try:
+        with Session(engine) as session:
+            row = session.get(AppState, CLOCK_OFFSET_KEY)
+            if row is not None:
+                session.delete(row)
+                session.commit()
+    except OperationalError:  # la BD aún no tiene tablas (antes del primer arranque)
+        pass
+
+
 @pytest.fixture(autouse=True)
 def _reset_clock():
     clock.reset()
+    _forget_saved_clock()
     yield
     clock.reset()
+    _forget_saved_clock()
 
 
 API = "/api/v1"
