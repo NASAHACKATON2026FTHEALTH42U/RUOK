@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { ROUTE_PERMISSIONS } from '../../auth/permissions'
@@ -44,6 +45,7 @@ export function Layout() {
   const { pathname } = useLocation()
   const wide = pathname.startsWith('/control')
   const [open, setOpen] = useState(false)
+  const reducedMotion = useReducedMotion()
 
   // Solo las vistas que permite el rol (FE-28, src/auth/permissions.ts).
   const navItems = [
@@ -156,21 +158,38 @@ export function Layout() {
             <LivenessGuard />
             {can('action:change-environment') && <EnvironmentSelector />}
           </section>
+
+          {/* Aviso siempre visible en escritorio (en móvil va en el pie de página). */}
+          <p className="hidden text-[11px] leading-snug text-env-muted md:block">
+            Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
+            el criterio de un profesional sanitario.
+          </p>
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col overflow-x-clip">
           {/* El centro de control usa todo el ancho (proyector o pantalla grande). */}
           <main
             className={`mx-auto w-full flex-1 px-4 py-4 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
           >
-            <Outlet />
+            {/* Fundido corto al cambiar de página. Solo opacidad: un transform crearía un bloque
+                contenedor y descolocaría las modales `fixed` de las páginas. */}
+            <motion.div
+              key={pathname}
+              initial={reducedMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+            >
+              <Outlet />
+            </motion.div>
           </main>
 
-          <footer className="border-t border-env-border px-4 pt-3 pb-20 text-center text-xs text-env-muted">
-            Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
-            el criterio de un profesional sanitario.
+          <footer className="border-t border-env-border px-4 pt-3 pb-20 text-center text-xs text-env-muted md:pb-6">
+            <span className="md:hidden">
+              Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
+              el criterio de un profesional sanitario.
+            </span>
             {device.mode === 'tab' && (
-              <span className="mt-1 block" title={device.id}>
+              <span className="mt-1 block md:mt-0" title={device.id}>
                 Dispositivo: {device.name ?? `pestaña ${device.id.slice(0, 8)}`}
               </span>
             )}

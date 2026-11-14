@@ -35,6 +35,52 @@ body {
 /* Transición suave al cambiar de entorno. Solo se activa tras aplicar el primer tema
    (initTheme pone data-theme-ready), para que la carga inicial no parpadee. */
 html[data-theme-ready] :is(body, header, footer, nav a, select) {
-  transition-property: background-color, border-color, color;
-  transition-duration: 300ms;
+  transition-property: background-color, border-color, color, outline-offset, box-shadow;
+  transition-duration: 300ms, 300ms, 300ms, 120ms, 120ms;
+}
+
+/*
+ * Interacción común (FE-26). En @layer base para que las utilidades de cada componente
+ * (p. ej. outline-none en las zonas del cuerpo, que tienen su propio resaltado) manden.
+ */
+@layer base {
+  /* Cursor de mano en todo lo pulsable; "no permitido" si está desactivado. */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  a[href],
+  summary,
+  select:not(:disabled),
+  label:has(> input[type='checkbox'], > input[type='radio']),
+  input[type='checkbox']:not(:disabled),
+  input[type='radio']:not(:disabled),
+  input[type='range']:not(:disabled) {
+    cursor: pointer;
+  }
+  button:disabled,
+  select:disabled,
+  input:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
+  /*
+   * Foco de teclado elegante y uniforme: anillo del color primario del entorno, separado del
+   * elemento, con un halo suave y una transición corta. Solo con teclado (:focus-visible).
+   */
+  :where(a, button, input, select, textarea, summary, [tabindex], [role='button']) {
+    transition:
+      outline-offset 120ms ease-out,
+      box-shadow 120ms ease-out;
+  }
+  :where(a, button, input, select, textarea, summary, [tabindex], [role='button']):focus-visible {
+    outline: 2px solid var(--env-primary);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--env-primary) 22%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(a, button, input, select, textarea, summary, [tabindex], [role='button']) {
+    transition: none;
+  }
 }

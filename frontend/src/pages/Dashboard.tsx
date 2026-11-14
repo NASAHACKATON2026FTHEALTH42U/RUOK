@@ -186,8 +186,8 @@ export default function Dashboard() {
         <MissionPhaseBar mission={env.mission} now={serverNow()} canCheckIn={can('view:checkin')} />
       )}
 
-      <div className="grid gap-6 md:grid-cols-[minmax(240px,320px)_1fr]">
-        <div className="md:sticky md:top-4 md:self-start">
+      <div className="grid gap-6 lg:grid-cols-[minmax(240px,320px)_1fr]">
+        <div className="lg:sticky lg:top-4 lg:self-start">
           <BodyFigure
             regions={regions}
             liveness={a.liveness}
