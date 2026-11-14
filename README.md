@@ -29,7 +29,7 @@ presentation/   slides y capturas (los vídeos van al Drive)
 | gh (opcional) | reciente | ver `docs/team-and-schedule.md` |
 
 ## Arrancar en local
-> Los comandos funcionan en cuanto estén mergeados BE-01 (#3) y FE-01 (#4).
+> Los comandos del backend funcionan en cuanto esté mergeado BE-01 (#3). El frontend ya está disponible (FE-01, #4).
 
 **Backend**: API en http://localhost:8000/api/v1, Swagger en `/docs`.
 ```bash
@@ -44,10 +44,11 @@ uv run pytest            # tests
 cd frontend
 npm ci
 npm run dev
+npm run lint             # ESLint
 npm run build            # comprueba los tipos y genera el build
-npm run gen:api          # regenera los tipos desde el OpenAPI (con el back arrancado)
+npm run gen:api          # regenera los tipos desde el OpenAPI (con el back arrancado; llega con FS-03)
 ```
-Para trabajar sin backend: `VITE_USE_MOCKS=true npm run dev`.
+Para trabajar sin backend: `VITE_USE_MOCKS=true npm run dev` (llega con FS-04). Detalles en [`frontend/README.md`](frontend/README.md).
 
 **Todo junto (modo "a bordo", sin internet)**, disponible con BE-24:
 ```bash

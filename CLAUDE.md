@@ -15,12 +15,12 @@ Toda la documentación está en [`docs/`](docs/README.md). **Léela antes de dis
 | Parte | Stack | Comandos |
 |---|---|---|
 | `backend/` | Python 3.11+, FastAPI, SQLModel, SQLite (WAL), pytest | `cd backend && uv run uvicorn app.main:app --reload` · `uv run pytest` |
-| `frontend/` | React 18 + Vite + TS, Tailwind, Zustand, Recharts, Framer Motion, idb | `cd frontend && npm run dev` · `npm run build` · `npm run gen:api` |
+| `frontend/` | React 18 + Vite 6 + TS, Tailwind 4, React Router 6, Zustand, Recharts, Framer Motion, idb | `cd frontend && npm run dev` · `npm run lint` · `npm run build` · `npm run format` · `npm run gen:api` (FS-03) |
 | Todo | docker-compose | `docker compose up` |
 | Backlog | `scripts/github/backlog.yaml` | `python3 scripts/github/create_issues.py [--dry-run]` |
 
 API en `http://localhost:8000/api/v1`, con Swagger en `/docs`. El front corre en `http://localhost:5173`.
-*(Estos comandos se activan cuando se completan FS-01, BE-01 y FE-01. Si cambian, actualiza esta tabla.)*
+*(Los del front están activos desde FE-01, salvo `gen:api`, que llega con FS-03. Los del back se activan con BE-01. Si cambian, actualiza esta tabla; detalle del front en [`frontend/README.md`](frontend/README.md).)*
 
 ## Principios no negociables
 1. **El contrato manda.** Un cambio de API se hace primero en `docs/api-contract.md`, después en `app/schemas.py`, después `npm run gen:api`. Nunca se editan a mano los tipos generados (`src/api/types.gen.ts`).

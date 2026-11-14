@@ -3,7 +3,7 @@
 ## Stack
 | Capa | Tecnología |
 |---|---|
-| Frontend | React 18 + Vite + TypeScript, Tailwind, React Router, Zustand, Recharts, Framer Motion, IndexedDB (`idb`) |
+| Frontend | React 18 + Vite 6 + TypeScript 5.6 (strict), Tailwind 4 (`@tailwindcss/vite`), React Router 6, Zustand 5, Recharts 3, Framer Motion, IndexedDB (`idb`). ESLint 9 + Prettier. Versiones y estructura en [`frontend/README.md`](../frontend/README.md) |
 | Backend | Python 3.11+, FastAPI, SQLModel, SQLite (modo WAL), pytest |
 | Contrato | OpenAPI generado por FastAPI → tipos TS con `openapi-typescript` |
 | Ejecución | Local: `docker compose up` o dos terminales. FastAPI sirve `frontend/dist` en modo "a bordo" |
