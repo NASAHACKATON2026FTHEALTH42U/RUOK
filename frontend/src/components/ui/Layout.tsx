@@ -19,13 +19,14 @@ import { NavIcon } from './NavIcon'
 import { allowedItems, MORE, navItems, tabsFor } from './navigation'
 import { PendingSyncChip } from './PendingSyncChip'
 import { ServerStatus } from './ServerStatus'
-import { SIDEBAR_SLOT_ID } from './SidebarPortal'
+import { TOPBAR_SLOT_ID } from './TopBarPortal'
 
 /**
  * Estructura de la app con el estilo HUD (docs/design/hud-style.md §6).
  * - **Móvil:** cabecera (R U OK, nodo, reloj y `SOS`), contenido y 4 pestañas abajo según el
  *   rol (3 + «Más»). Sin cajón: lo secundario está en la pantalla «Más».
- * - **Escritorio (≥ md):** barra lateral con todas las secciones, estados y controles.
+ * - **Escritorio (≥ md):** barra superior (identidad, reloj, sesión, resumen de la página y SOS)
+ *   y barra lateral con las secciones, estados y controles.
  * `LivenessGuard` (heartbeat y modal "R U OK?"), el SSE y los avisos en vivo se montan UNA vez.
  */
 export function Layout() {
@@ -76,19 +77,6 @@ export function Layout() {
           aria-label="Menú principal"
           className="hidden w-64 shrink-0 flex-col gap-3 overflow-y-auto border-r border-hud-line px-4 py-4 [scrollbar-width:none] md:flex [&::-webkit-scrollbar]:hidden"
         >
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              {logo}
-              <div className="hud-label mt-0.5 truncate text-[9px]">{node}</div>
-            </div>
-            <SosButton variant="header" />
-          </div>
-          <HudClock env={env} />
-          <SessionMenu />
-
-          {/* Resumen de la página actual (p. ej. estado general del panel), vía SidebarPortal (FE-26) */}
-          <div id={SIDEBAR_SLOT_ID} className="empty:hidden" />
-
           <nav aria-label="Secciones" className="hud-panel">
             <div className="hud-panel-head">
               <b>NAV.01</b>Secciones
@@ -133,23 +121,46 @@ export function Layout() {
           </section>
         </aside>
 
-        {/* Contenido. En móvil, cada pantalla debería caber sin scroll (hud-style.md §5). */}
-        <main className="bg-grid min-w-0 flex-1 overflow-x-clip overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
-          <div
-            className={`mx-auto w-full px-3.5 py-3.5 md:px-6 md:py-6 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
-          >
-            {/* Fundido corto al cambiar de página (FE-26). Solo opacidad: un transform crearía un
-                bloque contenedor y descolocaría las modales `fixed` de las páginas. */}
-            <motion.div
-              key={pathname}
-              initial={reducedMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* Barra superior de escritorio, con el estilo de la de fase de misión: identidad, reloj,
+              sesión, el resumen de la página (TopBarPortal: estado general, avisos…) y SOS. Fuera
+              del área con scroll, para que el SOS esté siempre a la vista. */}
+          <div className="hidden shrink-0 px-6 pt-4 md:block">
+            <div
+              className={`mx-auto flex w-full flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-env-border bg-env-surface px-4 py-2.5 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
             >
-              <Outlet />
-            </motion.div>
+              <div className="min-w-0">
+                {logo}
+                <div className="hud-label mt-0.5 truncate text-[9px]">{node}</div>
+              </div>
+              <HudClock env={env} />
+              <SessionMenu />
+              <div
+                id={TOPBAR_SLOT_ID}
+                className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+              />
+              <SosButton variant="header" />
+            </div>
           </div>
-        </main>
+
+          {/* Contenido. En móvil, cada pantalla debería caber sin scroll (hud-style.md §5). */}
+          <main className="bg-grid min-w-0 flex-1 overflow-x-clip overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
+            <div
+              className={`mx-auto w-full px-3.5 py-3.5 md:px-6 md:py-6 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
+            >
+              {/* Fundido corto al cambiar de página (FE-26). Solo opacidad: un transform crearía un
+                bloque contenedor y descolocaría las modales `fixed` de las páginas. */}
+              <motion.div
+                key={pathname}
+                initial={reducedMotion ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+              >
+                <Outlet />
+              </motion.div>
+            </div>
+          </main>
+        </div>
       </div>
 
       {/* Pestañas móviles: 3 del rol + «Más» */}
