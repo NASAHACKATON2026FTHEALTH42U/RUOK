@@ -66,3 +66,11 @@ Fotos de la NASA Image and Video Library (Johnson Space Center), **dominio públ
 | iss045e013851 | Earth Observation from the International Space Station | 2015-09-17 |
 
 Fuente: https://images.nasa.gov · Uso: https://www.nasa.gov/nasa-brand-center/images-and-media/
+
+## Imágenes del cuerpo (FE-05)
+| Archivo | Uso | Origen y licencia |
+|---|---|---|
+| `frontend/src/assets/holographic-human.webp` | Figura del cuerpo (`BodyFigure`) | *Pendiente de confirmar por el equipo* |
+| `frontend/src/assets/fire-rays.webp` | Anillo de radiación alrededor del cuerpo | Recurso "fire rays explosion shockwave aura" (PNG gratuito); *autor y licencia pendientes de confirmar* |
+
+Antes de la presentación hay que confirmar que ambas se pueden usar (y con qué atribución).

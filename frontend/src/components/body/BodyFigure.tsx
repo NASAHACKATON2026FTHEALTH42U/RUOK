@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import holographicHuman from '../../assets/holographic-human.webp'
+import fireRays from '../../assets/fire-rays.webp'
 import { STATUS_COLORS, statusStyle, type Liveness } from '../ui/status'
 import { StatusBadge } from '../ui/StatusBadge'
 import { isFigureStale, type BodyRegion, type RegionState } from './regions'
@@ -34,6 +35,13 @@ interface Tooltip {
  * - Con liveness stale o lost, toda la figura pasa a gris rayado (nunca el último verde).
  * - Debajo hay una leyenda con StatusBadge: el estado nunca depende solo del color.
  */
+/** Intensidad visual del anillo de radiación según el estado (el estado lo dicen tooltip y leyenda). */
+const RADIATION_INTENSITY: Partial<Record<RegionState['status'], number>> = {
+  normal: 0.45,
+  warning: 0.75,
+  critical: 1,
+}
+
 export function BodyFigure({
   regions,
   liveness,
@@ -158,6 +166,39 @@ export function BodyFigure({
 
   /** Zonas del cuerpo, en coordenadas de la imagen original (887 × 1774). */
   const zones: [BodyRegion, (r: RegionState) => ReactNode][] = [
+    // Radiación (todo el cuerpo): anillo de rayos de fuego en óvalo alrededor de la figura. Va
+    // primero para quedar debajo de los órganos. Más intenso cuanto peor el estado; gris y tenue
+    // sin datos fiables. Solo el borde del óvalo recibe el ratón (no tapa los órganos).
+    [
+      'halo',
+      (r) => {
+        const noData = stale || statusStyle(r.status).striped
+        return (
+          <g>
+            <ellipse
+              cx="443.5"
+              cy="887"
+              rx="470"
+              ry="900"
+              fill="none"
+              stroke="transparent"
+              strokeWidth="70"
+            />
+            <image
+              href={fireRays}
+              x="-183"
+              y="-313"
+              width="1253"
+              height="2400"
+              preserveAspectRatio="none"
+              pointerEvents="none"
+              opacity={noData ? 0.35 : (RADIATION_INTENSITY[r.status] ?? 0.5)}
+              style={noData ? { filter: 'grayscale(1)' } : undefined}
+            />
+          </g>
+        )
+      },
+    ],
     // Huesos (musculoesquelético): húmero, antebrazo, fémur y tibia
     [
       'bones',
@@ -327,8 +368,6 @@ export function BodyFigure({
               />
             )}
 
-            {/* Sin halo alrededor del cuerpo: la radiación (todo el cuerpo) se consulta y se abre
-              desde la leyenda de debajo. */}
             {zones.map(([n, d]) => zone(n, d, 'visual'))}
           </g>
 
