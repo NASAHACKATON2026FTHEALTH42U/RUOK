@@ -244,10 +244,30 @@ def test_assessment_mode_depends_on_environment(client):
             return next(s for s in a["systems"] if s["system_id"] == "neuro_behavioral")
 
         assert neuro(mars)["status"] == "critical"
+        # TODO(BE-31 #111): el escalado de este sistema va a `crew` (a bordo); según el contrato
+        # debe ser `realtime` con delay 0. Hoy el motor le aplica el retardo de Marte. Al
+        # arreglar BE-31, cambia esta línea a: mode == "realtime" y delay_s == 0.
         assert neuro(mars)["escalation"]["mode"] == "autonomous"  # 840 s de retardo
         assert neuro(iss)["escalation"]["mode"] == "realtime"  # mismos datos, ISS
     finally:
         client.post(API + "/demo/reset")  # no dejar el escenario a los demás tests
+
+
+def test_assessment_escalation_follows_contract(client):
+    """Regla del contrato (docs/alerts-and-escalation.md), no valores concretos del seed:
+    - `autonomous` solo con estado `critical` (y retardo >= 60 s);
+    - sin retardo (ISS), todo es `realtime` con delay 0;
+    - el mismo member evaluado con otro perfil (`?env=`) usa el retardo de ese perfil.
+    """
+    mars = client.get(API + "/members/1/assessment?env=mars").json()
+    iss = client.get(API + "/members/1/assessment?env=iss").json()
+    assert mars["env_id"] == "mars" and iss["env_id"] == "iss"
+    for system in mars["systems"] + iss["systems"]:
+        if system["escalation"]["mode"] == "autonomous":
+            assert system["status"] == "critical", system
+    for system in iss["systems"]:
+        assert system["escalation"]["mode"] == "realtime", system
+        assert system["escalation"]["delay_s"] == 0, system
 
 
 def test_events_stream_is_sse(client):
