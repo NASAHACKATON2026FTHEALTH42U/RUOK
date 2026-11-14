@@ -3,6 +3,7 @@ import type { Assessment } from '../../api/useAssessment'
 import { formatAgo } from '../../lib/time'
 import { StatusBadge } from '../ui/StatusBadge'
 import { formatTrend, formatValue } from './format'
+import { TrendChart } from './TrendChart'
 
 export type IndicatorAssessment = Assessment['systems'][number]['indicators'][number]
 
@@ -16,13 +17,22 @@ interface IndicatorCardProps {
   stale?: boolean
   /** Si se indica, la tarjeta es un botón (p. ej. abre el SystemPanel). */
   onClick?: () => void
+  /** Muestra la TrendChart (7/30 días) del indicador debajo del valor. */
+  showTrend?: boolean
 }
 
 /**
- * Tarjeta de un indicador: valor y unidad, semáforo, tendencia (flecha + texto) y antigüedad.
- * TODO(FE-08): añadir la TrendChart con las bandas de umbral.
+ * Tarjeta de un indicador: valor y unidad, semáforo, tendencia (flecha + texto), antigüedad y,
+ * con `showTrend`, la TrendChart con las bandas de umbral (FE-08).
  */
-export function IndicatorCard({ indicator, name, systemName, stale, onClick }: IndicatorCardProps) {
+export function IndicatorCard({
+  indicator,
+  name,
+  systemName,
+  stale,
+  onClick,
+  showTrend,
+}: IndicatorCardProps) {
   const trend = formatTrend(indicator.trend)
   const body = (
     <>
@@ -57,6 +67,16 @@ export function IndicatorCard({ indicator, name, systemName, stale, onClick }: I
       {body}
     </button>
   ) : (
-    <div className={cls}>{body}</div>
+    <div className={cls}>
+      {body}
+      {showTrend && (
+        <TrendChart
+          indicatorId={indicator.indicator_id}
+          name={name ?? indicator.indicator_id}
+          unit={indicator.unit}
+          range={indicator.range}
+        />
+      )}
+    </div>
   )
 }

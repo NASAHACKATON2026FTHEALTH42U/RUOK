@@ -139,6 +139,7 @@ export function SystemPanel({
                     indicator={ind}
                     name={byId.get(ind.indicator_id)?.name}
                     stale={stale}
+                    showTrend
                   />
                 </li>
               ))}
