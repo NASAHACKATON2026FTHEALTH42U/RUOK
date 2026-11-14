@@ -98,6 +98,16 @@ El desfase vive en memoria y se pierde al reiniciar. Su persistencia en `app_sta
 - Un middleware añade `X-Server-Time` (hora de `clock.now()`, ISO-8601) a **todas** las respuestas, como pide [api-contract.md](api-contract.md).
 - CORS abierto en desarrollo (`CORS_ORIGINS=*`). La cabecera `X-Server-Time` está en `expose_headers` para que el front la pueda leer.
 
+## Próximas piezas que afectan a la base
+
+Decisiones ya documentadas que todavía no están implementadas. Tenlas en cuenta al tocar `main.py`, `db.py` o los modelos:
+
+- **Red local (FS-08, #73):** para que se conecten los móviles, el servidor se arranca con `uv run uvicorn app.main:app --host 0.0.0.0 --port 8000` y se abre el puerto (`sudo ufw allow 8000/tcp`). Ver [control-center-and-devices.md](control-center-and-devices.md). En la demo, FastAPI sirve `frontend/dist` (mismo origen, sin CORS).
+- **Autenticación (BE-25/BE-26):** `Authorization: Bearer <jwt>` en todos los endpoints **salvo `/health`**, `/auth/*` y el SOS de emergencia. Código en `app/auth/` (`security.py`, `permissions.py`). Ver [auth-and-roles.md](auth-and-roles.md).
+- **Dispositivo (BE-29):** todas las peticiones llevan `X-Device-Id`. El CORS actual ya acepta cualquier cabecera (`allow_headers=["*"]`).
+- **Tiempo real (BE-28):** los cambios de estado se registran con `events.emit()` en la tabla `event_log` y se emiten por SSE (`/events/stream`).
+- **Tablas nuevas para BE-02:** además de las originales, [data-model.md](data-model.md) incluye ahora `user_account`, `device` y `event_log`.
+
 ## Cómo añadir un endpoint
 
 1. Primero el contrato: [api-contract.md](api-contract.md).
