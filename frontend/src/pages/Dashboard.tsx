@@ -17,9 +17,11 @@ import { capitalize, useVocab } from '../environments/useVocab'
 import { formatAgo } from '../lib/time'
 import { useEnvironmentStore } from '../store/environment'
 import { useActiveMemberId, useAuth } from '../auth/useAuth'
+import { useProvisionalAssessment } from '../offline/useProvisional'
 
 /** Cada cuánto se refresca la evaluación (FE-07). */
 const REFRESH_MS = 15_000
+const NO_INDICATORS: never[] = []
 
 /**
  * Panel del member (FE-07): cabecera con estado general, liveness y frescura de los datos (el enlace está en la cabecera global, FE-17);
@@ -42,13 +44,19 @@ export default function Dashboard() {
   const envs = useEnvironments()
   const [selected, setSelected] = useState<string | null>(null)
   const close = useCallback(() => setSelected(null), [])
+  const env = envs.state === 'ready' ? envs.data.find((e) => e.id === envId) : undefined
+  // Semáforo provisional (FE-12): mediciones aún sin sincronizar, evaluadas en el dispositivo.
+  const prov = useProvisionalAssessment(
+    memberId,
+    assessment.state === 'ready' ? assessment.data : null,
+    indicators.state === 'ready' ? indicators.data : NO_INDICATORS,
+    env,
+  )
 
   const regions = useMemo(
     () =>
-      assessment.state === 'ready' && systems.state === 'ready'
-        ? buildRegions(systems.data, assessment.data.systems)
-        : [],
-    [assessment, systems],
+      prov && systems.state === 'ready' ? buildRegions(systems.data, prov.assessment.systems) : [],
+    [prov, systems],
   )
 
   const title = (
@@ -107,10 +115,10 @@ export default function Dashboard() {
     )
   }
 
-  const a = assessment.data
+  const a = prov?.assessment ?? assessment.data
+  const provisionalIds = prov?.provisionalIds
   const stale = isFigureStale(a.liveness)
   const live = livenessState(a.liveness)
-  const env = envs.state === 'ready' ? envs.data.find((e) => e.id === envId) : undefined
   const systemById = new Map((systems.state === 'ready' ? systems.data : []).map((s) => [s.id, s]))
   const indicatorById = new Map(
     (indicators.state === 'ready' ? indicators.data : []).map((i) => [i.id, i]),
@@ -143,6 +151,17 @@ export default function Dashboard() {
                 : null}
           </span>
         </div>
+        {provisionalIds && provisionalIds.size > 0 && (
+          <p className="rounded-lg border border-dashed border-env-border px-3 py-2 text-sm text-env-muted">
+            <span aria-hidden>⇡ </span>
+            <strong className="text-env-text">Estado provisional:</strong>{' '}
+            {provisionalIds.size === 1
+              ? 'hay 1 indicador'
+              : `hay ${provisionalIds.size} indicadores`}{' '}
+            con mediciones sin sincronizar, evaluados en este dispositivo. Se sustituye por la
+            evaluación del servidor al sincronizar.
+          </p>
+        )}
       </header>
 
       {env?.kind === 'space' && env.mission && (
@@ -173,6 +192,7 @@ export default function Dashboard() {
                     name={indicatorById.get(ind.indicator_id)?.name}
                     systemName={systemById.get(systemId)?.name}
                     stale={stale}
+                    provisional={provisionalIds?.has(ind.indicator_id)}
                     onClick={() => setSelected(systemId)}
                   />
                 </li>
@@ -192,6 +212,7 @@ export default function Dashboard() {
             isSpace={env?.kind === 'space'}
             stale={stale}
             canMeasure={canMeasure}
+            provisionalIds={provisionalIds}
             onClose={close}
           />
         )}
