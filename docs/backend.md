@@ -19,6 +19,7 @@
 | FS-04 (#7) | `scripts/export_mocks.py`: mocks del front generados desde la API | Hecho |
 | BE-06 (#13) | `POST` de mediciones por lotes (idempotente por UUID, atómico, 409) y `GET` con filtros | Hecho |
 | BE-05 (#12) | Members de la BD: lista por entorno con resumen, detalle y privacidad guardada | Hecho (PR pendiente de merge) |
+| BE-18 (#36) | Rutina diaria desde `environment.routine` + `task_types.json`: `GET /tasks`, completado idempotente, autocompletado al medir y `task.completed` (`services/routine.py`) | Hecho. Racha e insignias del `GameState`: BE-19 |
 
 Estado global y lista de inconsistencias pendientes: [status.md](status.md).
 
@@ -58,7 +59,8 @@ backend/
 │   ├── data/
 │   │   ├── environments.json  los 6 perfiles de entorno (BE-03)
 │   │   ├── indicators.json    20 indicadores con rangos revisados en CNT-01 (BE-04)
-│   │   └── systems.json       7 sistemas del cuerpo con su región del SVG (BE-04)
+│   │   ├── systems.json       7 sistemas del cuerpo con su región del SVG (BE-04)
+│   │   └── task_types.json    tipos de tarea de la rutina: título, momento del día, indicador (BE-18)
 │   ├── services/
 │   │   ├── app_state.py     clave-valor de app_state: get_value/set_value, save_clock/restore_clock
 │   │   ├── assessment.py    motor de evaluación por indicador y por sistema (BE-08, BE-09)
@@ -66,6 +68,7 @@ backend/
 │   │   ├── environments.py  carga y valida environments.json: list_environments(), get_environment()
 │   │   ├── measurements.py  lotes idempotentes (save_batch), series (list_series), validación (BE-06)
 │   │   ├── member_assessment.py  composición del Assessment completo de un member (BE-11; aún no lo usa el endpoint)
+│   │   ├── routine.py       tareas del día (plan_day, ensure_tasks), completado idempotente, autocompletado (BE-18)
 │   │   ├── members.py       members de la BD: get, list_by_env, set_privacy, to_summary; ensure_demo_members (STUB → BE-07)
 │   │   └── trends.py        tendencia, línea base de 7 días y regla de 3 días a peor (BE-10)
 │   ├── stubs.py          STUB(FS-02): datos de ejemplo de los routers stub (se van retirando)
@@ -85,7 +88,7 @@ backend/
 │       ├── catalog.py    /environments, /indicators, /systems (reales), /interventions (stub)
 │       ├── members.py    members y privacy (reales, BE-05), measurements (real, BE-06), assessment, heartbeat, ruok (stub)
 │       ├── alerts.py     alertas del member, acciones sobre alertas, consola ground
-│       ├── game.py       tareas, game, leaderboard
+│       ├── game.py       tareas (reales, BE-18), game y leaderboard (stub, BE-19)
 │       └── realtime.py   events (SSE), devices, control, system, link, demo (stub salvo /demo/fast-forward)
 ├── scripts/
 │   └── export_mocks.py   genera frontend/src/api/mocks/fixtures.gen.ts (FS-04)
@@ -103,7 +106,8 @@ backend/
     ├── test_environments.py perfiles vs docs/environments.md, JSON inválido, GET /environments y 404
     ├── test_catalog.py      indicadores y sistemas, coherencia, rangos con el motor, endpoints y 404
     ├── test_measurements.py idempotencia, 409, lote atómico, validación, filtros y orden del GET
-    └── test_members.py      lista por entorno, detalle, privacidad persistida, 404 y 422
+    ├── test_members.py      lista por entorno, detalle, privacidad persistida, 404 y 422
+    └── test_routine.py      generación de tareas, completado idempotente, 409/404 y autocompletado (BE-18)
 ```
 
 La estructura objetivo completa (services, data, seed…) está en [architecture.md](architecture.md#estructura-de-carpetas).
@@ -182,6 +186,7 @@ La configuración de dominio (entornos, indicadores, sistemas, intervenciones…
 |---|---|---|
 | `environments.json` | `services/environments.py` | BE-03 |
 | `indicators.json`, `systems.json` | `services/catalog.py` | BE-04 |
+| `task_types.json` | `services/routine.py` | BE-18 |
 | `interventions.json` | — | BE-21 |
 
 Cómo funciona `services/environments.py` (patrón que ya sigue `catalog.py`, de BE-04, y que debe seguir BE-21):

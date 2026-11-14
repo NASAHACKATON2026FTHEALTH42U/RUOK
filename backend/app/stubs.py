@@ -31,7 +31,6 @@ from app.schemas import (
     MemberSummary,
     Recommendation,
     SystemAssessment,
-    Task,
     User,
 )
 from app.schemas.game import Badge
@@ -309,35 +308,6 @@ def alert(member_id: int = 1) -> Alert:
         ],
     )
 
-
-TASKS: list[Task] = [
-    Task(
-        id="t_2026-11-14_1_measure_bp",
-        task_type="measure_bp",
-        title="Mide tu tensión",
-        points=10,
-        due="morning",
-        completed=True,
-        indicator_id="bp_systolic",
-    ),
-    Task(
-        id="t_2026-11-14_1_resistive_exercise",
-        task_type="resistive_exercise",
-        title="Ejercicio resistivo (ARED)",
-        points=20,
-        due="afternoon",
-        completed=False,
-    ),
-    Task(
-        id="t_2026-11-14_1_checkin",
-        task_type="checkin",
-        title="Check-in diario R U OK?",
-        points=10,
-        due="any",
-        completed=False,
-        indicator_id="mood",
-    ),
-]
 
 GAME = GameState(
     points=340,

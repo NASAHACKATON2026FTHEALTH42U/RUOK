@@ -61,6 +61,27 @@ class RoutineItem(ApiModel):
     points: int = 10
 
 
+DayPart = Literal["morning", "afternoon", "evening", "any"]
+
+
+class TaskType(ApiModel):
+    """Tipo de tarea de la rutina diaria (app/data/task_types.json, BE-18). Uso interno.
+
+    El entorno elige qué tipos usa, cuántas veces al día y cuántos puntos dan (`routine`).
+    """
+
+    id: Slug = Field(examples=["measure_bp"])
+    title: str
+    due: DayPart = "any"
+    slots: list[DayPart] = Field(
+        default_factory=list,
+        description="Momento de cada repetición si times_per_day > 1 (si falta, `due`)",
+    )
+    indicator_id: Slug | None = Field(
+        default=None, description="Se autocompleta al llegar una medición de este indicador"
+    )
+
+
 class Mission(ApiModel):
     start: date
     end: date

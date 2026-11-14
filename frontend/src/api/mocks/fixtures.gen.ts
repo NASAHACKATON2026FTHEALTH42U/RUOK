@@ -8957,7 +8957,7 @@ export const tasks: Schema<'Task'>[] = [
   {
     "id": "t_2026-11-14_1_resistive_exercise",
     "task_type": "resistive_exercise",
-    "title": "Ejercicio resistivo (ARED)",
+    "title": "Ejercicio resistivo",
     "points": 20,
     "due": "afternoon",
     "completed": false,
@@ -8969,7 +8969,7 @@ export const tasks: Schema<'Task'>[] = [
     "title": "Check-in diario R U OK?",
     "points": 10,
     "due": "any",
-    "completed": false,
+    "completed": true,
     "indicator_id": "mood"
   }
 ]
@@ -9192,6 +9192,42 @@ export const events: Schema<'Event'>[] = [
   },
   {
     "id": 4,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_1_checkin",
+    "summary": "Cmdr. Vega completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_1_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 5,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_1_measure_bp",
+    "summary": "Cmdr. Vega completó «Mide tu tensión» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_1_measure_bp",
+      "task_type": "measure_bp",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 6,
     "type": "alert.created",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -9208,7 +9244,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 5,
+    "id": 7,
     "type": "alert.escalated",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -9226,7 +9262,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 6,
+    "id": 8,
     "type": "link.queued",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -9243,7 +9279,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 7,
+    "id": 9,
     "type": "alert.escalated",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -9261,7 +9297,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 8,
+    "id": 10,
     "type": "alert.created",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -9278,7 +9314,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 9,
+    "id": 11,
     "type": "alert.escalated",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -9296,7 +9332,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 10,
+    "id": 12,
     "type": "link.queued",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -9313,7 +9349,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 11,
+    "id": 13,
     "type": "alert.escalated",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -9331,7 +9367,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 12,
+    "id": 14,
     "type": "measurement.created",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -9347,7 +9383,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 13,
+    "id": 15,
     "type": "measurement.created",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -9363,7 +9399,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 14,
+    "id": 16,
     "type": "alert.created",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",

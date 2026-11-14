@@ -1,0 +1,37 @@
+[
+  {
+    "id": "measure_bp",
+    "title": "Mide tu tensión",
+    "due": "morning",
+    "indicator_id": "bp_systolic"
+  },
+  {
+    "id": "resistive_exercise",
+    "title": "Ejercicio resistivo",
+    "due": "afternoon"
+  },
+  {
+    "id": "checkin",
+    "title": "Check-in diario R U OK?",
+    "due": "any",
+    "indicator_id": "mood"
+  },
+  {
+    "id": "walk",
+    "title": "Da un paseo",
+    "due": "afternoon"
+  },
+  {
+    "id": "hydration",
+    "title": "Bebe agua",
+    "due": "any",
+    "slots": ["morning", "afternoon", "evening"],
+    "indicator_id": "hydration_ml"
+  },
+  {
+    "id": "pvt",
+    "title": "Test de vigilancia (PVT)",
+    "due": "morning",
+    "indicator_id": "pvt_mean_rt_ms"
+  }
+]
