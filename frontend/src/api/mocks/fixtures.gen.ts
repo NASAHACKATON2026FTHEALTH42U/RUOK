@@ -1465,7 +1465,7 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "last_seen_at": "2026-11-14T10:00:00Z",
       "liveness": "active",
       "overall_status": "critical",
-      "open_alerts": 1,
+      "open_alerts": 3,
       "last_measurement_at": "2026-11-14T10:00:00Z"
     },
     {
@@ -5725,20 +5725,22 @@ export const measurements: Schema<'Measurement'>[] = [
 
 export const alerts: Schema<'Alert'>[] = [
   {
-    "id": "6f1c2a9e-0b5d-4c1e-9f3a-2d8e7b6a5c41",
+    "id": "40787fe0-1d3d-542d-b67b-1c66793e2f7e",
     "member_id": 1,
     "env_id": "mars",
-    "origin": "manual",
+    "origin": "auto",
     "authenticated": true,
-    "created_by_user_id": 7,
-    "category": "psychological",
-    "severity": "warning",
-    "system_id": null,
-    "indicator_ids": [],
-    "message": "Necesito hablar",
+    "created_by_user_id": null,
+    "category": "indicator",
+    "severity": "critical",
+    "system_id": "cardiovascular",
+    "indicator_ids": [
+      "bp_systolic"
+    ],
+    "message": "Cardiovascular en estado crítico",
     "level": 2,
     "target_role": "ground",
-    "delivery_mode": "delayed",
+    "delivery_mode": "autonomous",
     "delay_s": 840,
     "eta": "2026-11-14T10:14:00Z",
     "delivered_at": null,
@@ -5748,16 +5750,137 @@ export const alerts: Schema<'Alert'>[] = [
     "events": [
       {
         "type": "created",
-        "actor": "member",
+        "actor": "system",
         "at": "2026-11-14T10:00:00Z",
-        "payload": {}
+        "payload": {
+          "severity": "critical",
+          "system_id": "cardiovascular"
+        }
+      },
+      {
+        "type": "escalated",
+        "actor": "system",
+        "at": "2026-11-14T10:00:00Z",
+        "payload": {
+          "level": 1,
+          "target_role": "crew"
+        }
+      },
+      {
+        "type": "escalated",
+        "actor": "system",
+        "at": "2026-11-14T10:00:00Z",
+        "payload": {
+          "level": 2,
+          "target_role": "ground"
+        }
       },
       {
         "type": "queued",
         "actor": "system",
         "at": "2026-11-14T10:00:00Z",
         "payload": {
-          "eta_s": 840
+          "target_role": "ground",
+          "eta": "2026-11-14T10:14:00+00:00",
+          "link": "in_transit"
+        }
+      }
+    ]
+  },
+  {
+    "id": "6b44b3eb-fa65-56f1-8baa-886b991fab7f",
+    "member_id": 1,
+    "env_id": "mars",
+    "origin": "auto",
+    "authenticated": true,
+    "created_by_user_id": null,
+    "category": "indicator",
+    "severity": "critical",
+    "system_id": "neuro_behavioral",
+    "indicator_ids": [
+      "sleep_hours"
+    ],
+    "message": "Neuro-conductual en estado crítico",
+    "level": 2,
+    "target_role": "ground",
+    "delivery_mode": "autonomous",
+    "delay_s": 840,
+    "eta": "2026-11-14T10:14:00Z",
+    "delivered_at": null,
+    "status": "escalated",
+    "created_at": "2026-11-14T10:00:00Z",
+    "updated_at": "2026-11-14T10:00:00Z",
+    "events": [
+      {
+        "type": "created",
+        "actor": "system",
+        "at": "2026-11-14T10:00:00Z",
+        "payload": {
+          "severity": "critical",
+          "system_id": "neuro_behavioral"
+        }
+      },
+      {
+        "type": "escalated",
+        "actor": "system",
+        "at": "2026-11-14T10:00:00Z",
+        "payload": {
+          "level": 1,
+          "target_role": "crew"
+        }
+      },
+      {
+        "type": "escalated",
+        "actor": "system",
+        "at": "2026-11-14T10:00:00Z",
+        "payload": {
+          "level": 2,
+          "target_role": "ground"
+        }
+      },
+      {
+        "type": "queued",
+        "actor": "system",
+        "at": "2026-11-14T10:00:00Z",
+        "payload": {
+          "target_role": "ground",
+          "eta": "2026-11-14T10:14:00+00:00",
+          "link": "in_transit"
+        }
+      }
+    ]
+  },
+  {
+    "id": "138f8f59-0ba6-5e49-88f1-9b2e6b60899f",
+    "member_id": 1,
+    "env_id": "mars",
+    "origin": "auto",
+    "authenticated": true,
+    "created_by_user_id": null,
+    "category": "indicator",
+    "severity": "warning",
+    "system_id": "musculoskeletal",
+    "indicator_ids": [
+      "exercise_min"
+    ],
+    "message": "Musculoesquelético en aviso",
+    "level": 0,
+    "target_role": "self",
+    "delivery_mode": "realtime",
+    "delay_s": 0,
+    "eta": null,
+    "delivered_at": null,
+    "status": "open",
+    "created_at": "2026-11-14T10:00:00Z",
+    "updated_at": "2026-11-14T10:00:00Z",
+    "events": [
+      {
+        "type": "created",
+        "actor": "system",
+        "at": "2026-11-14T10:00:00Z",
+        "payload": {
+          "severity": "warning",
+          "system_id": "musculoskeletal"
         }
       }
     ]
@@ -5811,7 +5934,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
       "env_id": "mars",
       "state": "delayed",
       "delay_s": 840,
-      "queued": 0,
+      "queued": 2,
       "since": "2026-11-14T10:00:00Z"
     },
     "members": [
@@ -6056,7 +6179,7 @@ export const linkByEnv: Record<string, Schema<'LinkStatus'>> = {
     "env_id": "mars",
     "state": "delayed",
     "delay_s": 840,
-    "queued": 0,
+    "queued": 2,
     "since": "2026-11-14T10:00:00Z"
   },
   "earth": {
@@ -6204,7 +6327,7 @@ export const controlOverview: Schema<'ControlOverview'> = {
         "env_id": "mars",
         "state": "delayed",
         "delay_s": 840,
-        "queued": 0,
+        "queued": 2,
         "since": "2026-11-14T10:00:00Z"
       },
       "members": [

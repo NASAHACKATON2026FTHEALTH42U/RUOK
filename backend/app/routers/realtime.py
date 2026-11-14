@@ -33,7 +33,7 @@ from app.schemas import (
     Slug,
 )
 from app.schemas.realtime import AlertCounts, ControlMetrics, EnvironmentOverview, EnvironmentRef
-from app.services import comm_link
+from app.services import alerts, comm_link
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -253,10 +253,11 @@ def demo_link(body: DemoLinkIn, session: SessionDep) -> LinkStatus:
     response_model=DemoClock,
     tags=["demo"],
     summary="Avanzar el reloj de la demo",
-    description="Avanza el reloj de la demo (app/clock.py) y entrega los mensajes del enlace "
-    "cuya ETA ya ha pasado.",
+    description="Avanza el reloj de la demo (app/clock.py), entrega los mensajes del enlace "
+    "cuya ETA ya ha pasado y reevalúa las alertas abiertas.",
 )
 def demo_fast_forward(body: FastForwardIn, session: SessionDep) -> DemoClock:
     clock.advance(body.seconds)
     comm_link.deliver_due(session)
+    alerts.reevaluate_open(session)  # escala los warnings que han persistido (BE-14)
     return DemoClock(server_time=clock.now(), offset_s=clock.get_offset())

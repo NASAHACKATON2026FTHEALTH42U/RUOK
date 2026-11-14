@@ -280,9 +280,23 @@ SCENARIOS: dict[str, Callable[[Session], str]] = {
 }
 
 
+SCENARIO_MEMBER = {
+    "mars_sleep_bp": VEGA,
+    "eva_no_contact": VEGA,
+    "geriatric_fall_risk": FALL_RISK_RESIDENT,
+}
+
+
 def apply_scenario(session: Session, name: str) -> str:
-    """Aplica un escenario sobre los datos actuales. KeyError si no existe."""
+    """Aplica un escenario sobre los datos actuales. KeyError si no existe.
+
+    Después evalúa al member afectado, como haría un POST de mediciones: así se
+    abren o escalan sus alertas automáticas (BE-14).
+    """
+    from app.services.alerts import evaluate_member  # evita el ciclo de imports
+
     detail = SCENARIOS[name](session)
     session.commit()
     app_state.set_value(session, "scenario", name)
+    evaluate_member(session, session.get(models.Member, SCENARIO_MEMBER[name]))
     return detail
