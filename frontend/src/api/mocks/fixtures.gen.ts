@@ -185,7 +185,7 @@ export const CONTRACT_OPERATIONS = [
 
 export const health: Schema<'HealthResponse'> = {
   "status": "ok",
-  "server_time": "2026-11-14T16:29:14.498037Z"
+  "server_time": "2026-11-14T16:41:57.274400Z"
 }
 
 export const environments: Schema<'Environment'>[] = [
@@ -1347,7 +1347,7 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "liveness": "active",
       "overall_status": "normal",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T10:00:00Z"
+      "last_measurement_at": null
     }
   ],
   "moon": [],
@@ -1374,7 +1374,7 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "liveness": "stale",
       "overall_status": "unknown",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T09:48:00Z"
+      "last_measurement_at": null
     }
   ],
   "earth": [],
@@ -1386,7 +1386,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "iss": {
     "member_id": 1,
     "env_id": "iss",
-    "generated_at": "2026-11-14T16:29:14.515456Z",
+    "generated_at": "2026-11-14T16:41:57.294555Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -1643,7 +1643,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "moon": {
     "member_id": 1,
     "env_id": "moon",
-    "generated_at": "2026-11-14T16:29:14.516985Z",
+    "generated_at": "2026-11-14T16:41:57.296944Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -1900,7 +1900,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "mars": {
     "member_id": 1,
     "env_id": "mars",
-    "generated_at": "2026-11-14T16:29:14.518472Z",
+    "generated_at": "2026-11-14T16:41:57.299102Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -2157,7 +2157,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "earth": {
     "member_id": 1,
     "env_id": "earth",
-    "generated_at": "2026-11-14T16:29:14.519912Z",
+    "generated_at": "2026-11-14T16:41:57.301225Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -2414,7 +2414,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "hospital": {
     "member_id": 1,
     "env_id": "hospital",
-    "generated_at": "2026-11-14T16:29:14.521911Z",
+    "generated_at": "2026-11-14T16:41:57.303942Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -2671,7 +2671,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "geriatric": {
     "member_id": 1,
     "env_id": "geriatric",
-    "generated_at": "2026-11-14T16:29:14.523726Z",
+    "generated_at": "2026-11-14T16:41:57.306658Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -2937,7 +2937,7 @@ export const measurements: Schema<'Measurement'>[] = [
     "note": null,
     "member_id": 1,
     "unit": "mmHg",
-    "received_at": "2026-11-14T16:29:14.490810Z"
+    "received_at": "2026-11-14T16:41:57.268097Z"
   }
 ]
 
@@ -2985,7 +2985,7 @@ export const alerts: Schema<'Alert'>[] = [
 export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   "iss": {
     "env_id": "iss",
-    "as_of": "2026-11-14T16:29:14.540641Z",
+    "as_of": "2026-11-14T16:41:57.322270Z",
     "link": {
       "env_id": "iss",
       "state": "online",
@@ -3011,7 +3011,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "moon": {
     "env_id": "moon",
-    "as_of": "2026-11-14T16:29:13.542954Z",
+    "as_of": "2026-11-14T16:41:56.324118Z",
     "link": {
       "env_id": "moon",
       "state": "online",
@@ -3024,7 +3024,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "mars": {
     "env_id": "mars",
-    "as_of": "2026-11-14T16:15:14.544367Z",
+    "as_of": "2026-11-14T16:27:57.325909Z",
     "link": {
       "env_id": "mars",
       "state": "delayed",
@@ -3062,7 +3062,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "earth": {
     "env_id": "earth",
-    "as_of": "2026-11-14T16:29:14.545873Z",
+    "as_of": "2026-11-14T16:41:57.327774Z",
     "link": {
       "env_id": "earth",
       "state": "online",
@@ -3075,7 +3075,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "hospital": {
     "env_id": "hospital",
-    "as_of": "2026-11-14T16:29:14.547176Z",
+    "as_of": "2026-11-14T16:41:57.329526Z",
     "link": {
       "env_id": "hospital",
       "state": "online",
@@ -3088,7 +3088,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "geriatric": {
     "env_id": "geriatric",
-    "as_of": "2026-11-14T16:29:14.548556Z",
+    "as_of": "2026-11-14T16:41:57.331282Z",
     "link": {
       "env_id": "geriatric",
       "state": "online",
@@ -3355,7 +3355,7 @@ export const devices: Schema<'Device'>[] = [
 ]
 
 export const controlOverview: Schema<'ControlOverview'> = {
-  "generated_at": "2026-11-14T16:29:14.625232Z",
+  "generated_at": "2026-11-14T16:41:57.375476Z",
   "environments": [
     {
       "environment": {
@@ -3610,7 +3610,7 @@ export const demoUsers: Schema<'DemoUser'>[] = [
 export const tokenTemplate: Schema<'TokenResponse'> = {
   "access_token": "stub-token-7",
   "token_type": "bearer",
-  "expires_at": "2026-11-15T04:29:14.637572Z",
+  "expires_at": "2026-11-15T04:41:57.383174Z",
   "user": {
     "id": 7,
     "username": "vega",

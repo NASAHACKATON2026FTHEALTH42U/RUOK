@@ -6,6 +6,7 @@ import { capitalize, useVocab } from '../../environments/useVocab'
 import { EnvironmentSelector } from './EnvironmentSelector'
 import { MockBanner } from './MockBanner'
 import { SessionMenu } from '../auth/SessionMenu'
+import { LinkStatusChip } from './LinkStatusChip'
 import { PendingSyncChip } from './PendingSyncChip'
 import { ServerStatus } from './ServerStatus'
 import { getDevice } from '../../offline/device'
@@ -41,6 +42,7 @@ export function Layout() {
             R U OK<span className="text-env-primary">?</span>
           </NavLink>
           <div className="flex items-center gap-3">
+            <LinkStatusChip />
             <PendingSyncChip />
             <SessionMenu />
             <ServerStatus />

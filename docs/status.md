@@ -2,7 +2,7 @@
 
 > Foto del **sábado 14/11, por la tarde** (actualizada tras mergear BE-06, FE-11, FE-13 y FE-27). Actualízala en cada hito (o pídeselo a Claude: "actualiza docs/status.md"). Fuente: GitHub Issues/PRs y revisión del código. El detalle de cada pieza está en [`backend.md`](backend.md) y [`frontend/README.md`](../frontend/README.md).
 
-**27 de 81 issues cerradas.** Bloques 📜 Contrato y 🫀 Dashboard completos. **PRs abiertas:** #110 (BE-05, members), #118 (BE-12 parte 1, liveness), #119 (FE-19, check-in) y #108 (esta documentación).
+**27 de 81 issues cerradas.** Bloques 📜 Contrato y 🫀 Dashboard completos. **PRs abiertas:** #110 (BE-05, members), #118 (BE-12 parte 1, liveness) y #119 (FE-19, check-in).
 
 ## Hecho
 
@@ -28,7 +28,8 @@
 |---|---|
 | `GET /health` | auth y usuarios (BE-25, BE-26, FS-07) |
 | `GET /environments`, `/environments/{id}` (BE-03) | heartbeat y R U OK (BE-12 **PR #118**, BE-16) |
-| `GET /indicators`, `/indicators/{id}`, `/systems` (BE-04) | members y privacidad (BE-05, **PR #110 abierta**) |
+| `GET /indicators`, `/indicators/{id}`, `/systems` (BE-04) | en el resumen de members: `liveness` (BE-12), `overall_status` (BE-11) y `open_alerts` (BE-14) |
+| `GET /environments/{id}/members`, `GET /members/{id}`, `PATCH /members/{id}/privacy` (BE-05, **PR #110**) | |
 | `POST`/`GET /members/{id}/measurements` (BE-06) | `GET /members/{id}/assessment` (BE-11: el servicio existe, falta conectarlo) |
 | `POST /demo/fast-forward` (a medias: no persiste el reloj, BE-32) | alertas y consola ground (BE-14, BE-15, BE-17) |
 | | tareas y juego (BE-18, BE-19) · intervenciones (BE-21) |
@@ -42,7 +43,7 @@
 | Issue | Estado |
 |---|---|
 | BE-11 #18 (assessment endpoint) | En curso (bryanfajardo2712-arch). Bloquea BE-12, BE-14 y BE-30 |
-| BE-05 #12 (members) | PR #110 abierta |
+| BE-05 #12 (members) | PR #110 lista para mergear |
 | BE-12 #33 (liveness) | Parte 1 en PR #118 |
 | **BE-31 #111, BE-33 #112, BE-35 #113** (nuevas, de la revisión) | **Sin asignar.** Bloquean BE-12, BE-14 y BE-16 |
 | BE-07 #14 (seed), BE-25 #66 y BE-26 #67 (auth: el login del front ya existe y espera al back), BE-13 #30 (enlace), BE-14 #31 (alertas), BE-28 #75 (eventos SSE) | **Sin asignar** |

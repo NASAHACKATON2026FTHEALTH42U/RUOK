@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41); botón SOS / Pedir ayuda en **FE-13** (#43); login y sesión en **FE-27** (#68); permisos por rol en **FE-28** (#70); test PVT en **FE-22** (#52).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41); botón SOS / Pedir ayuda en **FE-13** (#43); login y sesión en **FE-27** (#68); permisos por rol en **FE-28** (#70); estado del enlace en la cabecera en **FE-17** (#47); test PVT en **FE-22** (#52).
 
 ## Comandos
 
@@ -133,15 +133,16 @@ frontend/
     ├── components/auth/       RequireSession, RequireRole, SessionMenu
     ├── components/alerts/     SosButton, SosDialog + sos.ts (categorías, destinos, protocolo; + test)
     ├── components/body/       BodyFigure (SVG) + regions.ts (buildRegions, formatSinceLabel; + test)
-    ├── components/dashboard/  SystemPanel, IndicatorCard, TrendChart, LinkChip + format.ts y trend.ts (+ tests)
+    ├── components/dashboard/  SystemPanel, IndicatorCard, TrendChart + format.ts y trend.ts (+ tests)
     ├── components/measure/    IndicatorField + measureForm.ts (parseValue, emptyValue; + test)
-    ├── components/behavioral/ PvtRunner + pvt.ts (summarize, buildPvtBatch, randomIsi; + test)
+    ├── components/behavioral/ FaceScale, PvtRunner + checkin.ts y pvt.ts (CHECKIN_INDICATORS, buildCheckinBatch, summarize, buildPvtBatch…; + tests)
     ├── components/environment/  EnvironmentCard (pintada con su propia paleta), MemberList
     ├── components/ui/
     │   ├── Layout.tsx         cabecera + navegación + <Outlet /> + disclaimer
     │   ├── EnvironmentSelector.tsx
     │   ├── ServerStatus.tsx   chip de conexión con el servidor
     │   ├── StatusBadge.tsx    semáforo: icono (forma + símbolo) + etiqueta
+    │   ├── LinkStatusChip.tsx estado del enlace con tierra en la cabecera + link.ts (+ test)
     │   ├── PendingSyncChip.tsx "N pendientes de sincronizar" en la cabecera
     │   ├── status.ts          statusStyle(), livenessState(), STATUS_COLORS (+ status.test.ts)
     │   ├── MockBanner.tsx     banner obligatorio con datos de ejemplo
@@ -309,12 +310,12 @@ Contenido:
 
 `/dashboard` (`src/pages/Dashboard.tsx`) muestra el panel del member activo (`memberId` del store). Sin member, enlaza a `/` para elegirlo.
 
-- **Cabecera:** `StatusBadge` con el estado general (`overall_status`), el liveness si no es `active` ("Sin datos desde hace X min"), `LinkChip` con el estado del enlace con `{ground}` (en línea / con retardo · 14 min / sin enlace, y los mensajes en cola) y la frescura de los datos ("Actualizado hace…").
+- **Cabecera:** `StatusBadge` con el estado general (`overall_status`), el liveness si no es `active` ("Sin datos desde hace X min") y la frescura de los datos ("Actualizado hace…"). El estado del enlace está en la cabecera global (FE-17).
 - **Izquierda:** `BodyFigure` (fija al hacer scroll en escritorio).
 - **Derecha:** cuadrícula de `IndicatorCard` con todos los indicadores de la evaluación, **ordenados por gravedad** (`bySeverity`: crítico, atención, sin datos, normal). Clic en una tarjeta → `SystemPanel` de su sistema.
 - En móvil, todo en una columna.
 
-**Refresco cada 15 s.** `useAssessment(memberId, 15_000)` y `useLink(envId, 15_000)` usan `useLoad({ refreshMs })`, que recarga en segundo plano sin volver al esqueleto de carga. Si un refresco falla, se mantienen los últimos datos y la cabecera avisa **"No se pudo actualizar: los datos pueden estar desfasados"** (nunca se finge que están al día).
+**Refresco cada 15 s.** `useAssessment(memberId, 15_000)` usa `useLoad({ refreshMs })`, que recarga en segundo plano sin volver al esqueleto de carga. Si un refresco falla, se mantienen los últimos datos y la cabecera avisa **"No se pudo actualizar: los datos pueden estar desfasados"** (nunca se finge que están al día).
 
 `IndicatorCard` (`components/dashboard/`) es la tarjeta de un indicador (valor, semáforo, tendencia y antigüedad). La usan la cuadrícula y el `SystemPanel`; con `showTrend` añade la `TrendChart` (FE-08).
 
@@ -338,7 +339,7 @@ Verificado con una serie sintética de 30 días (interceptando la petición en C
 
 `/history` (`src/pages/History.tsx`):
 
-- **Selector de indicador**: los indicadores activos del entorno (`Environment.indicators`) más los del test PVT (FE-22), con su nombre del catálogo.
+- **Selector de indicador**: los indicadores activos del entorno (`Environment.indicators`) más los 6 del check-in diario (FE-19) y los 2 del test PVT (FE-22), con su nombre del catálogo.
 - **Selector de periodo**: 7 d / 30 d.
 - El indicador y el periodo van en la URL: `/history?indicator=bp_systolic&days=30` (se puede enlazar directamente).
 - **Gráfica** grande (`TrendPlot`) con las bandas del entorno: si el indicador está en la evaluación se usan sus rangos ajustados; si no, los del catálogo.
@@ -362,6 +363,26 @@ Verificado con una serie sintética de 30 días (interceptando la petición en C
 - **Un solo lote** por formulario: la tensión sistólica y la diastólica (y el resto del sistema) van juntas en `POST /members/{id}/measurements`, con un **UUID por medición** (`newId()`), `taken_at` = hora del servidor y `source: "manual"`, más la nota opcional.
 - **Sin conexión no se pierde nada** (FE-11): el lote se guarda primero en el outbox del dispositivo. Si llega al servidor, se ve "N mediciones enviadas" con el estado general que devuelve; si no, "Medición guardada en el dispositivo", y se envía sola cuando vuelva la conexión, con los mismos UUID (sin duplicados).
 - "Ver el panel" vuelve a `/dashboard`, que vuelve a pedir la evaluación.
+
+## Check-in diario "R U OK?" (FE-19)
+
+`/checkin` (`src/pages/CheckIn.tsx`). Es el check-in conductual de [`docs/behavioral-health.md`](../docs/behavioral-health.md), pensado para hacerse **en menos de 30 s** y en una sola pantalla (mobile-first):
+
+- **6 escalas 1–5 con caras** (`FaceScale`), en este orden (`CHECKIN_INDICATORS`): `mood`, `stress`, `energy`, `loneliness`, `sleep_quality` y `crew_relation`. Debajo, una **nota** opcional.
+- **Textos desde el catálogo:** el nombre y la pregunta, con sus extremos ("1 = nada, 5 = muchísimo"), salen de `indicator.name` y `measurement_instructions[0]`. No hay textos clínicos fijos en el componente.
+- **Las caras siguen la polaridad** del indicador (`higher_is_worse`, `faceFor()`): en ánimo, 5 es 😄; en estrés y soledad, 5 es 😞. Cada cara va siempre con su número y `aria-label="N de 5"`, para no depender solo del emoji. Pulsar la opción elegida la quita.
+- Hay que responder a las 6. El botón muestra el progreso ("Responde 4 / 6") hasta que están todas.
+- **Envío:** un solo lote (`buildCheckinBatch()`) por `sendMeasurements()` del outbox. Lleva una medición por respuesta con su UUID (`newId()`), `source: "checkin"`, la misma `taken_at` (hora del servidor) y la nota en todas.
+- **Sin conexión no se pierde nada** (outbox, FE-11): si el lote llega al servidor, se ve "Check-in guardado" con el estado general que devuelve; si no, "Check-in guardado en el dispositivo", y se envía solo cuando vuelve la conexión, con los mismos UUID.
+- **Resultado:** en los dos casos hay enlaces al panel y al historial (`/history?indicator=mood`).
+- **Historial:** los 6 indicadores aparecen siempre en el selector de `/history`, aunque el entorno no los tenga activos. Hoy los entornos solo activan `mood`.
+- **Aviso de privacidad** al pie, según `docs/behavioral-health.md`. Quien lo aplica es el backend (BE-20, BE-17 y BE-27); el front solo informa.
+
+**Probado** contra el backend real, a través del proxy de Vite: el lote de 6 entra con `accepted: 6`; reenviarlo con los mismos UUID da `duplicates: 6` y no duplica nada; `GET /members/1/measurements?indicator_id=<id>` (la consulta del historial) devuelve cada respuesta con `source: "checkin"` y su nota. Lint, build y tests en verde. **Falta verificarlo visualmente en un navegador o móvil.**
+
+**Pendiente:**
+
+- Activar los indicadores conductuales en `environments.json` para que entren en la evaluación (backend, BE-20).
 
 ## Dispositivo e IndexedDB (FE-30)
 
@@ -470,6 +491,22 @@ const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el
 - **Cabecera:** usuario y rol con el **vocabulario del entorno** (`userRoleLabel()`: astronauta, oficial médico, flight surgeon…; si no hay término, el `role_label` del servidor).
 - El panel de demo y `/control` ya tienen permiso (`action:demo-panel`, `view:control`) para FE-31/FE-32.
 - Ocultar en la UI **no es seguridad**: el back comprueba rol y propiedad en cada endpoint (BE-27).
+
+## Estado del enlace en la cabecera (FE-17)
+
+`LinkStatusChip` (en `Layout`) muestra el enlace simulado con el control externo en **todas las vistas** en cuanto hay un entorno: `useLink(envId, 5_000)` consulta `GET /link?env=` **cada 5 s**, así que cambia en vivo cuando alguien lo fuerza desde los controles de demo (`POST /demo/link`, FE-32). Cuando llegue el tiempo real (FE-29) se actualizará por eventos.
+
+| Estado    | Icono | Texto                                                   |
+| --------- | ----- | ------------------------------------------------------- |
+| `online`  | ●     | Enlace con flight surgeon: en línea                     |
+| `delayed` | ◐     | … con retardo · 14 min                                  |
+| `los`     | ○     | … **sin enlace (LOS) desde las 14:02** (destacado)      |
+| sin datos | ?     | … **estado desconocido** (nunca el último estado visto) |
+
+- Se añaden los mensajes en cola: "· 2 en cola". La lógica está en `link.ts` (`describeLink()`, con tests).
+- El otro extremo según quién mira: a bordo, "Enlace con {ground}"; para `responder` y `psych`, "Enlace con {crew}".
+- En móvil se muestra en corto (icono + "14 min", "Sin enlace"…) y el texto completo va en el `title`.
+- Sustituye al `LinkChip` que había en la cabecera del dashboard (FE-07).
 
 ## Test de vigilancia psicomotora: PVT (FE-22)
 
