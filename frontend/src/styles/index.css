@@ -209,6 +209,8 @@ html[data-theme-ready] :is(body, header, footer, nav a, select) {
   border-color: var(--env-primary);
 }
 .hud-btn {
+  --hud-edge: var(--env-primary);
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -222,6 +224,23 @@ html[data-theme-ready] :is(body, header, footer, nav a, select) {
   text-transform: uppercase;
   clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
 }
+/* El recorte se come el borde en la esquina: se dibuja la diagonal con el color del borde. */
+.hud-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(
+    45deg,
+    transparent calc(50% - 0.7px),
+    var(--hud-edge) calc(50% - 0.7px),
+    var(--hud-edge) calc(50% + 0.7px),
+    transparent calc(50% + 0.7px)
+  );
+  pointer-events: none;
+}
 .hud-btn:disabled {
   opacity: 0.6;
 }
@@ -233,6 +252,7 @@ html[data-theme-ready] :is(body, header, footer, nav a, select) {
   filter: brightness(1.1);
 }
 .hud-btn-danger {
+  --hud-edge: #ef4444;
   border-color: #ef4444;
   /* Rojo mezclado con el texto del entorno: claro en temas oscuros, oscuro en temas claros. */
   color: color-mix(in srgb, #ef4444 65%, var(--env-text));
