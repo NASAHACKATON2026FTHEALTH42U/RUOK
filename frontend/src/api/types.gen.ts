@@ -1646,7 +1646,10 @@ export interface components {
             /** Paused */
             paused: boolean;
         };
-        /** LivenessThresholds */
+        /**
+         * LivenessThresholds
+         * @description Umbrales de liveness y escalado del entorno (docs/offline-and-liveness.md).
+         */
         LivenessThresholds: {
             /**
              * Stale After S
@@ -1664,10 +1667,34 @@ export interface components {
              */
             eva_stale_after_s: number;
             /**
+             * Eva Lost After S
+             * @description En EVA, sin señal → lost
+             * @example 120
+             */
+            eva_lost_after_s: number;
+            /**
+             * Sleep Factor
+             * @description Durante el sueño programado los umbrales se multiplican
+             * @example 3
+             */
+            sleep_factor: number;
+            /**
              * Ruok Timeout S
              * @example 120
              */
             ruok_timeout_s: number;
+            /**
+             * Morning Checkin By
+             * @description Hora local HH:MM; sin check-in matinal antes de esa hora → stale (geriatría)
+             * @example 10:00
+             */
+            morning_checkin_by: string | null;
+            /**
+             * Warning Escalate After S
+             * @description Un warning que persiste este tiempo escala al siguiente nivel
+             * @example 21600
+             */
+            warning_escalate_after_s: number;
         };
         /** LoginIn */
         LoginIn: {
