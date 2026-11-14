@@ -8,7 +8,7 @@ import {
   type PointerEvent,
   type ReactNode,
 } from 'react'
-import holographicHuman from '../../assets/holographic-human.webp'
+import xrayHuman from '../../assets/xray-human.webp'
 import { STATUS_COLORS, statusStyle, type Liveness } from '../ui/status'
 import { StatusBadge } from '../ui/StatusBadge'
 import { BodyLegend } from './BodyLegend'
@@ -208,10 +208,10 @@ export function BodyFigure({
           strokeOpacity={0.85}
           strokeLinecap="round"
         >
-          <polyline points="262,385 215,620 145,850" />
-          <polyline points="625,385 672,620 742,850" />
-          <polyline points="362,905 376,1190 392,1555" />
-          <polyline points="525,905 511,1190 497,1555" />
+          <polyline points="288,377 243,635 164,855" />
+          <polyline points="600,377 655,635 720,855" />
+          <polyline points="343,858 353,1240 353,1635" />
+          <polyline points="545,858 532,1240 532,1635" />
         </g>
       ),
     ],
@@ -269,8 +269,8 @@ export function BodyFigure({
       (r) => (
         <g {...shape(r)}>
           <rect x="360" y="118" width="168" height="56" fill="transparent" stroke="none" />
-          <ellipse cx="403" cy="142" rx="24" ry="13" />
-          <ellipse cx="484" cy="142" rx="24" ry="13" />
+          <ellipse cx="418" cy="137" rx="24" ry="13" />
+          <ellipse cx="473" cy="137" rx="24" ry="13" />
         </g>
       ),
     ],
@@ -380,13 +380,15 @@ export function BodyFigure({
           >
             {/* Cuerpo holográfico. Los órganos se desaturan un poco para que no se confundan con el
               semáforo; sin datos fiables (stale/lost), toda la figura en gris. */}
+            {/* Figura de rayos X (900 × 1820) colocada para que cabeza (y 30) y pies (y 1720)
+                caigan donde estaban: las zonas mantienen sus coordenadas. */}
             <image
-              href={holographicHuman}
-              x="0"
-              y="0"
-              width="887"
-              height="1774"
-              preserveAspectRatio="xMidYMid meet"
+              href={xrayHuman}
+              x="6"
+              y="-28"
+              width="876"
+              height="1770"
+              preserveAspectRatio="none"
               style={{
                 filter: stale ? 'grayscale(1) brightness(0.75)' : 'saturate(0.55) brightness(0.9)',
               }}
