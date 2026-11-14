@@ -26,7 +26,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from sqlmodel import Session
+from sqlmodel import Session, col, select
 
 from app import clock, models
 from app.schemas.common import Activity, DeviceKind, Liveness, Status
@@ -139,5 +139,13 @@ def record_heartbeat(
 
     return HeartbeatResult(
         liveness=member_liveness(member, now),
-        checkin_required=previous in (Liveness.stale, Liveness.lost),
+        # También si hay un "R U OK?" pendiente de responder (BE-16).
+        checkin_required=previous in (Liveness.stale, Liveness.lost)
+        or session.exec(
+            select(models.RuokCheck.id).where(
+                models.RuokCheck.member_id == member.id,
+                col(models.RuokCheck.responded_at).is_(None),
+            )
+        ).first()
+        is not None,
     )

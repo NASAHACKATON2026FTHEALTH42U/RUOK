@@ -380,7 +380,7 @@ export interface paths {
         put?: never;
         /**
          * Respuesta al check-in 'R U OK?'
-         * @description STUB(FS-02) → BE-16
+         * @description Cierra el check-in pendiente y cuenta como señal de vida. ok=false ('Necesito ayuda') crea una alerta critical y devuelve su id; ok=true resuelve la alerta no_contact abierta.
          */
         post: operations["ruok_api_v1_members__member_id__ruok_post"];
         delete?: never;
