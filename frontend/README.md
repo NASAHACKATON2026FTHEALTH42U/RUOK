@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23).
 
 ## Comandos
 
@@ -88,6 +88,7 @@ frontend/
     │   ├── useVocab.ts        hook useVocab() + capitalize()
     │   ├── applyTheme.ts      initTheme(): aplica el tema del entorno activo en <html>
     │   └── themes/            un tema por entorno (iss.ts, mars.ts…) + defaultTheme.ts
+    ├── lib/time.ts            formatAgo(): "hace 12 min" con la hora del servidor (+ test)
     ├── store/environment.ts   store Zustand: envId, memberId, vocabulary (persistido)
     ├── api/
     │   ├── types.gen.ts       GENERADO (npm run gen:api): no editar
@@ -98,9 +99,11 @@ frontend/
     │   ├── useMembers.ts      hook de GET /environments/{id}/members
     │   ├── useSystems.ts      hook de GET /systems (catálogo, una petición compartida)
     │   ├── useAssessment.ts   hook de GET /members/{id}/assessment
+    │   ├── useIndicators.ts   hook de GET /indicators (catálogo, una petición compartida)
     │   ├── useLoad.ts         carga genérica (loading / ready / error + retry)
     │   └── *.test.ts          tests (Vitest)
     ├── components/body/       BodyFigure (SVG) + regions.ts (buildRegions, formatSinceLabel; + test)
+    ├── components/dashboard/  SystemPanel + format.ts (tendencia, peligros, valores; + test)
     ├── components/environment/  EnvironmentCard (pintada con su propia paleta), MemberList
     ├── components/ui/
     │   ├── Layout.tsx         cabecera + navegación + <Outlet /> + disclaimer
@@ -252,7 +255,19 @@ const regions = buildRegions(systems, assessment.systems)   // catálogo (svg_re
 - Cada región es un botón accesible (`role="button"`, `aria-label` con nombre y estado, Enter/Espacio) y muestra un tooltip al pasar el ratón o al enfocarla.
 - Debajo hay una **leyenda clicable** con un `StatusBadge` por sistema: la misma información sin depender del color.
 - Las regiones que no están en el catálogo de sistemas no se dibujan; un `svg_region` desconocido se ignora.
-- `TODO(FE-06)`: el sistema seleccionado abrirá el `SystemPanel`. `TODO(FE-07)`: layout completo del dashboard.
+- Al seleccionar un sistema se abre el `SystemPanel` (FE-06). `TODO(FE-07)`: layout completo del dashboard.
+
+## Detalle del sistema: `SystemPanel` (FE-06)
+
+Se abre al hacer clic (o Enter) en una región de la figura o en la leyenda, y se cierra con **Esc**, con el botón ✕ o con un **clic fuera**. En escritorio es un panel lateral a la derecha; en móvil, una hoja desde abajo. Al abrirse, el foco va al botón de cerrar (`role="dialog"`, `aria-modal`).
+
+Contenido:
+
+- **Función** del sistema y, en entornos espaciales (`kind: space`), **efectos en el espacio** y **peligros** (los cinco de NASA HRP: radiación, aislamiento, distancia, gravedad y entorno hostil; `formatHazard()`).
+- **Indicadores** de la evaluación: nombre (del catálogo `/indicators`), último valor con unidad (`formatValue()`: las escalas `1-5` salen como "3 / 5"), `StatusBadge`, tendencia con flecha y texto (`formatTrend()`) y antigüedad (`formatAgo()` con `serverNow()`; "Nunca medido" si no hay dato).
+- **Recomendaciones** ordenadas por prioridad.
+- Botón **"Medir ahora"** → `/measure?system=<id>` (el formulario que lo lee llega con FE-10).
+- Con liveness `stale` o `lost`, los estados se muestran como "Sin datos recientes", igual que la figura.
 
 ### Pendiente
 

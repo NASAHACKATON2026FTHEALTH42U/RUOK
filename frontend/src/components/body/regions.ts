@@ -1,3 +1,4 @@
+import { formatAgo } from '../../lib/time'
 import type { Liveness, Status } from '../ui/status'
 
 /** Regiones que dibuja BodyFigure (`BodySystem.svg_region`). `halo` = radiación. */
@@ -55,10 +56,5 @@ export function isFigureStale(liveness: Liveness): boolean {
 
 /** "Sin datos desde hace 12 min" a partir de `last_seen_at` y la hora del servidor. */
 export function formatSinceLabel(lastSeenAt: string | null | undefined, now: Date): string {
-  if (!lastSeenAt) return 'Sin datos'
-  const min = Math.max(0, Math.floor((now.getTime() - Date.parse(lastSeenAt)) / 60_000))
-  if (min < 1) return 'Sin datos desde hace menos de 1 min'
-  if (min < 60) return `Sin datos desde hace ${min} min`
-  const h = Math.floor(min / 60)
-  return `Sin datos desde hace ${h} h${min % 60 ? ` ${min % 60} min` : ''}`
+  return lastSeenAt ? `Sin datos desde ${formatAgo(lastSeenAt, now)}` : 'Sin datos'
 }
