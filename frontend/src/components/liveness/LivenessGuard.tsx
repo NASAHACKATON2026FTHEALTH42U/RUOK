@@ -49,11 +49,11 @@ export function LivenessGuard() {
 }
 
 /** Selector de actividad (Normal / EVA / Sueño) del member de la sesión; nada para otros roles. */
-export function MemberActivitySelector() {
+export function MemberActivitySelector({ compact = false }: { compact?: boolean }) {
   const { role } = useAuth()
   const envId = useEnvironmentStore((s) => s.envId)
   const envs = useEnvironments()
   if (role !== 'member') return null
   const env = envs.state === 'ready' ? envs.data.find((e) => e.id === envId) : undefined
-  return <ActivitySelector isSpace={env?.kind === 'space'} />
+  return <ActivitySelector isSpace={env?.kind === 'space'} compact={compact} />
 }

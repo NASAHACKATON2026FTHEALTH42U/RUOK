@@ -9,13 +9,15 @@ import { getDb } from './offline/db'
 import { getDevice } from './offline/device'
 import { initOutbox } from './offline/outbox'
 // Fuentes empaquetadas (local-first, sin Google Fonts): estilo HUD, docs/design/hud-style.md.
-import '@fontsource/saira/300.css'
-import '@fontsource/saira/400.css'
-import '@fontsource/saira/500.css'
-import '@fontsource/saira/600.css'
-import '@fontsource/ibm-plex-mono/300.css'
-import '@fontsource/ibm-plex-mono/400.css'
-import '@fontsource/ibm-plex-mono/500.css'
+// Solo el subconjunto latino (español): menos peso en el build.
+import '@fontsource/saira/latin-300.css'
+import '@fontsource/saira/latin-400.css'
+import '@fontsource/saira/latin-500.css'
+import '@fontsource/saira/latin-600.css'
+import '@fontsource/ibm-plex-mono/latin-300.css'
+import '@fontsource/ibm-plex-mono/latin-400.css'
+import '@fontsource/ibm-plex-mono/latin-500.css'
+import '@fontsource/ibm-plex-mono/latin-600.css'
 import './styles/index.css'
 
 // ?mocks=1 activa el modo demo sin servidor (se recuerda); ?mocks=0 lo desactiva.

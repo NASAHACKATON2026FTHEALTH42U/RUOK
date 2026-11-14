@@ -31,7 +31,7 @@ interface SystemPanelProps {
 /**
  * Detalle de un sistema del cuerpo (FE-06): función, efectos en el espacio, peligros,
  * indicadores (valor, estado, tendencia, antigüedad), recomendaciones y "Medir ahora".
- * Panel lateral (abajo en móvil). Se cierra con Esc, con el botón o con un clic fuera.
+ * Modal grande centrada. Se cierra con Esc, con el botón o con un clic fuera.
  */
 export function SystemPanel({
   system,
@@ -65,7 +65,7 @@ export function SystemPanel({
   }, [onClose])
 
   return (
-    <div className="fixed inset-0 z-40">
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-3 md:p-8">
       {/* Clic fuera = cerrar */}
       <motion.button
         type="button"
@@ -82,15 +82,15 @@ export function SystemPanel({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-2xl border border-env-border bg-env-bg p-5 shadow-2xl md:inset-y-0 md:right-0 md:left-auto md:max-h-none md:w-[420px] md:rounded-none md:rounded-l-2xl"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 40 }}
+        className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-env-border bg-env-bg p-5 shadow-2xl md:p-8"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
         transition={{ type: 'tween', duration: 0.2 }}
       >
         <header className="flex items-start justify-between gap-3">
           <div>
-            <h2 id={titleId} className="text-xl font-semibold">
+            <h2 id={titleId} className="text-2xl font-semibold">
               {system.name}
             </h2>
             <StatusBadge
@@ -109,7 +109,7 @@ export function SystemPanel({
           </button>
         </header>
 
-        <section className="mt-5 space-y-3 text-sm">
+        <section className="mt-5 grid gap-4 text-sm md:grid-cols-2">
           <p>
             <span className="block text-xs font-medium tracking-wide text-env-muted uppercase">
               Función
@@ -125,7 +125,7 @@ export function SystemPanel({
             </p>
           )}
           {isSpace && system.hazards && system.hazards.length > 0 && (
-            <div>
+            <div className="md:col-span-2">
               <span className="block text-xs font-medium tracking-wide text-env-muted uppercase">
                 Peligros
               </span>
@@ -147,7 +147,7 @@ export function SystemPanel({
               Todavía no hay mediciones de este sistema.
             </p>
           ) : (
-            <ul className="mt-2 space-y-2">
+            <ul className="mt-2 grid gap-2 md:grid-cols-2">
               {assessed.indicators.map((ind) => (
                 <li key={ind.indicator_id}>
                   <IndicatorCard
@@ -177,7 +177,7 @@ export function SystemPanel({
         {interventions.length > 0 && (
           <section className="mt-6">
             <h3 className="text-sm font-semibold">Qué puedes hacer ahora</h3>
-            <ul className="mt-2 space-y-2">
+            <ul className="mt-2 grid gap-2 md:grid-cols-2">
               {interventions.map((i) => (
                 <li key={i.id}>
                   <InterventionCard intervention={i} compact />
@@ -190,7 +190,7 @@ export function SystemPanel({
         {canMeasure && (
           <Link
             to={`/measure?system=${encodeURIComponent(system.id)}`}
-            className="mt-6 block rounded-lg bg-env-primary px-4 py-2.5 text-center font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
+            className="mx-auto mt-6 block max-w-sm rounded-lg bg-env-primary px-4 py-2.5 text-center font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
           >
             Medir ahora
           </Link>

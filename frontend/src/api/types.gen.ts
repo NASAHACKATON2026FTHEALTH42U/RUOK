@@ -30,10 +30,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Login con usuario y contraseña
-         * @description STUB(FS-02) → BE-26
-         */
+        /** Login con usuario y contraseña */
         post: operations["login_api_v1_auth_login_post"];
         delete?: never;
         options?: never;
@@ -52,7 +49,7 @@ export interface paths {
         put?: never;
         /**
          * Login rápido con PIN
-         * @description STUB(FS-02) → BE-26
+         * @description Solo para `member` y `medic` (tablets compartidas).
          */
         post: operations["login_pin_api_v1_auth_pin_post"];
         delete?: never;
@@ -68,10 +65,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Usuario de la sesión actual
-         * @description STUB(FS-02) → BE-26
-         */
+        /** Usuario de la sesión actual */
         get: operations["me_api_v1_auth_me_get"];
         put?: never;
         post?: never;
@@ -88,10 +82,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Usuarios demo para el selector del login (solo DEMO_MODE=true)
-         * @description STUB(FS-02) → BE-25/BE-26
-         */
+        /** Usuarios demo para el selector del login (solo DEMO_MODE=true) */
         get: operations["demo_users_api_v1_auth_demo_users_get"];
         put?: never;
         post?: never;
@@ -496,7 +487,7 @@ export interface paths {
         };
         /**
          * Consola /ground: solo lo ENTREGADO por el enlace, con estado as-of
-         * @description STUB(FS-02) → BE-17
+         * @description Alertas que el enlace ya ha entregado a tierra, members con su resumen y `as_of` = ahora − retardo (en LOS, el último momento conocido y estado `unknown`). El detalle conductual se oculta salvo que el member lo comparta o sea una emergencia.
          */
         get: operations["ground_view_api_v1_environments__env_id__alerts_get"];
         put?: never;
@@ -2214,6 +2205,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description Cuenta bloqueada tras 5 fallos (Retry-After) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
     login_pin_api_v1_auth_pin_post: {
@@ -2257,6 +2257,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Cuenta bloqueada tras 5 fallos (Retry-After) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };
@@ -2330,6 +2339,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DemoUser"][];
+                };
+            };
+            /** @description DEMO_MODE=false */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Validation Error */

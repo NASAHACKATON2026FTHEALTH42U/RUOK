@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from 'framer-motion'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useEnvironments } from '../../api/useEnvironments'
 import { homeFor } from '../../auth/roles'
@@ -18,6 +19,7 @@ import { NavIcon } from './NavIcon'
 import { allowedItems, MORE, navItems, tabsFor } from './navigation'
 import { PendingSyncChip } from './PendingSyncChip'
 import { ServerStatus } from './ServerStatus'
+import { SIDEBAR_SLOT_ID } from './SidebarPortal'
 
 /**
  * Estructura de la app con el estilo HUD (docs/design/hud-style.md §6).
@@ -32,6 +34,7 @@ export function Layout() {
   const { role, can } = useAuth()
   const { pathname } = useLocation()
   const wide = pathname.startsWith('/control')
+  const reducedMotion = useReducedMotion()
   const envId = useEnvironmentStore((s) => s.envId)
   const envs = useEnvironments()
   const env = envs.state === 'ready' ? envs.data.find((e) => e.id === envId) : undefined
@@ -83,6 +86,9 @@ export function Layout() {
           <HudClock env={env} />
           <SessionMenu />
 
+          {/* Resumen de la página actual (p. ej. estado general del panel), vía SidebarPortal (FE-26) */}
+          <div id={SIDEBAR_SLOT_ID} className="empty:hidden" />
+
           <nav aria-label="Secciones" className="hud-panel">
             <div className="hud-panel-head">
               <b>NAV.01</b>Secciones
@@ -107,15 +113,17 @@ export function Layout() {
 
           <section
             aria-label="Estado"
-            className="mt-auto flex flex-col items-start gap-1.5 pt-2 text-xs [&_label]:flex-wrap [&_select]:max-w-full"
+            className="mt-auto flex w-full flex-col items-start gap-1.5 pt-2 text-xs [&_label]:flex-wrap [&_select]:max-w-full"
           >
-            <MemberActivitySelector />
+            <MemberActivitySelector compact />
             <LinkStatusChip />
             <PendingSyncChip />
             <ServerStatus />
             {can('action:change-environment') && <EnvironmentSelector />}
-            <p className="mt-2 text-[11px] text-env-muted">
-              Prototipo de autoevaluación. <strong>No es un dispositivo médico.</strong>
+            {/* Aviso siempre visible en escritorio; en móvil va en «Más» y en el login. */}
+            <p className="mt-2 text-[11px] leading-snug text-env-muted">
+              Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
+              el criterio de un profesional sanitario.
               {device.mode === 'tab' && (
                 <span className="mt-1 block" title={device.id}>
                   Dispositivo: {device.name ?? `pestaña ${device.id.slice(0, 8)}`}
@@ -126,11 +134,20 @@ export function Layout() {
         </aside>
 
         {/* Contenido. En móvil, cada pantalla debería caber sin scroll (hud-style.md §5). */}
-        <main className="min-w-0 flex-1 overflow-y-auto">
+        <main className="bg-grid min-w-0 flex-1 overflow-x-clip overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
           <div
             className={`mx-auto w-full px-3.5 py-3.5 md:px-6 md:py-6 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
           >
-            <Outlet />
+            {/* Fundido corto al cambiar de página (FE-26). Solo opacidad: un transform crearía un
+                bloque contenedor y descolocaría las modales `fixed` de las páginas. */}
+            <motion.div
+              key={pathname}
+              initial={reducedMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+            >
+              <Outlet />
+            </motion.div>
           </div>
         </main>
       </div>

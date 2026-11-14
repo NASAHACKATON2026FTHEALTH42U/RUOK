@@ -29,7 +29,7 @@ export function HudClock({ env }: { env?: ClockEnv }) {
       >
         {now.toLocaleTimeString('es-ES', { hour12: false })}
       </time>
-      <span className="hud-label text-[9px]">{day}Hora local</span>
+      <span className="hud-label block text-[9px] whitespace-nowrap">{day}Hora local</span>
     </div>
   )
 }

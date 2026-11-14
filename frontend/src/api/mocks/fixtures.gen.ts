@@ -8124,9 +8124,33 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "share_behavioral_details": false,
         "last_seen_at": "2026-11-14T10:00:00Z",
         "liveness": "active",
+        "overall_status": "warning",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T09:15:41.582052Z"
+      },
+      {
+        "id": 6,
+        "env_id": "iss",
+        "name": "Cmdte. Moreau",
+        "position": "commander",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
         "overall_status": "normal",
         "open_alerts": 0,
-        "last_measurement_at": "2026-11-14T10:00:00Z"
+        "last_measurement_at": "2026-11-14T09:42:36.958736Z"
+      },
+      {
+        "id": 7,
+        "env_id": "iss",
+        "name": "Esp. Rao",
+        "position": "scientist",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "normal",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T09:02:58.299119Z"
       }
     ],
     "alerts": []
@@ -8141,7 +8165,44 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
       "queued": 0,
       "since": "2026-11-14T10:00:00Z"
     },
-    "members": [],
+    "members": [
+      {
+        "id": 8,
+        "env_id": "moon",
+        "name": "Cmdr. Ito",
+        "position": "commander",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "normal",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T09:10:46.069797Z"
+      },
+      {
+        "id": 9,
+        "env_id": "moon",
+        "name": "Ing. Silva",
+        "position": "engineer",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "warning",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T08:49:35.366850Z"
+      },
+      {
+        "id": 10,
+        "env_id": "moon",
+        "name": "Dra. Weber",
+        "position": "geologist",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "normal",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T09:43:26.383471Z"
+      }
+    ],
     "alerts": []
   },
   "mars": {
@@ -8163,8 +8224,8 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "share_behavioral_details": false,
         "last_seen_at": "2026-11-14T10:00:00Z",
         "liveness": "active",
-        "overall_status": "warning",
-        "open_alerts": 1,
+        "overall_status": "critical",
+        "open_alerts": 3,
         "last_measurement_at": "2026-11-14T10:00:00Z"
       },
       {
@@ -8173,11 +8234,35 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "name": "Ing. Okafor",
         "position": "engineer",
         "share_behavioral_details": false,
-        "last_seen_at": "2026-11-14T09:48:00Z",
-        "liveness": "stale",
-        "overall_status": "unknown",
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "warning",
         "open_alerts": 0,
-        "last_measurement_at": "2026-11-14T09:48:00Z"
+        "last_measurement_at": "2026-11-14T09:32:49.156823Z"
+      },
+      {
+        "id": 4,
+        "env_id": "mars",
+        "name": "Dra. Haddad",
+        "position": "medical_officer",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "warning",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T09:55:59.993267Z"
+      },
+      {
+        "id": 5,
+        "env_id": "mars",
+        "name": "Esp. Tanaka",
+        "position": "scientist",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "normal",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T08:39:00.634194Z"
       }
     ],
     "alerts": []
@@ -8192,7 +8277,44 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
       "queued": 0,
       "since": "2026-11-14T10:00:00Z"
     },
-    "members": [],
+    "members": [
+      {
+        "id": 11,
+        "env_id": "earth",
+        "name": "Ana Ruiz",
+        "position": "participant",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "normal",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T09:49:17.059793Z"
+      },
+      {
+        "id": 12,
+        "env_id": "earth",
+        "name": "Leo Park",
+        "position": "participant",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "normal",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T09:30:12.728452Z"
+      },
+      {
+        "id": 13,
+        "env_id": "earth",
+        "name": "Marta Gil",
+        "position": "participant",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "normal",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T09:18:49.251217Z"
+      }
+    ],
     "alerts": []
   },
   "hospital": {
@@ -8205,7 +8327,44 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
       "queued": 0,
       "since": "2026-11-14T10:00:00Z"
     },
-    "members": [],
+    "members": [
+      {
+        "id": 14,
+        "env_id": "hospital",
+        "name": "Joan Puig",
+        "position": "patient",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "normal",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T09:24:15.212296Z"
+      },
+      {
+        "id": 15,
+        "env_id": "hospital",
+        "name": "Laura Sanz",
+        "position": "patient",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "normal",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T08:55:44.511251Z"
+      },
+      {
+        "id": 16,
+        "env_id": "hospital",
+        "name": "Pedro Díaz",
+        "position": "patient",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "normal",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T08:38:09.500902Z"
+      }
+    ],
     "alerts": []
   },
   "geriatric": {
@@ -8218,7 +8377,56 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
       "queued": 0,
       "since": "2026-11-14T10:00:00Z"
     },
-    "members": [],
+    "members": [
+      {
+        "id": 17,
+        "env_id": "geriatric",
+        "name": "Rosa Martí",
+        "position": "resident",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "normal",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T09:02:13.903601Z"
+      },
+      {
+        "id": 18,
+        "env_id": "geriatric",
+        "name": "Josep Vidal",
+        "position": "resident",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "normal",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T09:35:29.210944Z"
+      },
+      {
+        "id": 19,
+        "env_id": "geriatric",
+        "name": "Carmen López",
+        "position": "resident",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "normal",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T08:01:13.417633Z"
+      },
+      {
+        "id": 20,
+        "env_id": "geriatric",
+        "name": "Antonio Ferrer",
+        "position": "resident",
+        "share_behavioral_details": false,
+        "last_seen_at": "2026-11-14T10:00:00Z",
+        "liveness": "active",
+        "overall_status": "normal",
+        "open_alerts": 0,
+        "last_measurement_at": "2026-11-14T08:53:07.371617Z"
+      }
+    ],
     "alerts": []
   }
 }
@@ -8700,6 +8908,209 @@ export const users: Schema<'User'>[] = [
 
 export const demoUsers: Schema<'DemoUser'>[] = [
   {
+    "username": "ruiz",
+    "display_name": "Ana Ruiz",
+    "role": "member",
+    "env_id": "earth",
+    "role_label": "participante"
+  },
+  {
+    "username": "park",
+    "display_name": "Leo Park",
+    "role": "member",
+    "env_id": "earth",
+    "role_label": "participante"
+  },
+  {
+    "username": "gil",
+    "display_name": "Marta Gil",
+    "role": "member",
+    "env_id": "earth",
+    "role_label": "participante"
+  },
+  {
+    "username": "medic-earth",
+    "display_name": "Medic (Analógico terrestre)",
+    "role": "medic",
+    "env_id": "earth",
+    "role_label": "medic"
+  },
+  {
+    "username": "commander-earth",
+    "display_name": "Commander (Analógico terrestre)",
+    "role": "commander",
+    "env_id": "earth",
+    "role_label": "commander"
+  },
+  {
+    "username": "responder-earth",
+    "display_name": "Médico (Analógico terrestre)",
+    "role": "responder",
+    "env_id": "earth",
+    "role_label": "médico"
+  },
+  {
+    "username": "psych-earth",
+    "display_name": "Psych (Analógico terrestre)",
+    "role": "psych",
+    "env_id": "earth",
+    "role_label": "psych"
+  },
+  {
+    "username": "marti",
+    "display_name": "Rosa Martí",
+    "role": "member",
+    "env_id": "geriatric",
+    "role_label": "residente"
+  },
+  {
+    "username": "vidal",
+    "display_name": "Josep Vidal",
+    "role": "member",
+    "env_id": "geriatric",
+    "role_label": "residente"
+  },
+  {
+    "username": "lopez",
+    "display_name": "Carmen López",
+    "role": "member",
+    "env_id": "geriatric",
+    "role_label": "residente"
+  },
+  {
+    "username": "ferrer",
+    "display_name": "Antonio Ferrer",
+    "role": "member",
+    "env_id": "geriatric",
+    "role_label": "residente"
+  },
+  {
+    "username": "medic-geriatric",
+    "display_name": "Cuidador (Residencia geriátrica)",
+    "role": "medic",
+    "env_id": "geriatric",
+    "role_label": "cuidador"
+  },
+  {
+    "username": "commander-geriatric",
+    "display_name": "Commander (Residencia geriátrica)",
+    "role": "commander",
+    "env_id": "geriatric",
+    "role_label": "commander"
+  },
+  {
+    "username": "responder-geriatric",
+    "display_name": "Médico (Residencia geriátrica)",
+    "role": "responder",
+    "env_id": "geriatric",
+    "role_label": "médico"
+  },
+  {
+    "username": "psych-geriatric",
+    "display_name": "Psych (Residencia geriátrica)",
+    "role": "psych",
+    "env_id": "geriatric",
+    "role_label": "psych"
+  },
+  {
+    "username": "puig",
+    "display_name": "Joan Puig",
+    "role": "member",
+    "env_id": "hospital",
+    "role_label": "paciente"
+  },
+  {
+    "username": "sanz",
+    "display_name": "Laura Sanz",
+    "role": "member",
+    "env_id": "hospital",
+    "role_label": "paciente"
+  },
+  {
+    "username": "diaz",
+    "display_name": "Pedro Díaz",
+    "role": "member",
+    "env_id": "hospital",
+    "role_label": "paciente"
+  },
+  {
+    "username": "medic-hospital",
+    "display_name": "Enfermería (Planta de hospital)",
+    "role": "medic",
+    "env_id": "hospital",
+    "role_label": "enfermería"
+  },
+  {
+    "username": "commander-hospital",
+    "display_name": "Commander (Planta de hospital)",
+    "role": "commander",
+    "env_id": "hospital",
+    "role_label": "commander"
+  },
+  {
+    "username": "responder-hospital",
+    "display_name": "Médico (Planta de hospital)",
+    "role": "responder",
+    "env_id": "hospital",
+    "role_label": "médico"
+  },
+  {
+    "username": "psych-hospital",
+    "display_name": "Psych (Planta de hospital)",
+    "role": "psych",
+    "env_id": "hospital",
+    "role_label": "psych"
+  },
+  {
+    "username": "lindqvist",
+    "display_name": "Dra. Lindqvist",
+    "role": "member",
+    "env_id": "iss",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "moreau",
+    "display_name": "Cmdte. Moreau",
+    "role": "member",
+    "env_id": "iss",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "rao",
+    "display_name": "Esp. Rao",
+    "role": "member",
+    "env_id": "iss",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "medic-iss",
+    "display_name": "Oficial médico (Estación Espacial Internacional)",
+    "role": "medic",
+    "env_id": "iss",
+    "role_label": "oficial médico"
+  },
+  {
+    "username": "commander-iss",
+    "display_name": "Comandante (Estación Espacial Internacional)",
+    "role": "commander",
+    "env_id": "iss",
+    "role_label": "comandante"
+  },
+  {
+    "username": "responder-iss",
+    "display_name": "Flight surgeon (Estación Espacial Internacional)",
+    "role": "responder",
+    "env_id": "iss",
+    "role_label": "flight surgeon"
+  },
+  {
+    "username": "psych-iss",
+    "display_name": "Psicólogo bhp (Estación Espacial Internacional)",
+    "role": "psych",
+    "env_id": "iss",
+    "role_label": "psicólogo BHP"
+  },
+  {
     "username": "vega",
     "display_name": "Cmdr. Vega",
     "role": "member",
@@ -8707,18 +9118,102 @@ export const demoUsers: Schema<'DemoUser'>[] = [
     "role_label": "astronauta"
   },
   {
+    "username": "okafor",
+    "display_name": "Ing. Okafor",
+    "role": "member",
+    "env_id": "mars",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "haddad",
+    "display_name": "Dra. Haddad",
+    "role": "member",
+    "env_id": "mars",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "tanaka",
+    "display_name": "Esp. Tanaka",
+    "role": "member",
+    "env_id": "mars",
+    "role_label": "astronauta"
+  },
+  {
     "username": "medic-mars",
-    "display_name": "Dr. Haddad",
+    "display_name": "Oficial médico (Base marciana)",
     "role": "medic",
     "env_id": "mars",
     "role_label": "oficial médico"
   },
   {
-    "username": "surgeon-mars",
-    "display_name": "Dra. Ruiz",
+    "username": "commander-mars",
+    "display_name": "Comandante (Base marciana)",
+    "role": "commander",
+    "env_id": "mars",
+    "role_label": "comandante"
+  },
+  {
+    "username": "responder-mars",
+    "display_name": "Flight surgeon (Base marciana)",
     "role": "responder",
     "env_id": "mars",
     "role_label": "flight surgeon"
+  },
+  {
+    "username": "psych-mars",
+    "display_name": "Psicólogo bhp (Base marciana)",
+    "role": "psych",
+    "env_id": "mars",
+    "role_label": "psicólogo BHP"
+  },
+  {
+    "username": "ito",
+    "display_name": "Cmdr. Ito",
+    "role": "member",
+    "env_id": "moon",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "silva",
+    "display_name": "Ing. Silva",
+    "role": "member",
+    "env_id": "moon",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "weber",
+    "display_name": "Dra. Weber",
+    "role": "member",
+    "env_id": "moon",
+    "role_label": "astronauta"
+  },
+  {
+    "username": "medic-moon",
+    "display_name": "Oficial médico (Base lunar Artemis)",
+    "role": "medic",
+    "env_id": "moon",
+    "role_label": "oficial médico"
+  },
+  {
+    "username": "commander-moon",
+    "display_name": "Comandante (Base lunar Artemis)",
+    "role": "commander",
+    "env_id": "moon",
+    "role_label": "comandante"
+  },
+  {
+    "username": "responder-moon",
+    "display_name": "Flight surgeon (Base lunar Artemis)",
+    "role": "responder",
+    "env_id": "moon",
+    "role_label": "flight surgeon"
+  },
+  {
+    "username": "psych-moon",
+    "display_name": "Psicólogo bhp (Base lunar Artemis)",
+    "role": "psych",
+    "env_id": "moon",
+    "role_label": "psicólogo BHP"
   },
   {
     "username": "admin",
@@ -8730,11 +9225,11 @@ export const demoUsers: Schema<'DemoUser'>[] = [
 ]
 
 export const tokenTemplate: Schema<'TokenResponse'> = {
-  "access_token": "stub-token-7",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicm9sZSI6Im1lbWJlciIsImVudl9pZCI6Im1hcnMiLCJtZW1iZXJfaWQiOjEsImlhdCI6MTc5NDY1MDQwMCwiZXhwIjoxNzk0NjkzNjAwfQ.XVdp2YbfAtUaOT3dDoIIuha6vSQ4qtkwpbeKUJl_sm8",
   "token_type": "bearer",
   "expires_at": "2026-11-14T22:00:00Z",
   "user": {
-    "id": 7,
+    "id": 1,
     "username": "vega",
     "display_name": "Cmdr. Vega",
     "role": "member",

@@ -21,7 +21,7 @@ export function PendingSyncChip() {
       type="button"
       onClick={() => void syncNow(true)}
       title="Guardado en este dispositivo. Pulsa para reintentar el envío ahora."
-      className="inline-flex items-center gap-1.5 rounded-full border border-env-border bg-env-bg px-2.5 py-1 text-xs text-env-text hover:border-env-text"
+      className="inline-flex items-center gap-1.5 rounded-full border border-env-border bg-env-bg px-2.5 py-1 font-mono text-xs text-env-text hover:border-env-text"
     >
       <span aria-hidden>{syncing ? '⟳' : '⇡'}</span>
       <span role="status">

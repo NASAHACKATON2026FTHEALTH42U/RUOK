@@ -30,7 +30,7 @@ export function LinkStatusChip() {
     <span
       role="status"
       title={`Enlace con ${other}: ${d.long}`}
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs ${
         los ? 'border-env-text font-semibold' : 'border-env-border'
       } bg-env-bg text-env-text`}
     >
