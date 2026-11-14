@@ -15,6 +15,7 @@ import Measure from './pages/Measure'
 import Members from './pages/Members'
 import Missions from './pages/Missions'
 import NotFound from './pages/NotFound'
+import Pvt from './pages/Pvt'
 
 /** Envuelve la página con el permiso de vista de su ruta (FE-28). */
 function guard(path: string, page: ReactNode) {
@@ -36,6 +37,7 @@ const router = createBrowserRouter([
           { path: '/dashboard', element: guard('/dashboard', <Dashboard />) },
           { path: '/measure', element: guard('/measure', <Measure />) },
           { path: '/checkin', element: guard('/checkin', <CheckIn />) },
+          { path: '/pvt', element: guard('/pvt', <Pvt />) },
           { path: '/history', element: guard('/history', <History />) },
           { path: '/missions', element: guard('/missions', <Missions />) },
           { path: '/alerts', element: guard('/alerts', <Alerts />) },

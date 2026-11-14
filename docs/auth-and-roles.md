@@ -35,7 +35,7 @@
 | Selector de entorno | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
 | Dashboard (cuerpo + semáforo) | ✅ propio | ✅ todos los del entorno | 👁️ todos | 🔒 (usa `/ground`) | 🔒 | 👁️ agregado de su familiar | ✅ |
 | Registrar mediciones | ✅ propio | ✅ para cualquier member (asistida) | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
-| Check-in diario conductual | ✅ propio | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
+| Check-in diario conductual y test PVT | ✅ propio | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
 | Historial y gráficas | ✅ propio | ✅ entorno | 👁️ entorno | 👁️ entregado | 👁️ entregado | 🔒 | ✅ |
 | Detalles conductuales | ✅ propio | solo si comparte o hay emergencia | agregado anónimo | solo si comparte o hay emergencia | ✅ | 🔒 | ✅ |
 | Alertas: ver | ✅ propias | ✅ entorno | 👁️ entorno | ✅ entregadas | ✅ entregadas (+ psicológicas) | 👁️ de su familiar | ✅ |
