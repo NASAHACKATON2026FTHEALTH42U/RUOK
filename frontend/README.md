@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26).
 
 ## Comandos
 
@@ -103,6 +103,7 @@ frontend/
     │   ├── useVocab.ts        hook useVocab() + capitalize()
     │   ├── applyTheme.ts      initTheme(): aplica el tema del entorno activo en <html>
     │   └── themes/            un tema por entorno (iss.ts, mars.ts…) + defaultTheme.ts
+    ├── offline/outbox.ts      sendMeasurements(): punto único de escritura (IndexedDB en FE-11)
     ├── lib/time.ts            formatAgo(): "hace 12 min" con la hora del servidor (+ test)
     ├── store/environment.ts   store Zustand: envId, memberId, vocabulary (persistido)
     ├── api/
@@ -123,6 +124,7 @@ frontend/
     │   └── *.test.ts          tests (Vitest)
     ├── components/body/       BodyFigure (SVG) + regions.ts (buildRegions, formatSinceLabel; + test)
     ├── components/dashboard/  SystemPanel, IndicatorCard, TrendChart, LinkChip + format.ts y trend.ts (+ tests)
+    ├── components/measure/    IndicatorField + measureForm.ts (parseValue, emptyValue; + test)
     ├── components/environment/  EnvironmentCard (pintada con su propia paleta), MemberList
     ├── components/ui/
     │   ├── Layout.tsx         cabecera + navegación + <Outlet /> + disclaimer
@@ -135,7 +137,7 @@ frontend/
     └── pages/                 una página vacía por ruta
 ```
 
-Carpetas que aún no existen y que crean sus issues: `offline/` (FE-11/FE-30) y `components/{body,dashboard,measure,alerts,behavioral,game}/`.
+Carpetas que aún no existen y que crean sus issues: `components/{alerts,behavioral,game}/`. `offline/` ya existe con `outbox.ts`; FE-11 y FE-30 añaden IndexedDB y la sincronización.
 
 ## Rutas
 
@@ -328,6 +330,25 @@ Verificado con una serie sintética de 30 días (interceptando la petición en C
 - **Gráfica** grande (`TrendPlot`) con las bandas del entorno: si el indicador está en la evaluación se usan sus rangos ajustados; si no, los del catálogo.
 - **Tabla** con todas las mediciones del periodo, de la más reciente a la más antigua: fecha, valor con unidad, origen (`formatSource()`: manual, dispositivo, cámara, check-in, test PVT) y nota. En móvil la tabla hace scroll dentro de su caja.
 - **Mediciones nuevas:** la serie se recarga cada 15 s en segundo plano, así que una medición nueva aparece sin recargar la página. Si el refresco falla, se avisa.
+
+## Medición guiada (FE-10)
+
+`/measure` (`src/pages/Measure.tsx`):
+
+1. **Elegir qué medir:** tarjetas de los sistemas que tienen indicadores activos en el entorno.
+2. **Formulario** con `?system=<id>` (lo usa "Medir ahora" del `SystemPanel`) o `?indicator=<id>`: un `IndicatorField` por indicador activo del entorno, con sus **pasos numerados** (`measurement_instructions`) y el campo generado a partir de `indicator.input`:
+
+| `input.type` | Campo                                                                |
+| ------------ | -------------------------------------------------------------------- |
+| `number`     | campo numérico con la unidad; acepta coma decimal                    |
+| `scale_1_5`  | 5 botones (`role="radio"`); pulsar el elegido lo quita               |
+| `duration`   | horas + minutos, convertidos a la unidad del indicador (`h` o `min`) |
+
+- **Validación** (`parseValue()`): rango `[min, max]` y paso (`step`) de `indicator.input`; los errores salen bajo el campo (`role="alert"`, `aria-invalid`). Los campos vacíos no se envían; hace falta al menos uno.
+- **Un solo lote** por formulario: la tensión sistólica y la diastólica (y el resto del sistema) van juntas en `POST /members/{id}/measurements`, con un **UUID por medición** (`newId()`), `taken_at` = hora del servidor y `source: "manual"`, más la nota opcional.
+- **Reintento idempotente:** si falla la red, el formulario conserva los valores, los bloquea y el botón pasa a "Reintentar el envío", que reenvía **los mismos UUID** (el servidor no duplica).
+- **Resultado:** "N mediciones enviadas" y el estado general de la evaluación que devuelve el lote; "Ver el panel" vuelve a `/dashboard`, que vuelve a pedir la evaluación.
+- Toda escritura pasa por `src/offline/outbox.ts` (`sendMeasurements()`). **TODO(FE-11):** guardar primero en IndexedDB para no perder nada sin conexión; hoy, sin red, la medición no se guarda hasta que se reintenta.
 
 ### Pendiente
 
