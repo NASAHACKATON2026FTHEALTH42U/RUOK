@@ -18,6 +18,9 @@ import {
   type FeedFilters,
 } from '../components/control/feed'
 import { severityStyle } from '../components/alerts/alertFormat'
+import { ConnectQr } from '../components/control/ConnectQr'
+import { DemoControls } from '../components/control/DemoControls'
+import { EnvironmentConfig } from '../components/control/EnvironmentConfig'
 import { describeLink, hhmm } from '../components/ui/link'
 import { livenessState } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
@@ -29,12 +32,14 @@ import { useEnvironmentStore } from '../store/environment'
 /**
  * Centro de control (FE-31, solo admin): vista global, en tiempo real y SIN retardo de todos los
  * entornos. Métricas, panorama por entorno (clic en un member → su dashboard), feed de eventos
- * en vivo con filtros y dispositivos. Pensado para proyector o pantalla grande.
+ * en vivo con filtros y dispositivos. Gestión (FE-32): controles de demo, entorno activo con su
+ * configuración y QR de conexión. Pensado para proyector o pantalla grande.
  */
 export default function Control() {
   const overview = useControlOverview()
   const devices = useDevices()
   const recent = useRecentEvents()
+  const allEnvs = useEnvironments()
   const [events, setEvents] = useState<RealtimeEvent[]>([])
   const [fresh, setFresh] = useState<Set<number>>(new Set())
   const [filters, setFilters] = useState<FeedFilters>(EMPTY_FILTERS)
@@ -117,6 +122,11 @@ export default function Control() {
           </div>
         ))}
       </section>
+
+      {/* Gestión de la demo (FE-32) */}
+      {overview.state === 'ready' && (
+        <DemoControls overview={overview.data} onChanged={overview.refresh} />
+      )}
 
       <div className="grid gap-6 xl:grid-cols-[3fr_2fr]">
         {/* 2. Panorama por entorno */}
@@ -206,6 +216,11 @@ export default function Control() {
             ))}
           </ol>
         </section>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
+        <EnvironmentConfig environments={allEnvs.state === 'ready' ? allEnvs.data : []} />
+        <ConnectQr />
       </div>
 
       {/* 4. Dispositivos */}

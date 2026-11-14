@@ -371,3 +371,27 @@ export function sendAlertMessage(alertId: string, actor: Schema<'Actor'>, text: 
     }),
   )
 }
+
+// ── Controles de demo y gestión del centro de control (FE-32, solo admin) ──
+//
+// Acciones de operación: van directas (no se encolan). Sin servidor lanzan NetworkError.
+
+export function demoReset() {
+  return unwrap(api.POST('/api/v1/demo/reset'))
+}
+
+export function demoScenario(name: string) {
+  return unwrap(api.POST('/api/v1/demo/scenarios/{name}', { params: { path: { name } } }))
+}
+
+export function demoLink(env: string, state: Schema<'LinkState'>) {
+  return unwrap(api.POST('/api/v1/demo/link', { body: { env, state } }))
+}
+
+export function demoFastForward(seconds: number) {
+  return unwrap(api.POST('/api/v1/demo/fast-forward', { body: { seconds } }))
+}
+
+export function pauseLiveness(envId: string, paused: boolean) {
+  return unwrap(api.POST('/api/v1/control/liveness/pause', { body: { env_id: envId, paused } }))
+}
