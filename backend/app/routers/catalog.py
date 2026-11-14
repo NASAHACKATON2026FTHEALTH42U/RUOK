@@ -8,7 +8,6 @@ autónomo los necesitan también sin sesión (docs/auth-and-roles.md, principio 
 
 from fastapi import APIRouter, HTTPException
 
-from app import stubs
 from app.routers.deps import ERRORS_404
 from app.schemas import BodySystem, Environment, Indicator, Intervention, Slug
 from app.services import catalog, environments
@@ -85,14 +84,10 @@ def list_systems() -> list[BodySystem]:
     response_model=list[Intervention],
     tags=["catalog"],
     summary="Intervenciones (contramedidas offline)",
-    description="STUB(FS-02) → BE-21",
+    description="Las de app/data/interventions.json, filtradas por `system_id` y `category`. "
+    "`indicator_ids` vacío = genérica del sistema. Público (las usa el protocolo autónomo).",
 )
 def list_interventions(
     system_id: Slug | None = None, category: str | None = None
 ) -> list[Intervention]:
-    return [
-        i
-        for i in stubs.INTERVENTIONS
-        if (system_id is None or i.system_id == system_id)
-        and (category is None or i.category == category)
-    ]
+    return catalog.list_interventions(system_id, category)

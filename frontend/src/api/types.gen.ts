@@ -225,7 +225,7 @@ export interface paths {
         };
         /**
          * Intervenciones (contramedidas offline)
-         * @description STUB(FS-02) → BE-21
+         * @description Las de app/data/interventions.json, filtradas por `system_id` y `category`. `indicator_ids` vacío = genérica del sistema. Público (las usa el protocolo autónomo).
          */
         get: operations["list_interventions_api_v1_interventions_get"];
         put?: never;
@@ -1525,6 +1525,16 @@ export interface components {
              * @default true
              */
             offline: boolean;
+            /**
+             * Indicator Ids
+             * @description Indicadores a los que responde; vacío = genérica del sistema
+             */
+            indicator_ids: string[];
+            /**
+             * Sources
+             * @description IDs de docs/sources.md
+             */
+            sources: string[];
         };
         /**
          * Leaderboard

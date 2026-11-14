@@ -72,6 +72,20 @@
 - Revisar con un profesional sanitario los valores marcados como *diseño*.
 - Un indicador de **riesgo de caídas** para geriatría (no existe en el catálogo).
 
+## Intervenciones (BE-21)
+Tarjetas de `backend/app/data/interventions.json`. Cada una lleva en `sources` los IDs de esta página (el back comprueba al arrancar que existen). **Los textos son de diseño**, inspirados en las contramedidas de las fuentes; hay que revisarlos con un profesional antes de usarlos fuera de la demo.
+
+| Intervención | Indicadores | Fuente |
+|---|---|---|
+| `int_reach_out` Habla con alguien de confianza | genérica del sistema neuro-conductual | [S3] BHP (pedir apoyo antes de escalar); [S11] análogos |
+| `int_box_breathing` Respiración en caja | stress | [S3] BHP; ritmo 4-4-4-4: diseño |
+| `int_cbt_reframe` Reencuadre de pensamientos (TCC breve) | mood, stress | [S3] BHP; pasos: diseño |
+| `int_journal` Diario de 5 minutos | mood, loneliness | [S3] BHP; [S10] Mars-500 |
+| `int_connect_crew` Un rato con el equipo o con casa | loneliness, crew_relation | [S10] Mars-500; [S11] HI-SEAS / HERA (cohesión) |
+| `int_sleep_light` Higiene del sueño y luz | sleep_hours, sleep_quality, energy, PVT | [S26] ≥ 7 h; [S10] sueño en Mars-500; [S12] PVT y fatiga |
+| `int_movement_break` Pausa activa | energy, mood, stress | [S3] BHP; [S14] ejercicio |
+| `int_exercise_session` Sesión de ejercicio de resistencia | exercise_min | [S14] unas 2 h de ejercicio al día en la ISS |
+
 ## Imágenes (Earth view, FE-25)
 Fotos de la NASA Image and Video Library (Johnson Space Center), **dominio público** (las imágenes de la NASA no tienen copyright en EE. UU. salvo indicación). Empaquetadas en `frontend/public/earth/` en tamaño medio.
 
