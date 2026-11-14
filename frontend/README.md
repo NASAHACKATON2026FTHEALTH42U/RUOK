@@ -209,4 +209,4 @@ El selector de la cabecera usa el mismo `useEnvironments()`: hay una sola petici
 ### Pendiente
 
 - **TODO(FE-28):** `/` solo será accesible para el rol admin; el resto entra directamente en su entorno.
-- **Colores del contrato alineados:** `theme.primary` de los stubs del backend usa ya los mismos `primary` que `src/environments/themes/` (en `earth`, `#2bb3c9`, no verde). Manda el archivo del front; **BE-03** tiene que usar estos valores en `environments.json`.
+- **Colores del contrato alineados:** `theme.primary` de `backend/app/data/environments.json` (BE-03) usa los mismos `primary` que `src/environments/themes/` (en `earth`, `#2bb3c9`, no verde). Si cambias uno, cambia el otro.

@@ -7,7 +7,7 @@ encaje con estos ejemplos rompe al importar (y en los tests).
 Todo es coherente con docs/: Marte con 840 s de retardo, Cmdr. Vega (member 1), etc.
 """
 
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from app import clock
@@ -37,106 +37,15 @@ from app.schemas import (
     Task,
     User,
 )
-from app.schemas.config import (
-    IndicatorInput,
-    IndicatorRanges,
-    LivenessThresholds,
-    Mission,
-    RangeOverride,
-    RoutineItem,
-    Theme,
-)
+from app.schemas.config import IndicatorInput, IndicatorRanges
 from app.schemas.game import Badge
+from app.services import environments
 
 # Instante fijo de referencia para que los ejemplos sean deterministas.
 T0 = datetime(2026, 11, 14, 10, 0, tzinfo=UTC)
 
-_LIVENESS_SPACE = LivenessThresholds(
-    stale_after_s=300, lost_after_s=900, eva_stale_after_s=30, ruok_timeout_s=120
-)
-_SPACE_VOCAB = {
-    "member": "astronauta",
-    "crew": "tripulación",
-    "ground": "flight surgeon",
-    "medic": "oficial médico",
-    "commander": "comandante",
-    "psych": "psicólogo BHP",
-}
-_CORE = ["heart_rate", "bp_systolic", "bp_diastolic", "spo2", "temperature", "sleep_hours", "mood"]
-_SPACE_ROUTINE = [
-    RoutineItem(task_type="measure_bp", times_per_day=1, points=10),
-    RoutineItem(task_type="resistive_exercise", times_per_day=1, points=20),
-    RoutineItem(task_type="checkin", times_per_day=1, points=10),
-]
-
-
-def _space(id_, name, g, delay, radiation) -> Environment:
-    return Environment(
-        id=id_,
-        name=name,
-        kind="space",
-        gravity_g=g,
-        comm_delay_s=delay,
-        radiation_level=radiation,
-        escalation_ladder=["self", "crew", "ground"],
-        liveness=_LIVENESS_SPACE,
-        vocabulary=_SPACE_VOCAB,
-        theme=Theme(
-            primary={"iss": "#4d9fff", "moon": "#c8ccd6", "mars": "#c1440e"}[id_],
-            background=f"{id_}.jpg",
-        ),
-        threshold_overrides={"bp_systolic": RangeOverride(warning=(130, 140))}
-        if id_ == "mars"
-        else {},
-        indicators=[*_CORE, "exercise_min", "radiation_dose"],
-        routine=_SPACE_ROUTINE,
-        mission=Mission(start=date(2026, 10, 1), end=date(2027, 9, 30)),
-    )
-
-
-def _earth(id_, name, ladder, vocab, primary) -> Environment:
-    return Environment(
-        id=id_,
-        name=name,
-        kind="earth",
-        gravity_g=1.0,
-        comm_delay_s=0,
-        radiation_level="none",
-        escalation_ladder=ladder,
-        liveness=_LIVENESS_SPACE,
-        vocabulary=vocab,
-        theme=Theme(primary=primary),
-        indicators=_CORE,
-        routine=[RoutineItem(task_type="checkin", times_per_day=1, points=10)],
-    )
-
-
-ENVIRONMENTS: list[Environment] = [
-    _space("iss", "Estación Espacial Internacional", 0.0, 0, "medium"),
-    _space("moon", "Base lunar Artemis", 0.16, 1, "high"),
-    _space("mars", "Base marciana", 0.38, 840, "high"),
-    _earth(
-        "earth",
-        "Analógico terrestre",
-        ["self", "crew", "ground"],
-        {"member": "participante", "crew": "equipo", "ground": "médico"},
-        "#2bb3c9",
-    ),
-    _earth(
-        "hospital",
-        "Planta de hospital",
-        ["self", "nurse", "doctor"],
-        {"member": "paciente", "crew": "planta", "ground": "médico", "medic": "enfermería"},
-        "#0b5a96",
-    ),
-    _earth(
-        "geriatric",
-        "Residencia geriátrica",
-        ["self", "caregiver", "doctor", "family"],
-        {"member": "residente", "crew": "residencia", "ground": "médico", "medic": "cuidador"},
-        "#6a429e",
-    ),
-]
+# Entornos reales (BE-03): los stubs restantes los usan para validar env_id.
+ENVIRONMENTS: list[Environment] = environments.list_environments()
 ENV_BY_ID = {e.id: e for e in ENVIRONMENTS}
 
 INDICATORS: list[Indicator] = [

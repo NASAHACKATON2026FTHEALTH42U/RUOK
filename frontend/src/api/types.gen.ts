@@ -134,7 +134,7 @@ export interface paths {
         };
         /**
          * Perfiles de entorno
-         * @description STUB(FS-02) → BE-03
+         * @description Los 6 perfiles de app/data/environments.json (docs/environments.md).
          */
         get: operations["list_environments_api_v1_environments_get"];
         put?: never;
@@ -154,7 +154,7 @@ export interface paths {
         };
         /**
          * Un perfil de entorno
-         * @description STUB(FS-02) → BE-03
+         * @description Un perfil de app/data/environments.json. 404 si el id no existe.
          */
         get: operations["get_environment_api_v1_environments__env_id__get"];
         put?: never;
