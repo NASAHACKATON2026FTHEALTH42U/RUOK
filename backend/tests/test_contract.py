@@ -198,7 +198,7 @@ CALLS = [
     ("get", "/events?since_id=1", None, 200),
     ("get", "/devices", None, 200),
     ("get", "/control/overview", None, 200),
-    ("post", "/control/liveness/pause", {"env_id": "mars", "paused": True}, 200),
+    ("post", "/control/liveness/pause", {"env_id": "mars", "paused": False}, 200),
     ("get", "/system/network-info", None, 200),
     ("get", "/link?env=mars", None, 200),
     ("get", "/link/messages?env=mars", None, 200),

@@ -23,6 +23,9 @@ from pathlib import Path
 os.environ["DATABASE_URL"] = f"sqlite:///{tempfile.mkdtemp(prefix='ruok-mocks-')}/mocks.db"
 # Clave JWT fija: el token del mock (tokenTemplate) tiene que ser determinista (BE-26).
 os.environ["RUOK_JWT_SECRET"] = "ruok-mocks-jwt-secret-not-for-production"
+# network-info (BE-30): ni la IP ni el nombre de la máquina que genera los mocks.
+os.environ["RUOK_LAN_HOST"] = "192.168.8.10"
+os.environ["RUOK_HOSTNAME"] = "ruok-onboard"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fastapi.testclient import TestClient  # noqa: E402

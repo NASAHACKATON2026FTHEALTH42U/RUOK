@@ -1,8 +1,7 @@
 """Tiempo real, dispositivos, centro de control, enlace, sistema y demo.
 
 Reales: enlace (BE-13), demo (BE-07), fast-forward (app/clock.py) y eventos/SSE (BE-28).
-Reales también: dispositivos (BE-29). STUB(FS-02) → BE-30 (control y network-info);
-en /control/overview el `link` ya es real.
+Reales también: dispositivos (BE-29), centro de control y network-info (BE-30).
 """
 
 import asyncio
@@ -12,11 +11,11 @@ import time
 from collections.abc import AsyncIterator
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from sqlmodel import Session
 
-from app import clock, models, seed, stubs
+from app import clock, models, seed
 from app.db import engine, get_session
 from app.routers.deps import (
     ERRORS_404,
@@ -43,8 +42,17 @@ from app.schemas import (
     OkResponse,
     Slug,
 )
-from app.schemas.realtime import AlertCounts, ControlMetrics, EnvironmentOverview, EnvironmentRef
-from app.services import alerts, app_state, comm_link, devices, events, liveness_watch
+from app.services import (
+    alerts,
+    app_state,
+    comm_link,
+    control,
+    devices,
+    environments,
+    events,
+    liveness_watch,
+    network,
+)
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -196,37 +204,30 @@ def list_devices(session: SessionDep, env_id: Slug | None = None) -> list[Device
     response_model=ControlOverview,
     tags=["control"],
     summary="Vista global del centro de control (admin, sin retardo)",
-    description="STUB(FS-02) → BE-30",
+    description="Todos los entornos con sus members (`overall_status`, `liveness`), "
+    "alertas abiertas por severidad, enlace, `liveness_paused` y métricas: mediciones "
+    "recibidas en la última hora, alertas abiertas, dispositivos activos (últimos 5 min) y "
+    "tiempo medio hasta el primer reconocimiento (`null` si no hay ninguno).",
     dependencies=[AdminDep],
 )
 def control_overview(session: SessionDep) -> ControlOverview:
-    envs = [
-        EnvironmentOverview(
-            environment=EnvironmentRef(id=e.id, name=e.name, kind=e.kind),
-            link=comm_link.status(session, e.id),  # real (BE-13)
-            members=[stubs.member_summary(m) for m in stubs.MEMBERS if m.env_id == e.id],
-            open_alerts=AlertCounts(warning=1) if e.id == "mars" else AlertCounts(),
-        )
-        for e in stubs.ENVIRONMENTS
-    ]
-    return ControlOverview(
-        generated_at=clock.now(),
-        environments=envs,
-        metrics=ControlMetrics(
-            measurements_last_hour=12, open_alerts=1, active_devices=1, avg_alert_response_s=95.0
-        ),
-    )
+    return control.overview(session)
 
 
 @router.post(
     "/control/liveness/pause",
     response_model=OkResponse,
+    responses=ERRORS_404,
     tags=["control"],
     summary="Pausar las alertas de liveness de un entorno (presentación)",
-    description="STUB(FS-02) → BE-30",
+    description="Mientras está en pausa no se lanzan \"R U OK?\" ni alertas `no_contact` en "
+    "ese entorno. El liveness se sigue mostrando. `/demo/reset` quita la pausa.",
     dependencies=[AdminDep],
 )
-def pause_liveness(body: LivenessPauseIn) -> OkResponse:
+def pause_liveness(body: LivenessPauseIn, session: SessionDep) -> OkResponse:
+    if environments.get_environment(body.env_id) is None:
+        raise HTTPException(404, f"Entorno desconocido: {body.env_id}")
+    control.set_liveness_paused(session, body.env_id, body.paused)
     return OkResponse(detail=f"liveness {'pausado' if body.paused else 'activo'} en {body.env_id}")
 
 
@@ -235,10 +236,12 @@ def pause_liveness(body: LivenessPauseIn) -> OkResponse:
     response_model=NetworkInfo,
     tags=["system"],
     summary="URLs del servidor en la red local (para el QR)",
-    description="Público. STUB(FS-02) → BE-30",
+    description="Público. IP de la red local del servidor (nunca loopback ni link-local), "
+    "privadas primero. `RUOK_LAN_HOST` fuerza la IP y `RUOK_PUBLIC_PORT` el puerto.",
 )
-def network_info() -> NetworkInfo:
-    return NetworkInfo(lan_urls=["http://192.168.8.10:8000"], hostname="ruok-onboard")
+def network_info(request: Request) -> NetworkInfo:
+    port = network.public_port(request.url.port)
+    return NetworkInfo(lan_urls=network.lan_urls(port), hostname=network.hostname())
 
 
 # ── Enlace con tierra ───────────────────────────────────────

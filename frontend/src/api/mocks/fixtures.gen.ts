@@ -453,7 +453,10 @@ export const environments: Schema<'Environment'>[] = [
     "vocabulary": {
       "member": "participante",
       "crew": "equipo",
-      "ground": "médico"
+      "ground": "médico",
+      "medic": "sanitario del equipo",
+      "commander": "responsable del equipo",
+      "psych": "psicólogo"
     },
     "theme": {
       "primary": "#2bb3c9",
@@ -505,7 +508,9 @@ export const environments: Schema<'Environment'>[] = [
       "member": "paciente",
       "crew": "planta",
       "ground": "médico",
-      "medic": "enfermería"
+      "medic": "enfermería",
+      "nurse": "enfermería",
+      "doctor": "médico"
     },
     "theme": {
       "primary": "#0b5a96",
@@ -558,7 +563,10 @@ export const environments: Schema<'Environment'>[] = [
       "member": "residente",
       "crew": "residencia",
       "ground": "médico",
-      "medic": "cuidador"
+      "medic": "cuidador",
+      "caregiver": "cuidador",
+      "doctor": "médico",
+      "family": "familia"
     },
     "theme": {
       "primary": "#6a429e",
@@ -1383,19 +1391,181 @@ export const systems: Schema<'BodySystem'>[] = [
 
 export const interventions: Schema<'Intervention'>[] = [
   {
+    "id": "int_reach_out",
+    "title": "Habla con alguien de confianza",
+    "category": "support",
+    "system_id": "neuro_behavioral",
+    "duration_min": 10,
+    "steps": [
+      "Piensa en una persona con la que te sientas a gusto: alguien del equipo, de casa o el servicio de apoyo psicológico",
+      "Cuéntale cómo te sientes estos días, sin necesidad de dar detalles",
+      "Si prefieres hacerlo en privado, usa «Necesito hablar»: va por un canal confidencial",
+      "Si el malestar sigue varios días, pide apoyo profesional"
+    ],
+    "offline": true,
+    "indicator_ids": [],
+    "sources": [
+      "S3",
+      "S11"
+    ]
+  },
+  {
     "id": "int_box_breathing",
     "title": "Respiración en caja",
     "category": "stress",
     "system_id": "neuro_behavioral",
     "duration_min": 4,
     "steps": [
-      "Inhala 4 s",
-      "Mantén 4 s",
-      "Exhala 4 s",
-      "Mantén 4 s",
+      "Siéntate cómodo y suelta los hombros",
+      "Inhala por la nariz contando 4 segundos",
+      "Mantén el aire 4 segundos",
+      "Exhala por la boca contando 4 segundos",
+      "Mantén los pulmones vacíos 4 segundos",
       "Repite 4 ciclos"
     ],
-    "offline": true
+    "offline": true,
+    "indicator_ids": [
+      "stress"
+    ],
+    "sources": [
+      "S3"
+    ]
+  },
+  {
+    "id": "int_cbt_reframe",
+    "title": "Reencuadre de pensamientos (TCC breve)",
+    "category": "mood",
+    "system_id": "neuro_behavioral",
+    "duration_min": 8,
+    "steps": [
+      "Escribe la situación que te preocupa en una frase",
+      "Anota el pensamiento automático que te viene («todo va a salir mal»)",
+      "Busca pruebas a favor y en contra de ese pensamiento",
+      "Escribe una alternativa más equilibrada",
+      "Puntúa de 1 a 5 cómo te sientes antes y después"
+    ],
+    "offline": true,
+    "indicator_ids": [
+      "mood",
+      "stress"
+    ],
+    "sources": [
+      "S3"
+    ]
+  },
+  {
+    "id": "int_journal",
+    "title": "Diario de 5 minutos",
+    "category": "journal",
+    "system_id": "neuro_behavioral",
+    "duration_min": 5,
+    "steps": [
+      "Escribe tres cosas que hayan ido bien hoy, por pequeñas que sean",
+      "Anota una cosa que te haya costado y cómo la has llevado",
+      "Escribe algo que te apetezca hacer mañana",
+      "El diario se queda en este dispositivo: no se comparte"
+    ],
+    "offline": true,
+    "indicator_ids": [
+      "mood",
+      "loneliness"
+    ],
+    "sources": [
+      "S3",
+      "S10"
+    ]
+  },
+  {
+    "id": "int_connect_crew",
+    "title": "Un rato con el equipo o con casa",
+    "category": "social",
+    "system_id": "neuro_behavioral",
+    "duration_min": 15,
+    "steps": [
+      "Propón una actividad compartida: una comida, un juego o una película",
+      "O graba un mensaje para alguien de casa",
+      "Comparte algo de tu día, aunque sea breve",
+      "Al terminar, haz tu check-in y compara cómo te sientes"
+    ],
+    "offline": true,
+    "indicator_ids": [
+      "loneliness",
+      "crew_relation"
+    ],
+    "sources": [
+      "S10",
+      "S11"
+    ]
+  },
+  {
+    "id": "int_sleep_light",
+    "title": "Higiene del sueño y luz",
+    "category": "sleep",
+    "system_id": "neuro_behavioral",
+    "duration_min": 5,
+    "steps": [
+      "Mantén la misma hora de acostarte y de levantarte",
+      "Busca luz intensa por la mañana y luz tenue en la última hora del día",
+      "Deja las pantallas 30 minutos antes de dormir",
+      "Evita la cafeína en las 6 horas antes de acostarte",
+      "Intenta dormir al menos 7 horas"
+    ],
+    "offline": true,
+    "indicator_ids": [
+      "sleep_hours",
+      "sleep_quality",
+      "energy",
+      "pvt_mean_rt_ms",
+      "pvt_lapses"
+    ],
+    "sources": [
+      "S26",
+      "S10",
+      "S12"
+    ]
+  },
+  {
+    "id": "int_movement_break",
+    "title": "Pausa activa",
+    "category": "exercise",
+    "system_id": "neuro_behavioral",
+    "duration_min": 10,
+    "steps": [
+      "Levántate y estira cuello, hombros y espalda",
+      "Haz 5 minutos de ejercicio suave: sentadillas, zancadas o bicicleta",
+      "Termina con tres respiraciones lentas",
+      "Anota cómo está tu energía antes y después"
+    ],
+    "offline": true,
+    "indicator_ids": [
+      "energy",
+      "mood",
+      "stress"
+    ],
+    "sources": [
+      "S3",
+      "S14"
+    ]
+  },
+  {
+    "id": "int_exercise_session",
+    "title": "Sesión de ejercicio de resistencia",
+    "category": "exercise",
+    "system_id": "musculoskeletal",
+    "duration_min": 30,
+    "steps": [
+      "Calienta 5 minutos",
+      "Haz ejercicios de resistencia para piernas, cadera y espalda",
+      "Añade una parte aeróbica (cinta, bicicleta o marcha)",
+      "Registra los minutos de ejercicio al terminar"
+    ],
+    "offline": true,
+    "indicator_ids": [
+      "exercise_min"
+    ],
+    "sources": [
+      "S14"
+    ]
   }
 ]
 
@@ -1778,7 +1948,14 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_exercise_session",
+            "text": "Sesión de ejercicio de resistencia (30 min)",
+            "priority": 1,
+            "intervention_id": "int_exercise_session"
+          }
+        ],
         "escalation": {
           "level": 0,
           "target_role": "self",
@@ -1998,7 +2175,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_sleep_light",
+            "text": "Higiene del sueño y luz (5 min)",
+            "priority": 1,
+            "intervention_id": "int_sleep_light"
+          },
+          {
+            "id": "rec_int_reach_out",
+            "text": "Habla con alguien de confianza (10 min)",
+            "priority": 2,
+            "intervention_id": "int_reach_out"
+          }
+        ],
         "escalation": {
           "level": 1,
           "target_role": "crew",
@@ -2172,7 +2362,14 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_exercise_session",
+            "text": "Sesión de ejercicio de resistencia (30 min)",
+            "priority": 1,
+            "intervention_id": "int_exercise_session"
+          }
+        ],
         "escalation": {
           "level": 0,
           "target_role": "self",
@@ -2392,7 +2589,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_sleep_light",
+            "text": "Higiene del sueño y luz (5 min)",
+            "priority": 1,
+            "intervention_id": "int_sleep_light"
+          },
+          {
+            "id": "rec_int_reach_out",
+            "text": "Habla con alguien de confianza (10 min)",
+            "priority": 2,
+            "intervention_id": "int_reach_out"
+          }
+        ],
         "escalation": {
           "level": 1,
           "target_role": "crew",
@@ -2566,7 +2776,14 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_exercise_session",
+            "text": "Sesión de ejercicio de resistencia (30 min)",
+            "priority": 1,
+            "intervention_id": "int_exercise_session"
+          }
+        ],
         "escalation": {
           "level": 0,
           "target_role": "self",
@@ -2786,7 +3003,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_sleep_light",
+            "text": "Higiene del sueño y luz (5 min)",
+            "priority": 1,
+            "intervention_id": "int_sleep_light"
+          },
+          {
+            "id": "rec_int_reach_out",
+            "text": "Habla con alguien de confianza (10 min)",
+            "priority": 2,
+            "intervention_id": "int_reach_out"
+          }
+        ],
         "escalation": {
           "level": 1,
           "target_role": "crew",
@@ -3013,7 +3243,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_sleep_light",
+            "text": "Higiene del sueño y luz (5 min)",
+            "priority": 1,
+            "intervention_id": "int_sleep_light"
+          },
+          {
+            "id": "rec_int_reach_out",
+            "text": "Habla con alguien de confianza (10 min)",
+            "priority": 2,
+            "intervention_id": "int_reach_out"
+          }
+        ],
         "escalation": {
           "level": 1,
           "target_role": "crew",
@@ -3206,7 +3449,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_sleep_light",
+            "text": "Higiene del sueño y luz (5 min)",
+            "priority": 1,
+            "intervention_id": "int_sleep_light"
+          },
+          {
+            "id": "rec_int_reach_out",
+            "text": "Habla con alguien de confianza (10 min)",
+            "priority": 2,
+            "intervention_id": "int_reach_out"
+          }
+        ],
         "escalation": {
           "level": 1,
           "target_role": "nurse",
@@ -3448,7 +3704,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_sleep_light",
+            "text": "Higiene del sueño y luz (5 min)",
+            "priority": 1,
+            "intervention_id": "int_sleep_light"
+          },
+          {
+            "id": "rec_int_reach_out",
+            "text": "Habla con alguien de confianza (10 min)",
+            "priority": 2,
+            "intervention_id": "int_reach_out"
+          }
+        ],
         "escalation": {
           "level": 1,
           "target_role": "caregiver",
@@ -10111,9 +10380,33 @@ export const controlOverview: Schema<'ControlOverview'> = {
           "share_behavioral_details": false,
           "last_seen_at": "2026-11-14T10:00:00Z",
           "liveness": "active",
+          "overall_status": "warning",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:15:41.582052Z"
+        },
+        {
+          "id": 6,
+          "env_id": "iss",
+          "name": "Cmdte. Moreau",
+          "position": "commander",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
           "overall_status": "normal",
           "open_alerts": 0,
-          "last_measurement_at": "2026-11-14T10:00:00Z"
+          "last_measurement_at": "2026-11-14T09:42:36.958736Z"
+        },
+        {
+          "id": 7,
+          "env_id": "iss",
+          "name": "Esp. Rao",
+          "position": "scientist",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:02:58.299119Z"
         }
       ],
       "open_alerts": {
@@ -10136,7 +10429,44 @@ export const controlOverview: Schema<'ControlOverview'> = {
         "queued": 0,
         "since": "2026-11-14T10:00:00Z"
       },
-      "members": [],
+      "members": [
+        {
+          "id": 8,
+          "env_id": "moon",
+          "name": "Cmdr. Ito",
+          "position": "commander",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:10:46.069797Z"
+        },
+        {
+          "id": 9,
+          "env_id": "moon",
+          "name": "Ing. Silva",
+          "position": "engineer",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "warning",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T08:49:35.366850Z"
+        },
+        {
+          "id": 10,
+          "env_id": "moon",
+          "name": "Dra. Weber",
+          "position": "geologist",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:43:26.383471Z"
+        }
+      ],
       "open_alerts": {
         "warning": 0,
         "critical": 0,
@@ -10166,8 +10496,8 @@ export const controlOverview: Schema<'ControlOverview'> = {
           "share_behavioral_details": false,
           "last_seen_at": "2026-11-14T10:00:00Z",
           "liveness": "active",
-          "overall_status": "warning",
-          "open_alerts": 1,
+          "overall_status": "critical",
+          "open_alerts": 3,
           "last_measurement_at": "2026-11-14T10:00:00Z"
         },
         {
@@ -10176,16 +10506,40 @@ export const controlOverview: Schema<'ControlOverview'> = {
           "name": "Ing. Okafor",
           "position": "engineer",
           "share_behavioral_details": false,
-          "last_seen_at": "2026-11-14T09:48:00Z",
-          "liveness": "stale",
-          "overall_status": "unknown",
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "warning",
           "open_alerts": 0,
-          "last_measurement_at": "2026-11-14T09:48:00Z"
+          "last_measurement_at": "2026-11-14T09:32:49.156823Z"
+        },
+        {
+          "id": 4,
+          "env_id": "mars",
+          "name": "Dra. Haddad",
+          "position": "medical_officer",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "warning",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:55:59.993267Z"
+        },
+        {
+          "id": 5,
+          "env_id": "mars",
+          "name": "Esp. Tanaka",
+          "position": "scientist",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T08:39:00.634194Z"
         }
       ],
       "open_alerts": {
         "warning": 1,
-        "critical": 0,
+        "critical": 2,
         "emergency": 0
       },
       "liveness_paused": false
@@ -10203,7 +10557,44 @@ export const controlOverview: Schema<'ControlOverview'> = {
         "queued": 0,
         "since": "2026-11-14T10:00:00Z"
       },
-      "members": [],
+      "members": [
+        {
+          "id": 11,
+          "env_id": "earth",
+          "name": "Ana Ruiz",
+          "position": "participant",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:49:17.059793Z"
+        },
+        {
+          "id": 12,
+          "env_id": "earth",
+          "name": "Leo Park",
+          "position": "participant",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:30:12.728452Z"
+        },
+        {
+          "id": 13,
+          "env_id": "earth",
+          "name": "Marta Gil",
+          "position": "participant",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:18:49.251217Z"
+        }
+      ],
       "open_alerts": {
         "warning": 0,
         "critical": 0,
@@ -10224,7 +10615,44 @@ export const controlOverview: Schema<'ControlOverview'> = {
         "queued": 0,
         "since": "2026-11-14T10:00:00Z"
       },
-      "members": [],
+      "members": [
+        {
+          "id": 14,
+          "env_id": "hospital",
+          "name": "Joan Puig",
+          "position": "patient",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:24:15.212296Z"
+        },
+        {
+          "id": 15,
+          "env_id": "hospital",
+          "name": "Laura Sanz",
+          "position": "patient",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T08:55:44.511251Z"
+        },
+        {
+          "id": 16,
+          "env_id": "hospital",
+          "name": "Pedro Díaz",
+          "position": "patient",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T08:38:09.500902Z"
+        }
+      ],
       "open_alerts": {
         "warning": 0,
         "critical": 0,
@@ -10245,7 +10673,56 @@ export const controlOverview: Schema<'ControlOverview'> = {
         "queued": 0,
         "since": "2026-11-14T10:00:00Z"
       },
-      "members": [],
+      "members": [
+        {
+          "id": 17,
+          "env_id": "geriatric",
+          "name": "Rosa Martí",
+          "position": "resident",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:02:13.903601Z"
+        },
+        {
+          "id": 18,
+          "env_id": "geriatric",
+          "name": "Josep Vidal",
+          "position": "resident",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T09:35:29.210944Z"
+        },
+        {
+          "id": 19,
+          "env_id": "geriatric",
+          "name": "Carmen López",
+          "position": "resident",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T08:01:13.417633Z"
+        },
+        {
+          "id": 20,
+          "env_id": "geriatric",
+          "name": "Antonio Ferrer",
+          "position": "resident",
+          "share_behavioral_details": false,
+          "last_seen_at": "2026-11-14T10:00:00Z",
+          "liveness": "active",
+          "overall_status": "normal",
+          "open_alerts": 0,
+          "last_measurement_at": "2026-11-14T08:53:07.371617Z"
+        }
+      ],
       "open_alerts": {
         "warning": 0,
         "critical": 0,
@@ -10255,10 +10732,10 @@ export const controlOverview: Schema<'ControlOverview'> = {
     }
   ],
   "metrics": {
-    "measurements_last_hour": 12,
-    "open_alerts": 1,
+    "measurements_last_hour": 35,
+    "open_alerts": 3,
     "active_devices": 1,
-    "avg_alert_response_s": 95.0
+    "avg_alert_response_s": null
   }
 }
 
@@ -10332,17 +10809,17 @@ export const demoUsers: Schema<'DemoUser'>[] = [
   },
   {
     "username": "medic-earth",
-    "display_name": "Medic (Analógico terrestre)",
+    "display_name": "Sanitario del equipo (Analógico terrestre)",
     "role": "medic",
     "env_id": "earth",
-    "role_label": "medic"
+    "role_label": "sanitario del equipo"
   },
   {
     "username": "commander-earth",
-    "display_name": "Commander (Analógico terrestre)",
+    "display_name": "Responsable del equipo (Analógico terrestre)",
     "role": "commander",
     "env_id": "earth",
-    "role_label": "commander"
+    "role_label": "responsable del equipo"
   },
   {
     "username": "responder-earth",
@@ -10353,10 +10830,10 @@ export const demoUsers: Schema<'DemoUser'>[] = [
   },
   {
     "username": "psych-earth",
-    "display_name": "Psych (Analógico terrestre)",
+    "display_name": "Psicólogo (Analógico terrestre)",
     "role": "psych",
     "env_id": "earth",
-    "role_label": "psych"
+    "role_label": "psicólogo"
   },
   {
     "username": "marti",

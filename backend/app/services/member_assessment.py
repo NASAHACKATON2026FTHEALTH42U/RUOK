@@ -34,6 +34,7 @@ from app.services.assessment import (
     build_escalation,
     evaluate_indicator,
     find_protocol,
+    intervention_recommendations,
     merge_ranges,
     overall_status,
     recommendations_for,
@@ -118,6 +119,7 @@ def build_assessment(
     series: Mapping[str, Iterable[Any]],
     now: datetime,
     protocols: Iterable[Any] = (),
+    interventions: Iterable[Any] = (),
     liveness: Liveness | str = Liveness.active,
     last_seen_at: datetime | None = None,
     behavioral_details_visible: bool = False,
@@ -133,11 +135,14 @@ def build_assessment(
       base (``services/behavioral.py``, BE-20).
     - ``behavioral_details_visible`` es ``False`` por defecto (privacidad
       conductual). Ocultar los detalles en la respuesta es ``behavioral.redact``.
+    - Un sistema en ``warning``/``critical`` recomienda, tras las del protocolo, las
+      ``interventions`` de sus indicadores alterados y las genéricas (BE-21).
     """
     env_d = _as_dict(env)
     active = set(env_d.get("indicators") or [])
     by_id = {(d := _as_dict(i))["id"]: d for i in indicators}
     protocols = list(protocols)
+    interventions = list(interventions)
 
     system_results: list[SystemAssessment] = []
     for raw_system in systems:
@@ -152,12 +157,20 @@ def build_assessment(
         if sys_d["id"] == BEHAVIORAL_SYSTEM_ID:
             status = _apply_behavioral_rules(ind_results, status, by_id, ids, series, now)
         protocol = find_protocol(sys_d["id"], status, protocols)
+        recommendations = recommendations_for(protocol)
+        recommendations += intervention_recommendations(
+            sys_d["id"],
+            status,
+            {r.indicator_id: r.status for r in ind_results},
+            interventions,
+            first_priority=max((r.priority for r in recommendations), default=0) + 1,
+        )
         system_results.append(
             SystemAssessment(
                 system_id=sys_d["id"],
                 status=status,
                 indicators=ind_results,
-                recommendations=recommendations_for(protocol),
+                recommendations=recommendations,
                 escalation=build_escalation(status, env_d, protocol),
             )
         )
@@ -257,6 +270,7 @@ def assess_member(
         systems=catalog.list_systems(),
         series=series,
         protocols=load_protocols(),
+        interventions=catalog.list_interventions(),
         now=clock.now(),
         liveness=liveness,
         last_seen_at=member.last_seen_at,

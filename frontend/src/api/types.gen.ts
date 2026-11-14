@@ -225,7 +225,7 @@ export interface paths {
         };
         /**
          * Intervenciones (contramedidas offline)
-         * @description STUB(FS-02) → BE-21
+         * @description Las de app/data/interventions.json, filtradas por `system_id` y `category`. `indicator_ids` vacío = genérica del sistema. Público (las usa el protocolo autónomo).
          */
         get: operations["list_interventions_api_v1_interventions_get"];
         put?: never;
@@ -627,7 +627,7 @@ export interface paths {
         };
         /**
          * Vista global del centro de control (admin, sin retardo)
-         * @description STUB(FS-02) → BE-30
+         * @description Todos los entornos con sus members (`overall_status`, `liveness`), alertas abiertas por severidad, enlace, `liveness_paused` y métricas: mediciones recibidas en la última hora, alertas abiertas, dispositivos activos (últimos 5 min) y tiempo medio hasta el primer reconocimiento (`null` si no hay ninguno).
          */
         get: operations["control_overview_api_v1_control_overview_get"];
         put?: never;
@@ -649,7 +649,7 @@ export interface paths {
         put?: never;
         /**
          * Pausar las alertas de liveness de un entorno (presentación)
-         * @description STUB(FS-02) → BE-30
+         * @description Mientras está en pausa no se lanzan "R U OK?" ni alertas `no_contact` en ese entorno. El liveness se sigue mostrando. `/demo/reset` quita la pausa.
          */
         post: operations["pause_liveness_api_v1_control_liveness_pause_post"];
         delete?: never;
@@ -807,7 +807,7 @@ export interface paths {
         };
         /**
          * URLs del servidor en la red local (para el QR)
-         * @description Público. STUB(FS-02) → BE-30
+         * @description Público. IP de la red local del servidor (nunca loopback ni link-local), privadas primero. `RUOK_LAN_HOST` fuerza la IP y `RUOK_PUBLIC_PORT` el puerto.
          */
         get: operations["network_info_api_v1_system_network_info_get"];
         put?: never;
@@ -1525,6 +1525,16 @@ export interface components {
              * @default true
              */
             offline: boolean;
+            /**
+             * Indicator Ids
+             * @description Indicadores a los que responde; vacío = genérica del sistema
+             */
+            indicator_ids: string[];
+            /**
+             * Sources
+             * @description IDs de docs/sources.md
+             */
+            sources: string[];
         };
         /**
          * Leaderboard
@@ -4143,6 +4153,15 @@ export interface operations {
             };
             /** @description Rol sin permiso o dato ajeno */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

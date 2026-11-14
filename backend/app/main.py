@@ -28,6 +28,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         events.purge_old(session)  # bitácora: solo los últimos 7 días (BE-28)
     environments.list_environments()  # valida app/data/environments.json al arrancar
     catalog_service.list_indicators()  # valida indicators.json y systems.json (y su coherencia)
+    catalog_service.list_interventions()  # valida interventions.json (BE-21)
     routine.list_task_types()  # valida task_types.json y la rutina de los entornos (BE-18)
     gamification.list_badges()  # valida badges.json (BE-19)
     watcher = None
