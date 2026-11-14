@@ -25,8 +25,8 @@ from sqlmodel import Session, col, select
 from app import clock, models
 from app.schemas import Environment, LinkStatus
 from app.schemas import LinkMessage as LinkMessageOut
-from app.schemas.common import LinkDirection, LinkState
-from app.services import environments
+from app.schemas.common import EventType, LinkDirection, LinkState
+from app.services import environments, events
 
 REALTIME_MAX_DELAY_S = 5  # docs/alerts-and-escalation.md: < 5 s → realtime
 
@@ -94,11 +94,32 @@ def send(
         state="queued" if row.state == LinkState.los else "in_transit",
     )
     session.add(message)
+    session.flush()
+    up = LinkDirection(direction) == LinkDirection.up
+    events.emit(
+        session, EventType.link_queued, env_id=env_id, ref_id=message.ref_id,
+        summary=f"Mensaje en cola hacia {'tierra' if up else 'a bordo'}",
+        payload={
+            "message_id": message.id, "direction": "up" if up else "down", "kind": kind,
+            "eta": message.eta.isoformat() if message.eta else None,
+        },
+    )
     session.commit()
     session.refresh(message)
-    # TODO(BE-28): events.emit("link.queued", ...)
     deliver_due(session, env_id)  # con retardo 0 se entrega al instante
     return message
+
+
+def _member_of(session: Session, message: models.LinkMessage) -> int | None:
+    """Member de la alerta a la que se refiere el mensaje (para el filtro del SSE)."""
+    alert_id = message.ref_id
+    if message.kind == "alert_event" and message.ref_id:
+        ev = None
+        if message.ref_id.isdigit():
+            ev = session.get(models.AlertEvent, int(message.ref_id))
+        alert_id = ev.alert_id if ev else None
+    alert = session.get(models.Alert, alert_id) if alert_id else None
+    return alert.member_id if alert else None
 
 
 def deliver_due(session: Session, env_id: str | None = None) -> list[models.LinkMessage]:
@@ -130,8 +151,15 @@ def deliver_due(session: Session, env_id: str | None = None) -> list[models.Link
         from app.services.alerts import on_link_delivered  # evita el ciclo de imports
 
         on_link_delivered(session, delivered)
+        for message in delivered:
+            events.emit(
+                session, EventType.link_delivered, env_id=message.env_id,
+                member_id=_member_of(session, message), ref_id=message.ref_id,
+                summary=f"Entregado {'en tierra' if message.direction == 'up' else 'a bordo'}",
+                payload={"message_id": message.id, "direction": message.direction,
+                         "kind": message.kind},
+            )
         session.commit()
-        # TODO(BE-28): events.emit("link.delivered", ...) por mensaje
     return delivered
 
 
@@ -157,9 +185,12 @@ def set_state(
             message.state = "in_transit"
             message.eta = eta
             session.add(message)
+    events.emit(
+        session, EventType.link_state_changed, env_id=env_id,
+        summary=f"Enlace {env_id}: {row.state}", payload={"state": row.state},
+    )
     session.commit()
     session.refresh(row)
-    # TODO(BE-28): events.emit("link.state_changed", ...)
     deliver_due(session, env_id)
     return row
 

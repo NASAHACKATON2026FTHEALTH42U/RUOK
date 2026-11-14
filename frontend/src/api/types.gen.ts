@@ -587,7 +587,7 @@ export interface paths {
         };
         /**
          * Historial de eventos (admin; fallback de polling)
-         * @description STUB(FS-02) → BE-28
+         * @description Eventos de `event_log` con `id > since_id`, en orden. `limit` máximo 500.
          */
         get: operations["list_events_api_v1_events_get"];
         put?: never;
@@ -787,7 +787,7 @@ export interface paths {
         };
         /**
          * Stream SSE de eventos (filtrado por rol)
-         * @description `text/event-stream`. Cada mensaje: `id` (= Event.id, usable como Last-Event-ID), `event` (= Event.type) y `data` (= Event en JSON). El token va en `?token=` porque EventSource no admite cabeceras (sin token válido → 401). STUB(FS-02): emite los eventos de ejemplo y cierra → BE-28 (que filtra cada evento según el rol del token).
+         * @description `text/event-stream`. Cada mensaje: `id` (= Event.id, usable como Last-Event-ID), `event` (= Event.type) y `data` (= Event en JSON). El token va en `?token=` porque EventSource no admite cabeceras (sin token válido → 401). Filtrado por el rol del token: admin todo; medic/commander su entorno; member lo suyo; responder/psych solo lo entregado por el enlace. Con `Last-Event-ID` se reanuda sin perder eventos; sin él, solo llegan los nuevos. La conexión se cierra cada pocos minutos y el navegador reconecta solo.
          */
         get: operations["events_stream_api_v1_events_stream_get"];
         put?: never;
@@ -4506,12 +4506,13 @@ export interface operations {
     events_stream_api_v1_events_stream_get: {
         parameters: {
             query?: {
-                /** @description JWT (EventSource no admite cabeceras) */
-                token?: string | null;
                 types?: string | null;
                 env_id?: string | null;
+                /** @description JWT (EventSource no admite cabeceras) */
+                token?: string | null;
             };
             header?: {
+                "Last-Event-ID"?: number | null;
                 /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
                 "x-device-id"?: string | null;
             };

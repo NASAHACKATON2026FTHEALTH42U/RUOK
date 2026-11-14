@@ -10,15 +10,19 @@ Principio "sin pérdida de datos" (docs/offline-and-liveness.md):
 """
 
 from collections.abc import Sequence
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, col, select
 
-from app import models
+from app import clock, models
 from app.schemas import Indicator, MeasurementIn
 from app.schemas import Measurement as MeasurementOut
-from app.services import catalog
+from app.schemas.common import EventType
+from app.services import catalog, events
+
+# Un lote con mediciones tomadas hace más de esto viene del outbox (estaba sin conexión).
+SYNC_AGE = timedelta(minutes=10)
 
 
 class InvalidMeasurement(Exception):
@@ -64,6 +68,31 @@ def same_content(row: models.Measurement, member_id: int, item: MeasurementIn) -
     )
 
 
+def _emit_batch(session: Session, member_id: int, rows: list[models.Measurement]) -> None:
+    """`measurement.created` por medición nueva, o un solo `sync.batch` si el lote llega
+    del outbox de un dispositivo que ha estado sin conexión."""
+    if not rows:
+        return
+    member = session.get(models.Member, member_id)
+    env_id = member.env_id if member else None
+    oldest = min(as_utc(r.taken_at) for r in rows)
+    if len(rows) > 1 and clock.now() - oldest > SYNC_AGE:
+        events.emit(
+            session, EventType.sync_batch, env_id=env_id, member_id=member_id,
+            summary=f"Sincronizadas {len(rows)} mediciones pendientes",
+            payload={"count": len(rows), "oldest_taken_at": oldest.isoformat(),
+                     "indicators": sorted({r.indicator_id for r in rows})},
+        )
+        return
+    for r in rows:
+        events.emit(
+            session, EventType.measurement_created, env_id=env_id, member_id=member_id,
+            ref_id=r.id, summary=f"{r.indicator_id} = {r.value:g}",
+            payload={"indicator_id": r.indicator_id, "value": r.value,
+                     "taken_at": as_utc(r.taken_at).isoformat()},
+        )
+
+
 def save_batch(
     session: Session, member_id: int, items: Sequence[MeasurementIn]
 ) -> tuple[int, int]:
@@ -107,9 +136,8 @@ def _save_batch(
         accepted += 1
 
     session.add_all(pending.values())
+    _emit_batch(session, member_id, list(pending.values()))
     session.commit()
-    # TODO(BE-28): events.emit("measurement.created") por medición nueva, o
-    # "sync.batch" si el lote viene del outbox del dispositivo.
     return accepted, duplicates
 
 

@@ -29,9 +29,9 @@ from typing import Any
 from sqlmodel import Session, col, select
 
 from app import clock, models
-from app.schemas.common import Activity, DeviceKind, Liveness, Status
+from app.schemas.common import Activity, DeviceKind, EventType, Liveness, Status
 from app.schemas.members import HeartbeatIn, HeartbeatResult
-from app.services import environments
+from app.services import environments, events
 from app.services.assessment import _as_dict, worst_status
 
 __all__ = [
@@ -133,9 +133,19 @@ def record_heartbeat(
     if body.device_kind is not None:
         device.kind = DeviceKind(body.device_kind).value
     session.add(device)
+    common = {"env_id": member.env_id, "member_id": member.id, "device_id": body.device_id}
+    events.emit(
+        session, EventType.heartbeat, **common, summary=f"Heartbeat de {member.name}",
+        payload={"activity": member.last_activity, "pending_outbox": body.pending_outbox},
+    )
+    if previous != Liveness.active:
+        events.emit(
+            session, EventType.liveness_changed, **common,
+            summary=f"{member.name}: {previous.value} → active",
+            payload={"from": previous.value, "to": Liveness.active.value},
+        )
     session.commit()
     session.refresh(member)
-    # TODO(BE-28): events.emit("liveness.changed") si previous != active.
 
     return HeartbeatResult(
         liveness=member_liveness(member, now),

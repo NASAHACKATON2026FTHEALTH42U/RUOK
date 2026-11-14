@@ -9,6 +9,9 @@ os.environ.setdefault("RUOK_BCRYPT_ROUNDS", "4")
 # Los tests adelantan el reloj días enteros: que el token del fixture `client` no caduque.
 # Los tests de caducidad (test_auth_api.py) fijan su propio RUOK_JWT_TTL_HOURS.
 os.environ.setdefault("RUOK_JWT_TTL_HOURS", str(24 * 365))
+# El SSE cierra la conexión tras este tiempo (el navegador reconecta con Last-Event-ID):
+# en los tests, enseguida, para que el TestClient pueda leer el stream entero.
+os.environ.setdefault("RUOK_SSE_MAX_SECONDS", "0.3")
 # Sin la tarea periódica de liveness (BE-16): los tests llaman a check_all() a mano.
 os.environ["RUOK_LIVENESS_WATCH"] = "0"
 

@@ -21,6 +21,7 @@ from app.routers.deps import ERRORS_AUTH, AdminDep, CurrentUser
 from app.schemas import (
     DemoUser,
     ErrorResponse,
+    EventType,
     LoginIn,
     PinLoginIn,
     Slug,
@@ -28,7 +29,7 @@ from app.schemas import (
     User,
     UserCreate,
 )
-from app.services import accounts
+from app.services import accounts, events
 
 router = APIRouter(tags=["auth"])
 
@@ -54,18 +55,41 @@ def to_user(account: models.UserAccount) -> User:
     )
 
 
+def _auth_event(
+    session: Session,
+    type_: EventType,
+    account: models.UserAccount | None,
+    username: str,
+    method: str,
+    reason: str | None = None,
+) -> None:
+    """`auth.login` / `auth.failed` en la bitácora (solo los ve admin en el SSE)."""
+    ok = type_ == EventType.auth_login
+    events.emit(
+        session,
+        type_,
+        env_id=account.env_id if account else None,
+        member_id=account.member_id if account else None,
+        user_id=account.id if account else None,
+        summary=f"Login de {username}" if ok else f"Login fallido de {username} ({reason})",
+        payload={"username": username, "method": method, **({"reason": reason} if reason else {})},
+    )
+    session.commit()
+
+
 def _authenticate(session: Session, username: str, secret: str, *, pin: bool) -> TokenResponse:
     account = session.exec(
         select(models.UserAccount).where(models.UserAccount.username == username)
     ).first()
+    method = "pin" if pin else "password"
     if account is None:
-        # TODO(BE-28): events.emit("auth.failed", reason="unknown_user")
+        _auth_event(session, EventType.auth_failed, None, username, method, "unknown_user")
         raise HTTPException(401, _BAD_CREDENTIALS)
     check = accounts.check_pin if pin else accounts.check_password
     try:
         ok = check(session, account, secret)
     except accounts.AccountLocked as exc:
-        # TODO(BE-28): events.emit("auth.failed", reason="locked")
+        _auth_event(session, EventType.auth_failed, account, username, method, "locked")
         until = exc.locked_until.isoformat(timespec="seconds")
         retry = max(1, math.ceil((exc.locked_until - clock.now()).total_seconds()))
         raise HTTPException(
@@ -74,11 +98,11 @@ def _authenticate(session: Session, username: str, secret: str, *, pin: bool) ->
             headers={"Retry-After": str(retry)},
         ) from exc
     if not ok:
-        # TODO(BE-28): events.emit("auth.failed", reason="bad_credentials")
+        _auth_event(session, EventType.auth_failed, account, username, method, "bad_credentials")
         raise HTTPException(401, "PIN incorrecto" if pin else _BAD_CREDENTIALS)
 
     token, expires_at = create_token(session, account)
-    # TODO(BE-28): events.emit("auth.login", user_id=account.id, method="pin"|"password")
+    _auth_event(session, EventType.auth_login, account, username, method)
     return TokenResponse(access_token=token, expires_at=expires_at, user=to_user(account))
 
 

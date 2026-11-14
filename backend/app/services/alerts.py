@@ -26,8 +26,8 @@ from app import clock, models
 from app.schemas import Alert as AlertOut
 from app.schemas import AlertEvent as AlertEventOut
 from app.schemas import Assessment, Environment
-from app.schemas.common import AlertStatus, LinkDirection, Status
-from app.services import catalog, comm_link, environments
+from app.schemas.common import AlertStatus, EventType, LinkDirection, Status
+from app.services import catalog, comm_link, environments, events
 from app.services.assessment import escalation_for_level
 
 OPEN = (AlertStatus.open, AlertStatus.escalated, AlertStatus.acknowledged)
@@ -117,8 +117,11 @@ def _escalate(
             session, alert, "escalated", actor,
             level=level, target_role=env.escalation_ladder[level], **payload,
         )
-        # TODO(BE-28): events.emit("alert.escalated", ...)
         _apply_level(session, alert, level, status, env)
+        events.emit_alert(
+            session, alert, EventType.alert_escalated,
+            f"Alerta escalada a {env.escalation_ladder[level]}", actor=actor,
+        )
 
 
 def mark_delivered(session: Session, alert: models.Alert, message: models.LinkMessage) -> None:
@@ -203,7 +206,10 @@ def evaluate(
             session.flush()  # la alerta existe antes de sus eventos (FK)
             _apply_level(session, alert, 0, status, env)
             _event(session, alert, "created", severity=alert.severity, system_id=alert.system_id)
-            # TODO(BE-28): events.emit("alert.created", ...)
+            events.emit_alert(
+                session, alert, EventType.alert_created,
+                f"Alerta automática ({alert.severity}): {alert.system_id or alert.category}",
+            )
             _escalate(session, alert, target_level(status, env), status, env)
             changed.append(alert)
             continue
@@ -416,7 +422,11 @@ def create_manual(
     session.flush()
     _apply_level(session, alert, 0, status, env)
     _event(session, alert, "created", "member", category=alert.category, severity=alert.severity)
-    # TODO(BE-28): events.emit("alert.created", ...)
+    events.emit_alert(
+        session, alert, EventType.alert_created,
+        "SOS: petición de ayuda" if alert.category == "emergency" else "Petición de ayuda",
+        authenticated=alert.authenticated,
+    )
     _escalate(session, alert, to_level, status, env, "member")
     session.commit()
     return alert, True
@@ -451,8 +461,10 @@ def acknowledge(session: Session, alert: models.Alert, actor: str) -> models.Ale
     alert.updated_at = clock.now()
     session.add(alert)
     _event(session, alert, "acknowledged", actor)
+    events.emit_alert(
+        session, alert, EventType.alert_acknowledged, "Alerta reconocida", actor=actor
+    )
     session.commit()
-    # TODO(BE-28): events.emit("alert.acknowledged", ...)
     return alert
 
 
@@ -465,8 +477,8 @@ def resolve(
     alert.updated_at = clock.now()
     session.add(alert)
     _event(session, alert, "resolved", actor, **({"note": note} if note else {}))
+    events.emit_alert(session, alert, EventType.alert_resolved, "Alerta resuelta", actor=actor)
     session.commit()
-    # TODO(BE-28): events.emit("alert.resolved", ...)
     return alert
 
 

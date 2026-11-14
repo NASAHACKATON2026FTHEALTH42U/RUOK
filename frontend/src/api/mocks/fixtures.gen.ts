@@ -9146,39 +9146,238 @@ export const linkByEnv: Record<string, Schema<'LinkStatus'>> = {
 export const events: Schema<'Event'>[] = [
   {
     "id": 1,
+    "type": "auth.login",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": null,
+    "member_id": null,
+    "user_id": 45,
+    "device_id": null,
+    "ref_id": null,
+    "summary": "Login de admin",
+    "payload": {
+      "username": "admin",
+      "method": "password"
+    }
+  },
+  {
+    "id": 2,
+    "type": "auth.login",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": 1,
+    "device_id": null,
+    "ref_id": null,
+    "summary": "Login de vega",
+    "payload": {
+      "username": "vega",
+      "method": "password"
+    }
+  },
+  {
+    "id": 3,
     "type": "measurement.created",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
     "member_id": 1,
-    "user_id": 7,
-    "device_id": "a3f9c2d1-7b6e-4f5a-8c9d-0e1f2a3b4c5d",
+    "user_id": null,
+    "device_id": null,
     "ref_id": "0b7e5c1a-3f2d-4e8b-9a6c-1d2e3f4a5b6c",
-    "summary": "Cmdr. Vega: tensión 142 mmHg",
-    "payload": {}
+    "summary": "bp_systolic = 142",
+    "payload": {
+      "indicator_id": "bp_systolic",
+      "value": 142.0,
+      "taken_at": "2026-11-14T10:00:00+00:00"
+    }
   },
   {
-    "id": 2,
+    "id": 4,
     "type": "alert.created",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
     "member_id": 1,
-    "user_id": 7,
-    "device_id": "a3f9c2d1-7b6e-4f5a-8c9d-0e1f2a3b4c5d",
-    "ref_id": "6f1c2a9e-0b5d-4c1e-9f3a-2d8e7b6a5c41",
-    "summary": "Petición de ayuda de Cmdr. Vega",
-    "payload": {}
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "40787fe0-1d3d-542d-b67b-1c66793e2f7e",
+    "summary": "Alerta automática (critical): cardiovascular",
+    "payload": {
+      "category": "indicator",
+      "severity": "critical",
+      "level": 0,
+      "target_role": "self"
+    }
   },
   {
-    "id": 3,
+    "id": 5,
+    "type": "alert.escalated",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "40787fe0-1d3d-542d-b67b-1c66793e2f7e",
+    "summary": "Alerta escalada a crew",
+    "payload": {
+      "category": "indicator",
+      "severity": "critical",
+      "level": 1,
+      "target_role": "crew",
+      "actor": "system"
+    }
+  },
+  {
+    "id": 6,
     "type": "link.queued",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
     "member_id": null,
     "user_id": null,
     "device_id": null,
-    "ref_id": "6f1c2a9e-0b5d-4c1e-9f3a-2d8e7b6a5c41",
-    "summary": "Alerta en cola hacia tierra (ETA 14 min)",
-    "payload": {}
+    "ref_id": "40787fe0-1d3d-542d-b67b-1c66793e2f7e",
+    "summary": "Mensaje en cola hacia tierra",
+    "payload": {
+      "message_id": 1,
+      "direction": "up",
+      "kind": "alert",
+      "eta": "2026-11-14T10:14:00+00:00"
+    }
+  },
+  {
+    "id": 7,
+    "type": "alert.escalated",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "40787fe0-1d3d-542d-b67b-1c66793e2f7e",
+    "summary": "Alerta escalada a ground",
+    "payload": {
+      "category": "indicator",
+      "severity": "critical",
+      "level": 2,
+      "target_role": "ground",
+      "actor": "system"
+    }
+  },
+  {
+    "id": 8,
+    "type": "alert.created",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "6b44b3eb-fa65-56f1-8baa-886b991fab7f",
+    "summary": "Alerta automática (critical): neuro_behavioral",
+    "payload": {
+      "category": "indicator",
+      "severity": "critical",
+      "level": 0,
+      "target_role": "self"
+    }
+  },
+  {
+    "id": 9,
+    "type": "alert.escalated",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "6b44b3eb-fa65-56f1-8baa-886b991fab7f",
+    "summary": "Alerta escalada a crew",
+    "payload": {
+      "category": "indicator",
+      "severity": "critical",
+      "level": 1,
+      "target_role": "crew",
+      "actor": "system"
+    }
+  },
+  {
+    "id": 10,
+    "type": "link.queued",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": null,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "6b44b3eb-fa65-56f1-8baa-886b991fab7f",
+    "summary": "Mensaje en cola hacia tierra",
+    "payload": {
+      "message_id": 2,
+      "direction": "up",
+      "kind": "alert",
+      "eta": "2026-11-14T10:14:00+00:00"
+    }
+  },
+  {
+    "id": 11,
+    "type": "alert.escalated",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "6b44b3eb-fa65-56f1-8baa-886b991fab7f",
+    "summary": "Alerta escalada a ground",
+    "payload": {
+      "category": "indicator",
+      "severity": "critical",
+      "level": 2,
+      "target_role": "ground",
+      "actor": "system"
+    }
+  },
+  {
+    "id": 12,
+    "type": "measurement.created",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "3a1a7d3b-63a8-5a7c-bd65-0fc43592b9a3",
+    "summary": "bp_systolic = 145",
+    "payload": {
+      "indicator_id": "bp_systolic",
+      "value": 145.0,
+      "taken_at": "2026-11-14T10:00:00+00:00"
+    }
+  },
+  {
+    "id": 13,
+    "type": "measurement.created",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "4d7d5ae7-f0b9-5dfc-a5ea-e07c9c22aaa3",
+    "summary": "exercise_min = 90",
+    "payload": {
+      "indicator_id": "exercise_min",
+      "value": 90.0,
+      "taken_at": "2026-11-14T10:00:00+00:00"
+    }
+  },
+  {
+    "id": 14,
+    "type": "alert.created",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "138f8f59-0ba6-5e49-88f1-9b2e6b60899f",
+    "summary": "Alerta automática (warning): musculoskeletal",
+    "payload": {
+      "category": "indicator",
+      "severity": "warning",
+      "level": 0,
+      "target_role": "self"
+    }
   }
 ]
 

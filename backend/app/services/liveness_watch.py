@@ -22,8 +22,8 @@ from sqlmodel import Session, col, select
 
 from app import clock, models
 from app.schemas import AlertIn, RuokResult
-from app.schemas.common import AlertStatus, Liveness, Status
-from app.services import alerts, environments
+from app.schemas.common import AlertStatus, EventType, Liveness, Status
+from app.services import alerts, environments, events
 from app.services.liveness import member_liveness
 
 log = logging.getLogger(__name__)
@@ -92,7 +92,7 @@ def check_member(session: Session, member: models.Member) -> models.Alert | None
         session, alert, "created",
         category="no_contact", liveness=live.value, timed_out=timed_out,
     )
-    # TODO(BE-28): events.emit("alert.created", ...)
+    events.emit_alert(session, alert, EventType.alert_created, "Sin contacto con el member")
     to_level = alerts.target_level(Status.critical, env)  # crew al instante, ground por el enlace
     alerts._escalate(session, alert, to_level, Status.critical, env)
     check.alert_id = alert.id

@@ -1,20 +1,23 @@
 """Tiempo real, dispositivos, centro de control, enlace, sistema y demo.
 
-Reales: enlace (BE-13), demo (BE-07) y fast-forward (app/clock.py).
-STUB(FS-02) → BE-28 (eventos/SSE), BE-29 (dispositivos) y BE-30 (control y network-info);
+Reales: enlace (BE-13), demo (BE-07), fast-forward (app/clock.py) y eventos/SSE (BE-28).
+STUB(FS-02) → BE-29 (dispositivos) y BE-30 (control y network-info);
 en /control/overview el `link` ya es real.
 """
 
+import asyncio
 import json
-from collections.abc import Iterator
+import os
+import time
+from collections.abc import AsyncIterator
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlmodel import Session
 
-from app import clock, seed, stubs
-from app.db import get_session
+from app import clock, models, seed, stubs
+from app.db import engine, get_session
 from app.routers.deps import (
     ERRORS_404,
     ERRORS_AUTH,
@@ -41,7 +44,7 @@ from app.schemas import (
     Slug,
 )
 from app.schemas.realtime import AlertCounts, ControlMetrics, EnvironmentOverview, EnvironmentRef
-from app.services import alerts, comm_link, liveness_watch
+from app.services import alerts, comm_link, events, liveness_watch
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -59,22 +62,66 @@ def _link_scope(env: Slug, user: CurrentUser) -> None:
 # ── Eventos ─────────────────────────────────────────────────
 
 
-def _sse(events: list[Event]) -> Iterator[str]:
-    for ev in events:
-        data = json.dumps(ev.model_dump(mode="json"))
-        yield f"id: {ev.id}\nevent: {ev.type.value}\ndata: {data}\n\n"
+KEEPALIVE_S = 15.0  # comentario `: ping` para que proxies y navegadores no corten
+RETRY_MS = 3000  # el navegador reconecta a los 3 s (con Last-Event-ID)
+
+
+def _max_stream_s() -> float:
+    """Vida máxima de una conexión SSE. Al cerrarse, el navegador reconecta solo con
+    `Last-Event-ID` (no se pierde nada). Los tests la bajan con `RUOK_SSE_MAX_SECONDS`."""
+    return float(os.environ.get("RUOK_SSE_MAX_SECONDS", "300"))
+
+
+def _sse_message(ev: Event) -> str:
+    data = json.dumps(ev.model_dump(mode="json"))
+    return f"id: {ev.id}\nevent: {ev.type.value}\ndata: {data}\n\n"
+
+
+def _fetch(
+    since: int, viewer: events.Viewer, env_id: str | None, types: set[str] | None
+) -> tuple[int, list[Event]]:
+    """Eventos nuevos visibles para `viewer`. Devuelve también el último id leído."""
+    with Session(engine) as session:
+        rows = events.fetch_since(session, since, env_id=env_id, types=types)
+        last = rows[-1].id if rows else since
+        return last, [events.to_schema(r) for r in rows if events.visible_to(r, viewer)]
+
+
+async def _stream(
+    viewer: events.Viewer, since: int, env_id: str | None, types: set[str] | None
+) -> AsyncIterator[str]:
+    waiter = events.subscribe()
+    deadline = time.monotonic() + _max_stream_s()
+    try:
+        yield f"retry: {RETRY_MS}\n\n"
+        while True:
+            waiter.clear()  # antes de leer: un commit durante la lectura vuelve a despertar
+            since, batch = await asyncio.to_thread(_fetch, since, viewer, env_id, types)
+            for ev in batch:
+                yield _sse_message(ev)
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return
+            try:
+                await asyncio.wait_for(waiter.wait(), timeout=min(KEEPALIVE_S, remaining))
+            except TimeoutError:
+                if deadline - time.monotonic() > 0:
+                    yield ": ping\n\n"
+    finally:
+        events.unsubscribe(waiter)
 
 
 @public.get(
     "/events/stream",
-    dependencies=[Depends(stream_user)],
     tags=["realtime"],
     response_class=StreamingResponse,
     summary="Stream SSE de eventos (filtrado por rol)",
     description="`text/event-stream`. Cada mensaje: `id` (= Event.id, usable como Last-Event-ID), "
     "`event` (= Event.type) y `data` (= Event en JSON). El token va en `?token=` porque "
-    "EventSource no admite cabeceras (sin token válido → 401). STUB(FS-02): emite los eventos "
-    "de ejemplo y cierra → BE-28 (que filtra cada evento según el rol del token).",
+    "EventSource no admite cabeceras (sin token válido → 401). Filtrado por el rol del token: "
+    "admin todo; medic/commander su entorno; member lo suyo; responder/psych solo lo entregado "
+    "por el enlace. Con `Last-Event-ID` se reanuda sin perder eventos; sin él, solo llegan los "
+    "nuevos. La conexión se cierra cada pocos minutos y el navegador reconecta solo.",
     responses={
         **ERRORS_AUTH,
         200: {
@@ -83,16 +130,24 @@ def _sse(events: list[Event]) -> Iterator[str]:
         },
     },
 )
-def events_stream(
-    token: str | None = None, types: str | None = None, env_id: Slug | None = None
+async def events_stream(
+    user: Annotated[models.UserAccount, Depends(stream_user)],
+    types: str | None = None,
+    env_id: Slug | None = None,
+    last_event_id: Annotated[int | None, Header(alias="Last-Event-ID")] = None,
 ) -> StreamingResponse:
-    wanted = set(types.split(",")) if types else None
-    evs = [
-        e
-        for e in stubs.EVENTS
-        if (wanted is None or e.type.value in wanted) and (env_id is None or e.env_id == env_id)
-    ]
-    return StreamingResponse(_sse(evs), media_type="text/event-stream")
+    viewer = events.Viewer.of(user)
+    wanted = {t for t in types.split(",") if t} if types else None
+    if last_event_id is None:
+        with Session(engine) as session:
+            since = events.last_id(session)  # primera conexión: solo lo nuevo
+    else:
+        since = last_event_id
+    return StreamingResponse(
+        _stream(viewer, since, env_id, wanted),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @router.get(
@@ -100,22 +155,20 @@ def events_stream(
     response_model=list[Event],
     tags=["realtime"],
     summary="Historial de eventos (admin; fallback de polling)",
-    description="STUB(FS-02) → BE-28",
+    description="Eventos de `event_log` con `id > since_id`, en orden. `limit` máximo 500.",
     dependencies=[AdminDep],
 )
 def list_events(
+    session: SessionDep,
     since_id: int = 0,
     env_id: Slug | None = None,
     type: EventType | None = None,  # noqa: A002
-    limit: int = 100,
+    limit: Annotated[int, Query(ge=1, le=500)] = 100,
 ) -> list[Event]:
-    return [
-        e
-        for e in stubs.EVENTS
-        if e.id > since_id
-        and (env_id is None or e.env_id == env_id)
-        and (type is None or e.type == type)
-    ][:limit]
+    rows = events.fetch_since(
+        session, since_id, env_id=env_id, types={type.value} if type else None, limit=limit
+    )
+    return [events.to_schema(r) for r in rows]
 
 
 # ── Dispositivos y control ──────────────────────────────────
