@@ -14,7 +14,7 @@ from app.routers import alerts, auth, catalog, game, health, members, realtime
 from app.routers.deps import device_id_header
 from app.seed import ensure_seeded
 from app.services import catalog as catalog_service
-from app.services import environments, liveness_watch
+from app.services import environments, events, liveness_watch
 from app.services.app_state import restore_clock
 
 
@@ -24,6 +24,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     with Session(engine) as session:
         restore_clock(session)
         ensure_seeded(session)  # BD vacía → seed de demo (BE-07)
+        events.purge_old(session)  # bitácora: solo los últimos 7 días (BE-28)
     environments.list_environments()  # valida app/data/environments.json al arrancar
     catalog_service.list_indicators()  # valida indicators.json y systems.json (y su coherencia)
     watcher = None

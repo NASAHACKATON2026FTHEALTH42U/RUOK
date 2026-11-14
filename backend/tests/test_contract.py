@@ -301,10 +301,14 @@ def test_assessment_escalation_follows_contract(client):
 
 
 def test_events_stream_is_sse(client):
-    with client.stream("GET", API + "/events/stream?env_id=mars") as resp:
+    body = {"measurements": [{**MEASUREMENT, "id": str(uuid.uuid4())}]}
+    assert client.post(API + "/members/1/measurements", json=body).status_code == 200
+    last = client.get(API + "/events?type=measurement.created").json()[-1]["id"]
+    headers = {"Last-Event-ID": str(last - 1)}
+    with client.stream("GET", API + "/events/stream?env_id=mars", headers=headers) as resp:
         assert resp.headers["content-type"].startswith("text/event-stream")
         text = "".join(resp.iter_text())
-    assert "id: 1\nevent: measurement.created\ndata: {" in text
+    assert f"id: {last}\nevent: measurement.created\ndata: {{" in text
 
 
 def test_fast_forward_moves_demo_clock(client):
