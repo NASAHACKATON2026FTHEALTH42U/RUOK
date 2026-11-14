@@ -5,12 +5,10 @@ import { serverNow } from '../api/client'
 import { useAssessment } from '../api/useAssessment'
 import { useEnvironments } from '../api/useEnvironments'
 import { useIndicators } from '../api/useIndicators'
-import { useLink } from '../api/useLink'
 import { useSystems } from '../api/useSystems'
 import { BodyFigure } from '../components/body/BodyFigure'
 import { buildRegions, formatSinceLabel, isFigureStale } from '../components/body/regions'
 import { IndicatorCard } from '../components/dashboard/IndicatorCard'
-import { LinkChip } from '../components/dashboard/LinkChip'
 import { SystemPanel } from '../components/dashboard/SystemPanel'
 import { bySeverity, livenessState, statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
@@ -19,11 +17,11 @@ import { formatAgo } from '../lib/time'
 import { useEnvironmentStore } from '../store/environment'
 import { useActiveMemberId, useAuth } from '../auth/useAuth'
 
-/** Cada cuánto se refrescan la evaluación y el enlace (FE-07). */
+/** Cada cuánto se refresca la evaluación (FE-07). */
 const REFRESH_MS = 15_000
 
 /**
- * Panel del member (FE-07): cabecera con estado general, liveness, enlace y frescura de los datos;
+ * Panel del member (FE-07): cabecera con estado general, liveness y frescura de los datos (el enlace está en la cabecera global, FE-17);
  * figura del cuerpo (FE-05); cuadrícula de indicadores ordenada por gravedad; detalle del sistema
  * al hacer clic (FE-06). La evaluación se refresca cada 15 s.
  * Los pendientes de sincronizar del outbox se ven en la cabecera global (PendingSyncChip, FE-11).
@@ -38,7 +36,6 @@ export default function Dashboard() {
     can('action:measure-others') || (can('view:measure') && user?.member_id === memberId)
   const envId = useEnvironmentStore((s) => s.envId)
   const assessment = useAssessment(memberId, REFRESH_MS)
-  const link = useLink(memberId !== null ? envId : null, REFRESH_MS)
   const systems = useSystems()
   const indicators = useIndicators()
   const envs = useEnvironments()
@@ -134,7 +131,6 @@ export default function Dashboard() {
           {live && (
             <StatusBadge status={live} label={formatSinceLabel(a.last_seen_at, serverNow())} />
           )}
-          {link.state === 'ready' && <LinkChip link={link.data} ground={vocab.ground} />}
           <span className="text-sm text-env-muted" role="status">
             {assessment.refreshFailed
               ? '⚠ No se pudo actualizar: los datos pueden estar desfasados'
