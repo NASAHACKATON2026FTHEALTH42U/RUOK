@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41); botón SOS / Pedir ayuda en **FE-13** (#43); login y sesión en **FE-27** (#68).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41); botón SOS / Pedir ayuda en **FE-13** (#43); login y sesión en **FE-27** (#68); permisos por rol en **FE-28** (#70).
 
 ## Comandos
 
@@ -128,8 +128,9 @@ frontend/
     │   ├── mocks/             API simulada: mode.ts, handlers.ts, mockFetch.ts, events.ts,
     │   │                      useMockStatus.ts, fixtures.gen.ts (GENERADO por npm run gen:mocks)
     │   └── *.test.ts          tests (Vitest)
-    ├── auth/                  session.ts (login, logout, kv.auth, 401) + roles.ts (homeFor; + test)
-    ├── components/auth/       RequireSession, SessionMenu
+    ├── auth/                  session.ts (login, logout, kv.auth, 401), roles.ts (homeFor),
+    │                          permissions.ts (matriz de acceso), useAuth.ts (+ tests)
+    ├── components/auth/       RequireSession, RequireRole, SessionMenu
     ├── components/alerts/     SosButton, SosDialog + sos.ts (categorías, destinos, protocolo; + test)
     ├── components/body/       BodyFigure (SVG) + regions.ts (buildRegions, formatSinceLabel; + test)
     ├── components/dashboard/  SystemPanel, IndicatorCard, TrendChart, LinkChip + format.ts y trend.ts (+ tests)
@@ -441,14 +442,33 @@ Diseño completo en [`docs/auth-and-roles.md`](../docs/auth-and-roles.md).
 - **401 o `exp` vencido:** la sesión pasa a "caducada" y se va a `/login?expired=1` ("Tu sesión ha caducado… no se ha perdido nada"); al volver a entrar se regresa a la página donde se estaba. El outbox se pausa solo con el 401 (FE-11) y se reanuda tras el login.
 - **"Salir"** (cabecera, `SessionMenu`) borra `kv.auth` pero **nunca el outbox**: lo pendiente se envía al volver a entrar.
 - **SOS sin sesión:** usa `kv.last_member_id` y solo permite la categoría _emergencia_ (lo único que el back acepta sin token). Si el dispositivo nunca tuvo sesión, pide iniciarla y recuerda avisar de viva voz.
-- Los permisos por rol (ocultar vistas y menús, "solo admin" en el selector de entorno) son de **FE-28**.
 - **Para FE-15:** el modal "R U OK?" debe montarse también en `/login` (fuera del `Layout`), como el SOS.
+
+## Permisos por rol (FE-28)
+
+**Un solo sitio:** `src/auth/permissions.ts` es el espejo de la matriz de [`docs/auth-and-roles.md`](../docs/auth-and-roles.md#matriz-de-acceso-a-vistas). Si cambia la matriz, se cambia allí y aquí (y en el back). `permissions.test.ts` recorre la matriz completa rol a rol y comprueba que la vista inicial de cada rol está permitida (sin bucles de redirección).
+
+```ts
+const { user, role, can } = useAuth()
+can('view:ground') // vistas: view:dashboard, view:measure, view:checkin, view:ground…
+can('action:measure-others') // acciones: action:sos, action:change-environment, action:ack-alerts…
+const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el elegido
+```
+
+- **Rutas:** cada ruta de `App.tsx` va envuelta en `<RequireRole>` con el permiso de `ROUTE_PERMISSIONS`. Una ruta prohibida **redirige a la vista inicial del rol** (`homeFor`).
+- **Menú:** la navegación solo muestra las vistas permitidas (p. ej. el flight surgeon ve Historial, Alertas y su consola; el medic, además, "Tripulación"). El logo lleva a la vista inicial del rol.
+- **Selector de entorno** de la cabecera y página `/`: solo `admin`.
+- **"Medir ahora"** del `SystemPanel`: el member para sí mismo; medic y admin para cualquiera ("medir para otro solo medic").
+- **SOS:** sin sesión, siempre visible. Con sesión, oculto para `responder` y `psych` (están en tierra).
+- **Cabecera:** usuario y rol con el **vocabulario del entorno** (`userRoleLabel()`: astronauta, oficial médico, flight surgeon…; si no hay término, el `role_label` del servidor).
+- El panel de demo y `/control` ya tienen permiso (`action:demo-panel`, `view:control`) para FE-31/FE-32.
+- Ocultar en la UI **no es seguridad**: el back comprueba rol y propiedad en cada endpoint (BE-27).
 
 ### Pendiente
 
 - **TODO(FE-11):** los pendientes de sincronizar del outbox en la cabecera del dashboard (aún no existe el outbox).
 
-- **Cabecera en móvil:** a 390 px el chip de servidor y el selector de entorno no caben y hay scroll horizontal (se arregla en FE-26).
+- **Cabecera en móvil:** desde FE-28 solo el admin ve el selector de entorno; con él, a 390 px el chip de servidor y el selector pueden no caber (FE-26). Para el member ya no hay scroll horizontal.
 
 - **TODO(FE-28):** `/` solo será accesible para el rol admin; el resto entra directamente en su entorno.
 - **Colores del contrato alineados:** `theme.primary` de `backend/app/data/environments.json` (BE-03) usa los mismos `primary` que `src/environments/themes/` (en `earth`, `#2bb3c9`, no verde). Si cambias uno, cambia el otro.
