@@ -43,8 +43,11 @@ export function BodyFigure({
 }: BodyFigureProps) {
   const uid = useId().replace(/:/g, '')
   const stripes = `stripes-${uid}`
+  const glow = `glow-${uid}`
   const boxRef = useRef<HTMLDivElement>(null)
   const [tooltip, setTooltip] = useState<Tooltip | null>(null)
+  // Zona señalada (ratón, foco de teclado o su botón de la leyenda): se ilumina y el resto se atenúa.
+  const [hovered, setHovered] = useState<string | null>(null)
   const stale = isFigureStale(liveness)
   // Latido del aura: no si el usuario pide reducir movimiento ni sin datos fiables.
   const reducedMotion = useReducedMotion()
@@ -74,6 +77,14 @@ export function BodyFigure({
         'aria-label': label,
         'aria-pressed': selectedSystemId === r.systemId,
         className: 'cursor-pointer outline-none',
+        style: {
+          transformBox: 'fill-box' as const,
+          transformOrigin: 'center',
+          transition: 'transform 150ms ease-out, opacity 150ms ease-out, filter 150ms ease-out',
+          transform: hovered === r.systemId ? 'scale(1.08)' : undefined,
+          opacity: hovered !== null && hovered !== r.systemId ? 0.4 : 1,
+          filter: hovered === r.systemId ? `url(#${glow})` : undefined,
+        },
         onClick: () => onSelectSystem?.(r.systemId),
         onKeyDown: (e: KeyboardEvent) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -81,10 +92,22 @@ export function BodyFigure({
             onSelectSystem?.(r.systemId)
           }
         },
-        onPointerEnter: (e: PointerEvent) => showTooltip(r, e.currentTarget),
-        onPointerLeave: () => setTooltip(null),
-        onFocus: (e: FocusEvent) => showTooltip(r, e.currentTarget),
-        onBlur: () => setTooltip(null),
+        onPointerEnter: (e: PointerEvent) => {
+          showTooltip(r, e.currentTarget)
+          setHovered(r.systemId)
+        },
+        onPointerLeave: () => {
+          setTooltip(null)
+          setHovered(null)
+        },
+        onFocus: (e: FocusEvent) => {
+          showTooltip(r, e.currentTarget)
+          setHovered(r.systemId)
+        },
+        onBlur: () => {
+          setTooltip(null)
+          setHovered(null)
+        },
       },
     }
   }
@@ -94,10 +117,10 @@ export function BodyFigure({
    * (deja ver el órgano) y contorno del mismo color; más grueso y blanco si está seleccionada.
    */
   const shape = (r: RegionState) => {
-    const selected = selectedSystemId === r.systemId
+    const selected = selectedSystemId === r.systemId || hovered === r.systemId
     return {
       fill: fillFor(r),
-      fillOpacity: 0.55,
+      fillOpacity: hovered === r.systemId ? 0.85 : 0.55,
       stroke: selected
         ? '#ffffff'
         : stale || statusStyle(r.status).striped
@@ -148,6 +171,16 @@ export function BodyFigure({
           aria-label="Estado por sistema del cuerpo"
         >
           <defs>
+            <filter id={glow} x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="14" result="blur" />
+              <feFlood floodColor="#ffffff" floodOpacity="0.95" />
+              <feComposite in2="blur" operator="in" result="halo" />
+              <feMerge>
+                <feMergeNode in="halo" />
+                <feMergeNode in="halo" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
             <pattern
               id={stripes}
               width="24"
@@ -294,6 +327,10 @@ export function BodyFigure({
             <button
               type="button"
               onClick={() => onSelectSystem?.(r.systemId)}
+              onPointerEnter={() => setHovered(r.systemId)}
+              onPointerLeave={() => setHovered(null)}
+              onFocus={() => setHovered(r.systemId)}
+              onBlur={() => setHovered(null)}
               aria-pressed={selectedSystemId === r.systemId}
               className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
                 selectedSystemId === r.systemId
