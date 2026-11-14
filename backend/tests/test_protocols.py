@@ -1,4 +1,5 @@
-"""CNT-02: protocolos por sistema y estado (protocols.json) y fuentes de los textos."""
+"""CNT-02 y CNT-03: protocolos por sistema y estado y por categoría de alerta
+(protocols.json), y fuentes de los textos."""
 
 import re
 
@@ -10,6 +11,8 @@ from tests.conftest import API
 
 REAL = catalog.load_protocols()
 SYSTEMS = catalog.list_systems()
+BY_SYSTEM = [p for p in REAL if p.system_id]
+NO_CONTACT = next(p for p in REAL if p.alert_category == "no_contact")
 
 
 def _proto(**kw) -> Protocol:
@@ -23,12 +26,12 @@ def test_real_file_is_consistent_and_cites_known_sources():
 
 
 def test_every_system_has_a_warning_and_a_critical_protocol():
-    covered = {(p.system_id, st) for p in REAL for st in p.statuses}
+    covered = {(p.system_id, st) for p in BY_SYSTEM for st in p.statuses}
     assert covered == {(s.id, st) for s in SYSTEMS for st in ("warning", "critical")}
 
 
 def test_recommendations_are_ordered_and_have_text():
-    for p in REAL:
+    for p in BY_SYSTEM:
         assert [r.priority for r in p.recommendations] == list(
             range(1, len(p.recommendations) + 1)
         )
@@ -65,6 +68,42 @@ def test_repeated_recommendation_id_is_rejected():
 def test_schema_rejects_invalid_protocols(bad):
     with pytest.raises(ValueError):
         _proto(**bad)
+
+
+# ── Protocolos por categoría de alerta (CNT-03) ──────────────────────
+
+
+def test_no_contact_protocol_has_steps_and_is_found_by_category():
+    assert catalog.protocol_for_alert("no_contact") == NO_CONTACT
+    assert len(NO_CONTACT.steps) >= 4 and all(s.strip() for s in NO_CONTACT.steps)
+    assert catalog.protocol_for_alert("indicator") is None
+
+
+def test_alert_protocols_are_ignored_by_the_system_assessment():
+    from app.services.assessment import find_protocol
+    from app.services.member_assessment import load_protocols
+
+    for system in SYSTEMS:
+        found = find_protocol(system.id, "critical", load_protocols())
+        assert found is not None and found["system_id"] == system.id
+
+
+def test_two_protocols_for_the_same_alert_category_are_rejected():
+    twin = Protocol.model_validate({**NO_CONTACT.model_dump(), "id": "proto_twin"})
+    with pytest.raises(ValueError, match="ya lo cubre"):
+        catalog.check_protocols([NO_CONTACT, twin], SYSTEMS)
+
+
+@pytest.mark.parametrize("bad", [
+    {"system_id": "cardiovascular"},  # sistema y categoría a la vez
+    {"alert_category": None},  # ni lo uno ni lo otro
+    {"steps": []},
+    {"statuses": ["critical"]},
+    {"alert_category": "juggling"},
+])
+def test_schema_rejects_invalid_alert_protocols(bad):
+    with pytest.raises(ValueError):
+        Protocol.model_validate({**NO_CONTACT.model_dump(), **bad})
 
 
 def test_every_system_and_indicator_text_has_a_source():

@@ -8,7 +8,7 @@ from typing import Literal
 
 from pydantic import Field, model_validator
 
-from app.schemas.common import ApiModel, EnvironmentKind, Range, Slug
+from app.schemas.common import AlertCategory, ApiModel, EnvironmentKind, Range, Slug
 
 
 class LivenessThresholds(ApiModel):
@@ -108,16 +108,33 @@ class ProtocolRecommendation(ApiModel):
 
 
 class Protocol(ApiModel):
-    """Qué hacer cuando un sistema está en `warning` o `critical` (app/data/protocols.json,
-    CNT-02). Uso interno: sus textos salen por `Assessment` (recommendations, escalation)."""
+    """Protocolo de app/data/protocols.json. Uso interno (no sale tal cual por la API).
+
+    - **De sistema** (`system_id` + `statuses`, CNT-02): qué hacer cuando un sistema está
+      en `warning` o `critical`. Sus textos salen por `Assessment` (recommendations,
+      escalation).
+    - **De categoría de alerta** (`alert_category`, CNT-03): pasos para quien atiende una
+      alerta que no es de un sistema del cuerpo, como `no_contact`.
+    """
 
     id: Slug = Field(examples=["proto_cardiovascular_critical"])
-    system_id: Slug
-    statuses: list[Literal["warning", "critical"]] = Field(min_length=1)
+    system_id: Slug | None = None
+    statuses: list[Literal["warning", "critical"]] = Field(default_factory=list)
+    alert_category: AlertCategory | None = None
     message: str = Field(min_length=1, description="Mensaje de la alerta y del escalado")
     steps: list[str] = Field(default_factory=list, description="Pasos del protocolo autónomo")
-    recommendations: list[ProtocolRecommendation] = Field(min_length=1)
+    recommendations: list[ProtocolRecommendation] = Field(default_factory=list)
     sources: list[str] = Field(min_length=1, description="IDs de docs/sources.md")
+
+    @model_validator(mode="after")
+    def _system_or_category(self) -> "Protocol":
+        if (self.system_id is None) == (self.alert_category is None):
+            raise ValueError("un protocolo es de un sistema (system_id) o de una alert_category")
+        if self.system_id is not None and not (self.statuses and self.recommendations):
+            raise ValueError("un protocolo de sistema necesita statuses y recommendations")
+        if self.alert_category is not None and (self.statuses or not self.steps):
+            raise ValueError("un protocolo de alert_category lleva steps y no statuses")
+        return self
 
 
 class Mission(ApiModel):
