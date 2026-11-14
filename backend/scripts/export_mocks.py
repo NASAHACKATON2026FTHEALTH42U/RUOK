@@ -55,6 +55,9 @@ OUT = Path(__file__).resolve().parents[2] / "frontend/src/api/mocks/fixtures.gen
 NOW = "2026-11-14T10:00:00Z"
 
 
+MOBILE_UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile/15E148"
+
+
 def _demo_state(post) -> None:
     """Deja a Cmdr. Vega (member 1) con un assessment de demo que mezcla los 4 estados.
 
@@ -130,6 +133,25 @@ def main() -> None:
         )
 
         _demo_state(post)
+        # Desde BE-29 /devices es real: el móvil de Vega se registra con una petición
+        # (X-Device-Id + user agent) y un heartbeat con pendientes en su outbox.
+        phone = {
+            **vega,
+            "X-Device-Id": str(stubs.DEVICE.id),
+            "User-Agent": MOBILE_UA,
+            "X-Forwarded-For": "192.168.8.21",  # IP de ejemplo en la red local
+        }
+        c.get(API + "/auth/me", headers=phone).raise_for_status()
+        post(
+            "/members/1/heartbeat",
+            {
+                "device_id": str(stubs.DEVICE.id),
+                "pending_outbox": 2,
+                "device_kind": "mobile",
+                "last_sync_at": clock.now().isoformat().replace("+00:00", "Z"),
+            },
+            headers=phone,
+        )
 
         envs = get("/environments")
         env_ids = [e["id"] for e in envs]

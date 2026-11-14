@@ -1,7 +1,7 @@
 """Tiempo real, dispositivos, centro de control, enlace, sistema y demo.
 
 Reales: enlace (BE-13), demo (BE-07), fast-forward (app/clock.py) y eventos/SSE (BE-28).
-Centro de control y network-info (BE-30). STUB(FS-02) → BE-29 (dispositivos).
+Reales también: dispositivos (BE-29), centro de control y network-info (BE-30).
 """
 
 import asyncio
@@ -15,7 +15,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from sqlmodel import Session
 
-from app import clock, models, seed, stubs
+from app import clock, models, seed
 from app.db import engine, get_session
 from app.routers.deps import (
     ERRORS_404,
@@ -42,7 +42,17 @@ from app.schemas import (
     OkResponse,
     Slug,
 )
-from app.services import alerts, comm_link, control, environments, events, liveness_watch, network
+from app.services import (
+    alerts,
+    app_state,
+    comm_link,
+    control,
+    devices,
+    environments,
+    events,
+    liveness_watch,
+    network,
+)
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -177,11 +187,16 @@ def list_events(
     response_model=list[Device],
     tags=["realtime"],
     summary="Dispositivos registrados (admin)",
-    description="STUB(FS-02) → BE-29",
+    description="El último visto primero. Se actualizan con cada petición que lleva "
+    "`X-Device-Id` (IP, user agent, usuario) y con cada heartbeat (`pending_outbox`, "
+    "`last_sync_at`). `env_id` filtra por el entorno de su último usuario.",
     dependencies=[AdminDep],
 )
-def list_devices(env_id: Slug | None = None) -> list[Device]:
-    return [stubs.DEVICE]
+def list_devices(session: SessionDep, env_id: Slug | None = None) -> list[Device]:
+    return [
+        Device.model_validate(d, from_attributes=True)
+        for d in devices.list_devices(session, env_id)
+    ]
 
 
 @router.get(
@@ -282,6 +297,7 @@ def list_link_messages(
 )
 def demo_reset(session: Annotated[Session, Depends(get_session)]) -> OkResponse:
     members, measurements = seed.reset(session)
+    app_state.save_clock(session)  # el reloj vuelve al real también tras un reinicio (BE-32)
     return OkResponse(
         detail=f"seed v{seed.SEED_VERSION}: {members} members y {measurements} mediciones"
     )
@@ -332,6 +348,7 @@ def demo_link(body: DemoLinkIn, session: SessionDep) -> LinkStatus:
 )
 def demo_fast_forward(body: FastForwardIn, session: SessionDep) -> DemoClock:
     clock.advance(body.seconds)
+    app_state.save_clock(session)  # el offset sobrevive a un reinicio del servidor (BE-32)
     comm_link.deliver_due(session)
     alerts.reevaluate_open(session)  # escala los warnings que han persistido (BE-14)
     liveness_watch.check_all(session)  # R U OK? y no_contact con el reloj adelantado (BE-16)

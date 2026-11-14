@@ -120,6 +120,16 @@ def test_expired_token_is_401_with_demo_clock(client, monkeypatch):
     assert resp.json()["detail"] == "Token caducado"
 
 
+def test_login_after_fast_forward_is_valid(client):
+    """BE-36: un token emitido con el reloj de la demo adelantado (iat en el "futuro" para
+    la hora del sistema) es válido: la validez se mide solo con clock.now()."""
+    clock.advance(3 * 86400)
+    token = client.post(API + "/auth/login", json=VEGA).json()["access_token"]
+    resp = client.get(API + "/auth/me", headers=_bearer(token))
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["username"] == "vega"
+
+
 def test_ttl_is_configurable(client, monkeypatch):
     monkeypatch.setenv("RUOK_JWT_TTL_HOURS", "1")
     token = client.post(API + "/auth/login", json=VEGA).json()["access_token"]
