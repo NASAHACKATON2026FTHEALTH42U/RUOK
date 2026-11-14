@@ -101,6 +101,25 @@ class BadgeDef(ApiModel):
     rule: BadgeRule
 
 
+class ProtocolRecommendation(ApiModel):
+    id: Slug
+    text: str
+    priority: int = Field(ge=1, description="1 = más importante")
+
+
+class Protocol(ApiModel):
+    """Qué hacer cuando un sistema está en `warning` o `critical` (app/data/protocols.json,
+    CNT-02). Uso interno: sus textos salen por `Assessment` (recommendations, escalation)."""
+
+    id: Slug = Field(examples=["proto_cardiovascular_critical"])
+    system_id: Slug
+    statuses: list[Literal["warning", "critical"]] = Field(min_length=1)
+    message: str = Field(min_length=1, description="Mensaje de la alerta y del escalado")
+    steps: list[str] = Field(default_factory=list, description="Pasos del protocolo autónomo")
+    recommendations: list[ProtocolRecommendation] = Field(min_length=1)
+    sources: list[str] = Field(min_length=1, description="IDs de docs/sources.md")
+
+
 class Mission(ApiModel):
     start: date
     end: date

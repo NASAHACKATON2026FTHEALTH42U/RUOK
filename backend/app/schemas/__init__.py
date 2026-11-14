@@ -60,6 +60,8 @@ from app.schemas.config import (
     Environment,
     Indicator,
     Intervention,
+    Protocol,
+    ProtocolRecommendation,
     TaskType,
 )
 from app.schemas.game import Badge, GameState, Leaderboard, LeaderboardEntry, Task, TaskCompleteIn
@@ -164,6 +166,8 @@ __all__ = [
     "OkResponse",
     "PinLoginIn",
     "PrivacyIn",
+    "Protocol",
+    "ProtocolRecommendation",
     "Recommendation",
     "ResolveIn",
     "Role",

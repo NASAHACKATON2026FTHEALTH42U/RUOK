@@ -238,7 +238,7 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
     "escalation": { "level": 0, "target_role": "self", "mode": "realtime",     // level = índice en escalation_ladder.
                     // self/crew (a bordo) → realtime, delay_s 0. Externos: realtime <5 s, delayed,
                     // autonomous si retardo ≥ 60 s Y critical (ver alerts-and-escalation.md)
-                    "delay_s": 0, "message": "...", "protocol_id": "proto_bp_high" }
+                    "delay_s": 0, "message": "...", "protocol_id": "proto_cardiovascular_critical" }
   }],
   "behavioral": { "status": "normal", "details_visible": true },  // privacidad: con false, los indicadores
                   // conductuales (mood, stress, energy, loneliness, sleep_quality, crew_relation, pvt_*)

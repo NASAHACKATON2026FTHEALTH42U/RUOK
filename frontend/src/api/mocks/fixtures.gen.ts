@@ -1922,14 +1922,33 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_cardiovascular_warning_1",
+            "text": "Siéntate 5 minutos en reposo y repite la medición",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_cardiovascular_warning_2",
+            "text": "Evita el esfuerzo intenso hasta tener una medición normal",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_cardiovascular_warning_3",
+            "text": "Anota si notas dolor en el pecho, mareo o falta de aire y cuéntaselo al responsable médico",
+            "priority": 3,
+            "intervention_id": null
+          }
+        ],
         "escalation": {
           "level": 0,
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "",
-          "protocol_id": null
+          "message": "Cardiovascular en aviso: repite la medición en reposo.",
+          "protocol_id": "proto_cardiovascular_warning"
         }
       },
       {
@@ -1958,9 +1977,21 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         ],
         "recommendations": [
           {
+            "id": "rec_musculoskeletal_warning_1",
+            "text": "Reserva hoy un bloque para completar la sesión de ejercicio",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_musculoskeletal_warning_2",
+            "text": "Si no te cabe una sesión larga, repártela en dos bloques más cortos",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
             "id": "rec_int_exercise_session",
             "text": "Sesión de ejercicio de resistencia (30 min)",
-            "priority": 1,
+            "priority": 3,
             "intervention_id": "int_exercise_session"
           }
         ],
@@ -1969,8 +2000,8 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "",
-          "protocol_id": null
+          "message": "Musculoesquelético en aviso: hoy llevas menos ejercicio del recomendado.",
+          "protocol_id": "proto_musculoskeletal_warning"
         }
       },
       {
@@ -2185,15 +2216,33 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         ],
         "recommendations": [
           {
+            "id": "rec_neuro_behavioral_critical_1",
+            "text": "Habla hoy con alguien de confianza o con el responsable médico",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_neuro_behavioral_critical_2",
+            "text": "No hagas a solas tareas críticas hasta que estés mejor",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_neuro_behavioral_critical_3",
+            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en Pedir ayuda",
+            "priority": 3,
+            "intervention_id": null
+          },
+          {
             "id": "rec_int_sleep_light",
             "text": "Higiene del sueño y luz (5 min)",
-            "priority": 1,
+            "priority": 4,
             "intervention_id": "int_sleep_light"
           },
           {
             "id": "rec_int_reach_out",
             "text": "Habla con alguien de confianza (10 min)",
-            "priority": 2,
+            "priority": 5,
             "intervention_id": "int_reach_out"
           }
         ],
@@ -2202,8 +2251,8 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "crew",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "",
-          "protocol_id": null
+          "message": "Neuro-conductual en estado crítico: no lo lleves a solas, pide apoyo hoy.",
+          "protocol_id": "proto_neuro_behavioral_critical"
         }
       },
       {
@@ -2336,14 +2385,33 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_cardiovascular_warning_1",
+            "text": "Siéntate 5 minutos en reposo y repite la medición",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_cardiovascular_warning_2",
+            "text": "Evita el esfuerzo intenso hasta tener una medición normal",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_cardiovascular_warning_3",
+            "text": "Anota si notas dolor en el pecho, mareo o falta de aire y cuéntaselo al responsable médico",
+            "priority": 3,
+            "intervention_id": null
+          }
+        ],
         "escalation": {
           "level": 0,
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "",
-          "protocol_id": null
+          "message": "Cardiovascular en aviso: repite la medición en reposo.",
+          "protocol_id": "proto_cardiovascular_warning"
         }
       },
       {
@@ -2372,9 +2440,21 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         ],
         "recommendations": [
           {
+            "id": "rec_musculoskeletal_warning_1",
+            "text": "Reserva hoy un bloque para completar la sesión de ejercicio",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_musculoskeletal_warning_2",
+            "text": "Si no te cabe una sesión larga, repártela en dos bloques más cortos",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
             "id": "rec_int_exercise_session",
             "text": "Sesión de ejercicio de resistencia (30 min)",
-            "priority": 1,
+            "priority": 3,
             "intervention_id": "int_exercise_session"
           }
         ],
@@ -2383,8 +2463,8 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "",
-          "protocol_id": null
+          "message": "Musculoesquelético en aviso: hoy llevas menos ejercicio del recomendado.",
+          "protocol_id": "proto_musculoskeletal_warning"
         }
       },
       {
@@ -2599,15 +2679,33 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         ],
         "recommendations": [
           {
+            "id": "rec_neuro_behavioral_critical_1",
+            "text": "Habla hoy con alguien de confianza o con el responsable médico",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_neuro_behavioral_critical_2",
+            "text": "No hagas a solas tareas críticas hasta que estés mejor",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_neuro_behavioral_critical_3",
+            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en Pedir ayuda",
+            "priority": 3,
+            "intervention_id": null
+          },
+          {
             "id": "rec_int_sleep_light",
             "text": "Higiene del sueño y luz (5 min)",
-            "priority": 1,
+            "priority": 4,
             "intervention_id": "int_sleep_light"
           },
           {
             "id": "rec_int_reach_out",
             "text": "Habla con alguien de confianza (10 min)",
-            "priority": 2,
+            "priority": 5,
             "intervention_id": "int_reach_out"
           }
         ],
@@ -2616,8 +2714,8 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "crew",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "",
-          "protocol_id": null
+          "message": "Neuro-conductual en estado crítico: no lo lleves a solas, pide apoyo hoy.",
+          "protocol_id": "proto_neuro_behavioral_critical"
         }
       },
       {
@@ -2750,14 +2848,33 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_cardiovascular_critical_1",
+            "text": "Avisa ahora a alguien que esté contigo y pide ayuda con el botón SOS",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_cardiovascular_critical_2",
+            "text": "Deja lo que estés haciendo, siéntate y no hagas esfuerzos",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_cardiovascular_critical_3",
+            "text": "Repite la medición a los 5 minutos y registra el valor",
+            "priority": 3,
+            "intervention_id": null
+          }
+        ],
         "escalation": {
           "level": 1,
           "target_role": "crew",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "",
-          "protocol_id": null
+          "message": "Cardiovascular en estado crítico: avisa ahora y no te quedes a solas.",
+          "protocol_id": "proto_cardiovascular_critical"
         }
       },
       {
@@ -2786,9 +2903,21 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         ],
         "recommendations": [
           {
+            "id": "rec_musculoskeletal_warning_1",
+            "text": "Reserva hoy un bloque para completar la sesión de ejercicio",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_musculoskeletal_warning_2",
+            "text": "Si no te cabe una sesión larga, repártela en dos bloques más cortos",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
             "id": "rec_int_exercise_session",
             "text": "Sesión de ejercicio de resistencia (30 min)",
-            "priority": 1,
+            "priority": 3,
             "intervention_id": "int_exercise_session"
           }
         ],
@@ -2797,8 +2926,8 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "",
-          "protocol_id": null
+          "message": "Musculoesquelético en aviso: hoy llevas menos ejercicio del recomendado.",
+          "protocol_id": "proto_musculoskeletal_warning"
         }
       },
       {
@@ -3013,15 +3142,33 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         ],
         "recommendations": [
           {
+            "id": "rec_neuro_behavioral_critical_1",
+            "text": "Habla hoy con alguien de confianza o con el responsable médico",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_neuro_behavioral_critical_2",
+            "text": "No hagas a solas tareas críticas hasta que estés mejor",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_neuro_behavioral_critical_3",
+            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en Pedir ayuda",
+            "priority": 3,
+            "intervention_id": null
+          },
+          {
             "id": "rec_int_sleep_light",
             "text": "Higiene del sueño y luz (5 min)",
-            "priority": 1,
+            "priority": 4,
             "intervention_id": "int_sleep_light"
           },
           {
             "id": "rec_int_reach_out",
             "text": "Habla con alguien de confianza (10 min)",
-            "priority": 2,
+            "priority": 5,
             "intervention_id": "int_reach_out"
           }
         ],
@@ -3030,8 +3177,8 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "crew",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "",
-          "protocol_id": null
+          "message": "Neuro-conductual en estado crítico: no lo lleves a solas, pide apoyo hoy.",
+          "protocol_id": "proto_neuro_behavioral_critical"
         }
       },
       {
@@ -3164,14 +3311,33 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_cardiovascular_warning_1",
+            "text": "Siéntate 5 minutos en reposo y repite la medición",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_cardiovascular_warning_2",
+            "text": "Evita el esfuerzo intenso hasta tener una medición normal",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_cardiovascular_warning_3",
+            "text": "Anota si notas dolor en el pecho, mareo o falta de aire y cuéntaselo al responsable médico",
+            "priority": 3,
+            "intervention_id": null
+          }
+        ],
         "escalation": {
           "level": 0,
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "",
-          "protocol_id": null
+          "message": "Cardiovascular en aviso: repite la medición en reposo.",
+          "protocol_id": "proto_cardiovascular_warning"
         }
       },
       {
@@ -3253,15 +3419,33 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         ],
         "recommendations": [
           {
+            "id": "rec_neuro_behavioral_critical_1",
+            "text": "Habla hoy con alguien de confianza o con el responsable médico",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_neuro_behavioral_critical_2",
+            "text": "No hagas a solas tareas críticas hasta que estés mejor",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_neuro_behavioral_critical_3",
+            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en Pedir ayuda",
+            "priority": 3,
+            "intervention_id": null
+          },
+          {
             "id": "rec_int_sleep_light",
             "text": "Higiene del sueño y luz (5 min)",
-            "priority": 1,
+            "priority": 4,
             "intervention_id": "int_sleep_light"
           },
           {
             "id": "rec_int_reach_out",
             "text": "Habla con alguien de confianza (10 min)",
-            "priority": 2,
+            "priority": 5,
             "intervention_id": "int_reach_out"
           }
         ],
@@ -3270,8 +3454,8 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "crew",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "",
-          "protocol_id": null
+          "message": "Neuro-conductual en estado crítico: no lo lleves a solas, pide apoyo hoy.",
+          "protocol_id": "proto_neuro_behavioral_critical"
         }
       }
     ],
@@ -3370,14 +3554,33 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_cardiovascular_warning_1",
+            "text": "Siéntate 5 minutos en reposo y repite la medición",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_cardiovascular_warning_2",
+            "text": "Evita el esfuerzo intenso hasta tener una medición normal",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_cardiovascular_warning_3",
+            "text": "Anota si notas dolor en el pecho, mareo o falta de aire y cuéntaselo al responsable médico",
+            "priority": 3,
+            "intervention_id": null
+          }
+        ],
         "escalation": {
           "level": 0,
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "",
-          "protocol_id": null
+          "message": "Cardiovascular en aviso: repite la medición en reposo.",
+          "protocol_id": "proto_cardiovascular_warning"
         }
       },
       {
@@ -3459,15 +3662,33 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         ],
         "recommendations": [
           {
+            "id": "rec_neuro_behavioral_critical_1",
+            "text": "Habla hoy con alguien de confianza o con el responsable médico",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_neuro_behavioral_critical_2",
+            "text": "No hagas a solas tareas críticas hasta que estés mejor",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_neuro_behavioral_critical_3",
+            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en Pedir ayuda",
+            "priority": 3,
+            "intervention_id": null
+          },
+          {
             "id": "rec_int_sleep_light",
             "text": "Higiene del sueño y luz (5 min)",
-            "priority": 1,
+            "priority": 4,
             "intervention_id": "int_sleep_light"
           },
           {
             "id": "rec_int_reach_out",
             "text": "Habla con alguien de confianza (10 min)",
-            "priority": 2,
+            "priority": 5,
             "intervention_id": "int_reach_out"
           }
         ],
@@ -3476,8 +3697,8 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "nurse",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "",
-          "protocol_id": null
+          "message": "Neuro-conductual en estado crítico: no lo lleves a solas, pide apoyo hoy.",
+          "protocol_id": "proto_neuro_behavioral_critical"
         }
       }
     ],
@@ -3576,14 +3797,33 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_cardiovascular_warning_1",
+            "text": "Siéntate 5 minutos en reposo y repite la medición",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_cardiovascular_warning_2",
+            "text": "Evita el esfuerzo intenso hasta tener una medición normal",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_cardiovascular_warning_3",
+            "text": "Anota si notas dolor en el pecho, mareo o falta de aire y cuéntaselo al responsable médico",
+            "priority": 3,
+            "intervention_id": null
+          }
+        ],
         "escalation": {
           "level": 0,
           "target_role": "self",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "",
-          "protocol_id": null
+          "message": "Cardiovascular en aviso: repite la medición en reposo.",
+          "protocol_id": "proto_cardiovascular_warning"
         }
       },
       {
@@ -3714,15 +3954,33 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         ],
         "recommendations": [
           {
+            "id": "rec_neuro_behavioral_critical_1",
+            "text": "Habla hoy con alguien de confianza o con el responsable médico",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_neuro_behavioral_critical_2",
+            "text": "No hagas a solas tareas críticas hasta que estés mejor",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_neuro_behavioral_critical_3",
+            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en Pedir ayuda",
+            "priority": 3,
+            "intervention_id": null
+          },
+          {
             "id": "rec_int_sleep_light",
             "text": "Higiene del sueño y luz (5 min)",
-            "priority": 1,
+            "priority": 4,
             "intervention_id": "int_sleep_light"
           },
           {
             "id": "rec_int_reach_out",
             "text": "Habla con alguien de confianza (10 min)",
-            "priority": 2,
+            "priority": 5,
             "intervention_id": "int_reach_out"
           }
         ],
@@ -3731,8 +3989,8 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "target_role": "caregiver",
           "mode": "realtime",
           "delay_s": 0,
-          "message": "",
-          "protocol_id": null
+          "message": "Neuro-conductual en estado crítico: no lo lleves a solas, pide apoyo hoy.",
+          "protocol_id": "proto_neuro_behavioral_critical"
         }
       }
     ],
@@ -8744,7 +9002,7 @@ export const alerts: Schema<'Alert'>[] = [
     "indicator_ids": [
       "bp_systolic"
     ],
-    "message": "Cardiovascular en estado crítico",
+    "message": "Cardiovascular en estado crítico: avisa ahora y no te quedes a solas.",
     "level": 2,
     "target_role": "ground",
     "delivery_mode": "autonomous",
@@ -8807,7 +9065,7 @@ export const alerts: Schema<'Alert'>[] = [
     "indicator_ids": [
       "sleep_hours"
     ],
-    "message": "Neuro-conductual en estado crítico",
+    "message": "Neuro-conductual en estado crítico: no lo lleves a solas, pide apoyo hoy.",
     "level": 2,
     "target_role": "ground",
     "delivery_mode": "autonomous",
@@ -8870,7 +9128,7 @@ export const alerts: Schema<'Alert'>[] = [
     "indicator_ids": [
       "exercise_min"
     ],
-    "message": "Musculoesquelético en aviso",
+    "message": "Musculoesquelético en aviso: hoy llevas menos ejercicio del recomendado.",
     "level": 0,
     "target_role": "self",
     "delivery_mode": "realtime",

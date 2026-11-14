@@ -157,12 +157,16 @@ def test_member_sees_specific_but_medic_only_generic(client, vega_auth, medic_au
     own = client.get(f"{API}/members/1/assessment", headers=vega_auth).json()
     neuro = next(s for s in own["systems"] if s["system_id"] == NEURO)
     assert neuro["status"] in ("warning", "critical")
-    own_ids = [r["intervention_id"] for r in neuro["recommendations"]]
+    # Las recomendaciones del protocolo (CNT-02) no llevan intervention_id: son las mismas
+    # salte el indicador que salte, así que no delatan nada y las ve todo el mundo.
+    own_ids = [r["intervention_id"] for r in neuro["recommendations"] if r["intervention_id"]]
     assert "int_sleep_light" in own_ids
 
     other = client.get(f"{API}/members/1/assessment", headers=medic_auth).json()
     neuro = next(s for s in other["systems"] if s["system_id"] == NEURO)
-    medic_ids = [r["intervention_id"] for r in neuro["recommendations"]]
+    medic_ids = [r["intervention_id"] for r in neuro["recommendations"] if r["intervention_id"]]
+    protocol_texts = [r["text"] for r in neuro["recommendations"] if not r["intervention_id"]]
+    assert protocol_texts  # el protocolo del sistema sí se ve
     if other["behavioral"]["details_visible"]:  # comparte o hay emergencia (BD compartida)
         assert medic_ids == own_ids
     else:

@@ -1,0 +1,377 @@
+[
+  {
+    "id": "proto_cardiovascular_warning",
+    "system_id": "cardiovascular",
+    "statuses": [
+      "warning"
+    ],
+    "message": "Cardiovascular en aviso: repite la medición en reposo.",
+    "recommendations": [
+      {
+        "id": "rec_cardiovascular_warning_1",
+        "text": "Siéntate 5 minutos en reposo y repite la medición",
+        "priority": 1
+      },
+      {
+        "id": "rec_cardiovascular_warning_2",
+        "text": "Evita el esfuerzo intenso hasta tener una medición normal",
+        "priority": 2
+      },
+      {
+        "id": "rec_cardiovascular_warning_3",
+        "text": "Anota si notas dolor en el pecho, mareo o falta de aire y cuéntaselo al responsable médico",
+        "priority": 3
+      }
+    ],
+    "sources": [
+      "S20",
+      "S21",
+      "S22"
+    ]
+  },
+  {
+    "id": "proto_cardiovascular_critical",
+    "system_id": "cardiovascular",
+    "statuses": [
+      "critical"
+    ],
+    "message": "Cardiovascular en estado crítico: avisa ahora y no te quedes a solas.",
+    "recommendations": [
+      {
+        "id": "rec_cardiovascular_critical_1",
+        "text": "Avisa ahora a alguien que esté contigo y pide ayuda con el botón SOS",
+        "priority": 1
+      },
+      {
+        "id": "rec_cardiovascular_critical_2",
+        "text": "Deja lo que estés haciendo, siéntate y no hagas esfuerzos",
+        "priority": 2
+      },
+      {
+        "id": "rec_cardiovascular_critical_3",
+        "text": "Repite la medición a los 5 minutos y registra el valor",
+        "priority": 3
+      }
+    ],
+    "sources": [
+      "S20",
+      "S21"
+    ]
+  },
+  {
+    "id": "proto_musculoskeletal_warning",
+    "system_id": "musculoskeletal",
+    "statuses": [
+      "warning"
+    ],
+    "message": "Musculoesquelético en aviso: hoy llevas menos ejercicio del recomendado.",
+    "recommendations": [
+      {
+        "id": "rec_musculoskeletal_warning_1",
+        "text": "Reserva hoy un bloque para completar la sesión de ejercicio",
+        "priority": 1
+      },
+      {
+        "id": "rec_musculoskeletal_warning_2",
+        "text": "Si no te cabe una sesión larga, repártela en dos bloques más cortos",
+        "priority": 2
+      }
+    ],
+    "sources": [
+      "S1",
+      "S14"
+    ]
+  },
+  {
+    "id": "proto_musculoskeletal_critical",
+    "system_id": "musculoskeletal",
+    "statuses": [
+      "critical"
+    ],
+    "message": "Musculoesquelético en estado crítico: casi sin ejercicio, y sin él se pierde hueso y músculo.",
+    "recommendations": [
+      {
+        "id": "rec_musculoskeletal_critical_1",
+        "text": "Retoma la sesión de ejercicio de resistencia en cuanto puedas",
+        "priority": 1
+      },
+      {
+        "id": "rec_musculoskeletal_critical_2",
+        "text": "Si no entrenas por dolor o por una lesión, no fuerces y avisa al responsable médico",
+        "priority": 2
+      }
+    ],
+    "sources": [
+      "S1",
+      "S14"
+    ]
+  },
+  {
+    "id": "proto_immune_warning",
+    "system_id": "immune",
+    "statuses": [
+      "warning"
+    ],
+    "message": "Inmune en aviso: temperatura fuera de lo normal.",
+    "recommendations": [
+      {
+        "id": "rec_immune_warning_1",
+        "text": "Repite la toma de temperatura en 30 minutos",
+        "priority": 1
+      },
+      {
+        "id": "rec_immune_warning_2",
+        "text": "Bebe líquidos y descansa",
+        "priority": 2
+      },
+      {
+        "id": "rec_immune_warning_3",
+        "text": "Hasta saber si es una infección, limita el contacto cercano con los demás",
+        "priority": 3
+      }
+    ],
+    "sources": [
+      "S23",
+      "S24"
+    ]
+  },
+  {
+    "id": "proto_immune_critical",
+    "system_id": "immune",
+    "statuses": [
+      "critical"
+    ],
+    "message": "Inmune en estado crítico: temperatura muy alta o muy baja. Avisa ahora.",
+    "recommendations": [
+      {
+        "id": "rec_immune_critical_1",
+        "text": "Avisa ahora al responsable médico y no te quedes a solas",
+        "priority": 1
+      },
+      {
+        "id": "rec_immune_critical_2",
+        "text": "Repite la toma de temperatura a los 15 minutos y registra el valor",
+        "priority": 2
+      }
+    ],
+    "sources": [
+      "S23"
+    ]
+  },
+  {
+    "id": "proto_metabolic_warning",
+    "system_id": "metabolic",
+    "statuses": [
+      "warning"
+    ],
+    "message": "Metabólico en aviso: glucosa, hidratación o peso fuera de lo normal.",
+    "recommendations": [
+      {
+        "id": "rec_metabolic_warning_1",
+        "text": "Repite la medición para confirmar el valor",
+        "priority": 1
+      },
+      {
+        "id": "rec_metabolic_warning_2",
+        "text": "Bebe agua ahora y no te saltes la siguiente comida",
+        "priority": 2
+      },
+      {
+        "id": "rec_metabolic_warning_3",
+        "text": "Si notas temblor, sudor frío o mareo, toma algo con azúcar y avisa",
+        "priority": 3
+      }
+    ],
+    "sources": [
+      "S25",
+      "S27"
+    ]
+  },
+  {
+    "id": "proto_metabolic_critical",
+    "system_id": "metabolic",
+    "statuses": [
+      "critical"
+    ],
+    "message": "Metabólico en estado crítico: avisa ahora.",
+    "recommendations": [
+      {
+        "id": "rec_metabolic_critical_1",
+        "text": "Avisa ahora al responsable médico y no te quedes a solas",
+        "priority": 1
+      },
+      {
+        "id": "rec_metabolic_critical_2",
+        "text": "Si la glucosa es baja, toma algo con azúcar de absorción rápida y repite la medición a los 15 minutos",
+        "priority": 2
+      },
+      {
+        "id": "rec_metabolic_critical_3",
+        "text": "Si es por falta de líquidos, bebe agua a sorbos pequeños",
+        "priority": 3
+      }
+    ],
+    "sources": [
+      "S25",
+      "S27"
+    ]
+  },
+  {
+    "id": "proto_neuro_behavioral_warning",
+    "system_id": "neuro_behavioral",
+    "statuses": [
+      "warning"
+    ],
+    "message": "Neuro-conductual en aviso: sueño, ánimo o atención por debajo de tu nivel habitual.",
+    "recommendations": [
+      {
+        "id": "rec_neuro_behavioral_warning_1",
+        "text": "Prioriza dormir al menos 7 horas esta noche",
+        "priority": 1
+      },
+      {
+        "id": "rec_neuro_behavioral_warning_2",
+        "text": "Si has dormido poco, evita hoy las tareas de riesgo o que exijan mucha atención",
+        "priority": 2
+      },
+      {
+        "id": "rec_neuro_behavioral_warning_3",
+        "text": "Cuéntale a alguien de confianza cómo estás",
+        "priority": 3
+      }
+    ],
+    "sources": [
+      "S3",
+      "S12",
+      "S26"
+    ]
+  },
+  {
+    "id": "proto_neuro_behavioral_critical",
+    "system_id": "neuro_behavioral",
+    "statuses": [
+      "critical"
+    ],
+    "message": "Neuro-conductual en estado crítico: no lo lleves a solas, pide apoyo hoy.",
+    "recommendations": [
+      {
+        "id": "rec_neuro_behavioral_critical_1",
+        "text": "Habla hoy con alguien de confianza o con el responsable médico",
+        "priority": 1
+      },
+      {
+        "id": "rec_neuro_behavioral_critical_2",
+        "text": "No hagas a solas tareas críticas hasta que estés mejor",
+        "priority": 2
+      },
+      {
+        "id": "rec_neuro_behavioral_critical_3",
+        "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en Pedir ayuda",
+        "priority": 3
+      }
+    ],
+    "sources": [
+      "S3",
+      "S10",
+      "S12"
+    ]
+  },
+  {
+    "id": "proto_eyes_warning",
+    "system_id": "eyes",
+    "statuses": [
+      "warning"
+    ],
+    "message": "Ojos en aviso: has notado cambios en la visión.",
+    "recommendations": [
+      {
+        "id": "rec_eyes_warning_1",
+        "text": "Anota qué notas (visión borrosa, puntos ciegos, dolor de cabeza) y en qué ojo",
+        "priority": 1
+      },
+      {
+        "id": "rec_eyes_warning_2",
+        "text": "Repite la autoevaluación mañana a la misma hora",
+        "priority": 2
+      },
+      {
+        "id": "rec_eyes_warning_3",
+        "text": "Coméntalo con el responsable médico en la próxima consulta",
+        "priority": 3
+      }
+    ],
+    "sources": [
+      "S2"
+    ]
+  },
+  {
+    "id": "proto_eyes_critical",
+    "system_id": "eyes",
+    "statuses": [
+      "critical"
+    ],
+    "message": "Ojos en estado crítico: cambio fuerte en la visión. Avisa ahora.",
+    "recommendations": [
+      {
+        "id": "rec_eyes_critical_1",
+        "text": "Avisa ahora al responsable médico",
+        "priority": 1
+      },
+      {
+        "id": "rec_eyes_critical_2",
+        "text": "Evita las tareas que dependan de la vista fina hasta que te valoren",
+        "priority": 2
+      }
+    ],
+    "sources": [
+      "S2"
+    ]
+  },
+  {
+    "id": "proto_radiation_warning",
+    "system_id": "radiation",
+    "statuses": [
+      "warning"
+    ],
+    "message": "Radiación en aviso: la dosis acumulada supera la mitad del límite de carrera.",
+    "recommendations": [
+      {
+        "id": "rec_radiation_warning_1",
+        "text": "Revisa con el responsable médico la planificación de las salidas al exterior",
+        "priority": 1
+      },
+      {
+        "id": "rec_radiation_warning_2",
+        "text": "Durante una tormenta solar, quédate en la zona más protegida del hábitat",
+        "priority": 2
+      }
+    ],
+    "sources": [
+      "S1",
+      "S13"
+    ]
+  },
+  {
+    "id": "proto_radiation_critical",
+    "system_id": "radiation",
+    "statuses": [
+      "critical"
+    ],
+    "message": "Radiación en estado crítico: se ha alcanzado el límite de dosis de carrera.",
+    "recommendations": [
+      {
+        "id": "rec_radiation_critical_1",
+        "text": "Avisa al responsable médico: hay que replanificar tu exposición",
+        "priority": 1
+      },
+      {
+        "id": "rec_radiation_critical_2",
+        "text": "Evita cualquier exposición adicional que no sea imprescindible",
+        "priority": 2
+      }
+    ],
+    "sources": [
+      "S13"
+    ]
+  }
+]
