@@ -22,6 +22,15 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      // En la red local los móviles entran por HTTP (sin contexto seguro): randomUUID no existe.
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'crypto',
+          property: 'randomUUID',
+          message: 'Usa newId() de src/api/newId.ts (randomUUID no existe sin HTTPS).',
+        },
+      ],
     },
   },
 )

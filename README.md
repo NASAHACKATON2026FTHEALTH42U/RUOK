@@ -50,6 +50,14 @@ npm run gen:api          # regenera los tipos desde el OpenAPI (con el back arra
 ```
 Para trabajar sin backend: `VITE_USE_MOCKS=true npm run dev` (llega con FS-04). Detalles en [`frontend/README.md`](frontend/README.md).
 
+**Red local con móviles** (FS-08). Los móviles abren `http://<IP-del-portátil>:5173` en desarrollo, o `:8000` en modo a bordo:
+```bash
+sudo ufw allow 8000/tcp && sudo ufw allow 5173/tcp
+cd backend  && uv run uvicorn app.main:app --host 0.0.0.0 --reload
+cd frontend && npm run dev -- --host
+```
+Montaje de la red sin internet y checklist: [`docs/control-center-and-devices.md`](docs/control-center-and-devices.md).
+
 **Todo junto (modo "a bordo", sin internet)**, disponible con BE-24:
 ```bash
 docker compose up

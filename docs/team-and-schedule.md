@@ -4,20 +4,20 @@
 | Rol | Responsable de |
 |---|---|
 | **Supervisor** | Alcance y prioridades (tiene la última palabra), control del tiempo y check-ins. Contenido HRP: umbrales, explicaciones, intervenciones y fuentes. Textos de la UI, pitch, slides, vídeo y envío a Space Apps. Ensayos. |
-| **Full-stack** | Scaffolding, contrato y tipos generados, mocks, integración front↔back, enlace simulado en la UI, controles de demo, gamificación en la UI, PVT, docker-compose. |
-| **Front A** | `BodyFigure` SVG, `SystemPanel`, temas por entorno, selector de entorno, barra de fase de misión, Earth view. |
+| **Full-stack** | Scaffolding, contrato y tipos generados, mocks, integración front↔back, **red local y móviles (FS-08)**, gestión de usuarios, gamificación en la UI, PVT, docker-compose. |
+| **Front A** | `BodyFigure` SVG, `SystemPanel`, temas por entorno, selector de entorno, barra de fase de misión, **centro de control `/control`**, Earth view. |
 | **Front B** | Dashboard, `IndicatorCard`, `TrendChart`, formularios guiados, check-in, outbox offline, SOS y alertas, consola `/ground`. |
-| **Back A** | Modelos, catálogos JSON, perfiles de entorno, members, mediciones, seed y escenarios, enlace simulado. |
-| **Back B** | Motor de evaluación, tendencias y línea base, alertas y escalado, liveness, rutina y gamificación, tests. |
+| **Back A** | Modelos, catálogos JSON, perfiles de entorno, members, mediciones, seed y escenarios, enlace simulado, **eventos SSE, dispositivos y endpoints de control**. |
+| **Back B** | Motor de evaluación, tendencias y línea base, alertas y escalado, liveness, rutina y gamificación, **auth y permisos**, tests. |
 
 ## Cronograma (sábado → domingo 16:00)
 | Hora | Hito |
 |---|---|
-| **Sáb, primeras 2 h** — **M0 Setup** | Kick-off. Scaffolding, **contrato v0 cerrado**, mocks, catálogos iniciales. Wireframe rápido del dashboard. |
+| **Sáb, primeras 2 h** — **M0 Setup** | Kick-off. Scaffolding, **contrato v0 cerrado**, mocks, catálogos iniciales. Wireframe rápido del dashboard. **Prueba de la red local con 2 móviles (FS-08)**: decidir entre router de viaje y hotspot. |
 | **+2 a +8 h** | Desarrollo en paralelo: el front contra mocks, el back con endpoints y motor. **Check-in cada 3 h** (15 min). |
-| **Sáb noche** — **Hito 1** | Dashboard con cuerpo y semáforo usando datos reales del back, cambio de entorno funcionando, check-in diario. |
+| **Sáb noche** — **Hito 1** | Dashboard con cuerpo y semáforo usando datos reales del back, login, cambio de entorno funcionando, check-in diario. **Un móvil conectado por la red local ve su dashboard.** |
 | **Noche** | Turnos de descanso escalonados (nunca duermen a la vez los 2 de front ni los 2 de back). Alertas, offline, liveness, gamificación. |
-| **Dom 09:00** — **Hito 2** | MVP integrado, escenarios de demo cargados y pruebas offline superadas. |
+| **Dom 09:00** — **Hito 2** | MVP integrado: alertas, offline, liveness, roles, **centro de control y tiempo real entre dispositivos**. Escenarios de demo cargados y pruebas offline superadas con móviles. |
 | **Dom 11:00** — **Freeze** | **Congelación de funcionalidades.** Lo P2 que no esté terminado se corta. Solo bugs y pulido. |
 | **Dom 12:00–14:00** | Vídeo, capturas, slides y envío a Space Apps. |
 | **Dom 14:00–15:30** | 2 o 3 ensayos completos. Plan B listo (vídeo + build local). |

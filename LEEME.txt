@@ -106,7 +106,14 @@ Kanban (GitHub Project): https://github.com/orgs/NASAHACKATON2026FTHEALTH42U/pro
   6. Texto visible desde environment.vocabulary: nunca "astronauta" fijo.
   7. Privacidad conductual: detalles de ánimo ocultos salvo que el member los
      comparta o haya una emergencia.
-  8. Disclaimer: NO es un dispositivo médico.
+  8. Login y roles (docs/auth-and-roles.md): el BACKEND valida rol y propiedad
+     en cada endpoint; ocultar en el front no es seguridad. El SOS funciona
+     SIN sesión y un 401 nunca borra el outbox.
+  9. Multi-dispositivo en red local (docs/control-center-and-devices.md):
+     los móviles entran por http://<IP>:8000 SIN HTTPS -> no uses
+     crypto.randomUUID() ni service workers. Vistas de member mobile-first.
+     Todo cambio de estado en el back emite un evento (events.emit) para el SSE.
+ 10. Disclaimer: NO es un dispositivo médico.
 
 ------------------------------------------------------------------------------
  6. HITOS

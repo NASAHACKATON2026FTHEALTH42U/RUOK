@@ -7,7 +7,7 @@
 ```mermaid
 flowchart LR
   subgraph DEV["Dispositivo del member (navegador)"]
-    UI[React app] --> OB[(IndexedDB<br/>ruok-device)]
+    UI[React app<br/>móvil / tablet / pestaña] --> OB[("IndexedDB<br/>ruok-device_id")]
   end
   subgraph SRV["Servidor de a bordo"]
     API[FastAPI] --> DB[(SQLite WAL<br/>ruok.db)]
@@ -34,7 +34,11 @@ Hay tres capas de datos:
 
 ```mermaid
 erDiagram
+  USER_ACCOUNT |o--o| MEMBER : "es (si role=member)"
+  USER_ACCOUNT ||--o{ ALERT : "crea / reconoce"
   MEMBER ||--o{ MEASUREMENT : registra
+  USER_ACCOUNT ||--o{ DEVICE : "usa"
+  DEVICE ||--o{ EVENT_LOG : "origen"
   MEMBER ||--o{ TASK : "tiene asignadas"
   TASK ||--o| TASK_COMPLETION : "se completa con"
   MEMBER ||--o{ ALERT : genera
@@ -47,11 +51,27 @@ erDiagram
   ALERT_EVENT |o--o| LINK_MESSAGE : "mensaje de respuesta"
   LINK_STATE ||--o{ LINK_MESSAGE : "estado por entorno"
 
+  USER_ACCOUNT {
+    int id PK
+    text username "UNIQUE"
+    text display_name
+    text role "member | medic | commander | responder | psych | family | admin"
+    text env_id "slug; null solo para admin"
+    int member_id FK "UNIQUE, si role=member"
+    text password_hash "bcrypt"
+    text pin_hash "bcrypt, nullable"
+    int failed_attempts
+    datetime locked_until
+    bool active
+    datetime last_login_at
+    datetime created_at
+  }
+
   MEMBER {
     int id PK
     text env_id "slug -> environments.json"
     text name
-    text role "commander, engineer, patient, resident..."
+    text position "commander, engineer, patient, resident... (no es User.role)"
     bool share_behavioral_details "privacidad, default false"
     text device_id "último dispositivo"
     datetime last_seen_at "último heartbeat"
@@ -95,6 +115,8 @@ erDiagram
     int member_id FK
     text env_id
     text origin "auto | manual"
+    bool authenticated "false = SOS de emergencia sin sesión"
+    int created_by_user_id FK "nullable"
     text category "symptom | physical | psychological | emergency | no_contact | indicator"
     text severity "warning | critical | emergency"
     text system_id "nullable"
@@ -158,6 +180,32 @@ erDiagram
     datetime earned_at
   }
 
+  DEVICE {
+    text id PK "UUID generado en el dispositivo"
+    int user_id FK "último usuario con sesión"
+    text kind "mobile | tablet | desktop"
+    text label "p. ej. movil-vega, ?device="
+    text ip
+    text user_agent
+    datetime first_seen_at
+    datetime last_seen_at
+    int pending_outbox "informado en el heartbeat"
+    datetime last_sync_at
+  }
+
+  EVENT_LOG {
+    int id PK "autoincremental; sirve como Last-Event-ID"
+    text type "measurement.created | alert.created | ..."
+    datetime at
+    text env_id
+    int member_id "nullable"
+    int user_id "nullable"
+    text device_id "nullable"
+    text ref_id "id del recurso relacionado"
+    text summary
+    json payload
+  }
+
   KUDOS {
     text id PK "UUID"
     text env_id
@@ -174,6 +222,7 @@ Hay además una tabla técnica, fuera del diagrama: **`app_state`** (`key TEXT P
 
 | Tabla | Notas clave | Issue |
 |---|---|---|
+| `user_account` | Login local. `UNIQUE(username)` y `UNIQUE(member_id)`. Bloqueo de PIN con `failed_attempts`/`locked_until`. Ver [auth-and-roles.md](auth-and-roles.md). | BE-25, BE-26 |
 | `member` | Cada entorno tiene sus members (`env_id`). `last_seen_at` lo actualiza el heartbeat y de él se deriva el liveness (no se guarda). | BE-02, BE-05, BE-12 |
 | `measurement` | **Solo se añade, nunca se edita.** La PK es el UUID del cliente: un reintento con el mismo `id` y el mismo contenido devuelve 200, y con contenido distinto, 409. El check-in y el PVT también son measurements (`source`). | BE-06, BE-20 |
 | `task` | Se genera cada día desde `environment.routine`. El `id` determinista evita duplicados si la generación se repite. | BE-18 |
@@ -185,6 +234,8 @@ Hay además una tabla técnica, fuera del diagrama: **`app_state`** (`key TEXT P
 | `link_state` | Una fila por entorno, modificable desde `/demo/link`. | BE-13 |
 | `badge_award` | `UNIQUE(member_id, badge_id)`. | BE-19 |
 | `kudos` | P2. | BE-23 |
+| `device` | Una fila por dispositivo (móvil, tablet, pestaña). Se actualiza con cada heartbeat o petición (`X-Device-Id`). | BE-29 |
+| `event_log` | Bitácora *append-only* de todo lo que ocurre. Alimenta el SSE y el centro de control. Se purga a los 7 días. | BE-28 |
 
 ### Índices y restricciones
 
@@ -192,6 +243,8 @@ Hay además una tabla técnica, fuera del diagrama: **`app_state`** (`key TEXT P
 PRAGMA journal_mode = WAL;
 PRAGMA foreign_keys = ON;
 
+CREATE UNIQUE INDEX ux_user_username     ON user_account(username);
+CREATE UNIQUE INDEX ux_user_member       ON user_account(member_id) WHERE member_id IS NOT NULL;
 CREATE INDEX ix_member_env              ON member(env_id);
 CREATE INDEX ix_measurement_series      ON measurement(member_id, indicator_id, taken_at);
 CREATE INDEX ix_task_member_date        ON task(member_id, date);
@@ -203,6 +256,9 @@ CREATE INDEX ix_alert_event_alert       ON alert_event(alert_id, at);
 CREATE INDEX ix_ruok_member_pending     ON ruok_check(member_id) WHERE responded_at IS NULL;
 CREATE INDEX ix_link_due                ON link_message(env_id, state, eta);
 CREATE UNIQUE INDEX ux_badge_award      ON badge_award(member_id, badge_id);
+CREATE INDEX ix_device_user            ON device(user_id, last_seen_at);
+CREATE INDEX ix_event_env_id           ON event_log(env_id, id);
+CREATE INDEX ix_event_type_at          ON event_log(type, at);
 ```
 
 **Convenciones:**
@@ -263,7 +319,9 @@ classDiagram
 
 ---
 
-## 2. IndexedDB: base `ruok-device` (v1, librería `idb`)
+## 2. IndexedDB: una base por dispositivo, `ruok-<device_id>` (v1, librería `idb`)
+
+> El `device_id` se guarda en `localStorage` (dispositivo real) o en `sessionStorage` (cada pestaña es un dispositivo, para ensayos). Con `?device=<nombre>` se fija uno con nombre. Ver [control-center-and-devices.md](control-center-and-devices.md#4-identidad-de-dispositivo-y-aislamiento).
 
 Un dispositivo puede trabajar sin el servidor de a bordo. IndexedDB guarda:
 - **qué falta por enviar** (outbox);
@@ -330,7 +388,7 @@ classDiagram
   }
   class kv {
     <<object store · keyPath key>>
-    +string key — device_id | env_id | member_id | last_heartbeat_at
+    +string key — device_id | auth | last_member_id | env_id | last_heartbeat_at
     +any value
   }
   outbox ..> measurements : mismo id
@@ -348,7 +406,7 @@ classDiagram
 | `catalog` | Al arrancar con conexión | Formularios, rangos, protocolos e intervenciones offline | Se sobrescribe |
 | `alerts` | SOS local (`pending=true`) y alertas del servidor | Panel de alertas y aviso "No enviado" | Las resueltas, a los 7 días |
 | `tasks` | Tareas del día y completados locales | Misiones offline | Se conservan los días anteriores al de hoy menos 2 |
-| `kv` | Sesión y `device_id` (UUID generado una vez) | Toda la app | Nunca |
+| `kv` | `device_id` (UUID generado una vez), `auth` = `{token, user, exp}` y `last_member_id` (para el SOS sin sesión) | Toda la app | `auth` se borra al cerrar sesión. El outbox **nunca** se borra por un logout o un 401 |
 
 ### Flujo de sincronización
 

@@ -47,7 +47,9 @@ Si fallan, se arregla en la misma rama. No se desactivan ni se marcan como opcio
 5. **Configuración, no código:** umbrales, entornos y protocolos van en `backend/app/data/*.json`.
 6. **Reloj inyectable:** `app/clock.py` (`now()`), nunca `datetime.now()`.
 7. **Vocabulario por entorno:** nunca "astronauta" fijo en la UI.
-8. **Privacidad conductual** y **disclaimer** ("no es un dispositivo médico").
+8. **Login local y roles:** la autorización vive en el backend (`app/auth/permissions.py`) y el front solo la refleja. El SOS funciona sin sesión y un 401 nunca borra el outbox. Ver `docs/auth-and-roles.md`.
+9. **Multi-dispositivo en red local:** HTTP sin contexto seguro (sin `crypto.randomUUID()` ni service workers), vistas de member mobile-first, IndexedDB por dispositivo y eventos con `events.emit()` para el SSE. Ver `docs/control-center-and-devices.md`.
+10. **Privacidad conductual** y **disclaimer** ("no es un dispositivo médico").
 
 ## Seguridad y datos
 - No subas secretos, tokens ni `.env`.

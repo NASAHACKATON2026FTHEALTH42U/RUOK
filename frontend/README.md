@@ -14,11 +14,36 @@ npm run preview        # sirve el build de dist/
 npm run lint           # ESLint
 npm run format         # Prettier (escribe)
 npm run format:check   # Prettier (solo comprueba)
+npm run gen:api        # regenera src/api/types.gen.ts desde el OpenAPI del backend (usa uv)
+npm test               # tests unitarios (Vitest)
+npm run typecheck      # solo tsc -b
 ```
 
-Antes de abrir una PR: `npm run lint && npm run build` (es lo que ejecuta el job `Frontend` de la CI).
+Antes de abrir una PR: `npm run lint && npm run build && npm test` (es lo que ejecuta el job `Frontend` de la CI). Si el backend cambió la API: `npm run gen:api` y commitea `types.gen.ts` (lo comprueba el job `Contrato API`).
 
-> `npm run gen:api` (tipos desde el OpenAPI) llega con **FS-03** (#6) y `VITE_USE_MOCKS=true` con **FS-04** (#7).
+> `VITE_USE_MOCKS=true` llega con **FS-04** (#7).
+
+## API: tipos y cliente (FS-03)
+
+- **Tipos:** `npm run gen:api` lee el OpenAPI **directamente del código de FastAPI** con `uv`, sin arrancar el servidor, y genera `src/api/types.gen.ts` con `openapi-typescript` 7.13. Para leerlo de un servidor en marcha: `OPENAPI_URL=http://<ip>:8000/openapi.json npm run gen:api`. **No edites `types.gen.ts` a mano.**
+- **Cliente:** `src/api/client.ts` (`openapi-fetch`). Ruta, parámetros, cuerpo y respuesta están tipados a partir del contrato:
+
+  ```ts
+  import { api, unwrap, type Schema } from '../api/client'
+
+  const a: Schema<'Assessment'> = await unwrap(
+    api.GET('/api/v1/members/{member_id}/assessment', { params: { path: { member_id: 1 } } }),
+  )
+  ```
+
+  - `unwrap()` devuelve `data` o lanza **`ApiError`** (`status` y `detail` de FastAPI; los 422 se resumen).
+  - Un fallo de red lanza **`NetworkError`**: es la señal para que el outbox (FE-11) guarde y reintente.
+  - `configureApi({ getToken, getDeviceId, onUnauthorized })` lo conectan **FE-27** (sesión: añade `Authorization`; con un 401, login sin borrar el outbox) y **FE-30** (añade `X-Device-Id`).
+  - `serverNow()` da la hora del servidor (cabecera `X-Server-Time`). **Úsala para "hace X min" y las ETA**: con el fast-forward de la demo, el reloj del dispositivo no vale.
+
+- **IDs:** `newId()` (`src/api/newId.ts`) genera UUID v4 con `crypto.getRandomValues()`. **`crypto.randomUUID()` está prohibido por ESLint**, porque no existe por HTTP en la red local.
+- **Proxy de desarrollo:** el front llama siempre a `/api/v1` (mismo origen). `npm run dev` reenvía `/api` a `http://localhost:8000` (`VITE_API_PROXY_TARGET` para cambiarlo, ver `.env.example`). Desde un móvil: `npm run dev -- --host` y abrir `http://<ip-del-portátil>:5173`.
+- **Estado del servidor:** el chip _Servidor conectado / sin conexión_ de la cabecera (`ServerStatus`) consulta `GET /health` cada 15 s.
 
 ## Stack instalado (FE-01)
 
@@ -49,7 +74,9 @@ Notas:
 frontend/
 ├── index.html                 lang="es", favicon local
 ├── public/favicon.svg
-├── vite.config.ts             React + Tailwind, puerto 5173
+├── vite.config.ts             React + Tailwind, puerto 5173, proxy /api → :8000, config de Vitest
+├── scripts/gen-api.mjs        npm run gen:api (OpenAPI → src/api/types.gen.ts)
+├── .env.example               VITE_API_PROXY_TARGET, VITE_API_ORIGIN
 ├── eslint.config.js  .prettierrc.json  .prettierignore
 ├── tsconfig.json              referencias a tsconfig.app.json (src/) y tsconfig.node.json (vite.config.ts)
 └── src/
@@ -62,14 +89,21 @@ frontend/
     │   ├── applyTheme.ts      initTheme(): aplica el tema del entorno activo en <html>
     │   └── themes/            un tema por entorno (iss.ts, mars.ts…) + defaultTheme.ts
     ├── store/environment.ts   store Zustand: envId, memberId, vocabulary (persistido)
+    ├── api/
+    │   ├── types.gen.ts       GENERADO (npm run gen:api): no editar
+    │   ├── client.ts          cliente tipado, ApiError/NetworkError, configureApi, serverNow
+    │   ├── newId.ts           UUID v4 sin contexto seguro
+    │   ├── useServerHealth.ts hook de GET /health
+    │   └── *.test.ts          tests (Vitest)
     ├── components/ui/
     │   ├── Layout.tsx         cabecera + navegación + <Outlet /> + disclaimer
     │   ├── EnvironmentSelector.tsx
+    │   ├── ServerStatus.tsx   chip de conexión con el servidor
     │   └── PagePlaceholder.tsx
     └── pages/                 una página vacía por ruta
 ```
 
-Carpetas que aún no existen y que crean sus issues: `api/` (FS-03/FS-04), `offline/` (FE-11) y `components/{body,dashboard,measure,alerts,behavioral,game}/`.
+Carpetas que aún no existen y que crean sus issues: `api/mocks/` (FS-04), `offline/` (FE-11/FE-30) y `components/{body,dashboard,measure,alerts,behavioral,game}/`.
 
 ## Rutas
 

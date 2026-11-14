@@ -15,7 +15,7 @@ Toda la documentación está en [`docs/`](docs/README.md). **Léela antes de dis
 | Parte | Stack | Comandos |
 |---|---|---|
 | `backend/` | Python 3.11+, FastAPI, SQLModel, SQLite (WAL), pytest | `cd backend && uv run uvicorn app.main:app --reload` · `uv run pytest` |
-| `frontend/` | React 18 + Vite 6 + TS, Tailwind 4, React Router 6, Zustand, Recharts, Framer Motion, idb | `cd frontend && npm run dev` · `npm run lint` · `npm run build` · `npm run format` · `npm run gen:api` (FS-03) |
+| `frontend/` | React 18 + Vite 6 + TS, Tailwind 4, React Router 6, Zustand, Recharts, Framer Motion, idb, openapi-fetch, Vitest | `cd frontend && npm run dev` · `npm run lint` · `npm run build` · `npm test` · `npm run format` · `npm run gen:api` |
 | Todo | docker-compose | `docker compose up` |
 | Backlog | `scripts/github/backlog.yaml` | `python3 scripts/github/create_issues.py [--dry-run]` |
 
@@ -31,7 +31,9 @@ API en `http://localhost:8000/api/v1`, con Swagger en `/docs`. El front corre en
 6. **Configuración, no código.** Umbrales, entornos, protocolos e intervenciones van en `backend/app/data/*.json`. No se escriben valores clínicos fijos en el código.
 7. **Reloj inyectable.** Usa siempre `app/clock.py` (`now()`) y nunca `datetime.now()` directo, porque la demo acelera el tiempo.
 8. **Privacidad conductual.** Los detalles de ánimo o psicológicos se ocultan fuera del member salvo `share_behavioral_details` o una emergencia.
-9. **No es un dispositivo médico.** El disclaimer tiene que estar visible y cada umbral o texto clínico se cita en `docs/sources.md`.
+9. **Login local y roles** ([`docs/auth-and-roles.md`](docs/auth-and-roles.md)). El backend valida siempre el rol y la propiedad del dato; ocultar en el front es UX, no seguridad. **El SOS funciona sin sesión** y un 401 nunca borra el outbox.
+10. **Multi-dispositivo en red local** ([`docs/control-center-and-devices.md`](docs/control-center-and-devices.md)). Los móviles se conectan por HTTP a la IP del servidor, **sin contexto seguro**: nada de `crypto.randomUUID()`, service workers ni APIs que exijan HTTPS (los UUID se generan con `crypto.getRandomValues()`). Las vistas de member y medic son mobile-first. Cada dispositivo tiene su `device_id` y su IndexedDB `ruok-<device_id>`. Los cambios de estado se emiten con `events.emit()` (SSE).
+11. **No es un dispositivo médico.** El disclaimer tiene que estar visible y cada umbral o texto clínico se cita en `docs/sources.md`.
 
 ## Convenciones
 - **Idioma:** UI y docs en español; código, identificadores y commits en inglés o español, pero de forma coherente dentro de cada archivo. Los IDs de configuración son slugs en inglés (`mars`, `heart_rate`).
