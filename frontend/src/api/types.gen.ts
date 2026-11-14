@@ -134,7 +134,7 @@ export interface paths {
         };
         /**
          * Perfiles de entorno
-         * @description STUB(FS-02) → BE-03
+         * @description Los 6 perfiles de app/data/environments.json (docs/environments.md).
          */
         get: operations["list_environments_api_v1_environments_get"];
         put?: never;
@@ -154,7 +154,7 @@ export interface paths {
         };
         /**
          * Un perfil de entorno
-         * @description STUB(FS-02) → BE-03
+         * @description Un perfil de app/data/environments.json. 404 si el id no existe.
          */
         get: operations["get_environment_api_v1_environments__env_id__get"];
         put?: never;
@@ -872,13 +872,13 @@ export interface components {
              */
             authenticated: boolean;
             /** Created By User Id */
-            created_by_user_id?: number | null;
+            created_by_user_id: number | null;
             category: components["schemas"]["AlertCategory"];
             severity: components["schemas"]["AlertSeverity"];
             /** System Id */
-            system_id?: string | null;
+            system_id: string | null;
             /** Indicator Ids */
-            indicator_ids?: string[];
+            indicator_ids: string[];
             /** Message */
             message: string;
             /**
@@ -892,9 +892,9 @@ export interface components {
             /** Delay S */
             delay_s: number;
             /** Eta */
-            eta?: string | null;
+            eta: string | null;
             /** Delivered At */
-            delivered_at?: string | null;
+            delivered_at: string | null;
             status: components["schemas"]["AlertStatus"];
             /**
              * Created At
@@ -907,7 +907,7 @@ export interface components {
              */
             updated_at: string;
             /** Events */
-            events?: components["schemas"]["AlertEvent"][];
+            events: components["schemas"]["AlertEvent"][];
         };
         /**
          * AlertCategory
@@ -942,7 +942,7 @@ export interface components {
              */
             at: string;
             /** Payload */
-            payload?: {
+            payload: {
                 [key: string]: unknown;
             };
         };
@@ -1013,7 +1013,7 @@ export interface components {
             overall_status: components["schemas"]["Status"];
             liveness: components["schemas"]["Liveness"];
             /** Last Seen At */
-            last_seen_at?: string | null;
+            last_seen_at: string | null;
             /** Systems */
             systems: components["schemas"]["SystemAssessment"][];
             behavioral: components["schemas"]["BehavioralSummary"];
@@ -1069,7 +1069,7 @@ export interface components {
             /** Space Effects */
             space_effects: string;
             /** Hazards */
-            hazards?: string[];
+            hazards: string[];
         };
         /** ControlMetrics */
         ControlMetrics: {
@@ -1080,7 +1080,7 @@ export interface components {
             /** Active Devices */
             active_devices: number;
             /** Avg Alert Response S */
-            avg_alert_response_s?: number | null;
+            avg_alert_response_s: number | null;
         };
         /** ControlOverview */
         ControlOverview: {
@@ -1135,14 +1135,14 @@ export interface components {
              */
             id: string;
             /** User Id */
-            user_id?: number | null;
-            kind?: components["schemas"]["DeviceKind"] | null;
+            user_id: number | null;
+            kind: components["schemas"]["DeviceKind"] | null;
             /** Label */
-            label?: string | null;
+            label: string | null;
             /** Ip */
-            ip?: string | null;
+            ip: string | null;
             /** User Agent */
-            user_agent?: string | null;
+            user_agent: string | null;
             /**
              * First Seen At
              * Format: date-time
@@ -1159,7 +1159,7 @@ export interface components {
              */
             pending_outbox: number;
             /** Last Sync At */
-            last_sync_at?: string | null;
+            last_sync_at: string | null;
         };
         /**
          * DeviceKind
@@ -1208,14 +1208,14 @@ export interface components {
             };
             theme: components["schemas"]["Theme"];
             /** Threshold Overrides */
-            threshold_overrides?: {
+            threshold_overrides: {
                 [key: string]: components["schemas"]["RangeOverride"];
             };
             /** Indicators */
             indicators: string[];
             /** Routine */
-            routine?: components["schemas"]["RoutineItem"][];
-            mission?: components["schemas"]["Mission"] | null;
+            routine: components["schemas"]["RoutineItem"][];
+            mission: components["schemas"]["Mission"] | null;
         };
         /**
          * EnvironmentKind
@@ -1284,7 +1284,7 @@ export interface components {
             /** Message */
             message: string;
             /** Protocol Id */
-            protocol_id?: string | null;
+            protocol_id: string | null;
         };
         /**
          * EscalationMode
@@ -1308,19 +1308,19 @@ export interface components {
              */
             at: string;
             /** Env Id */
-            env_id?: string | null;
+            env_id: string | null;
             /** Member Id */
-            member_id?: number | null;
+            member_id: number | null;
             /** User Id */
-            user_id?: number | null;
+            user_id: number | null;
             /** Device Id */
-            device_id?: string | null;
+            device_id: string | null;
             /** Ref Id */
-            ref_id?: string | null;
+            ref_id: string | null;
             /** Summary */
             summary: string;
             /** Payload */
-            payload?: {
+            payload: {
                 [key: string]: unknown;
             };
         };
@@ -1341,7 +1341,7 @@ export interface components {
             /** Streak Days */
             streak_days: number;
             /** Badges */
-            badges?: components["schemas"]["Badge"][];
+            badges: components["schemas"]["Badge"][];
             /** Crew Points */
             crew_points: number;
         };
@@ -1393,12 +1393,12 @@ export interface components {
              */
             device_id: string;
             /** @default normal */
-            activity: components["schemas"]["Activity"];
+            activity?: components["schemas"]["Activity"];
             /**
              * Pending Outbox
              * @default 0
              */
-            pending_outbox: number;
+            pending_outbox?: number;
             /** Last Sync At */
             last_sync_at?: string | null;
             device_kind?: components["schemas"]["DeviceKind"] | null;
@@ -1445,7 +1445,7 @@ export interface components {
             /** Why It Matters */
             why_it_matters: string;
             /** Hazards */
-            hazards?: string[];
+            hazards: string[];
         };
         /** IndicatorAssessment */
         IndicatorAssessment: {
@@ -1455,18 +1455,18 @@ export interface components {
              */
             indicator_id: string;
             /** Last Value */
-            last_value?: number | null;
+            last_value: number | null;
             /** Unit */
             unit: string;
             /** Taken At */
-            taken_at?: string | null;
+            taken_at: string | null;
             status: components["schemas"]["Status"];
             trend: components["schemas"]["Trend"];
             /**
              * Baseline
              * @description Línea base personal (primeros 7 días)
              */
-            baseline?: number | null;
+            baseline: number | null;
             /**
              * Range
              * @description Rangos aplicados (ya con los ajustes del entorno)
@@ -1486,11 +1486,11 @@ export interface components {
              */
             type: "number" | "scale_1_5" | "duration";
             /** Min */
-            min?: number | null;
+            min: number | null;
             /** Max */
-            max?: number | null;
+            max: number | null;
             /** Step */
-            step?: number | null;
+            step: number | null;
         };
         /** IndicatorRanges */
         IndicatorRanges: {
@@ -1500,14 +1500,14 @@ export interface components {
                 number
             ];
             /** Warning */
-            warning?: [
+            warning: [
                 number,
                 number
             ] | null;
             /** Critical Low */
-            critical_low?: number | null;
+            critical_low: number | null;
             /** Critical High */
-            critical_high?: number | null;
+            critical_high: number | null;
         };
         /** Intervention */
         Intervention: {
@@ -1524,7 +1524,7 @@ export interface components {
              */
             category: string;
             /** System Id */
-            system_id?: string | null;
+            system_id: string | null;
             /** Duration Min */
             duration_min: number;
             /** Steps */
@@ -1582,9 +1582,9 @@ export interface components {
              */
             kind: "alert" | "alert_event" | "home_message";
             /** Ref Id */
-            ref_id?: string | null;
+            ref_id: string | null;
             /** Payload */
-            payload?: {
+            payload: {
                 [key: string]: unknown;
             };
             /**
@@ -1598,7 +1598,7 @@ export interface components {
              */
             eta: string;
             /** Delivered At */
-            delivered_at?: string | null;
+            delivered_at: string | null;
             /**
              * State
              * @enum {string}
@@ -1700,7 +1700,7 @@ export interface components {
             /** @default manual */
             source: components["schemas"]["Source"];
             /** Note */
-            note?: string | null;
+            note: string | null;
             /** Member Id */
             member_id: number;
             /** Unit */
@@ -1747,7 +1747,7 @@ export interface components {
              */
             taken_at: string;
             /** @default manual */
-            source: components["schemas"]["Source"];
+            source?: components["schemas"]["Source"];
             /** Note */
             note?: string | null;
         };
@@ -1774,7 +1774,7 @@ export interface components {
              */
             share_behavioral_details: boolean;
             /** Last Seen At */
-            last_seen_at?: string | null;
+            last_seen_at: string | null;
             liveness: components["schemas"]["Liveness"];
         };
         /**
@@ -1803,7 +1803,7 @@ export interface components {
              */
             share_behavioral_details: boolean;
             /** Last Seen At */
-            last_seen_at?: string | null;
+            last_seen_at: string | null;
             liveness: components["schemas"]["Liveness"];
             overall_status: components["schemas"]["Status"];
             /**
@@ -1812,7 +1812,7 @@ export interface components {
              */
             open_alerts: number;
             /** Last Measurement At */
-            last_measurement_at?: string | null;
+            last_measurement_at: string | null;
         };
         /** Mission */
         Mission: {
@@ -1847,7 +1847,7 @@ export interface components {
              */
             ok: boolean;
             /** Detail */
-            detail?: string | null;
+            detail: string | null;
         };
         /** PinLoginIn */
         PinLoginIn: {
@@ -1864,19 +1864,19 @@ export interface components {
         /** RangeOverride */
         RangeOverride: {
             /** Normal */
-            normal?: [
+            normal: [
                 number,
                 number
             ] | null;
             /** Warning */
-            warning?: [
+            warning: [
                 number,
                 number
             ] | null;
             /** Critical Low */
-            critical_low?: number | null;
+            critical_low: number | null;
             /** Critical High */
-            critical_high?: number | null;
+            critical_high: number | null;
         };
         /** Recommendation */
         Recommendation: {
@@ -1893,7 +1893,7 @@ export interface components {
              */
             priority: number;
             /** Intervention Id */
-            intervention_id?: string | null;
+            intervention_id: string | null;
         };
         /** ResolveIn */
         ResolveIn: {
@@ -1939,7 +1939,7 @@ export interface components {
              * Alert Id
              * @description Si ok=false, la alerta creada
              */
-            alert_id?: string | null;
+            alert_id: string | null;
         };
         /**
          * Source
@@ -1963,7 +1963,7 @@ export interface components {
             /** Indicators */
             indicators: components["schemas"]["IndicatorAssessment"][];
             /** Recommendations */
-            recommendations?: components["schemas"]["Recommendation"][];
+            recommendations: components["schemas"]["Recommendation"][];
             escalation: components["schemas"]["Escalation"];
         };
         /** Task */
@@ -1996,7 +1996,7 @@ export interface components {
              * Indicator Id
              * @description Se autocompleta al medir este indicador
              */
-            indicator_id?: string | null;
+            indicator_id: string | null;
         };
         /** TaskCompleteIn */
         TaskCompleteIn: {
@@ -2023,7 +2023,7 @@ export interface components {
              * Background
              * @example mars.jpg
              */
-            background?: string | null;
+            background: string | null;
         };
         /** TokenResponse */
         TokenResponse: {
@@ -2059,12 +2059,12 @@ export interface components {
              * Env Id
              * @description null solo para admin (global)
              */
-            env_id?: string | null;
+            env_id: string | null;
             /**
              * Member Id
              * @description Solo si role=member
              */
-            member_id?: number | null;
+            member_id: number | null;
             /**
              * Role Label
              * @description Nombre del rol con el vocabulario del entorno

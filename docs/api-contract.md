@@ -293,6 +293,7 @@ data: {"id":2,"type":"alert.created","at":"...","env_id":"mars","member_id":1,..
 - El stub emite los eventos de ejemplo y cierra la conexión; el stream continuo llega con BE-28.
 
 ### Reglas generales de los schemas
+- **Valores por defecto:** un campo con default es **opcional en la petición** y **siempre presente en la respuesta**.
 - **Entrada estricta:** los cuerpos rechazan campos desconocidos con `422` (`extra="forbid"`), así que una errata en un campo no se pierde en silencio.
 - **Fechas:** ISO-8601 con zona. En las query strings usa `Z` (`2026-11-14T10:00:00Z`); un `+00:00` sin codificar llega como espacio.
 - `GET /members/{id}/measurements` usa el parámetro `from` (palabra reservada en Python; en el back es `from_` con alias).
