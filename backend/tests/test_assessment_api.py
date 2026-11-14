@@ -60,7 +60,9 @@ def test_env_param_gives_other_result_with_same_data(client):
     assert mars["env_id"] == "mars" and geriatric["env_id"] == "geriatric"
     assert bp(mars)["status"] == "critical"  # override de Marte: warning [130, 140]
     assert bp(geriatric)["status"] == "warning"
-    assert cardio(mars)["escalation"]["mode"] == "autonomous"
+    # critical escala a la tripulación, que es de a bordo: tiempo real y sin retardo (BE-31).
+    esc = cardio(mars)["escalation"]
+    assert (esc["target_role"], esc["mode"], esc["delay_s"]) == ("crew", "realtime", 0)
     assert cardio(geriatric)["escalation"]["target_role"] == "self"
 
 

@@ -3,6 +3,7 @@ import pytest
 from app.schemas.common import EscalationMode, Status
 from app.services.assessment import (
     build_escalation,
+    escalation_for_level,
     escalation_mode,
     find_protocol,
     overall_status,
@@ -13,10 +14,11 @@ from app.services.assessment import (
 
 # Fixtures con la forma de docs/api-contract.md (Environment) y del formato
 # propuesto para data/protocols.json.
-MARS = {"id": "mars", "comm_delay_s": 840, "escalation_ladder": ["self", "crew", "ground"]}
-ISS = {"id": "iss", "comm_delay_s": 0, "escalation_ladder": ["self", "crew", "ground"]}
-MOON = {"id": "moon", "comm_delay_s": 30, "escalation_ladder": ["self", "crew", "ground"]}
-SOLO = {"id": "solo", "comm_delay_s": 0, "escalation_ladder": ["self"]}
+LADDER = {"escalation_ladder": ["self", "crew", "ground"], "external_from_level": 2}
+MARS = {"id": "mars", "comm_delay_s": 840, **LADDER}
+ISS = {"id": "iss", "comm_delay_s": 0, **LADDER}
+MOON = {"id": "moon", "comm_delay_s": 30, **LADDER}
+SOLO = {"id": "solo", "comm_delay_s": 0, "escalation_ladder": ["self"], "external_from_level": 1}
 
 PROTOCOLS = [
     {
@@ -42,9 +44,42 @@ PROTOCOLS = [
 # --- Acceptance criterion -------------------------------------------------
 
 
-def test_critical_on_mars_is_autonomous_and_realtime_on_iss():
-    assert build_escalation(Status.critical, MARS).mode == EscalationMode.autonomous
+def test_onboard_levels_never_carry_the_delay():
+    """BE-31: en Marte una alerta a la tripulación nunca lleva los 840 s."""
+    esc = build_escalation(Status.critical, MARS)
+    assert (esc.target_role, esc.mode, esc.delay_s) == ("crew", EscalationMode.realtime, 0)
     assert build_escalation(Status.critical, ISS).mode == EscalationMode.realtime
+
+
+def test_external_level_on_mars_is_autonomous():
+    esc = escalation_for_level(2, Status.critical, MARS)
+    assert (esc.target_role, esc.mode, esc.delay_s) == ("ground", EscalationMode.autonomous, 840)
+
+
+@pytest.mark.parametrize(
+    ("env", "status", "expected"),
+    [
+        (MARS, Status.warning, EscalationMode.delayed),  # autónomo solo si critical
+        (MOON, Status.critical, EscalationMode.delayed),  # 30 s: < 60 s
+        (ISS, Status.critical, EscalationMode.realtime),  # sin retardo
+    ],
+)
+def test_external_level_mode_depends_on_delay(env, status, expected):
+    esc = escalation_for_level(2, status, env)
+    assert esc.mode == expected
+    assert esc.delay_s == env["comm_delay_s"]
+
+
+@pytest.mark.parametrize("level", [0, 1])
+@pytest.mark.parametrize("env", [MARS, MOON, ISS], ids=["mars", "moon", "iss"])
+def test_onboard_levels_are_realtime_everywhere(env, level):
+    esc = escalation_for_level(level, Status.critical, env)
+    assert (esc.mode, esc.delay_s) == (EscalationMode.realtime, 0)
+
+
+def test_level_is_clamped_to_the_ladder():
+    assert escalation_for_level(9, Status.critical, MARS).target_role == "ground"
+    assert escalation_for_level(-1, Status.critical, MARS).target_role == "self"
 
 
 # --- worst / system / overall ---------------------------------------------
@@ -97,7 +132,7 @@ def test_escalation_mode(delay, status, expected):
 def test_warning_stays_on_self():
     esc = build_escalation(Status.warning, MARS)
     assert (esc.level, esc.target_role) == (0, "self")
-    assert esc.delay_s == 840
+    assert esc.delay_s == 0  # self es de a bordo
     assert esc.protocol_id is None
 
 
@@ -111,8 +146,8 @@ def test_critical_with_single_level_ladder_stays_on_self():
     assert (esc.level, esc.target_role) == (0, "self")
 
 
-def test_moon_critical_is_delayed():
-    assert build_escalation(Status.critical, MOON).mode == EscalationMode.delayed
+def test_moon_critical_to_crew_is_realtime():
+    assert build_escalation(Status.critical, MOON).mode == EscalationMode.realtime
 
 
 def test_escalation_carries_protocol():

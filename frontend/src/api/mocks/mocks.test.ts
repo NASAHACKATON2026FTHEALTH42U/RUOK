@@ -53,7 +53,10 @@ describe('modo mock (VITE_USE_MOCKS=true)', () => {
           params: { path: { member_id: 1 }, query: { env } },
         }),
       )
-    expect((await get('mars')).systems[0].escalation.mode).toBe('autonomous')
+    // BE-31: un critical escala a la tripulación, que es de a bordo → tiempo real y sin
+    // retardo también en Marte. El modo `autonomous` (840 s) es solo para niveles externos.
+    const mars = (await get('mars')).systems[0].escalation
+    expect([mars.target_role, mars.mode, mars.delay_s]).toEqual(['crew', 'realtime', 0])
     expect((await get('iss')).systems[0].escalation.mode).toBe('realtime')
   })
 
