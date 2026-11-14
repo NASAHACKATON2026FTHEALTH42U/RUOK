@@ -303,7 +303,13 @@ function MeasureForm({
   }
 
   return (
-    <form onSubmit={submit} className="mx-auto max-w-xl space-y-4" noValidate>
+    // Con varios indicadores (p. ej. cardiovascular), el formulario es más ancho y los campos van
+    // en dos columnas (un par de filas) en vez de en una sola columna larga.
+    <form
+      onSubmit={submit}
+      className={`mx-auto space-y-4 ${fields.length > 1 ? 'max-w-4xl' : 'max-w-xl'}`}
+      noValidate
+    >
       <Link to="/measure" className="text-sm text-env-muted hover:text-env-text hover:underline">
         ← Elegir otra cosa
       </Link>
@@ -315,22 +321,32 @@ function MeasureForm({
       )}
 
       <fieldset disabled={phase.kind === 'sending'} className="space-y-4">
-        {fields.map((f) => (
-          <IndicatorField
-            key={f.id}
-            indicator={f}
-            value={values[f.id]}
-            error={errors[f.id]}
-            onChange={(v) => {
-              setValues((s) => ({ ...s, [f.id]: v }))
-              setErrors((s) => {
-                const next = { ...s }
-                delete next[f.id]
-                return next
-              })
-            }}
-          />
-        ))}
+        <div
+          // También en móvil (< 768 px) van de dos en dos, con el contenido más compacto, para
+          // no tener que bajar con scroll.
+          className={`grid gap-4 ${
+            fields.length > 1
+              ? 'grid-cols-2 max-md:gap-2 [&_fieldset]:min-w-0 max-md:[&_fieldset]:p-2.5 max-md:[&_input]:min-w-0 max-md:[&_input]:px-2 max-md:[&_legend]:text-sm max-md:[&_ol]:text-xs'
+              : ''
+          }`}
+        >
+          {fields.map((f) => (
+            <IndicatorField
+              key={f.id}
+              indicator={f}
+              value={values[f.id]}
+              error={errors[f.id]}
+              onChange={(v) => {
+                setValues((s) => ({ ...s, [f.id]: v }))
+                setErrors((s) => {
+                  const next = { ...s }
+                  delete next[f.id]
+                  return next
+                })
+              }}
+            />
+          ))}
+        </div>
 
         <label className="block text-sm">
           <span className="text-env-muted">Nota (opcional)</span>
