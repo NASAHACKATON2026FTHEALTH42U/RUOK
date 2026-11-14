@@ -24,11 +24,11 @@ Cada issue pertenece a **un componente**: la parte del sistema que resuelve. Apa
 | 🎨 **UI** | `comp:ui` | UI base, temas y pulido | FE-02, FE-03, FE-04, FE-33, FE-34, FE-26 |
 | 🫀 **Dashboard** | `comp:dashboard` | Dashboard, cuerpo SVG y gráficas | FE-05, FE-06, FE-07, FE-08, FE-09 |
 | 📝 **Formularios** | `comp:forms` | Formularios de medición | FE-10 |
-| 🎮 **Juego** | `comp:game` | Rutina y gamificación | BE-18, BE-19, FE-18, BE-23, FE-24 |
+| 🎮 **Juego** | `comp:game` | Rutina y gamificación | BE-18, BE-19, FE-18, BE-23, FE-24, BE-37 |
 | 🧘 **Conductual** | `comp:behavioral` | Salud conductual / aislamiento | FE-19, BE-20, BE-21, FE-20, FE-21, FE-22, BE-22, FE-23, FE-25 |
 | 📶 **Tiempo real** | `comp:realtime` | Tiempo real y dispositivos (SSE, event_log, device) | BE-28, BE-29, FE-29 |
 | 🛰️ **Control** | `comp:control` | Centro de control (vista global y gestión) | BE-30, FE-31, FE-32, FS-07 |
-| 🔐 **Auth** | `comp:auth` | Login y roles (acceso por vistas) | FS-06, BE-25, BE-26, FE-27, BE-27, FE-28 |
+| 🔐 **Auth** | `comp:auth` | Login y roles (acceso por vistas) | FS-06, BE-25, BE-26, FE-27, BE-27, FE-28, BE-36 |
 | 🎤 **Pitch** | `comp:pitch` | Pitch, demo y envío | CNT-04 |
 
 ## M0 Setup (sáb +2h)
@@ -59,7 +59,7 @@ Dashboard con cuerpo + semáforo con datos reales y cambio de entorno.
 |---|---|---|---|---|---|---|
 | BE-05 | 🌐 API | [#12](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/12) Endpoints de members | backend | P0-blocker | BE-02, BE-03 | BE-07, BE-27 |
 | BE-06 | 🌐 API | [#13](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/13) POST de mediciones por lotes e idempotente, y GET con filtros | backend | P0-blocker | BE-02, BE-04 | BE-07, BE-08, FE-11, BE-27 |
-| BE-07 | 🗄️ BD | [#14](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/14) Seed de 30 días sintéticos y escenarios de demo | backend | P0-blocker | BE-05, BE-06 | BE-25 |
+| BE-07 | 🗄️ BD | [#14](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/14) Seed de 30 días sintéticos y escenarios de demo | backend | P0-blocker | BE-05, BE-06 | BE-25, BE-37 |
 | BE-08 | 🧠 Motor | [#15](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/15) Motor de evaluación por indicador con umbrales y ajustes de entorno | backend | P0-blocker | BE-03, BE-04, BE-06 | BE-09, BE-10 |
 | BE-09 | 🧠 Motor | [#16](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/16) Evaluación agregada por sistema y global con recomendaciones | backend | P0-blocker | BE-08 | BE-11, BE-31 |
 | BE-10 | 🧠 Motor | [#17](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/17) Tendencias y línea base personal | backend | P1 | BE-08 | BE-20 |
@@ -76,7 +76,7 @@ Dashboard con cuerpo + semáforo con datos reales y cambio de entorno.
 | BE-20 | 🧘 Conductual | [#28](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/28) Indicadores conductuales, regla de línea base y privacidad | backend | P1 | BE-10, BE-04 | — |
 | CNT-02 | 📚 Config | [#29](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/29) Textos por sistema e indicador e instrucciones de medición | content | P1 | CNT-01 | — |
 | BE-25 | 🔐 Auth | [#66](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/66) Tabla user_account, hash de contraseñas/PIN y usuarios demo | backend | P0-blocker | BE-02, BE-07 | BE-26 |
-| BE-26 | 🔐 Auth | [#67](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/67) Endpoints /auth (login, PIN, me) con JWT local | backend | P0-blocker | BE-25 | BE-27 |
+| BE-26 | 🔐 Auth | [#67](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/67) Endpoints /auth (login, PIN, me) con JWT local | backend | P0-blocker | BE-25 | BE-27, BE-36 |
 | FE-27 | 🔐 Auth | [#68](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/68) Pantalla de login, sesión y cliente con token | frontend | P0-blocker | FE-30, FS-04, FE-02 | FE-28, FE-29 |
 | FE-30 | 📴 Offline | [#74](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/74) Identidad de dispositivo e IndexedDB aislada por dispositivo/pestaña | frontend | P0-blocker | FE-01, FS-03 | FE-27, FE-11, FE-15 |
 | BE-28 | 📶 Tiempo real | [#75](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/75) Bitácora de eventos y stream en tiempo real (SSE) | backend | P0-blocker | BE-02 | FE-29 |
@@ -98,7 +98,7 @@ MVP integrado: alertas, offline, liveness, gamificación, consola ground.
 | BE-16 | 💓 Liveness | [#34](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/34) Alerta no_contact y timeout del check-in "R U OK?" | backend | P1 | BE-33, BE-12, BE-14 | — |
 | BE-17 | 🚨 Alertas | [#35](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/35) Endpoint de la consola ground con estado as-of y filtro de privacidad | backend | P1 | BE-15, BE-13 | FE-16, BE-27 |
 | BE-18 | 🎮 Juego | [#36](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/36) Rutina de tareas diarias desde el perfil del entorno | backend | P1 | BE-02, BE-03 | BE-19 |
-| BE-19 | 🎮 Juego | [#37](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/37) Gamificación (puntos, rachas, insignias, leaderboard cooperativo) | backend | P1 | BE-18 | FE-18, BE-23 |
+| BE-19 | 🎮 Juego | [#37](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/37) Gamificación (puntos, rachas, insignias, leaderboard cooperativo) | backend | P1 | BE-18 | FE-18, BE-23, BE-37 |
 | BE-21 | 🧘 Conductual | [#38](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/38) Catálogo de intervenciones y GET /interventions | backend | P1 | BE-04 | FE-20 |
 | BE-24 | ⚙️ Setup | [#39](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/39) FastAPI sirve el build del front y docker-compose | fullstack | P1 | BE-01, FE-01 | — |
 | FE-09 | 🫀 Dashboard | [#40](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/40) Página de historial (7/30 días) | frontend | P1 | FE-08 | — |
@@ -125,6 +125,8 @@ MVP integrado: alertas, offline, liveness, gamificación, consola ground.
 | FE-34 | 🎨 UI | [#116](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/116) Correcciones de reglas del front detectadas en la revisión | frontend | P1 | FE-04, FE-07 | — |
 | FE-22 | 🧘 Conductual | [#52](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/52) Test de vigilancia psicomotora (PVT) | fullstack | P1 | FE-10 | — |
 | FS-07 | 🛰️ Control | [#71](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/71) Gestión de usuarios en el centro de control (y rol family P2) | fullstack | P1 | BE-27, FE-28, FE-31 | — |
+| BE-36 | 🔐 Auth | [#170](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/170) Login válido tras adelantar el reloj de la demo (iat con clock.now()) | backend | P0-blocker | BE-26 | — |
+| BE-37 | 🎮 Juego | [#171](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/171) Historial de rutina y juego en el seed (rachas, insignias y puntos variados) | backend | P1 | BE-07, BE-19 | — |
 
 ## Freeze (dom 11:00)
 
@@ -235,4 +237,6 @@ graph LR
   FE_30 --> FE_11
   FE_10 --> FE_11
   BE_06 --> FE_11
+  BE_36["BE-36 · Auth<br/>Login válido tras adelantar el reloj de "]
+  BE_26 --> BE_36
 ```
