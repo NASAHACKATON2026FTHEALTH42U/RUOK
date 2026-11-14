@@ -20,6 +20,8 @@ import { getDevice } from './device'
 
 export type MeasurementIn = Schema<'MeasurementIn'>
 export type AlertIn = Schema<'AlertIn'>
+export type TaskCompleteIn = Schema<'TaskCompleteIn'>
+export type GameState = Schema<'GameState'>
 
 // ── Estado visible (contador de la cabecera) ─────────────────
 
@@ -68,6 +70,13 @@ function postAlert(memberId: number, alert: AlertIn) {
   })
 }
 
+function postTaskComplete(memberId: number, taskId: string, body: TaskCompleteIn) {
+  return api.POST('/api/v1/members/{member_id}/tasks/{task_id}/complete', {
+    params: { path: { member_id: memberId, task_id: taskId } },
+    body,
+  })
+}
+
 function postMeasurements(memberId: number, measurements: MeasurementIn[]) {
   return api.POST('/api/v1/members/{member_id}/measurements', {
     params: { path: { member_id: memberId } },
@@ -92,6 +101,15 @@ async function send(
       }
       case 'alert': {
         const r = await postAlert(entry.member_id, entry.body as AlertIn)
+        return {
+          status: r.response.status,
+          data: r.data,
+          error: r.error ? JSON.stringify(r.error) : undefined,
+        }
+      }
+      case 'task_completion': {
+        const body = entry.body as { task_id: string; completion: TaskCompleteIn }
+        const r = await postTaskComplete(entry.member_id, body.task_id, body.completion)
         return {
           status: r.response.status,
           data: r.data,
@@ -301,6 +319,41 @@ export function sendAlert(memberId: number, alert: AlertIn): Promise<SubmitResul
       await db.put('alerts', { id: alert.id, member_id: memberId, alert, pending: true })
     },
   )
+}
+
+/**
+ * Completa una tarea de la rutina (FE-18): el completado lleva su UUID de cliente (idempotente),
+ * la tarea queda marcada en el dispositivo (`tasks`, `completed_local`) y, sin conexión, se
+ * envía después. Si llega, devuelve el `GameState` actualizado (puntos, racha, insignias).
+ */
+export function completeTask(
+  memberId: number,
+  task: { id: string },
+  date: string,
+): Promise<SubmitResult<GameState>> {
+  const completion: TaskCompleteIn = { id: newId(), completed_at: serverNow().toISOString() }
+  return submit<GameState>(
+    'task_completion',
+    completion.id,
+    memberId,
+    `/members/${memberId}/tasks/${task.id}/complete`,
+    { task_id: task.id, completion },
+    async (db) => {
+      await db.put('tasks', {
+        id: task.id,
+        member_id: memberId,
+        date,
+        task: { ...task, completed: true },
+        completed_local: true,
+      })
+    },
+  )
+}
+
+/** Tareas completadas en este dispositivo para un member y día (también las aún sin enviar). */
+export async function locallyCompletedTasks(memberId: number, date: string): Promise<Set<string>> {
+  const rows = await (await getDb()).getAllFromIndex('tasks', 'by_member_date', [memberId, date])
+  return new Set(rows.filter((r) => r.completed_local).map((r) => r.id))
 }
 
 // ── Arranque ────────────────────────────────────────────────
