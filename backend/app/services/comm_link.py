@@ -126,6 +126,10 @@ def deliver_due(session: Session, env_id: str | None = None) -> list[models.Link
             session.add(message)
             delivered.append(message)
     if delivered:
+        # Las alertas que llegan a tierra quedan marcadas como entregadas (BE-14).
+        from app.services.alerts import on_link_delivered  # evita el ciclo de imports
+
+        on_link_delivered(session, delivered)
         session.commit()
         # TODO(BE-28): events.emit("link.delivered", ...) por mensaje
     return delivered
