@@ -15,13 +15,12 @@ npm run lint           # ESLint
 npm run format         # Prettier (escribe)
 npm run format:check   # Prettier (solo comprueba)
 npm run gen:api        # regenera src/api/types.gen.ts desde el OpenAPI del backend (usa uv)
+npm run gen:mocks      # regenera src/api/mocks/fixtures.gen.ts desde las respuestas del backend
 npm test               # tests unitarios (Vitest)
 npm run typecheck      # solo tsc -b
 ```
 
 Antes de abrir una PR: `npm run lint && npm run build && npm test` (es lo que ejecuta el job `Frontend` de la CI). Si el backend cambió la API: `npm run gen:api` y commitea `types.gen.ts` (lo comprueba el job `Contrato API`).
-
-> `VITE_USE_MOCKS=true` llega con **FS-04** (#7).
 
 ## API: tipos y cliente (FS-03)
 
@@ -68,6 +67,22 @@ Notas:
 - Prettier (`.prettierrc.json`): sin punto y coma, comillas simples, `trailingComma: all`, 100 columnas.
 - ESLint y Prettier ignoran `src/api/types.gen.ts` (es generado, no se edita a mano).
 
+## Mocks: el front sin backend (FS-04)
+
+| Modo                             | Cómo                                                                                         | Qué pasa                                                                                                                                                            |
+| -------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Real** (por defecto)           | `npm run dev`                                                                                | Llama al backend. Sin servidor: chip "sin conexión" y `NetworkError`; **nunca datos inventados**                                                                    |
+| **Mock**                         | `VITE_USE_MOCKS=true npm run dev`, o `?mocks=1` en la URL (se recuerda; `?mocks=0` lo quita) | Todo el front funciona contra una API simulada en memoria. Banner amarillo **"DATOS DE EJEMPLO"**                                                                   |
+| **Fallback** (plan B de la demo) | `VITE_MOCK_FALLBACK=true`                                                                    | Si el servidor no responde, **solo las lecturas** usan mocks y aparece el banner. **Las escrituras nunca se simulan**: lanzan `NetworkError` y el outbox las guarda |
+
+- **Datos:** `src/api/mocks/fixtures.gen.ts` lo genera `npm run gen:mocks`, que llama a cada endpoint del backend con su `TestClient` (hoy, los stubs de `backend/app/stubs.py`). Cada fixture lleva su tipo (`: Schema<'Assessment'>`), así que **si el contrato cambia y los mocks no encajan, `npm run build` falla**. No se edita a mano.
+- **Estado en memoria** (`handlers.ts`): las mediciones enviadas aparecen en el historial (idempotentes por UUID), los SOS se crean, escalan y resuelven, las tareas suman puntos, `/demo/link` y `/demo/fast-forward` funcionan. `POST /demo/reset` lo reinicia.
+- **El assessment de ejemplo** tiene los 7 sistemas con los 4 estados (`normal`, `warning`, `critical`, `unknown`), y el modo de escalado cambia según el entorno (`?env=`).
+- **Usuarios demo:** `vega` (member, Marte), `medic-mars`, `surgeon-mars` y `admin`, con cualquier contraseña.
+- **Feed de eventos:** `EventSource` no pasa por `fetch`, así que en modo mock el cliente SSE (FE-29) usa `createMockEventStream(onEvent)` de `src/api/mocks/events.ts`.
+- **Por qué no MSW:** necesita un service worker, que no existe por HTTP en la red local.
+- **Cobertura:** `mocks.test.ts` exige un handler para **cada operación del OpenAPI** (`CONTRACT_OPERATIONS`). Si el backend añade un endpoint, regenera con `npm run gen:mocks` y añade su handler.
+
 ## Estructura
 
 ```
@@ -90,16 +105,19 @@ frontend/
     │   ├── client.ts          cliente tipado, ApiError/NetworkError, configureApi, serverNow
     │   ├── newId.ts           UUID v4 sin contexto seguro
     │   ├── useServerHealth.ts hook de GET /health
+    │   ├── mocks/             API simulada: mode.ts, handlers.ts, mockFetch.ts, events.ts,
+    │   │                      useMockStatus.ts, fixtures.gen.ts (GENERADO por npm run gen:mocks)
     │   └── *.test.ts          tests (Vitest)
     ├── components/ui/
     │   ├── Layout.tsx         cabecera + navegación + <Outlet /> + disclaimer
     │   ├── EnvironmentSelector.tsx
     │   ├── ServerStatus.tsx   chip de conexión con el servidor
+    │   ├── MockBanner.tsx     banner obligatorio con datos de ejemplo
     │   └── PagePlaceholder.tsx
     └── pages/                 una página vacía por ruta
 ```
 
-Carpetas que aún no existen y que crean sus issues: `api/mocks/` (FS-04), `offline/` (FE-11/FE-30) y `components/{body,dashboard,measure,alerts,behavioral,game}/`.
+Carpetas que aún no existen y que crean sus issues: `offline/` (FE-11/FE-30) y `components/{body,dashboard,measure,alerts,behavioral,game}/`.
 
 ## Rutas
 

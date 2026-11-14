@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { EnvironmentSelector } from './EnvironmentSelector'
+import { MockBanner } from './MockBanner'
 import { ServerStatus } from './ServerStatus'
 
 const NAV_ITEMS = [
@@ -15,6 +16,7 @@ const NAV_ITEMS = [
 export function Layout() {
   return (
     <div className="flex min-h-full flex-col">
+      <MockBanner />
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
           <NavLink to="/" className="text-lg font-bold tracking-tight">
