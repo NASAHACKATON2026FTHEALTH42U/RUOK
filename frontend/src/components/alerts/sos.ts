@@ -45,6 +45,7 @@ const ROLE_VOCAB: Record<string, string> = {
   doctor: 'ground',
 }
 const ROLE_FALLBACK: Record<string, string> = {
+  self: 'autocuidado',
   crew: 'equipo',
   ground: 'control externo',
   nurse: 'enfermería',
