@@ -28,7 +28,7 @@ from app.schemas.members import (
     IndicatorAssessment,
     SystemAssessment,
 )
-from app.services import catalog, environments, measurements, members
+from app.services import catalog, environments, measurements
 from app.services.assessment import (
     _as_dict,
     build_escalation,
@@ -39,7 +39,7 @@ from app.services.assessment import (
     recommendations_for,
     system_status,
 )
-from app.services.liveness import combine_overall
+from app.services.liveness import combine_overall, member_liveness
 from app.services.trends import _points, apply_worsening_rule, baseline, trend
 
 __all__ = [
@@ -174,8 +174,7 @@ def assess_member(
     """``Assessment`` real de un member con sus mediciones de la BD.
 
     Con ``env_id`` se evalúa con otro perfil sin modificar nada (``?env=``).
-    El liveness sigue siendo el stub de members hasta BE-12 (parte 2), pero
-    ``overall_status`` ya es el peor entre la salud y el liveness.
+    ``overall_status`` es el peor entre la salud y el liveness real (BE-12).
     """
     env = environments.get_environment(env_id or member.env_id)
     if env is None:
@@ -185,7 +184,7 @@ def assess_member(
     for row in measurements.list_series(session, member.id):
         series[row.indicator_id].append(row)
 
-    liveness = members.stub_liveness(member.id)  # STUB → BE-12 (parte 2)
+    liveness = member_liveness(member)
     assessment = build_assessment(
         member_id=member.id,
         env=env,

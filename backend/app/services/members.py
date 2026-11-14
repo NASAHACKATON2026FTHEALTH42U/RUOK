@@ -1,9 +1,8 @@
 """Members en la base de datos (BE-05).
 
 Real: los datos del member, su privacidad, la fecha de su última medición y
-el `overall_status` del resumen (BE-11).
+el `overall_status` del resumen (BE-11) y el `liveness` (BE-12).
 STUB hasta su issue (ver docs/backend.md, sección "Members"):
-- `liveness` → BE-12 (heartbeat);
 - `open_alerts` → BE-14 (alertas).
 
 Los members los crea el seed (app/seed.py, BE-07).
@@ -16,9 +15,7 @@ from sqlmodel import Session, col, select
 
 from app import models, stubs
 from app.schemas import Member, MemberSummary
-from app.schemas.common import Liveness
-
-_STUB_BY_ID = {m.id: m for m in stubs.MEMBERS}
+from app.services.liveness import member_liveness
 
 
 def get_member(session: Session, member_id: int) -> models.Member | None:
@@ -49,12 +46,6 @@ def last_measurement_at(session: Session, member_id: int) -> datetime | None:
     return session.exec(query).one()
 
 
-def stub_liveness(member_id: int) -> Liveness:
-    """STUB → BE-12. El de los stubs; sin dato, `stale` (sin datos nunca es verde)."""
-    stub = _STUB_BY_ID.get(member_id)
-    return stub.liveness if stub is not None else Liveness.stale
-
-
 def to_schema(row: models.Member) -> Member:
     return Member(
         id=row.id,
@@ -63,7 +54,7 @@ def to_schema(row: models.Member) -> Member:
         position=row.position,
         share_behavioral_details=row.share_behavioral_details,
         last_seen_at=row.last_seen_at,
-        liveness=stub_liveness(row.id),
+        liveness=member_liveness(row),
     )
 
 

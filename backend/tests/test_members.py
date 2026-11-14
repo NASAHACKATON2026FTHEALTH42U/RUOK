@@ -59,12 +59,29 @@ def test_unknown_environment_is_404(client):
     assert client.get(f"{API}/environments/pluto/members").status_code == 404
 
 
-def test_summary_stub_fields(client):
-    """liveness y open_alerts siguen siendo stub (BE-12, BE-14); overall_status es real (BE-11)."""
-    by_id = {m["id"]: m for m in client.get(f"{API}/environments/mars/members").json()}
-    # Sin mediciones, la salud es unknown (sin datos = desconocido, nunca verde).
-    assert (by_id[1]["liveness"], by_id[1]["overall_status"]) == ("active", "unknown")
-    assert (by_id[2]["liveness"], by_id[2]["overall_status"]) == ("stale", "unknown")
+def test_summary_liveness_and_status_are_real(client):
+    """liveness (BE-12) y overall_status (BE-11) son reales; open_alerts sigue stub (BE-14)."""
+    from app import clock
+
+    with Session(engine) as s:
+        saved = {i: s.get(models.Member, i).last_seen_at for i in (1, 2)}
+        for member_id, minutes_ago in ((1, 0), (2, 6)):  # stale_after_s = 5 min
+            m = s.get(models.Member, member_id)
+            m.last_seen_at, m.last_activity = clock.now() - timedelta(minutes=minutes_ago), "normal"
+            s.add(m)
+        s.commit()
+    try:
+        by_id = {m["id"]: m for m in client.get(f"{API}/environments/mars/members").json()}
+        # Sin mediciones, la salud es unknown (sin datos = desconocido, nunca verde).
+        assert (by_id[1]["liveness"], by_id[1]["overall_status"]) == ("active", "unknown")
+        assert (by_id[2]["liveness"], by_id[2]["overall_status"]) == ("stale", "unknown")
+    finally:
+        with Session(engine) as s:
+            for member_id, last_seen in saved.items():
+                m = s.get(models.Member, member_id)
+                m.last_seen_at = last_seen
+                s.add(m)
+            s.commit()
 
 
 def test_last_measurement_at_is_real(client):

@@ -1,7 +1,7 @@
 """Members, mediciones, evaluación y liveness.
 
-Reales: members (BE-05), mediciones (BE-06) y assessment (BE-11).
-STUB(FS-02) → BE-12 (heartbeat y liveness) y BE-16 (R U OK?).
+Reales: members (BE-05), mediciones (BE-06), assessment (BE-11) y heartbeat (BE-12).
+STUB(FS-02) → BE-16 (R U OK?).
 """
 
 from datetime import datetime
@@ -27,7 +27,7 @@ from app.schemas import (
     RuokResult,
     Slug,
 )
-from app.services import environments, measurements, members
+from app.services import environments, liveness, measurements, members
 from app.services.member_assessment import UnknownEnvironment, assess_member
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -135,7 +135,7 @@ def list_measurements(
     tags=["assessment"],
     summary="Evaluación del member",
     description="Con `env` se evalúa con otro perfil sin modificar datos; "
-    "un `env` inexistente → 404. El liveness es STUB hasta BE-12.",
+    "un `env` inexistente → 404.",
 )
 def get_assessment(member_id: int, session: SessionDep, env: Slug | None = None) -> Assessment:
     m = _member(session, member_id)
@@ -150,11 +150,12 @@ def get_assessment(member_id: int, session: SessionDep, env: Slug | None = None)
     response_model=HeartbeatResult,
     tags=["liveness"],
     summary="Señal de vida del dispositivo del member",
-    description="Actualiza también el registro del dispositivo. STUB(FS-02) → BE-12/BE-29",
+    description="Actualiza `last_seen_at` y la actividad del member y el registro del "
+    "dispositivo. `checkin_required` es true si el member venía de `stale` o `lost`.",
 )
 def heartbeat(member_id: int, body: HeartbeatIn, session: SessionDep) -> HeartbeatResult:
-    _member(session, member_id)
-    return HeartbeatResult(liveness="active", checkin_required=False)
+    m = _member(session, member_id)
+    return liveness.record_heartbeat(session, m, body)
 
 
 @router.post(

@@ -338,7 +338,7 @@ export interface paths {
         };
         /**
          * Evaluación del member
-         * @description Con `env` se evalúa con otro perfil sin modificar datos; un `env` inexistente → 404. El liveness es STUB hasta BE-12.
+         * @description Con `env` se evalúa con otro perfil sin modificar datos; un `env` inexistente → 404.
          */
         get: operations["get_assessment_api_v1_members__member_id__assessment_get"];
         put?: never;
@@ -360,7 +360,7 @@ export interface paths {
         put?: never;
         /**
          * Señal de vida del dispositivo del member
-         * @description Actualiza también el registro del dispositivo. STUB(FS-02) → BE-12/BE-29
+         * @description Actualiza `last_seen_at` y la actividad del member y el registro del dispositivo. `checkin_required` es true si el member venía de `stale` o `lost`.
          */
         post: operations["heartbeat_api_v1_members__member_id__heartbeat_post"];
         delete?: never;
