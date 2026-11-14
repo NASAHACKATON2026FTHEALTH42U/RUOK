@@ -194,7 +194,8 @@ function MeasureForm({
             <strong>se enviará sola</strong> cuando vuelva la conexión, sin duplicarse.
           </p>
           <p className="mt-2 text-sm text-env-muted">
-            Verás los pendientes en la cabecera. Hasta entonces, el panel puede no reflejarla.
+            Verás los pendientes en la cabecera. Mientras tanto, el panel la evalúa en este
+            dispositivo y la marca como «provisional».
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

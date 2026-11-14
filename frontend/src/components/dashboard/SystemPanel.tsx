@@ -21,6 +21,8 @@ interface SystemPanelProps {
   stale: boolean
   /** El rol puede registrar mediciones de este member (si no, no hay "Medir ahora"). */
   canMeasure?: boolean
+  /** Indicadores con estado provisional (medición sin sincronizar, FE-12). */
+  provisionalIds?: ReadonlySet<string>
   onClose: () => void
 }
 
@@ -36,6 +38,7 @@ export function SystemPanel({
   isSpace,
   stale,
   canMeasure = true,
+  provisionalIds,
   onClose,
 }: SystemPanelProps) {
   const closeRef = useRef<HTMLButtonElement>(null)
@@ -143,6 +146,7 @@ export function SystemPanel({
                     name={byId.get(ind.indicator_id)?.name}
                     stale={stale}
                     showTrend
+                    provisional={provisionalIds?.has(ind.indicator_id)}
                   />
                 </li>
               ))}

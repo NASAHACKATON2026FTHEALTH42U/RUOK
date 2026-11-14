@@ -1,6 +1,7 @@
 import { serverNow } from '../../api/client'
 import type { Assessment } from '../../api/useAssessment'
 import { formatAgo } from '../../lib/time'
+import { statusStyle } from '../ui/status'
 import { StatusBadge } from '../ui/StatusBadge'
 import { formatTrend, formatValue } from './format'
 import { TrendChart } from './TrendChart'
@@ -19,6 +20,8 @@ interface IndicatorCardProps {
   onClick?: () => void
   /** Muestra la TrendChart (7/30 días) del indicador debajo del valor. */
   showTrend?: boolean
+  /** Estado calculado en el dispositivo con una medición aún sin sincronizar (FE-12). */
+  provisional?: boolean
 }
 
 /**
@@ -32,6 +35,7 @@ export function IndicatorCard({
   stale,
   onClick,
   showTrend,
+  provisional,
 }: IndicatorCardProps) {
   const trend = formatTrend(indicator.trend)
   const body = (
@@ -41,7 +45,15 @@ export function IndicatorCard({
           <span className="block font-medium">{name ?? indicator.indicator_id}</span>
           {systemName && <span className="block text-xs text-env-muted">{systemName}</span>}
         </span>
-        <StatusBadge status={stale ? 'stale' : indicator.status} size="sm" />
+        <StatusBadge
+          status={stale ? 'stale' : indicator.status}
+          label={
+            provisional && !stale
+              ? `${statusStyle(indicator.status).label} · provisional`
+              : undefined
+          }
+          size="sm"
+        />
       </span>
       <span className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
         <span className="text-lg font-semibold">
