@@ -16,7 +16,7 @@ import { HudClock } from './HudClock'
 import { LinkStatusChip } from './LinkStatusChip'
 import { MockBanner } from './MockBanner'
 import { NavIcon } from './NavIcon'
-import { allowedItems, MORE, navItems, tabsFor } from './navigation'
+import { allowedItems, navItems, tabsFor } from './navigation'
 import { PendingSyncChip } from './PendingSyncChip'
 import { ServerStatus } from './ServerStatus'
 import { TOPBAR_SLOT_ID } from './TopBarPortal'
@@ -78,7 +78,7 @@ export function Layout() {
               <b>NAV.01</b>Secciones
             </div>
             <ul>
-              {[...allowed, MORE].map((item) => (
+              {allowed.map((item) => (
                 <li key={item.to}>
                   <NavLink
                     to={item.to}
