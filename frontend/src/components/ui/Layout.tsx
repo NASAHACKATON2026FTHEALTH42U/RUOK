@@ -53,10 +53,6 @@ export function Layout() {
       <footer className="border-t border-env-border px-4 py-3 text-center text-xs text-env-muted">
         Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye el
         criterio de un profesional sanitario.
-        {/* TEMPORAL (FE-02): borrar junto con /dev/themes antes del freeze. */}
-        <NavLink to="/dev/themes" className="ml-2 underline hover:text-env-text">
-          Paletas (temporal)
-        </NavLink>
       </footer>
     </div>
   )

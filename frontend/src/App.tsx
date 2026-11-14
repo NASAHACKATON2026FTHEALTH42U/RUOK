@@ -4,7 +4,6 @@ import Alerts from './pages/Alerts'
 import CheckIn from './pages/CheckIn'
 import Dashboard from './pages/Dashboard'
 import EnvironmentSelect from './pages/EnvironmentSelect'
-import ThemePreview from './pages/dev/ThemePreview'
 import Ground from './pages/Ground'
 import History from './pages/History'
 import Measure from './pages/Measure'
@@ -23,8 +22,6 @@ const router = createBrowserRouter([
       { path: '/missions', element: <Missions /> },
       { path: '/alerts', element: <Alerts /> },
       { path: '/ground', element: <Ground /> },
-      // TEMPORAL (FE-02): comparador de paletas. Borrar antes del freeze.
-      { path: '/dev/themes', element: <ThemePreview /> },
       { path: '*', element: <NotFound /> },
     ],
   },

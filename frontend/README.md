@@ -66,7 +66,7 @@ frontend/
     │   ├── Layout.tsx         cabecera + navegación + <Outlet /> + disclaimer
     │   ├── EnvironmentSelector.tsx
     │   └── PagePlaceholder.tsx
-    └── pages/                 una página vacía por ruta (+ dev/ThemePreview.tsx, TEMPORAL)
+    └── pages/                 una página vacía por ruta
 ```
 
 Carpetas que aún no existen y que crean sus issues: `api/` (FS-03/FS-04), `offline/` (FE-11) y `components/{body,dashboard,measure,alerts,behavioral,game}/`.
@@ -75,18 +75,17 @@ Carpetas que aún no existen y que crean sus issues: `api/` (FS-03/FS-04), `offl
 
 Todas cuelgan de `Layout`, que pinta la cabecera con el selector de entorno, la navegación y el pie con el disclaimer **"No es un dispositivo médico"**.
 
-| Ruta          | Página                    | La implementa |
-| ------------- | ------------------------- | ------------- |
-| `/`           | `EnvironmentSelect`       | FE-03         |
-| `/dashboard`  | `Dashboard`               | FE-07         |
-| `/measure`    | `Measure`                 | FE-10         |
-| `/checkin`    | `CheckIn`                 | FE-19         |
-| `/history`    | `History`                 | FE-09         |
-| `/missions`   | `Missions`                | FE-18         |
-| `/alerts`     | `Alerts`                  | FE-14         |
-| `/ground`     | `Ground`                  | FE-16         |
-| `/dev/themes` | `ThemePreview` (TEMPORAL) | FE-02         |
-| `*`           | `NotFound`                | —             |
+| Ruta         | Página              | La implementa |
+| ------------ | ------------------- | ------------- |
+| `/`          | `EnvironmentSelect` | FE-03         |
+| `/dashboard` | `Dashboard`         | FE-07         |
+| `/measure`   | `Measure`           | FE-10         |
+| `/checkin`   | `CheckIn`           | FE-19         |
+| `/history`   | `History`           | FE-09         |
+| `/missions`  | `Missions`          | FE-18         |
+| `/alerts`    | `Alerts`            | FE-14         |
+| `/ground`    | `Ground`            | FE-16         |
+| `*`          | `NotFound`          | —             |
 
 Las páginas de FE-01 solo muestran un `PagePlaceholder` con el título y la issue que las completará.
 
@@ -138,7 +137,7 @@ const { member, crew, ground } = useVocab()
 
 Reglas:
 
-- **Contraste WCAG**: texto y `muted` sobre `bg` y `surface` ≥ 4,5:1; `primary` sobre `bg` ≥ 3:1; `primaryText` sobre `primary` ≥ 4,5:1. Todas las paletas lo cumplen. `/dev/themes` lo calcula al momento si cambias un color.
+- **Contraste WCAG**: texto y `muted` sobre `bg` y `surface` ≥ 4,5:1; `primary` sobre `bg` ≥ 3:1; `primaryText` sobre `primary` ≥ 4,5:1. Todas las paletas lo cumplen; si cambias un color, comprueba el contraste antes de hacer commit.
 - **`primary` no se usa como color de texto**: en Marte (`#c1440e`, el del contrato) solo da 3,7:1 sobre el fondo.
 - **El semáforo no depende del tema**: `normal`, `warning`, `critical` y `unknown` usan una paleta fija en todos los entornos (FE-04). Ningún `primary` es verde, para no confundirse con "normal".
 - Para añadir un entorno: crea `themes/<id>.ts` y regístralo en `themes/index.ts`.
@@ -148,4 +147,3 @@ Reglas:
 - `PLACEHOLDER_ENVIRONMENTS` (`src/environments/index.ts`) tiene slug, nombre y vocabulario, copiados de `docs/environments.md`. **TODO(FS-04)**: sustituir por `GET /environments`. No añadas aquí umbrales ni otra configuración.
 - El tipo `Vocabulary` está escrito a mano. **TODO(FS-03)**: usar el tipo generado de `types.gen.ts`.
 - Con FS-04, el `theme.primary` de la API sustituirá al del archivo de tema, para no tener dos fuentes de verdad.
-- **`/dev/themes`** es un comparador de paletas **temporal**: borrar antes del freeze (`src/pages/dev/`, su ruta en `App.tsx` y el enlace del pie de `Layout.tsx`, todos marcados `TEMPORAL (FE-02)`).
