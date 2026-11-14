@@ -13,8 +13,14 @@
  *
  * Toda ESCRITURA de datos del member debe pasar por el outbox (src/offline/, FE-11),
  * que usa este cliente por debajo.
+ *
+ * Mocks (FS-04, ver ./mocks/mode.ts): con `VITE_USE_MOCKS=true` o `?mocks=1` todas las
+ * peticiones se resuelven en memoria. Con `VITE_MOCK_FALLBACK=true`, solo las lecturas (GET)
+ * caen a mocks si el servidor no responde; las escrituras siempre lanzan NetworkError.
  */
 import createClient, { type Middleware } from 'openapi-fetch'
+import { mockFetch } from './mocks/mockFetch'
+import { isMockFallbackEnabled, isMockMode, setFallbackActive } from './mocks/mode'
 import type { components, paths } from './types.gen'
 
 export type { components, paths }
@@ -114,11 +120,23 @@ const ruokMiddleware: Middleware = {
   },
 }
 
-/** fetch que convierte los fallos de red en NetworkError (para distinguirlos de un 4xx/5xx). */
+/**
+ * fetch de la app:
+ * - modo mock → API simulada en memoria;
+ * - modo real → fetch; los fallos de red pasan a NetworkError (distinto de un 4xx/5xx);
+ * - fallback (opt-in) → si falla la red en un GET, se sirve el mock y se activa el banner.
+ */
 async function ruokFetch(input: Request): Promise<Response> {
+  if (isMockMode()) return mockFetch(input)
   try {
-    return await globalThis.fetch(input)
+    const response = await globalThis.fetch(input)
+    setFallbackActive(false)
+    return response
   } catch (err) {
+    if (isMockFallbackEnabled() && input.method === 'GET') {
+      setFallbackActive(true)
+      return mockFetch(input)
+    }
     throw new NetworkError(err)
   }
 }

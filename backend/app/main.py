@@ -10,6 +10,7 @@ from app import clock
 from app.db import engine, init_db
 from app.routers import alerts, auth, catalog, game, health, members, realtime
 from app.routers.deps import device_id_header
+from app.services import environments
 from app.services.app_state import restore_clock
 
 
@@ -18,6 +19,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     init_db()
     with Session(engine) as session:
         restore_clock(session)
+    environments.list_environments()  # valida app/data/environments.json al arrancar
     yield
 
 

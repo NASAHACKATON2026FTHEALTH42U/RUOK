@@ -9,7 +9,9 @@
 |---|---|---|
 | BE-01 (#3) | FastAPI, `/health`, CORS, `X-Server-Time`, SQLite en WAL, reloj inyectable, tests | Hecho |
 | FS-02 (#5) | Schemas Pydantic completos del contrato, routers stub de todos los endpoints, test de cobertura del contrato | Hecho |
-| BE-02 (#8) | Modelos SQLModel de **todas** las tablas de [data-model.md](data-model.md) con sus índices, `app_state` y persistencia del reloj | Hecho (PR pendiente de merge) |
+| BE-02 (#8) | Modelos SQLModel de **todas** las tablas de [data-model.md](data-model.md) con sus índices, `app_state` y persistencia del reloj | Hecho |
+| BE-08 (#15) | Motor de evaluación por indicador (`services/assessment.py`) | Hecho |
+| BE-03 (#9) | Perfiles de entorno en `app/data/environments.json`, loader validado y `GET /environments` reales | Hecho (PR pendiente de merge) |
 
 ## Arrancar
 
@@ -24,6 +26,7 @@ uv run --with ruff ruff check .            # lint (igual que la CI)
 - Swagger: <http://localhost:8000/docs>.
 - Comprobación rápida: `curl -i localhost:8000/api/v1/health`.
 - La base de datos `backend/ruok.db` se crea sola al arrancar. Está en `.gitignore` (también `-wal` y `-shm`).
+- Si cambias la API (rutas, schemas o `description`), regenera los tipos del front: `cd frontend && npm ci && npm run gen:api`. Necesita **Node 20** (`mise use -g node@20` o `nvm install 20`). La CI falla si `types.gen.ts` no está al día.
 
 ### Variables de entorno
 
@@ -39,12 +42,16 @@ backend/
 ├── pyproject.toml        dependencias (fastapi, uvicorn, sqlmodel, pydantic; dev: pytest, httpx, ruff)
 ├── uv.lock               versiones exactas (lo genera uv, no se edita a mano)
 ├── app/
-│   ├── main.py           app FastAPI: lifespan (init_db + restaurar reloj), CORS, X-Server-Time, /api/v1
+│   ├── main.py           app FastAPI: lifespan (init_db, reloj, entornos), CORS, X-Server-Time, /api/v1
 │   ├── db.py             engine SQLite (WAL + foreign_keys), init_db(), get_session()
 │   ├── clock.py          reloj inyectable: now(), advance(), set_offset(), get_offset(), reset()
 │   ├── models.py         tablas SQLModel (15) e índices de data-model.md; tipo UTCDateTime
+│   ├── data/
+│   │   └── environments.json  los 6 perfiles de entorno (BE-03)
 │   ├── services/
-│   │   └── app_state.py  clave-valor de app_state: get_value/set_value, save_clock/restore_clock
+│   │   ├── app_state.py     clave-valor de app_state: get_value/set_value, save_clock/restore_clock
+│   │   ├── assessment.py    motor de evaluación por indicador (BE-08)
+│   │   └── environments.py  carga y valida environments.json: list_environments(), get_environment()
 │   ├── stubs.py          STUB(FS-02): datos de ejemplo de los routers stub (se van retirando)
 │   ├── schemas/          modelos Pydantic del contrato, uno por dominio; se importan desde app.schemas
 │   │   ├── common.py     enumeraciones (Status, Liveness, Role…), Slug, Range, ApiModel, ErrorResponse
@@ -59,7 +66,7 @@ backend/
 │       ├── deps.py       Bearer opcional (stub de auth), cabecera X-Device-Id, respuestas de error
 │       ├── health.py     GET /health
 │       ├── auth.py       /auth/*, /users
-│       ├── catalog.py    /environments, /indicators, /systems, /interventions
+│       ├── catalog.py    /environments (real), /indicators, /systems, /interventions (stub)
 │       ├── members.py    /members/{id}, privacy, measurements, assessment, heartbeat, ruok
 │       ├── alerts.py     alertas del member, acciones sobre alertas, consola ground
 │       ├── game.py       tareas, game, leaderboard
@@ -70,7 +77,9 @@ backend/
     ├── test_health.py    /health, X-Server-Time, CORS, /docs
     ├── test_clock.py     reloj y fast-forward
     ├── test_db.py        WAL, foreign_keys y sesión
-    └── test_models.py    tablas, índices, crear/leer cada modelo, restricciones, fechas UTC, app_state
+    ├── test_models.py    tablas, índices, crear/leer cada modelo, restricciones, fechas UTC, app_state
+    ├── test_assessment.py   motor de evaluación (BE-08)
+    └── test_environments.py perfiles vs docs/environments.md, JSON inválido, GET /environments y 404
 ```
 
 La estructura objetivo completa (services, data, seed…) está en [architecture.md](architecture.md#estructura-de-carpetas).
@@ -141,6 +150,24 @@ El desfase vive en memoria. Para que sobreviva a un reinicio se guarda en `app_s
 - `services.app_state.save_clock(session)` lo guarda (lo llamará `/demo/fast-forward`);
 - al arrancar, el `lifespan` llama a `restore_clock(session)` y lo recupera.
 
+### Catálogos JSON (`app/data/`)
+
+La configuración de dominio (entornos, indicadores, sistemas, intervenciones…) vive en JSON, **no en el código ni en la BD** (principio *Configuración, no código*). Las tablas la referencian por slug (`env_id`, `indicator_id`…).
+
+| Fichero | Servicio | Issue |
+|---|---|---|
+| `environments.json` | `services/environments.py` | BE-03 |
+| `indicators.json`, `systems.json` | — | BE-04 |
+| `interventions.json` | — | BE-21 |
+
+Cómo funciona `services/environments.py` (patrón a seguir en BE-04 y BE-21):
+- `load_environments(path)` lee el fichero y lo valida con el schema del contrato (`TypeAdapter(list[Environment])`). `ApiModel` rechaza campos desconocidos, así que una errata en el JSON da error. También rechaza ids duplicados.
+- `list_environments()` y `get_environment(env_id)` usan una caché en memoria (`lru_cache`): el fichero se lee una sola vez.
+- El `lifespan` lo carga al arrancar: **si el JSON es inválido, el servidor no arranca** (mejor que fallar en mitad de la demo).
+- Cambiar el JSON requiere reiniciar el servidor (`--reload` solo vigila los `.py`).
+
+**Añadir o cambiar un entorno:** edita `environments.json` siguiendo [environments.md](environments.md), actualiza la tabla de ese documento y `DOC_TABLE` en `tests/test_environments.py`, y pasa los tests. Los valores clínicos (`threshold_overrides`) se citan en [sources.md](sources.md).
+
 ### Cabecera `X-Server-Time` y CORS (`app/main.py`)
 
 - Un middleware añade `X-Server-Time` (hora de `clock.now()`, ISO-8601) a **todas** las respuestas, como pide [api-contract.md](api-contract.md).
@@ -165,7 +192,13 @@ Todos los endpoints del contrato existen ya con datos de ejemplo (`app/stubs.py`
 3. Borra de `app/stubs.py` lo que ya no se use.
 4. `tests/test_contract.py` sigue pasando. Si cambias un endpoint del contrato, actualiza `CONTRACT_ENDPOINTS`.
 
+**Defaults en los schemas:** `ApiModel` usa `json_schema_serialization_defaults_required=True`. En las **respuestas**, los campos con valor por defecto salen como obligatorios (siempre vienen); en las **peticiones** siguen siendo opcionales. El front genera los tipos con `--default-non-nullable false`, así que no obliga a enviar los valores por defecto (por ejemplo, `MeasurementIn.source`).
+
 **Auth en los stubs:** `routers/deps.py` declara `Authorization: Bearer` (opcional) para que Swagger muestre el candado, pero **no valida nada** hasta BE-26 y BE-27. Los endpoints públicos (`/health`, `/auth/login`, `/auth/pin`, `/auth/demo-users`, `/system/network-info`) no lo declaran.
+
+## Exportar mocks para el front (FS-04)
+
+`uv run python scripts/export_mocks.py` (o `npm run gen:mocks` desde `frontend/`) llama a cada endpoint con el `TestClient` y genera `frontend/src/api/mocks/fixtures.gen.ts`. Hoy los datos salen de `app/stubs.py`. Cuando los endpoints sean reales, ejecútalo tras el seed (BE-07) para tener mocks con datos realistas. **Si añades un endpoint, el test de mocks del front exige un handler para él** (`frontend/src/api/mocks/handlers.ts`).
 
 ## Cómo añadir un endpoint
 

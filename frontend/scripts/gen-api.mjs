@@ -51,7 +51,9 @@ async function loadSchema() {
 writeFileSync(schemaFile, await loadSchema())
 execFileSync(
   join(frontendDir, 'node_modules/.bin/openapi-typescript'),
-  [schemaFile, '-o', output],
+  // Los defaults solo hacen opcional el campo en las PETICIONES; en las respuestas el backend
+  // ya los declara obligatorios (ApiModel.json_schema_serialization_defaults_required).
+  [schemaFile, '-o', output, '--default-non-nullable', 'false'],
   {
     stdio: 'inherit',
   },
