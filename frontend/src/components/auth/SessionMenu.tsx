@@ -17,8 +17,9 @@ export function SessionMenu({ part = 'all' }: { part?: 'all' | 'user' | 'logout'
     <span className="flex items-center gap-2 text-sm">
       {part !== 'logout' && (
         <span className="text-env-muted">
-          <span className="text-env-text">{user.display_name}</span> ·{' '}
-          {userRoleLabel(user.role, vocabulary, user.role_label)}
+          <span className="text-env-text">{user.display_name}</span>
+          {/* El rol solo en «Más»; en la barra superior (part="user") va solo el nombre. */}
+          {part === 'all' && <> · {userRoleLabel(user.role, vocabulary, user.role_label)}</>}
         </span>
       )}
       {part !== 'user' && (

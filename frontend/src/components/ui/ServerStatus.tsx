@@ -4,11 +4,13 @@ import { useServerHealth } from '../../api/useServerHealth'
 /**
  * Chip con el estado de la conexión con el servidor de a bordo (GET /health).
  * Sin verde (se confundiría con el estado de salud "normal") ni colores fijos: forma + texto
- * con los tokens del tema (FE-34).
+ * con los tokens del tema (FE-34). Con `quiet`, solo aparece si no está "conectado".
  */
-export function ServerStatus() {
+export function ServerStatus({ quiet = false }: { quiet?: boolean }) {
   const status = useServerHealth()
   const mock = useMockStatus()
+  // `quiet` (barra lateral): con el servidor conectado no se pinta nada; solo avisa si hay problema.
+  if (quiet && mock !== 'mock' && status.state === 'online') return null
 
   const { icon, label, strong } =
     mock === 'mock'
