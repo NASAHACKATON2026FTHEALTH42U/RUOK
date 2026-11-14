@@ -71,7 +71,7 @@ erDiagram
     int id PK
     text env_id "slug -> environments.json"
     text name
-    text role "commander, engineer, patient, resident..."
+    text position "commander, engineer, patient, resident... (no es User.role)"
     bool share_behavioral_details "privacidad, default false"
     text device_id "último dispositivo"
     datetime last_seen_at "último heartbeat"

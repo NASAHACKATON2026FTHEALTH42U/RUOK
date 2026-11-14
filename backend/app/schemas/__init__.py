@@ -1,0 +1,162 @@
+"""Schemas Pydantic de la API. Fuente de verdad: docs/api-contract.md.
+
+Se importan siempre desde aquí: `from app.schemas import Assessment`.
+Cambiar un schema cambia el contrato → actualiza docs/api-contract.md y ejecuta
+`npm run gen:api` en el front (la CI lo comprueba en el job "Contrato API").
+"""
+
+from datetime import datetime
+from typing import Literal
+
+from pydantic import BaseModel
+
+from app.schemas.alerts import (
+    AckIn,
+    Alert,
+    AlertEvent,
+    AlertIn,
+    AlertMessageIn,
+    EscalateIn,
+    GroundView,
+    ResolveIn,
+)
+from app.schemas.auth import DemoUser, LoginIn, PinLoginIn, TokenResponse, User, UserCreate
+from app.schemas.common import (
+    Activity,
+    Actor,
+    AlertCategory,
+    AlertEventType,
+    AlertOrigin,
+    AlertSeverity,
+    AlertStatus,
+    DeviceKind,
+    EnvironmentKind,
+    ErrorResponse,
+    EscalationMode,
+    EventType,
+    LinkDirection,
+    LinkState,
+    Liveness,
+    OkResponse,
+    Role,
+    Slug,
+    Source,
+    Status,
+    Trend,
+)
+from app.schemas.config import BodySystem, Environment, Indicator, Intervention
+from app.schemas.game import Badge, GameState, Leaderboard, LeaderboardEntry, Task, TaskCompleteIn
+from app.schemas.link import LinkMessage, LinkStatus
+from app.schemas.members import (
+    Assessment,
+    BehavioralSummary,
+    Escalation,
+    HeartbeatIn,
+    HeartbeatResult,
+    IndicatorAssessment,
+    Measurement,
+    MeasurementBatchIn,
+    MeasurementBatchResult,
+    MeasurementIn,
+    Member,
+    MemberSummary,
+    PrivacyIn,
+    Recommendation,
+    RuokIn,
+    RuokResult,
+    SystemAssessment,
+)
+from app.schemas.realtime import (
+    ControlOverview,
+    DemoClock,
+    DemoLinkIn,
+    Device,
+    EnvironmentOverview,
+    Event,
+    FastForwardIn,
+    LivenessPauseIn,
+    NetworkInfo,
+)
+
+
+class HealthResponse(BaseModel):
+    status: Literal["ok"]
+    server_time: datetime
+
+
+__all__ = [
+    "AckIn",
+    "Activity",
+    "Actor",
+    "Alert",
+    "AlertCategory",
+    "AlertEvent",
+    "AlertEventType",
+    "AlertIn",
+    "AlertMessageIn",
+    "AlertOrigin",
+    "AlertSeverity",
+    "AlertStatus",
+    "Assessment",
+    "Badge",
+    "BehavioralSummary",
+    "BodySystem",
+    "ControlOverview",
+    "DemoClock",
+    "DemoLinkIn",
+    "DemoUser",
+    "Device",
+    "DeviceKind",
+    "Environment",
+    "EnvironmentKind",
+    "EnvironmentOverview",
+    "ErrorResponse",
+    "Escalation",
+    "EscalateIn",
+    "EscalationMode",
+    "Event",
+    "EventType",
+    "FastForwardIn",
+    "GameState",
+    "GroundView",
+    "HealthResponse",
+    "HeartbeatIn",
+    "HeartbeatResult",
+    "Indicator",
+    "IndicatorAssessment",
+    "Intervention",
+    "Leaderboard",
+    "LeaderboardEntry",
+    "LinkDirection",
+    "LinkMessage",
+    "LinkState",
+    "LinkStatus",
+    "Liveness",
+    "LivenessPauseIn",
+    "LoginIn",
+    "Measurement",
+    "MeasurementBatchIn",
+    "MeasurementBatchResult",
+    "MeasurementIn",
+    "Member",
+    "MemberSummary",
+    "NetworkInfo",
+    "OkResponse",
+    "PinLoginIn",
+    "PrivacyIn",
+    "Recommendation",
+    "ResolveIn",
+    "Role",
+    "RuokIn",
+    "Slug",
+    "RuokResult",
+    "Source",
+    "Status",
+    "SystemAssessment",
+    "Task",
+    "TaskCompleteIn",
+    "TokenResponse",
+    "Trend",
+    "User",
+    "UserCreate",
+]
