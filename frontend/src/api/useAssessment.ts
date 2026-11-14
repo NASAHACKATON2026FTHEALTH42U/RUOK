@@ -1,5 +1,6 @@
 import { api, unwrap } from './client'
 import { loadCachedAssessment, saveAssessment } from '../offline/cache'
+import { useLiveRefresh } from '../realtime/events'
 import { useLoad } from './useLoad'
 
 const getAssessment = (memberId: number) =>
@@ -15,7 +16,7 @@ export type Assessment = Awaited<ReturnType<typeof getAssessment>>
  * Con `refreshMs` se refresca en segundo plano (el dashboard usa 15 s).
  */
 export function useAssessment(memberId: number | null, refreshMs?: number) {
-  return useLoad(
+  const r = useLoad(
     async () => {
       const a = await getAssessment(memberId!)
       void saveAssessment(memberId!, a) // última evaluación, para verla sin conexión (FE-11)
@@ -28,4 +29,10 @@ export function useAssessment(memberId: number | null, refreshMs?: number) {
       fallback: () => loadCachedAssessment<Assessment>(memberId!),
     },
   )
+  // Al instante con mediciones, cambios de liveness o alertas del member (FE-29).
+  useLiveRefresh(
+    { types: ['measurement.created', 'liveness.changed', 'alert.*', 'sync.batch'], memberId },
+    r.refresh,
+  )
+  return r
 }
