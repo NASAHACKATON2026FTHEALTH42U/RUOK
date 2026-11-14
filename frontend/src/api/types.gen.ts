@@ -174,7 +174,7 @@ export interface paths {
         };
         /**
          * Catálogo de indicadores
-         * @description STUB(FS-02) → BE-04
+         * @description Los indicadores de app/data/indicators.json. Rangos provisionales hasta CNT-01 (docs/sources.md).
          */
         get: operations["list_indicators_api_v1_indicators_get"];
         put?: never;
@@ -194,7 +194,7 @@ export interface paths {
         };
         /**
          * Un indicador
-         * @description STUB(FS-02) → BE-04
+         * @description Un indicador de app/data/indicators.json. 404 si el id no existe.
          */
         get: operations["get_indicator_api_v1_indicators__indicator_id__get"];
         put?: never;
@@ -214,7 +214,7 @@ export interface paths {
         };
         /**
          * Sistemas del cuerpo
-         * @description STUB(FS-02) → BE-04
+         * @description Los sistemas de app/data/systems.json, con su región del SVG de BodyFigure.
          */
         get: operations["list_systems_api_v1_systems_get"];
         put?: never;

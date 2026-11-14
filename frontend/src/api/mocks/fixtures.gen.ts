@@ -185,7 +185,7 @@ export const CONTRACT_OPERATIONS = [
 
 export const health: Schema<'HealthResponse'> = {
   "status": "ok",
-  "server_time": "2026-11-14T15:50:44.176958Z"
+  "server_time": "2026-11-14T16:08:01.907201Z"
 }
 
 export const environments: Schema<'Environment'>[] = [
@@ -911,6 +911,300 @@ export const indicators: Schema<'Indicator'>[] = [
     "hazards": [
       "radiation"
     ]
+  },
+  {
+    "id": "hydration_ml",
+    "name": "Hidratación",
+    "unit": "ml",
+    "system_id": "metabolic",
+    "ranges": {
+      "normal": [
+        1500.0,
+        4000.0
+      ],
+      "warning": [
+        801.0,
+        1499.0
+      ],
+      "critical_low": 800.0,
+      "critical_high": null
+    },
+    "max_age_s": 86400,
+    "higher_is_worse": false,
+    "input": {
+      "type": "number",
+      "min": 0.0,
+      "max": 6000.0,
+      "step": 100.0
+    },
+    "measurement_instructions": [
+      "Suma el agua y las bebidas que has tomado hoy, en ml"
+    ],
+    "why_it_matters": "La deshidratación afecta a la tensión, a los riñones y a la concentración.",
+    "hazards": [
+      "hostile_environment"
+    ]
+  },
+  {
+    "id": "weight_kg",
+    "name": "Peso",
+    "unit": "kg",
+    "system_id": "metabolic",
+    "ranges": {
+      "normal": [
+        45.0,
+        110.0
+      ],
+      "warning": null,
+      "critical_low": 40.0,
+      "critical_high": 150.0
+    },
+    "max_age_s": 604800,
+    "higher_is_worse": true,
+    "input": {
+      "type": "number",
+      "min": 20.0,
+      "max": 250.0,
+      "step": 0.1
+    },
+    "measurement_instructions": [
+      "En ayunas, después de ir al baño y con poca ropa"
+    ],
+    "why_it_matters": "Una pérdida de peso sostenida indica falta de nutrición o pérdida muscular.",
+    "hazards": [
+      "distance"
+    ]
+  },
+  {
+    "id": "stress",
+    "name": "Estrés",
+    "unit": "1-5",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        1.0,
+        3.0
+      ],
+      "warning": [
+        3.1,
+        4.4
+      ],
+      "critical_low": null,
+      "critical_high": 4.5
+    },
+    "max_age_s": 129600,
+    "higher_is_worse": true,
+    "input": {
+      "type": "scale_1_5",
+      "min": 1.0,
+      "max": 5.0,
+      "step": 1.0
+    },
+    "measurement_instructions": [
+      "¿Cuánto estrés sientes hoy? 1 = nada, 5 = muchísimo"
+    ],
+    "why_it_matters": "El estrés sostenido en confinamiento afecta al sueño, al ánimo y al sistema inmune.",
+    "hazards": [
+      "isolation"
+    ]
+  },
+  {
+    "id": "energy",
+    "name": "Energía",
+    "unit": "1-5",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        3.0,
+        5.0
+      ],
+      "warning": [
+        2.0,
+        2.9
+      ],
+      "critical_low": 1.5,
+      "critical_high": null
+    },
+    "max_age_s": 129600,
+    "higher_is_worse": false,
+    "input": {
+      "type": "scale_1_5",
+      "min": 1.0,
+      "max": 5.0,
+      "step": 1.0
+    },
+    "measurement_instructions": [
+      "¿Cuánta energía tienes hoy? 1 = ninguna, 5 = mucha"
+    ],
+    "why_it_matters": "La fatiga persistente es una señal temprana de mal sueño o de sobrecarga.",
+    "hazards": [
+      "isolation"
+    ]
+  },
+  {
+    "id": "loneliness",
+    "name": "Soledad",
+    "unit": "1-5",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        1.0,
+        3.0
+      ],
+      "warning": [
+        3.1,
+        4.4
+      ],
+      "critical_low": null,
+      "critical_high": 4.5
+    },
+    "max_age_s": 129600,
+    "higher_is_worse": true,
+    "input": {
+      "type": "scale_1_5",
+      "min": 1.0,
+      "max": 5.0,
+      "step": 1.0
+    },
+    "measurement_instructions": [
+      "¿Te sientes solo/a hoy? 1 = nada, 5 = muchísimo"
+    ],
+    "why_it_matters": "La soledad es un riesgo de salud en el aislamiento y en la vejez.",
+    "hazards": [
+      "isolation"
+    ]
+  },
+  {
+    "id": "sleep_quality",
+    "name": "Calidad del sueño",
+    "unit": "1-5",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        3.0,
+        5.0
+      ],
+      "warning": [
+        2.0,
+        2.9
+      ],
+      "critical_low": 1.5,
+      "critical_high": null
+    },
+    "max_age_s": 129600,
+    "higher_is_worse": false,
+    "input": {
+      "type": "scale_1_5",
+      "min": 1.0,
+      "max": 5.0,
+      "step": 1.0
+    },
+    "measurement_instructions": [
+      "¿Cómo has dormido? 1 = muy mal, 5 = muy bien"
+    ],
+    "why_it_matters": "Dormir mal reduce la atención y aumenta el riesgo de errores.",
+    "hazards": [
+      "isolation"
+    ]
+  },
+  {
+    "id": "crew_relation",
+    "name": "Relación con el equipo",
+    "unit": "1-5",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        3.0,
+        5.0
+      ],
+      "warning": [
+        2.0,
+        2.9
+      ],
+      "critical_low": 1.5,
+      "critical_high": null
+    },
+    "max_age_s": 129600,
+    "higher_is_worse": false,
+    "input": {
+      "type": "scale_1_5",
+      "min": 1.0,
+      "max": 5.0,
+      "step": 1.0
+    },
+    "measurement_instructions": [
+      "¿Cómo va la relación con tu equipo? 1 = muy mal, 5 = muy bien"
+    ],
+    "why_it_matters": "Los conflictos en un grupo aislado afectan al ánimo y a la seguridad.",
+    "hazards": [
+      "isolation"
+    ]
+  },
+  {
+    "id": "pvt_mean_rt_ms",
+    "name": "PVT: tiempo de reacción medio",
+    "unit": "ms",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        100.0,
+        350.0
+      ],
+      "warning": [
+        351.0,
+        499.0
+      ],
+      "critical_low": null,
+      "critical_high": 500.0
+    },
+    "max_age_s": 259200,
+    "higher_is_worse": true,
+    "input": {
+      "type": "number",
+      "min": 100.0,
+      "max": 2000.0,
+      "step": 1.0
+    },
+    "measurement_instructions": [
+      "Lo calcula el test PVT: pulsa en cuanto aparezca el estímulo"
+    ],
+    "why_it_matters": "Un tiempo de reacción más lento es un marcador objetivo de fatiga.",
+    "hazards": [
+      "isolation"
+    ]
+  },
+  {
+    "id": "pvt_lapses",
+    "name": "PVT: lapsos",
+    "unit": "lapsos",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        0.0,
+        2.0
+      ],
+      "warning": [
+        3.0,
+        5.0
+      ],
+      "critical_low": null,
+      "critical_high": 6.0
+    },
+    "max_age_s": 259200,
+    "higher_is_worse": true,
+    "input": {
+      "type": "number",
+      "min": 0.0,
+      "max": 100.0,
+      "step": 1.0
+    },
+    "measurement_instructions": [
+      "Lo calcula el test PVT: respuestas de más de 500 ms"
+    ],
+    "why_it_matters": "Los lapsos de atención aumentan con la falta de sueño y la fatiga.",
+    "hazards": [
+      "isolation"
+    ]
   }
 ]
 
@@ -964,7 +1258,9 @@ export const systems: Schema<'BodySystem'>[] = [
     "name": "Metabólico y nutrición",
     "svg_region": "metabolic",
     "indicators": [
-      "glucose"
+      "glucose",
+      "hydration_ml",
+      "weight_kg"
     ],
     "function": "Convierte los alimentos en energía.",
     "space_effects": "Dieta limitada y cambios hormonales afectan al metabolismo.",
@@ -978,7 +1274,14 @@ export const systems: Schema<'BodySystem'>[] = [
     "svg_region": "brain",
     "indicators": [
       "mood",
-      "sleep_hours"
+      "sleep_hours",
+      "stress",
+      "energy",
+      "loneliness",
+      "sleep_quality",
+      "crew_relation",
+      "pvt_mean_rt_ms",
+      "pvt_lapses"
     ],
     "function": "Ánimo, sueño, cognición y relación con la tripulación.",
     "space_effects": "Aislamiento, confinamiento y alteración del sueño afectan al ánimo.",
@@ -1083,7 +1386,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "iss": {
     "member_id": 1,
     "env_id": "iss",
-    "generated_at": "2026-11-14T15:50:44.217020Z",
+    "generated_at": "2026-11-14T16:08:01.940862Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -1340,7 +1643,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "moon": {
     "member_id": 1,
     "env_id": "moon",
-    "generated_at": "2026-11-14T15:50:44.220147Z",
+    "generated_at": "2026-11-14T16:08:01.945010Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -1597,7 +1900,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "mars": {
     "member_id": 1,
     "env_id": "mars",
-    "generated_at": "2026-11-14T15:50:44.222883Z",
+    "generated_at": "2026-11-14T16:08:01.948867Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -1854,7 +2157,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "earth": {
     "member_id": 1,
     "env_id": "earth",
-    "generated_at": "2026-11-14T15:50:44.225541Z",
+    "generated_at": "2026-11-14T16:08:01.952299Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -2111,7 +2414,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "hospital": {
     "member_id": 1,
     "env_id": "hospital",
-    "generated_at": "2026-11-14T15:50:44.228145Z",
+    "generated_at": "2026-11-14T16:08:01.956444Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -2368,7 +2671,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "geriatric": {
     "member_id": 1,
     "env_id": "geriatric",
-    "generated_at": "2026-11-14T15:50:44.230632Z",
+    "generated_at": "2026-11-14T16:08:01.959804Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -2682,7 +2985,7 @@ export const alerts: Schema<'Alert'>[] = [
 export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   "iss": {
     "env_id": "iss",
-    "as_of": "2026-11-14T15:50:44.250748Z",
+    "as_of": "2026-11-14T16:08:01.976239Z",
     "link": {
       "env_id": "iss",
       "state": "online",
@@ -2708,7 +3011,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "moon": {
     "env_id": "moon",
-    "as_of": "2026-11-14T15:50:43.253376Z",
+    "as_of": "2026-11-14T16:08:00.978141Z",
     "link": {
       "env_id": "moon",
       "state": "online",
@@ -2721,7 +3024,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "mars": {
     "env_id": "mars",
-    "as_of": "2026-11-14T15:36:44.255903Z",
+    "as_of": "2026-11-14T15:54:01.980045Z",
     "link": {
       "env_id": "mars",
       "state": "delayed",
@@ -2759,7 +3062,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "earth": {
     "env_id": "earth",
-    "as_of": "2026-11-14T15:50:44.258776Z",
+    "as_of": "2026-11-14T16:08:01.982174Z",
     "link": {
       "env_id": "earth",
       "state": "online",
@@ -2772,7 +3075,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "hospital": {
     "env_id": "hospital",
-    "as_of": "2026-11-14T15:50:44.261434Z",
+    "as_of": "2026-11-14T16:08:01.983962Z",
     "link": {
       "env_id": "hospital",
       "state": "online",
@@ -2785,7 +3088,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "geriatric": {
     "env_id": "geriatric",
-    "as_of": "2026-11-14T15:50:44.264433Z",
+    "as_of": "2026-11-14T16:08:01.985513Z",
     "link": {
       "env_id": "geriatric",
       "state": "online",
@@ -3052,7 +3355,7 @@ export const devices: Schema<'Device'>[] = [
 ]
 
 export const controlOverview: Schema<'ControlOverview'> = {
-  "generated_at": "2026-11-14T15:50:44.370884Z",
+  "generated_at": "2026-11-14T16:08:02.028814Z",
   "environments": [
     {
       "environment": {
@@ -3307,7 +3610,7 @@ export const demoUsers: Schema<'DemoUser'>[] = [
 export const tokenTemplate: Schema<'TokenResponse'> = {
   "access_token": "stub-token-7",
   "token_type": "bearer",
-  "expires_at": "2026-11-15T03:50:44.383000Z",
+  "expires_at": "2026-11-15T04:08:02.037640Z",
   "user": {
     "id": 7,
     "username": "vega",
