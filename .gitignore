@@ -1,0 +1,46 @@
+# ── Python ────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# ── Node / frontend ───────────────────────
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+npm-debug.log*
+coverage/
+
+# ── Base de datos local (se regenera con el seed) ──
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# ── Entorno y secretos ────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Artefactos de la CI / contrato ────────
+/openapi.json
+
+# ── Presentación: vídeos pesados fuera de git (van al Drive del equipo) ──
+presentation/*.mp4
+presentation/*.mov
+
+# ── Editores y SO ─────────────────────────
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+.DS_Store
+Thumbs.db
