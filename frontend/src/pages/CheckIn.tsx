@@ -4,6 +4,7 @@ import { serverNow } from '../api/client'
 import { useActiveMemberId } from '../auth/useAuth'
 import { newId } from '../api/newId'
 import { useIndicators } from '../api/useIndicators'
+import { useInterventions } from '../api/useInterventions'
 import {
   answeredCount,
   buildCheckinBatch,
@@ -11,6 +12,7 @@ import {
   type Answers,
 } from '../components/behavioral/checkin'
 import { FaceScale } from '../components/behavioral/FaceScale'
+import { InterventionCard } from '../components/behavioral/InterventionCard'
 import { statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { useVocab } from '../environments/useVocab'
@@ -37,6 +39,7 @@ export default function CheckIn() {
   const vocab = useVocab()
   const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el elegido
   const catalog = useIndicators()
+  const interventions = useInterventions()
 
   const questions = useMemo(() => {
     const all = catalog.state === 'ready' ? catalog.data : []
@@ -111,6 +114,19 @@ export default function CheckIn() {
     }
   }
 
+  // Intervenciones del sistema neuro-conductual (FE-20): también sin conexión (catálogo en caché).
+  const care = (interventions.state === 'ready' ? interventions.data : []).filter(
+    (i) => i.system_id === 'neuro_behavioral',
+  )
+  const careSection = care.length > 0 && (
+    <section className="space-y-2">
+      <h2 className="font-semibold">Para cuidarte hoy</h2>
+      {care.map((i) => (
+        <InterventionCard key={i.id} intervention={i} />
+      ))}
+    </section>
+  )
+
   const links = (
     <div className="flex flex-wrap gap-2">
       <Link to="/dashboard" className={btnPrimary}>
@@ -137,6 +153,7 @@ export default function CheckIn() {
             reflejarlas.
           </p>
         </div>
+        {careSection}
         {links}
       </section>
     )
@@ -158,6 +175,7 @@ export default function CheckIn() {
             />
           </p>
         </div>
+        {careSection}
         {links}
       </section>
     )

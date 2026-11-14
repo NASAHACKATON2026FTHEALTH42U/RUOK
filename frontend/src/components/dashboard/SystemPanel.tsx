@@ -3,7 +3,9 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import type { Assessment } from '../../api/useAssessment'
 import type { Indicator } from '../../api/useIndicators'
+import { useInterventions } from '../../api/useInterventions'
 import type { BodySystem } from '../../api/useSystems'
+import { InterventionCard } from '../behavioral/InterventionCard'
 import { StatusBadge } from '../ui/StatusBadge'
 import { formatHazard } from './format'
 import { IndicatorCard } from './IndicatorCard'
@@ -47,6 +49,13 @@ export function SystemPanel({
   const recommendations = [...(assessed?.recommendations ?? [])].sort(
     (a, b) => a.priority - b.priority,
   )
+  // Intervenciones (FE-20): las que proponen las recomendaciones y las del sistema, sin repetir.
+  const catalog = useInterventions()
+  const allInterventions = catalog.state === 'ready' ? catalog.data : []
+  const recommendedIds = new Set(recommendations.map((r) => r.intervention_id).filter(Boolean))
+  const interventions = allInterventions
+    .filter((i) => recommendedIds.has(i.id) || i.system_id === system.id)
+    .sort((a, b) => Number(recommendedIds.has(b.id)) - Number(recommendedIds.has(a.id)))
 
   useEffect(() => {
     closeRef.current?.focus()
@@ -162,6 +171,19 @@ export function SystemPanel({
                 <li key={r.id}>{r.text}</li>
               ))}
             </ol>
+          </section>
+        )}
+
+        {interventions.length > 0 && (
+          <section className="mt-6">
+            <h3 className="text-sm font-semibold">Qué puedes hacer ahora</h3>
+            <ul className="mt-2 space-y-2">
+              {interventions.map((i) => (
+                <li key={i.id}>
+                  <InterventionCard intervention={i} compact />
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 
