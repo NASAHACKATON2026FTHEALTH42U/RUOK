@@ -240,7 +240,7 @@ export default function Dashboard() {
 
         {/* Fases de la misión debajo del cuerpo, a todo el ancho de las tres columnas. */}
         {env?.kind === 'space' && env.mission && (
-          <div className="order-4 lg:col-span-2 xl:col-span-3">
+          <div className="order-4 lg:col-span-2 lg:mt-8 xl:col-span-3">
             <MissionPhaseBar
               mission={env.mission}
               now={serverNow()}
