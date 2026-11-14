@@ -1,7 +1,7 @@
 """Members, mediciones, evaluación y liveness.
 
-Reales: members (BE-05) y mediciones (BE-06).
-STUB(FS-02) → BE-11 (assessment), BE-12 (heartbeat y liveness) y BE-16 (R U OK?).
+Reales: members (BE-05), mediciones (BE-06) y assessment (BE-11).
+STUB(FS-02) → BE-12 (heartbeat y liveness) y BE-16 (R U OK?).
 """
 
 from datetime import datetime
@@ -28,6 +28,7 @@ from app.schemas import (
     Slug,
 )
 from app.services import environments, measurements, members
+from app.services.member_assessment import UnknownEnvironment, assess_member
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -87,7 +88,7 @@ def set_privacy(member_id: int, body: PrivacyIn, session: SessionDep) -> Member:
     description="Repetir un id con el mismo contenido cuenta como `duplicates`; "
     "con contenido distinto → 409. El lote es atómico: si una medición es inválida "
     "(indicador desconocido o valor fuera del rango del input → 422) o está en conflicto, "
-    "no se guarda ninguna. `assessment`: STUB(FS-02) → BE-11",
+    "no se guarda ninguna. Devuelve el `assessment` recalculado con el lote ya guardado.",
 )
 def post_measurements(
     member_id: int, body: MeasurementBatchIn, session: SessionDep
@@ -102,7 +103,7 @@ def post_measurements(
     return MeasurementBatchResult(
         accepted=accepted,
         duplicates=duplicates,
-        assessment=stubs.assessment(m.id, m.env_id),  # STUB → BE-11
+        assessment=assess_member(session, m),
     )
 
 
@@ -133,11 +134,15 @@ def list_measurements(
     response_model=Assessment,
     tags=["assessment"],
     summary="Evaluación del member",
-    description="Con `env` se evalúa con otro perfil sin modificar datos. STUB(FS-02) → BE-11",
+    description="Con `env` se evalúa con otro perfil sin modificar datos; "
+    "un `env` inexistente → 404. El liveness es STUB hasta BE-12.",
 )
 def get_assessment(member_id: int, session: SessionDep, env: Slug | None = None) -> Assessment:
     m = _member(session, member_id)
-    return stubs.assessment(m.id, env or m.env_id)
+    try:
+        return assess_member(session, m, env)
+    except UnknownEnvironment as exc:
+        raise HTTPException(404, f"Entorno desconocido: {exc}") from exc
 
 
 @router.post(
