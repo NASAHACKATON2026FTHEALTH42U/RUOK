@@ -130,7 +130,7 @@ MEASUREMENT = {
 
 CALLS = [
     ("get", "/health", None, 200),
-    ("post", "/auth/login", {"username": "vega", "password": "x"}, 200),
+    ("post", "/auth/login", {"username": "vega", "password": "ruok-mars"}, 200),
     ("post", "/auth/pin", {"username": "vega", "pin": "1234"}, 200),
     ("get", "/auth/me", None, 200),
     ("get", "/auth/demo-users", None, 200),
@@ -202,9 +202,15 @@ ALERT_BODY = {"id": ALERT_ID, "category": "symptom", "severity": "warning", "mes
 
 @pytest.mark.parametrize(("method", "path", "body", "status"), CALLS)
 def test_stub_responds(client, method, path, body, status):
+    # Desde BE-26 el token es real: se envía en todas las llamadas (el resto de
+    # endpoints aún lo aceptan opcional hasta BE-27).
+    login = {"username": "admin", "password": "ruok-admin"}
+    token = client.post(API + "/auth/login", json=login).json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
     if ALERT_ID in path:  # idempotente: la crea si no existe (o un reset la ha borrado)
-        assert client.post(API + "/members/1/alerts", json=ALERT_BODY).status_code == 200
-    resp = client.request(method, API + path, json=body)
+        created = client.post(API + "/members/1/alerts", json=ALERT_BODY, headers=headers)
+        assert created.status_code == 200
+    resp = client.request(method, API + path, json=body, headers=headers)
     assert resp.status_code == status, resp.text
 
 

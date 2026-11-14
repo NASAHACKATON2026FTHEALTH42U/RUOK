@@ -54,8 +54,8 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 ### Autenticación y roles
 | Método | Ruta | Auth | Descripción |
 |---|---|---|---|
-| POST | `/auth/login` | — | `{username, password}` → `{access_token, expires_at, user: User}` |
-| POST | `/auth/pin` | — | `{username, pin}` → igual que login (PIN rápido en tablets) |
+| POST | `/auth/login` | — | `{username, password}` → `{access_token, expires_at, user: User}`. `401` = credenciales incorrectas; `429` (+ `Retry-After`) = cuenta bloqueada 5 min tras 5 fallos |
+| POST | `/auth/pin` | — | `{username, pin}` → igual que login, también `429` si está bloqueada (PIN rápido en tablets) |
 | GET | `/auth/me` | ✅ | `User` actual |
 | GET | `/auth/demo-users` | — | Solo con `DEMO_MODE=true`: usuarios sembrados para el selector de la demo |
 | GET | `/users?env_id=` *(P1, FS-07)* | admin | Listado de usuarios (pestaña Usuarios de `/control`) |

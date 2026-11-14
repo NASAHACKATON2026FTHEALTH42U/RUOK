@@ -21,6 +21,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 os.environ["DATABASE_URL"] = f"sqlite:///{tempfile.mkdtemp(prefix='ruok-mocks-')}/mocks.db"
+# Clave JWT fija: el token del mock (tokenTemplate) tiene que ser determinista (BE-26).
+os.environ["RUOK_JWT_SECRET"] = "ruok-mocks-jwt-secret-not-for-production"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fastapi.testclient import TestClient  # noqa: E402
@@ -162,7 +164,7 @@ def main() -> None:
             (
                 "tokenTemplate",
                 "Schema<'TokenResponse'>",
-                post("/auth/login", {"username": "vega", "password": "demo"}),
+                post("/auth/login", {"username": "vega", "password": "ruok-mars"}),
             ),
             (
                 "heartbeatResult",
