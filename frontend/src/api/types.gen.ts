@@ -1198,6 +1198,12 @@ export interface components {
              *     ]
              */
             escalation_ladder: string[];
+            /**
+             * External From Level
+             * @description Índice del primer nivel externo de escalation_ladder. Los anteriores son de a bordo (realtime, sin retardo); los externos salen por el enlace con comm_delay_s
+             * @example 2
+             */
+            external_from_level: number;
             liveness: components["schemas"]["LivenessThresholds"];
             /**
              * Vocabulary
