@@ -17,6 +17,7 @@ from app.routers.deps import (
     ERRORS_409,
     ERRORS_AUTH,
     AuthDep,
+    CurrentUser,
     allow_env,
     allow_member,
 )
@@ -177,9 +178,11 @@ def get_assessment(
     "dispositivo. `checkin_required` es true si el member venía de `stale` o `lost`.",
     dependencies=[Depends(allow_member("heartbeat:write"))],
 )
-def heartbeat(member_id: int, body: HeartbeatIn, session: SessionDep) -> HeartbeatResult:
+def heartbeat(
+    member_id: int, body: HeartbeatIn, session: SessionDep, user: CurrentUser
+) -> HeartbeatResult:
     m = _member(session, member_id)
-    return liveness.record_heartbeat(session, m, body)
+    return liveness.record_heartbeat(session, m, body, user=user)
 
 
 @router.post(
