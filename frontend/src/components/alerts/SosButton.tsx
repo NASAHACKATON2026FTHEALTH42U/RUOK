@@ -9,9 +9,16 @@ import { SosDialog } from './SosDialog'
 
 /**
  * Botón "Pedir ayuda" fijo y siempre visible (FE-13). Carga las intervenciones al arrancar
- * para tenerlas en caché y poder mostrarlas sin conexión.
+ * para tenerlas en caché y poder mostrarlas sin conexión. `inline`: botón a todo el ancho dentro
+ * de la página (pantalla de login), con el mismo diálogo.
  */
-export function SosButton() {
+export function SosButton({
+  variant = 'floating',
+  label = 'Pedir ayuda',
+}: {
+  variant?: 'floating' | 'inline'
+  label?: string
+} = {}) {
   const [open, setOpen] = useState(false)
   const authenticated = useSession((s) => s.status === 'authenticated')
   const lastMemberId = useSession((s) => s.lastMemberId)
@@ -38,13 +45,21 @@ export function SosButton() {
         aria-haspopup="dialog"
         // Rojo carmesí profundo, a juego con las superficies oscuras de la web: degradado, borde
         // fino y halo rojo suave (sin el anillo blanco). Blanco sobre #7f1d1d–#b91c1c: AA de sobra.
-        className="fixed right-4 bottom-4 z-40 flex items-center gap-2 rounded-xl border border-red-400/50 px-5 py-3 text-sm font-semibold tracking-wider text-white uppercase shadow-[0_10px_28px_-8px_rgb(185_28_28/0.75)] transition hover:border-red-300/80 hover:brightness-115 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
-        style={{ background: 'linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%)' }}
+        className={
+          variant === 'inline'
+            ? 'hud-btn hud-btn-danger w-full'
+            : 'fixed right-4 bottom-4 z-40 flex items-center gap-2 rounded-xl border border-red-400/50 px-5 py-3 text-sm font-semibold tracking-wider text-white uppercase shadow-[0_10px_28px_-8px_rgb(185_28_28/0.75)] transition hover:border-red-300/80 hover:brightness-115 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text'
+        }
+        style={
+          variant === 'inline'
+            ? undefined
+            : { background: 'linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%)' }
+        }
       >
         <span aria-hidden className="text-lg leading-none">
           ✚
         </span>
-        Pedir ayuda
+        {label}
       </button>
       {open && (
         <SosDialog
