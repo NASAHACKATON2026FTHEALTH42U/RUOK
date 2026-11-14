@@ -201,38 +201,45 @@ export default function Dashboard() {
           />
         </div>
 
-        <div>
-          <h2 className="mb-3 text-lg font-semibold">Indicadores</h2>
-          {cards.length === 0 ? (
-            <p className="text-env-muted">Todavía no hay mediciones.</p>
-          ) : (
-            <ul className="grid gap-3 sm:grid-cols-2">
-              {cards.map(({ systemId, ind }) => (
-                <li key={`${systemId}-${ind.indicator_id}`}>
-                  <IndicatorCard
-                    indicator={ind}
-                    name={indicatorById.get(ind.indicator_id)?.name}
-                    systemName={systemById.get(systemId)?.name}
-                    stale={stale}
-                    provisional={provisionalIds?.has(ind.indicator_id)}
-                    onClick={() => setSelected(systemId)}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
+        {/* Indicadores (una columna, en baraja) y sistemas (columna a su derecha). */}
+        <div className="grid gap-6 xl:grid-cols-[1fr_250px]">
+          <div>
+            <h2 className="mb-3 text-lg font-semibold">Indicadores</h2>
+            {cards.length === 0 ? (
+              <p className="text-env-muted">Todavía no hay mediciones.</p>
+            ) : (
+              // Baraja (≥ lg): cartas plegadas que muestran su cabecera; al pasar el ratón o
+              // enfocarla, la carta se despliega hacia abajo. En móvil, lista normal.
+              <ul className="card-deck flex flex-col gap-3">
+                {cards.map(({ systemId, ind }) => (
+                  <li key={`${systemId}-${ind.indicator_id}`}>
+                    <IndicatorCard
+                      indicator={ind}
+                      name={indicatorById.get(ind.indicator_id)?.name}
+                      systemName={systemById.get(systemId)?.name}
+                      stale={stale}
+                      provisional={provisionalIds?.has(ind.indicator_id)}
+                      onClick={() => setSelected(systemId)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
-          {/* Leyenda de sistemas: a la derecha, bajo los indicadores, para que todo quepa sin scroll */}
-          <h2 className="mt-4 mb-2 text-sm font-semibold text-env-muted">Sistemas</h2>
-          <BodyLegend
-            regions={regions}
-            stale={stale}
-            selectedSystemId={selected}
-            onSelectSystem={setSelected}
-            onHoverSystem={setHovered}
-            className="justify-start"
-            compact
-          />
+          <div>
+            <h2 className="mb-3 text-lg font-semibold">Sistemas</h2>
+            <BodyLegend
+              regions={regions}
+              stale={stale}
+              selectedSystemId={selected}
+              onSelectSystem={setSelected}
+              onHoverSystem={setHovered}
+              className="justify-start"
+              compact
+              vertical
+            />
+          </div>
         </div>
       </div>
 
