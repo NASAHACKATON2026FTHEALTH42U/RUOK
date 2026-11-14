@@ -27,6 +27,11 @@ Responde al peligro HRP **Isolation & Confinement**. Se apoya en la literatura d
   - soledad en aumento durante 5 días → `warning`;
   - PVT peor que la línea base (+20 %) **junto con** sueño < 6 h → `warning`;
   - una combinación de dos `warning` → `critical`.
+- **Implementación (BE-20):** `backend/app/services/behavioral.py`, con los umbrales en `backend/app/data/behavioral_rules.json`.
+  - Cada regla que se cumple pone su indicador en `warning` (`mood`, `loneliness` o `pvt_mean_rt_ms`); con 2 a la vez, el sistema neuro-conductual pasa a `critical`.
+  - "Durante N días" = N días seguidos con datos, contando desde el último; un día sin datos corta la racha. "En aumento" = la media diaria sube respecto al día anterior (la misma racha que la regla de 3 días de BE-10).
+  - Con datos caducados o sin línea base (menos de 7 días de historia), ninguna regla se cumple: sin datos no se afirma nada.
+  - En ISS, Luna y Marte se evalúan los 8 indicadores del check-in y del PVT. En los entornos terrestres, solo `mood` (por ahora).
 - **Fase de misión:** barra de progreso y aviso proactivo del **"fenómeno del tercer cuarto"**, el bajón de moral que se observa en misiones largas.
 - **Índice de cohesión de la tripulación:** agregado y anónimo.
 
@@ -47,6 +52,9 @@ Es clave por el *under-reporting*: los astronautas tienden a ocultar síntomas p
 - Los datos conductuales son **privados por defecto** (`share_behavioral_details = false`).
 - El control externo ve solo un semáforo agregado, salvo que el member comparta los detalles o haya una alerta `emergency`.
 - El panel de la tripulación es solo agregado y anónimo.
+- **Implementación (BE-20):** si `behavioral.details_visible` es `false`, el assessment se devuelve sin los indicadores conductuales en `systems[].indicators` (ni valor, ni tendencia, ni línea base, ni estado individual); se mantiene el estado del sistema. Las alertas se calculan con el assessment completo.
+  - `details_visible` sigue la matriz de [auth-and-roles.md](auth-and-roles.md): el propio member, `psych` y `admin` siempre; `medic` y `responder` si comparte o hay una alerta `emergency` abierta; `commander` y `family`, nunca.
+  - **Hasta BE-27** el servidor no sabe quién consulta: se aplica la regla por defecto (solo si comparte o hay emergencia), **también para el propio member**.
 
 ## Uso en la Tierra
 En la residencia geriátrica, la soledad es un problema de salud de primer orden. El módulo se reutiliza con contactos familiares, actividades sociales y aviso al cuidador.

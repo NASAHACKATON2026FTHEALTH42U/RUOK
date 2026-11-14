@@ -222,7 +222,9 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
                     // autonomous si retardo ≥ 60 s Y critical (ver alerts-and-escalation.md)
                     "delay_s": 0, "message": "...", "protocol_id": "proto_bp_high" }
   }],
-  "behavioral": { "status": "normal", "details_visible": true },  // privacidad
+  "behavioral": { "status": "normal", "details_visible": true },  // privacidad: con false, los indicadores
+                  // conductuales (mood, stress, energy, loneliness, sleep_quality, crew_relation, pvt_*)
+                  // NO aparecen en systems[].indicators; el status del sistema sí (semáforo agregado). BE-20
   "provisional": false                                            // true solo en el cálculo offline del front
 }
 // MeasurementBatchResult = { accepted, duplicates, assessment }
