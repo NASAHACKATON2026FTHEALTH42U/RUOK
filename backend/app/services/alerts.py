@@ -31,6 +31,7 @@ from app.services import catalog, comm_link, environments
 from app.services.assessment import escalation_for_level
 
 OPEN = (AlertStatus.open, AlertStatus.escalated, AlertStatus.acknowledged)
+NAMESPACE = uuid.UUID("0f3c9a2e-6b1d-4f7a-9c8e-2d5b7a1e4c90")
 _SEVERITY = {Status.warning: "warning", Status.critical: "critical"}
 
 
@@ -170,7 +171,9 @@ def evaluate(
         message = _message(system.system_id, status, system.escalation.message)
         if alert is None:
             alert = models.Alert(
-                id=str(uuid.uuid4()),
+                # Determinista (clave + instante): única porque solo hay una alerta abierta por
+                # clave, y reproducible (mocks del front, tests).
+                id=str(uuid.uuid5(NAMESPACE, f"auto:{key}:{now.isoformat()}")),
                 member_id=member.id,
                 env_id=member.env_id,
                 origin="auto",
