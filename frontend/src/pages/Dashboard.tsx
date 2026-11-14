@@ -7,6 +7,7 @@ import { useEnvironments } from '../api/useEnvironments'
 import { useIndicators } from '../api/useIndicators'
 import { useSystems } from '../api/useSystems'
 import { BodyFigure } from '../components/body/BodyFigure'
+import { MissionPhaseBar } from '../components/behavioral/MissionPhaseBar'
 import { buildRegions, formatSinceLabel, isFigureStale } from '../components/body/regions'
 import { IndicatorCard } from '../components/dashboard/IndicatorCard'
 import { SystemPanel } from '../components/dashboard/SystemPanel'
@@ -132,10 +133,13 @@ export default function Dashboard() {
       <header className="space-y-3">
         {title}
         <div className="flex flex-wrap items-center gap-2">
-          <StatusBadge
-            status={a.overall_status}
-            label={`Estado general: ${statusStyle(a.overall_status).label}${a.provisional ? ' · provisional' : ''}`}
-          />
+          {/* Si el "sin datos" se debe a un liveness stale, basta el badge de liveness (FE-34). */}
+          {!(live === 'stale' && a.overall_status === 'unknown') && (
+            <StatusBadge
+              status={a.overall_status}
+              label={`Estado general: ${statusStyle(a.overall_status).label}`}
+            />
+          )}
           {live && (
             <StatusBadge status={live} label={formatSinceLabel(a.last_seen_at, serverNow())} />
           )}
@@ -143,7 +147,7 @@ export default function Dashboard() {
             {assessment.refreshFailed
               ? '⚠ No se pudo actualizar: los datos pueden estar desfasados'
               : assessment.updatedAt
-                ? `Actualizado ${formatAgo(assessment.updatedAt.toISOString(), new Date())}`
+                ? `Actualizado ${formatAgo(assessment.updatedAt.toISOString(), serverNow())}`
                 : null}
           </span>
         </div>
@@ -159,6 +163,10 @@ export default function Dashboard() {
           </p>
         )}
       </header>
+
+      {env?.kind === 'space' && env.mission && (
+        <MissionPhaseBar mission={env.mission} now={serverNow()} canCheckIn={can('view:checkin')} />
+      )}
 
       <div className="grid gap-8 md:grid-cols-[minmax(240px,320px)_1fr]">
         <div className="md:sticky md:top-4 md:self-start">

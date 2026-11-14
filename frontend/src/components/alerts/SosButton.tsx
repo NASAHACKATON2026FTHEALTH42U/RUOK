@@ -1,3 +1,4 @@
+import { STATUS_COLORS } from '../ui/status'
 import { useCallback, useState } from 'react'
 import { useEnvironments } from '../../api/useEnvironments'
 import { useInterventions } from '../../api/useInterventions'
@@ -36,7 +37,8 @@ export function SosButton() {
         type="button"
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
-        className="fixed right-4 bottom-4 z-40 flex items-center gap-2 rounded-full bg-[#d03b3b] px-5 py-3 font-semibold text-white shadow-lg ring-2 ring-white/70 hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
+        className="fixed right-4 bottom-4 z-40 flex items-center gap-2 rounded-full px-5 py-3 font-semibold text-white shadow-lg ring-2 ring-white/70 hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
+        style={{ background: STATUS_COLORS.critical }}
       >
         <span aria-hidden className="text-lg leading-none">
           ✚

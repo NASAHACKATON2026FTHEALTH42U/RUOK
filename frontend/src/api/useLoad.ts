@@ -1,3 +1,4 @@
+import { serverNow } from './client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { isUnavailable } from '../offline/cache'
 import type { Loadable } from './useEnvironments'
@@ -18,7 +19,7 @@ export type LoadResult<T> = Loadable<T> & {
   retry: () => void
   /** Recarga en segundo plano, sin volver a "loading" (p. ej. al llegar un evento, FE-29). */
   refresh: () => void
-  /** Hora local de la última carga correcta. */
+  /** Hora del servidor (`serverNow()`) de la última carga correcta. */
   updatedAt: Date | null
   /** La última recarga en segundo plano falló: los datos mostrados pueden estar desfasados. */
   refreshFailed: boolean
@@ -53,7 +54,7 @@ export function useLoad<T>(
         (data) => {
           if (cancelled) return
           setStatus({ state: 'ready', data })
-          setUpdatedAt(new Date())
+          setUpdatedAt(serverNow())
           setRefreshFailed(false)
         },
         async (err: unknown) => {

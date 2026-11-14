@@ -41,11 +41,20 @@ export const useSession = create<SessionState>(() => ({
   lastMemberId: null,
 }))
 
+// Sin IndexedDB (modo privado) la sesión vive solo en memoria: leer da "nada" y escribir no falla.
 async function kvGet<T>(key: string): Promise<T | undefined> {
-  return (await (await getDb()).get('kv', key))?.value as T | undefined
+  try {
+    return (await (await getDb()).get('kv', key))?.value as T | undefined
+  } catch {
+    return undefined
+  }
 }
 async function kvPut(key: string, value: unknown) {
-  await (await getDb()).put('kv', { key, value })
+  try {
+    await (await getDb()).put('kv', { key, value })
+  } catch {
+    // sin almacenamiento local
+  }
 }
 
 /** Carga la sesión guardada y conecta el cliente (token y 401). Se llama en main.tsx. */
@@ -143,6 +152,10 @@ async function applyUserContext(user: User) {
 
 /** Cierra la sesión: borra `kv.auth` pero conserva el outbox (los pendientes se enviarán al volver). */
 export async function logout(): Promise<void> {
-  await (await getDb()).delete('kv', 'auth')
+  try {
+    await (await getDb()).delete('kv', 'auth')
+  } catch {
+    // sin almacenamiento local
+  }
   useSession.setState({ status: 'anonymous', token: null, user: null, exp: null })
 }

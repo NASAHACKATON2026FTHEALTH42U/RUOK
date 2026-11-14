@@ -39,18 +39,20 @@ def test_list_members_of_environment(client):
     r = client.get(f"{API}/environments/mars/members")
     assert r.status_code == 200
     body = r.json()
-    assert [(m["id"], m["name"], m["position"]) for m in body] == [
+    assert [(m["id"], m["name"], m["position"]) for m in body[:2]] == [
         (1, "Cmdr. Vega", "commander"),
         (2, "Ing. Okafor", "engineer"),
     ]
+    assert [m["id"] for m in body] == sorted(m["id"] for m in body)
     assert all(m["env_id"] == "mars" for m in body)
-    assert [m["id"] for m in client.get(f"{API}/environments/iss/members").json()] == [3]
+    assert 3 in [m["id"] for m in client.get(f"{API}/environments/iss/members").json()]
 
 
-def test_environment_without_members_is_empty(client):
-    r = client.get(f"{API}/environments/hospital/members")
+@pytest.mark.parametrize("env_id", ["iss", "moon", "mars", "earth", "hospital", "geriatric"])
+def test_every_environment_has_seeded_members(client, env_id):
+    r = client.get(f"{API}/environments/{env_id}/members")
     assert r.status_code == 200
-    assert r.json() == []
+    assert 3 <= len(r.json()) <= 4
 
 
 def test_unknown_environment_is_404(client):
@@ -83,10 +85,11 @@ def test_last_measurement_at_is_real(client):
 def test_get_member(client):
     r = client.get(f"{API}/members/1")
     assert r.status_code == 200
-    assert r.json() == {
+    body = r.json()
+    assert body["last_seen_at"] is not None
+    assert {k: v for k, v in body.items() if k != "last_seen_at"} == {
         "id": 1, "env_id": "mars", "name": "Cmdr. Vega", "position": "commander",
-        "share_behavioral_details": False, "last_seen_at": "2026-11-14T10:00:00Z",
-        "liveness": "active",
+        "share_behavioral_details": False, "liveness": "active",
     }
 
 

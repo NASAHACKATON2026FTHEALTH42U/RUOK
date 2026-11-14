@@ -196,6 +196,9 @@ export function syncNow(force = false): Promise<void> {
       } else {
         await runSync(force)
       }
+    } catch {
+      // Sin IndexedDB (modo privado) no hay outbox: no hay nada pendiente que sincronizar.
+      useOutboxStore.setState({ syncing: false })
     } finally {
       running = null
     }
@@ -227,10 +230,8 @@ async function submit<T>(
   body: unknown,
   local: (db: RuokDb) => Promise<void>,
 ): Promise<SubmitResult<T>> {
-  const db = await getDb()
   const now = serverNow().toISOString()
-  await local(db)
-  await db.put('outbox', {
+  const entry: OutboxEntry = {
     id,
     kind,
     method: 'POST',
@@ -242,7 +243,20 @@ async function submit<T>(
     next_retry_at: now,
     status: 'pending',
     last_error: null,
-  })
+  }
+  let db: RuokDb
+  try {
+    db = await getDb()
+  } catch {
+    // Sin IndexedDB (modo privado): no hay outbox, se envía directamente (mismo UUID).
+    const r = await send(entry)
+    if (classify(r.status) === 'done') return { status: 'sent', result: r.data as T }
+    throw new Error(
+      'Este navegador no permite guardar datos en el dispositivo (¿modo privado?) y no hay conexión con el servidor: no se ha podido guardar. Avisa de viva voz si es urgente.',
+    )
+  }
+  await local(db)
+  await db.put('outbox', entry)
   await refreshCounts()
 
   await syncNow()
@@ -368,6 +382,56 @@ export function sendAlertMessage(alertId: string, actor: Schema<'Actor'>, text: 
     api.POST('/api/v1/alerts/{alert_id}/messages', {
       params: { path: { alert_id: alertId } },
       body: { actor, text },
+    }),
+  )
+}
+
+// ── Controles de demo y gestión del centro de control (FE-32, solo admin) ──
+//
+// Acciones de operación: van directas (no se encolan). Sin servidor lanzan NetworkError.
+
+export function demoReset() {
+  return unwrap(api.POST('/api/v1/demo/reset'))
+}
+
+export function demoScenario(name: string) {
+  return unwrap(api.POST('/api/v1/demo/scenarios/{name}', { params: { path: { name } } }))
+}
+
+export function demoLink(env: string, state: Schema<'LinkState'>) {
+  return unwrap(api.POST('/api/v1/demo/link', { body: { env, state } }))
+}
+
+export function demoFastForward(seconds: number) {
+  return unwrap(api.POST('/api/v1/demo/fast-forward', { body: { seconds } }))
+}
+
+export function pauseLiveness(envId: string, paused: boolean) {
+  return unwrap(api.POST('/api/v1/control/liveness/pause', { body: { env_id: envId, paused } }))
+}
+
+// ── Señales en tiempo real (FE-15): NO se encolan ────────────
+// El heartbeat y la respuesta al "R U OK?" solo tienen sentido en el momento: un heartbeat
+// guardado y enviado más tarde haría creer al servidor que el member seguía vivo. Si no hay
+// conexión, se pierden a propósito (el servidor marcará `stale`, que es lo correcto) y lanzan
+// NetworkError. Lo que el member necesite pedir sin conexión va por el SOS, que sí se encola.
+
+/** `POST /members/{id}/heartbeat`: señal de vida del dispositivo. */
+export function sendHeartbeat(memberId: number, body: Schema<'HeartbeatIn'>) {
+  return unwrap(
+    api.POST('/api/v1/members/{member_id}/heartbeat', {
+      params: { path: { member_id: memberId } },
+      body,
+    }),
+  )
+}
+
+/** `POST /members/{id}/ruok`: respuesta al check-in "R U OK?". Con `ok: false` el servidor crea la alerta. */
+export function answerRuok(memberId: number, ok: boolean, note?: string) {
+  return unwrap(
+    api.POST('/api/v1/members/{member_id}/ruok', {
+      params: { path: { member_id: memberId } },
+      body: { ok, note: note ?? null },
     }),
   )
 }

@@ -15,11 +15,12 @@ initMockModeFromUrl()
 // Identidad del dispositivo/pestaña (?device=<nombre>): va en X-Device-Id de cada petición
 // y decide la base IndexedDB `ruok-<device_id>` (FE-30).
 configureApi({ getDeviceId: () => getDevice().id })
-void getDb()
+// IndexedDB puede no existir (p. ej. modo privado): la app sigue, sin outbox ni caché local.
+getDb().catch((err) => console.warn('IndexedDB no disponible:', err))
 // Outbox offline: reenvía lo pendiente al arrancar, con `online` y cada 5 s (FE-11).
-void initOutbox()
+initOutbox().catch((err) => console.warn('Outbox no disponible:', err))
 // Sesión guardada en kv.auth + token y 401 en el cliente (FE-27).
-void initSession()
+initSession().catch((err) => console.warn('Sesión guardada no disponible:', err))
 initTheme()
 
 createRoot(document.getElementById('root')!).render(
