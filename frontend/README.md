@@ -118,7 +118,6 @@ frontend/
     │   ├── useLoad.ts         carga genérica (loading / ready / error + retry, refresco en segundo plano)
     │   ├── useLink.ts         hook de GET /link?env= (estado del enlace)
     │   ├── useMeasurements.ts hook de GET /members/{id}/measurements (serie de N días)
-    │   ├── useLoad.ts         carga genérica (loading / ready / error + retry)
     │   ├── mocks/             API simulada: mode.ts, handlers.ts, mockFetch.ts, events.ts,
     │   │                      useMockStatus.ts, fixtures.gen.ts (GENERADO por npm run gen:mocks)
     │   └── *.test.ts          tests (Vitest)
