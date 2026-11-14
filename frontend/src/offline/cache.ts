@@ -20,13 +20,15 @@ export function withCatalogCache<T>(key: CatalogKey, load: () => Promise<T>): ()
   return async () => {
     try {
       const value = await load()
-      void getDb().then((db) =>
-        db.put('catalog', { key, value, fetched_at: new Date().toISOString() }),
-      )
+      getDb()
+        .then((db) => db.put('catalog', { key, value, fetched_at: new Date().toISOString() }))
+        .catch(() => {}) // sin IndexedDB: sin caché
       return value
     } catch (err) {
       if (!isUnavailable(err)) throw err
-      const cached = await (await getDb()).get('catalog', key)
+      const cached = await getDb()
+        .then((db) => db.get('catalog', key))
+        .catch(() => undefined)
       if (cached) return cached.value as T
       throw err
     }
@@ -35,17 +37,25 @@ export function withCatalogCache<T>(key: CatalogKey, load: () => Promise<T>): ()
 
 /** Guarda la última evaluación recibida del servidor. */
 export async function saveAssessment(memberId: number, assessment: unknown): Promise<void> {
-  const db = await getDb()
-  await db.put('assessments', {
-    member_id: memberId,
-    assessment,
-    received_at: new Date().toISOString(),
-    provisional: false,
-  })
+  try {
+    const db = await getDb()
+    await db.put('assessments', {
+      member_id: memberId,
+      assessment,
+      received_at: new Date().toISOString(),
+      provisional: false,
+    })
+  } catch {
+    // sin IndexedDB: sin caché
+  }
 }
 
 /** Última evaluación guardada en el dispositivo (o undefined). */
 export async function loadCachedAssessment<T>(memberId: number): Promise<T | undefined> {
-  const row = await (await getDb()).get('assessments', memberId)
-  return row?.assessment as T | undefined
+  try {
+    const row = await (await getDb()).get('assessments', memberId)
+    return row?.assessment as T | undefined
+  } catch {
+    return undefined
+  }
 }

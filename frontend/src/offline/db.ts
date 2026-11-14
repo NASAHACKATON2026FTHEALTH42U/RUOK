@@ -77,21 +77,24 @@ let dbPromise: Promise<IDBPDatabase<RuokDB>> | null = null
 
 /** Abre (una sola vez) la base del dispositivo actual y registra su identidad en `kv`. */
 export function getDb(): Promise<IDBPDatabase<RuokDB>> {
-  dbPromise ??= openDB<RuokDB>(dbName(getDevice().id), DB_VERSION, {
-    upgrade(db) {
-      const outbox = db.createObjectStore('outbox', { keyPath: 'id' })
-      outbox.createIndex('by_status_created', ['status', 'created_at'])
-      const ms = db.createObjectStore('measurements', { keyPath: 'id' })
-      ms.createIndex('by_series', ['member_id', 'indicator_id', 'taken_at'])
-      db.createObjectStore('assessments', { keyPath: 'member_id' })
-      db.createObjectStore('catalog', { keyPath: 'key' })
-      const alerts = db.createObjectStore('alerts', { keyPath: 'id' })
-      alerts.createIndex('by_member', 'member_id')
-      const tasks = db.createObjectStore('tasks', { keyPath: 'id' })
-      tasks.createIndex('by_member_date', ['member_id', 'date'])
-      db.createObjectStore('kv', { keyPath: 'key' })
-    },
-  }).then(async (db) => {
+  // async: si IndexedDB no existe (modo privado), openDB lanza de forma síncrona; así se
+  // convierte en una promesa rechazada y quien llama decide qué hacer (FE-34).
+  dbPromise ??= (async () =>
+    openDB<RuokDB>(dbName(getDevice().id), DB_VERSION, {
+      upgrade(db) {
+        const outbox = db.createObjectStore('outbox', { keyPath: 'id' })
+        outbox.createIndex('by_status_created', ['status', 'created_at'])
+        const ms = db.createObjectStore('measurements', { keyPath: 'id' })
+        ms.createIndex('by_series', ['member_id', 'indicator_id', 'taken_at'])
+        db.createObjectStore('assessments', { keyPath: 'member_id' })
+        db.createObjectStore('catalog', { keyPath: 'key' })
+        const alerts = db.createObjectStore('alerts', { keyPath: 'id' })
+        alerts.createIndex('by_member', 'member_id')
+        const tasks = db.createObjectStore('tasks', { keyPath: 'id' })
+        tasks.createIndex('by_member_date', ['member_id', 'date'])
+        db.createObjectStore('kv', { keyPath: 'key' })
+      },
+    }))().then(async (db) => {
     const d = getDevice()
     await db.put('kv', { key: 'device_id', value: d.id })
     await db.put('kv', { key: 'device_name', value: d.name })

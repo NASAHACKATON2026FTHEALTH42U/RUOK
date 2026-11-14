@@ -196,6 +196,9 @@ export function syncNow(force = false): Promise<void> {
       } else {
         await runSync(force)
       }
+    } catch {
+      // Sin IndexedDB (modo privado) no hay outbox: no hay nada pendiente que sincronizar.
+      useOutboxStore.setState({ syncing: false })
     } finally {
       running = null
     }
@@ -227,10 +230,8 @@ async function submit<T>(
   body: unknown,
   local: (db: RuokDb) => Promise<void>,
 ): Promise<SubmitResult<T>> {
-  const db = await getDb()
   const now = serverNow().toISOString()
-  await local(db)
-  await db.put('outbox', {
+  const entry: OutboxEntry = {
     id,
     kind,
     method: 'POST',
@@ -242,7 +243,20 @@ async function submit<T>(
     next_retry_at: now,
     status: 'pending',
     last_error: null,
-  })
+  }
+  let db: RuokDb
+  try {
+    db = await getDb()
+  } catch {
+    // Sin IndexedDB (modo privado): no hay outbox, se envía directamente (mismo UUID).
+    const r = await send(entry)
+    if (classify(r.status) === 'done') return { status: 'sent', result: r.data as T }
+    throw new Error(
+      'Este navegador no permite guardar datos en el dispositivo (¿modo privado?) y no hay conexión con el servidor: no se ha podido guardar. Avisa de viva voz si es urgente.',
+    )
+  }
+  await local(db)
+  await db.put('outbox', entry)
   await refreshCounts()
 
   await syncNow()

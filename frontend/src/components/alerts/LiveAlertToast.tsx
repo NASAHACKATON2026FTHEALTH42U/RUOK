@@ -1,3 +1,4 @@
+import { STATUS_COLORS } from '../ui/status'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
@@ -30,7 +31,8 @@ export function LiveAlertToast() {
   return (
     <div
       role="alert"
-      className="fixed inset-x-4 top-4 z-50 mx-auto flex max-w-lg items-start gap-3 rounded-xl border-2 border-[#d03b3b] bg-env-bg p-4 shadow-2xl"
+      className="fixed inset-x-4 top-4 z-50 mx-auto flex max-w-lg items-start gap-3 rounded-xl border-2 bg-env-bg p-4 shadow-2xl"
+      style={{ borderColor: STATUS_COLORS.critical }}
     >
       <span aria-hidden className="text-2xl leading-none">
         🚨
