@@ -34,9 +34,11 @@ def make_engine(url: str) -> Engine:
 engine = make_engine(os.environ.get("DATABASE_URL", DEFAULT_DATABASE_URL))
 
 
-def init_db() -> None:
-    """Crea las tablas de los modelos registrados (los modelos llegan en BE-02)."""
-    SQLModel.metadata.create_all(engine)
+def init_db(target: Engine | None = None) -> None:
+    """Crea las tablas e índices de app/models.py que todavía no existan."""
+    import app.models  # noqa: F401  (registra los modelos en SQLModel.metadata)
+
+    SQLModel.metadata.create_all(target or engine)
 
 
 def get_session() -> Iterator[Session]:
