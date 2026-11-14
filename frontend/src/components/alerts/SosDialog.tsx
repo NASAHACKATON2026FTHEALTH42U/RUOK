@@ -1,3 +1,4 @@
+import { STATUS_COLORS } from '../ui/status'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { newId } from '../../api/newId'
@@ -239,7 +240,8 @@ export function SosDialog({
             <button
               type="submit"
               disabled={!category || phase.kind === 'sending'}
-              className="w-full rounded-lg bg-[#d03b3b] px-4 py-3 font-semibold text-white disabled:opacity-50"
+              className="w-full rounded-lg px-4 py-3 font-semibold text-white disabled:opacity-50"
+              style={{ background: STATUS_COLORS.critical }}
             >
               {phase.kind === 'sending' ? 'Enviando…' : 'Enviar petición de ayuda'}
             </button>
@@ -335,7 +337,11 @@ function Queued({
 
   return (
     <div className="mt-3 space-y-4">
-      <div role="alert" className="rounded-lg border-2 border-[#d03b3b] p-3">
+      <div
+        role="alert"
+        className="rounded-lg border-2 p-3"
+        style={{ borderColor: STATUS_COLORS.critical }}
+      >
         <p className="text-lg font-semibold">
           No enviado. Avisa a {roleLabel('crew', vocabulary)} de viva voz.
         </p>

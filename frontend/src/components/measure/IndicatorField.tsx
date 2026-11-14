@@ -1,3 +1,4 @@
+import { STATUS_COLORS } from '../ui/status'
 import { useId } from 'react'
 import type { Indicator } from '../../api/useIndicators'
 import type { RawValue } from './measureForm'
@@ -10,7 +11,7 @@ interface IndicatorFieldProps {
 }
 
 const inputCls =
-  'w-full rounded-md border border-env-border bg-env-bg px-3 py-2 text-lg tabular-nums text-env-text focus:outline-2 focus:outline-offset-1 focus:outline-env-primary aria-[invalid=true]:border-[#d03b3b]'
+  'w-full rounded-md border border-env-border bg-env-bg px-3 py-2 text-lg tabular-nums text-env-text focus:outline-2 focus:outline-offset-1 focus:outline-env-primary'
 
 /**
  * Un indicador del formulario: pasos para medirlo (`measurement_instructions`) y el campo
@@ -74,6 +75,7 @@ export function IndicatorField({ indicator, value, error, onChange }: IndicatorF
                 value={value.hours}
                 onChange={(e) => onChange({ ...value, hours: e.target.value })}
                 aria-invalid={invalid}
+                style={invalid ? { borderColor: STATUS_COLORS.critical } : undefined}
                 aria-describedby={invalid ? errId : undefined}
                 className={inputCls}
               />
@@ -85,6 +87,7 @@ export function IndicatorField({ indicator, value, error, onChange }: IndicatorF
                 value={value.minutes}
                 onChange={(e) => onChange({ ...value, minutes: e.target.value })}
                 aria-invalid={invalid}
+                style={invalid ? { borderColor: STATUS_COLORS.critical } : undefined}
                 aria-describedby={invalid ? errId : undefined}
                 className={inputCls}
               />
@@ -103,6 +106,7 @@ export function IndicatorField({ indicator, value, error, onChange }: IndicatorF
                     input.min != null && input.max != null ? `${input.min} – ${input.max}` : ''
                   }
                   aria-invalid={invalid}
+                  style={invalid ? { borderColor: STATUS_COLORS.critical } : undefined}
                   aria-describedby={invalid ? errId : undefined}
                   className={inputCls}
                 />

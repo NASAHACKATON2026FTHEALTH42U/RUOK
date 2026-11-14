@@ -124,10 +124,13 @@ export default function Dashboard() {
       <header className="space-y-3">
         {title}
         <div className="flex flex-wrap items-center gap-2">
-          <StatusBadge
-            status={a.overall_status}
-            label={`Estado general: ${statusStyle(a.overall_status).label}`}
-          />
+          {/* Si el "sin datos" se debe a un liveness stale, basta el badge de liveness (FE-34). */}
+          {!(live === 'stale' && a.overall_status === 'unknown') && (
+            <StatusBadge
+              status={a.overall_status}
+              label={`Estado general: ${statusStyle(a.overall_status).label}`}
+            />
+          )}
           {live && (
             <StatusBadge status={live} label={formatSinceLabel(a.last_seen_at, serverNow())} />
           )}
@@ -135,7 +138,7 @@ export default function Dashboard() {
             {assessment.refreshFailed
               ? '⚠ No se pudo actualizar: los datos pueden estar desfasados'
               : assessment.updatedAt
-                ? `Actualizado ${formatAgo(assessment.updatedAt.toISOString(), new Date())}`
+                ? `Actualizado ${formatAgo(assessment.updatedAt.toISOString(), serverNow())}`
                 : null}
           </span>
         </div>
