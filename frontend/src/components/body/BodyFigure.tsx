@@ -140,21 +140,18 @@ export function BodyFigure({
 
   /**
    * Estilo común de las zonas sobre la imagen: relleno semitransparente del color del estado
-   * (deja ver el órgano) y contorno del mismo color; más grueso y blanco si está seleccionada.
+   * (deja ver el órgano), sin contorno salvo al señalarla (blanco).
    */
   const shape = (r: RegionState) => {
-    const selected = selectedSystemId === r.systemId || hovered === r.systemId
+    const lit = hovered === r.systemId
     return {
       fill: fillFor(r),
-      // Más opaco al señalarlo; el crítico, algo más (sin llegar a sólido) y además parpadea.
-      fillOpacity: hovered === r.systemId || (r.status === 'critical' && !stale) ? 0.85 : 0.55,
-      stroke: selected
-        ? '#ffffff'
-        : stale || statusStyle(r.status).striped
-          ? STATUS_COLORS.unknown
-          : STATUS_COLORS[r.status],
+      // Más opaco al señalarlo; el crítico, algo más (sin llegar a sólido) y además late.
+      fillOpacity: lit || (r.status === 'critical' && !stale) ? 0.85 : 0.55,
+      // Sin contorno: solo aparece, en blanco, al señalar la zona.
+      stroke: lit ? '#ffffff' : 'none',
       strokeOpacity: 1,
-      strokeWidth: selected ? 9 : 5,
+      strokeWidth: lit ? 9 : 0,
     }
   }
 
