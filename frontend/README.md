@@ -135,6 +135,7 @@ frontend/
     ├── components/body/       BodyFigure (SVG) + regions.ts (buildRegions, formatSinceLabel; + test)
     ├── components/dashboard/  SystemPanel, IndicatorCard, TrendChart + format.ts y trend.ts (+ tests)
     ├── components/measure/    IndicatorField + measureForm.ts (parseValue, emptyValue; + test)
+    ├── components/behavioral/ FaceScale + checkin.ts (CHECKIN_INDICATORS, faceFor, buildCheckinBatch; + test)
     ├── components/environment/  EnvironmentCard (pintada con su propia paleta), MemberList
     ├── components/ui/
     │   ├── Layout.tsx         cabecera + navegación + <Outlet /> + disclaimer
@@ -149,7 +150,7 @@ frontend/
     └── pages/                 una página por ruta (CheckIn, Missions, Alerts y Ground aún son PagePlaceholder)
 ```
 
-Carpetas que aún no existen y que crean sus issues: `components/{behavioral,game}/`. `offline/` tiene la identidad de dispositivo y la base IndexedDB (FE-30) y el outbox persistente con su sincronización (FE-11).
+Carpetas que aún no existen y que crean sus issues: `components/game/`. `offline/` tiene la identidad de dispositivo y la base IndexedDB (FE-30) y el outbox persistente con su sincronización (FE-11).
 
 ## Rutas
 
@@ -337,7 +338,7 @@ Verificado con una serie sintética de 30 días (interceptando la petición en C
 
 `/history` (`src/pages/History.tsx`):
 
-- **Selector de indicador**: los indicadores activos del entorno (`Environment.indicators`), con su nombre del catálogo.
+- **Selector de indicador**: los indicadores activos del entorno (`Environment.indicators`) más los 6 del check-in diario (FE-19), con su nombre del catálogo.
 - **Selector de periodo**: 7 d / 30 d.
 - El indicador y el periodo van en la URL: `/history?indicator=bp_systolic&days=30` (se puede enlazar directamente).
 - **Gráfica** grande (`TrendPlot`) con las bandas del entorno: si el indicador está en la evaluación se usan sus rangos ajustados; si no, los del catálogo.
@@ -361,6 +362,26 @@ Verificado con una serie sintética de 30 días (interceptando la petición en C
 - **Un solo lote** por formulario: la tensión sistólica y la diastólica (y el resto del sistema) van juntas en `POST /members/{id}/measurements`, con un **UUID por medición** (`newId()`), `taken_at` = hora del servidor y `source: "manual"`, más la nota opcional.
 - **Sin conexión no se pierde nada** (FE-11): el lote se guarda primero en el outbox del dispositivo. Si llega al servidor, se ve "N mediciones enviadas" con el estado general que devuelve; si no, "Medición guardada en el dispositivo", y se envía sola cuando vuelva la conexión, con los mismos UUID (sin duplicados).
 - "Ver el panel" vuelve a `/dashboard`, que vuelve a pedir la evaluación.
+
+## Check-in diario "R U OK?" (FE-19)
+
+`/checkin` (`src/pages/CheckIn.tsx`). Es el check-in conductual de [`docs/behavioral-health.md`](../docs/behavioral-health.md), pensado para hacerse **en menos de 30 s** y en una sola pantalla (mobile-first):
+
+- **6 escalas 1–5 con caras** (`FaceScale`), en este orden (`CHECKIN_INDICATORS`): `mood`, `stress`, `energy`, `loneliness`, `sleep_quality` y `crew_relation`. Debajo, una **nota** opcional.
+- **Textos desde el catálogo:** el nombre y la pregunta, con sus extremos ("1 = nada, 5 = muchísimo"), salen de `indicator.name` y `measurement_instructions[0]`. No hay textos clínicos fijos en el componente.
+- **Las caras siguen la polaridad** del indicador (`higher_is_worse`, `faceFor()`): en ánimo, 5 es 😄; en estrés y soledad, 5 es 😞. Cada cara va siempre con su número y `aria-label="N de 5"`, para no depender solo del emoji. Pulsar la opción elegida la quita.
+- Hay que responder a las 6. El botón muestra el progreso ("Responde 4 / 6") hasta que están todas.
+- **Envío:** un solo lote (`buildCheckinBatch()`) por `sendMeasurements()` del outbox. Lleva una medición por respuesta con su UUID (`newId()`), `source: "checkin"`, la misma `taken_at` (hora del servidor) y la nota en todas.
+- **Sin conexión no se pierde nada** (outbox, FE-11): si el lote llega al servidor, se ve "Check-in guardado" con el estado general que devuelve; si no, "Check-in guardado en el dispositivo", y se envía solo cuando vuelve la conexión, con los mismos UUID.
+- **Resultado:** en los dos casos hay enlaces al panel y al historial (`/history?indicator=mood`).
+- **Historial:** los 6 indicadores aparecen siempre en el selector de `/history`, aunque el entorno no los tenga activos. Hoy los entornos solo activan `mood`.
+- **Aviso de privacidad** al pie, según `docs/behavioral-health.md`. Quien lo aplica es el backend (BE-20, BE-17 y BE-27); el front solo informa.
+
+**Probado** contra el backend real, a través del proxy de Vite: el lote de 6 entra con `accepted: 6`; reenviarlo con los mismos UUID da `duplicates: 6` y no duplica nada; `GET /members/1/measurements?indicator_id=<id>` (la consulta del historial) devuelve cada respuesta con `source: "checkin"` y su nota. Lint, build y tests en verde. **Falta verificarlo visualmente en un navegador o móvil.**
+
+**Pendiente:**
+
+- Activar los indicadores conductuales en `environments.json` para que entren en la evaluación (backend, BE-20).
 
 ## Dispositivo e IndexedDB (FE-30)
 
