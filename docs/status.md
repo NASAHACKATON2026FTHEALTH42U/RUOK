@@ -49,23 +49,20 @@
 
 **Sin ninguna issue cerrada todavía:** 🌐 API, 🚨 Alertas, 📡 Enlace, 💓 Liveness, 🎮 Juego, 🧘 Conductual, 📶 Tiempo real, 🛰️ Control y 🎤 Pitch. La mayoría de las issues de front del Hito 2 están asignadas en bloque a xddaso y AlbertoSanzAlonso.
 
-## Inconsistencias de código detectadas en la revisión (pendientes de issue)
+## Inconsistencias de código detectadas en la revisión
 
-La revisión del 14/11 encontró estos problemas en el código. Los docs ya describen el comportamiento correcto; el código todavía no:
+La revisión del 14/11 encontró estos problemas. Los docs ya describen el comportamiento correcto; el código todavía no. **P0 = hay que resolverlas antes que las issues que bloquean.**
 
-| Gravedad | Problema | Dónde | Issue que debería arreglarlo |
+| Prio | Problema | Issue | Bloquea a |
 |---|---|---|---|
-| Alta | El escalado a `crew` (a bordo) sale con el retardo de tierra (840 s en Marte); debe ser `realtime` y 0 s | `services/assessment.py` `build_escalation` | BE-11 / BE-14 |
-| Alta | El stub del assessment contradice al motor (142 mmHg en Marte es `critical`, no `warning`) y su test exige `autonomous` en un `warning` | `stubs.py`, `tests/test_contract.py` | BE-11 (conectar el motor y borrar el stub) |
-| Alta | El banner del modo fallback dice que lo registrado "se guarda para enviarlo", pero el outbox persistente aún no está en `main` | `MockBanner.tsx` | FE-11 (#107) |
-| Media | `overall_status` no combina salud y liveness, y el liveness por defecto es `active` (debería ser "sin datos") | `services/member_assessment.py` | BE-12 |
-| Media | `/demo/fast-forward` y `/demo/reset` no persisten el reloj | `routers/realtime.py` | BE-07 |
-| Media | Faltan umbrales en `environments.json` (`lost` en EVA, factor de sueño, check-in matinal, tiempo para escalar un warning persistente) | `schemas/config.py`, `environments.json` | BE-12 / BE-14 / BE-16 |
-| Media | `vocabulary` no tiene texto para roles de la escalera (`nurse`, `doctor`, `caregiver`, `family`) en hospital y geriatría | `environments.json` | BE-03 (ajuste) |
-| Media | 9 indicadores conductuales no están activos en ningún entorno | `environments.json` | BE-20 |
-| Media | `Alert.target_role` y `delivery_mode` admiten null en la BD, pero el contrato los exige | `models.py` | BE-14 |
-| Media | `threshold_overrides` con un indicador inexistente se ignora sin avisar | `services/catalog.py` | BE-04 (ajuste) |
-| Baja | Chip "Servidor conectado" en verde fijo (se confunde con "normal") y colores fijos de Tailwind | `ServerStatus.tsx`, `IndicatorField.tsx` | FE-26 |
-| Baja | El dashboard muestra dos badges cuando `unknown` se debe a `stale` | `pages/Dashboard.tsx` | FE-26 |
-| Baja | `formatAgo` con el reloj del dispositivo en vez de `serverNow()` | `pages/Dashboard.tsx`, `api/useLoad.ts` | FE-26 |
-| Baja | `X-Device-Id` mal formado da 422 incluso en un SOS | `routers/deps.py` | BE-27 |
+| **P0** | El escalado a `crew` (a bordo) sale con el retardo de tierra (840 s en Marte); debe ser `realtime` y 0 s | **#111 BE-31** | BE-14 |
+| **P0** | Faltan umbrales en `environments.json`: `lost` en EVA, factor de sueño, check-in matinal, tiempo para escalar un warning persistente | **#112 BE-33** | BE-12, BE-14, BE-16 |
+| **P0** | `Alert.target_role` y `delivery_mode` admiten null en la BD, pero el contrato los exige | **#113 BE-35** | BE-14 |
+| **P0** | El stub del assessment contradice al motor y su test exige `autonomous` en un `warning` | tareas añadidas a **#18 BE-11** (en curso) | — |
+| **P0** | El banner del fallback dice que lo registrado "se guarda para enviarlo" sin outbox persistente | tarea añadida a **#41 FE-11** (PR #107) | — |
+| P1 | `/demo/fast-forward` y `/demo/reset` no persisten el reloj | #114 BE-32 | — |
+| P1 | `threshold_overrides` con un indicador inexistente se ignora sin avisar; faltan textos de `vocabulary` para roles de la escalera | #115 BE-34 | FE-14 |
+| P1 | Colores fijos, chip verde, doble badge, `serverNow()` en el dashboard, `getDb()` sin `catch` | #116 FE-34 | — |
+| P0 | `overall_status` no combina salud y liveness; liveness por defecto `active` | tarea añadida a #33 BE-12 | — |
+| P1 | Indicadores conductuales no activos en ningún entorno; privacidad de sus valores | tareas añadidas a #28 BE-20 | — |
+| P1 | `X-Device-Id` mal formado da 422 incluso en un SOS | tarea añadida a #69 BE-27 | — |
