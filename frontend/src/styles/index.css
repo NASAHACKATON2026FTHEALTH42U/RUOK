@@ -1,9 +1,14 @@
 @import 'tailwindcss';
 
-/* Local-first: sin fuentes externas, se usa la pila del sistema. */
+/* Local-first: fuentes empaquetadas (src/main.tsx), nunca de un CDN. Textos en Jura; mensajes de sistema en
+   IBM Plex Mono. */
 @theme {
   --font-sans:
-    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    'Jura', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
+    sans-serif;
+  /* Mensajes de sistema: estados, badges, leyendas, conexión (clase font-mono). */
+  --font-mono:
+    'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
 }
 
 /*

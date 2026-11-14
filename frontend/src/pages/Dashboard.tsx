@@ -145,11 +145,12 @@ export default function Dashboard() {
         <StatusBadge
           status={a.overall_status}
           label={`Estado general: ${statusStyle(a.overall_status).label}`}
+          size={sidebar ? 'sm' : 'md'}
         />
       )}
       {live && <StatusBadge status={live} label={formatSinceLabel(a.last_seen_at, serverNow())} />}
       <span
-        className={`${sidebar ? 'text-xs' : 'text-sm'} text-env-muted`}
+        className={`${sidebar ? 'text-xs' : 'text-sm'} font-mono text-env-muted`}
         role={sidebar ? 'status' : undefined}
       >
         {assessment.refreshFailed

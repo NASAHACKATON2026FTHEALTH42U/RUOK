@@ -21,7 +21,7 @@ export function StatusBadge({ status, label, size = 'md', className = '' }: Stat
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border border-env-border bg-env-surface font-medium text-env-text ${
+      className={`inline-flex items-center gap-1.5 rounded-full border border-env-border bg-env-surface font-mono font-medium text-env-text ${
         size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-sm'
       } ${className}`}
       style={s.striped ? { backgroundImage: STRIPES } : undefined}

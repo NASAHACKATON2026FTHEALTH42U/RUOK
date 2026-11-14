@@ -325,13 +325,13 @@ export function BodyFigure({
             </pattern>
           </defs>
 
-          {/* Todo el cuerpo se amplía un poco mientras se señala cualquier zona. */}
+          {/* Todo el cuerpo se amplía (×1,12) mientras se señala cualquier zona. */}
           <g
             style={{
               transformBox: 'view-box',
               transformOrigin: '443.5px 887px',
               transition: 'transform 250ms ease-out',
-              transform: hovered !== null ? 'scale(1.05)' : undefined,
+              transform: hovered !== null ? 'scale(1.12)' : undefined,
             }}
           >
             {/* Cuerpo holográfico. Los órganos se desaturan un poco para que no se confundan con el

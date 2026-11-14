@@ -104,7 +104,7 @@ export function Layout() {
         <aside
           id="sidebar"
           aria-label="Menú principal"
-          className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col gap-3 overflow-y-auto border-r border-env-border bg-env-surface px-4 py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden transition-transform duration-200 md:sticky md:top-0 md:z-auto md:h-screen md:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col gap-3 overflow-y-auto border-r border-env-border bg-env-surface px-4 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden transition-transform duration-200 md:sticky md:top-0 md:z-auto md:h-screen md:translate-x-0 ${
             open ? 'translate-x-0' : '-translate-x-full'
           }`}
         >

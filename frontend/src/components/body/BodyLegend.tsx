@@ -26,7 +26,7 @@ export function BodyLegend({
 }: BodyLegendProps) {
   return (
     <ul
-      className={`flex w-full flex-wrap ${compact ? 'gap-1.5' : 'gap-2'} ${className}`}
+      className={`flex w-full flex-wrap font-mono ${compact ? 'gap-1.5' : 'gap-2'} ${className}`}
       aria-label="Sistemas"
     >
       {regions.map((r) => (
