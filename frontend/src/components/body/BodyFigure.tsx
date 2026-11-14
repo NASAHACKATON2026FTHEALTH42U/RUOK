@@ -77,14 +77,6 @@ export function BodyFigure({
         'aria-label': label,
         'aria-pressed': selectedSystemId === r.systemId,
         className: 'cursor-pointer outline-none',
-        style: {
-          transformBox: 'fill-box' as const,
-          transformOrigin: 'center',
-          transition: 'transform 150ms ease-out, opacity 150ms ease-out, filter 150ms ease-out',
-          transform: hovered === r.systemId ? 'scale(1.08)' : undefined,
-          opacity: hovered !== null && hovered !== r.systemId ? 0.4 : 1,
-          filter: hovered === r.systemId ? `url(#${glow})` : undefined,
-        },
         onClick: () => onSelectSystem?.(r.systemId),
         onKeyDown: (e: KeyboardEvent) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -133,11 +125,118 @@ export function BodyFigure({
 
   // Función (no componente): si fuera un componente definido aquí, React lo remontaría en cada
   // render y se perdería el foco de teclado al mostrar el tooltip.
-  const region = (name: BodyRegion, draw: (r: RegionState) => ReactNode) => {
+  // Dos capas: la zona sensible (invisible, FIJA, recibe ratón y teclado) y el dibujo visible,
+  // que crece, brilla o se atenúa sin mover la zona sensible: así el hover no parpadea.
+  const zone = (name: BodyRegion, draw: (r: RegionState) => ReactNode, layer: 'hit' | 'visual') => {
     const p = regionProps(name)
     if (!p) return null
-    return <g {...p.g}>{draw(p.r)}</g>
+    if (layer === 'hit')
+      return (
+        <g key={name} {...p.g}>
+          <g opacity={0}>{draw(p.r)}</g>
+        </g>
+      )
+    const lit = hovered === p.r.systemId
+    return (
+      <g
+        key={name}
+        aria-hidden="true"
+        pointerEvents="none"
+        style={{
+          transformBox: 'fill-box',
+          transformOrigin: 'center',
+          transition: 'transform 150ms ease-out, filter 150ms ease-out, opacity 150ms ease-out',
+          transform: lit ? 'scale(1.08)' : undefined,
+          filter: lit ? `url(#${glow})` : undefined,
+          opacity: hovered !== null && !lit ? 0.4 : 1,
+        }}
+      >
+        {draw(p.r)}
+      </g>
+    )
   }
+
+  /** Zonas del cuerpo, en coordenadas de la imagen original (887 × 1774). */
+  const zones: [BodyRegion, (r: RegionState) => ReactNode][] = [
+    // Huesos (musculoesquelético): húmero, antebrazo, fémur y tibia
+    [
+      'bones',
+      (r) => (
+        <g
+          {...shape(r)}
+          fill="none"
+          stroke={fillFor(r)}
+          strokeWidth={selectedSystemId === r.systemId ? 30 : 22}
+          strokeOpacity={0.85}
+          strokeLinecap="round"
+        >
+          <polyline points="262,385 215,620 145,850" />
+          <polyline points="625,385 672,620 742,850" />
+          <polyline points="362,905 376,1190 392,1555" />
+          <polyline points="525,905 511,1190 497,1555" />
+        </g>
+      ),
+    ],
+    // Metabólico: hígado y estómago
+    ['metabolic', (r) => <ellipse cx="445" cy="590" rx="140" ry="62" {...shape(r)} />],
+    // Corazón
+    [
+      'heart',
+      (r) => (
+        <path
+          d="M455 535 C385 495 385 425 425 428 C443 429 452 442 455 452 C458 442 467 429 485 428 C525 425 525 495 455 535 Z"
+          {...shape(r)}
+        />
+      ),
+    ],
+    // Inmune: ganglios linfáticos (cuello, axilas, ingles)
+    [
+      'immune',
+      (r) => (
+        <g {...shape(r)}>
+          {[
+            [398, 268],
+            [489, 268],
+            [306, 430],
+            [581, 430],
+            [372, 930],
+            [514, 930],
+          ].map(([cx, cy]) => (
+            <g key={`${cx}-${cy}`}>
+              <circle cx={cx} cy={cy} r="38" fill="transparent" stroke="none" />
+              {/* Anillo amarillo decorativo (a juego con el aura); el relleno sigue siendo
+                      el color del estado del sistema inmune. */}
+              {!stale && (
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r="27"
+                  fill="none"
+                  stroke="#fde047"
+                  strokeWidth="6"
+                  strokeOpacity="0.9"
+                />
+              )}
+              <circle cx={cx} cy={cy} r="18" />
+            </g>
+          ))}
+        </g>
+      ),
+    ],
+    // Cerebro (neuro-conductual)
+    ['brain', (r) => <ellipse cx="443" cy="88" rx="82" ry="58" {...shape(r)} />],
+    // Ojos (SANS)
+    [
+      'eyes',
+      (r) => (
+        <g {...shape(r)}>
+          <rect x="370" y="122" width="148" height="40" fill="transparent" stroke="none" />
+          <ellipse cx="403" cy="142" rx="24" ry="13" />
+          <ellipse cx="484" cy="142" rx="24" ry="13" />
+        </g>
+      ),
+    ],
+  ]
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -166,7 +265,7 @@ export function BodyFigure({
         {/* Coordenadas en píxeles de la imagen original (887 × 1774). */}
         <svg
           viewBox="0 0 887 1774"
-          className="relative h-auto w-full"
+          className="relative h-auto w-full overflow-visible"
           role="group"
           aria-label="Estado por sistema del cuerpo"
         >
@@ -193,110 +292,48 @@ export function BodyFigure({
             </pattern>
           </defs>
 
-          {/* Cuerpo holográfico. Los órganos se desaturan un poco para que no se confundan con el
-              semáforo; sin datos fiables (stale/lost), toda la figura en gris. */}
-          <image
-            href={holographicHuman}
-            x="0"
-            y="0"
-            width="887"
-            height="1774"
-            preserveAspectRatio="xMidYMid meet"
+          {/* Todo el cuerpo se amplía un poco mientras se señala cualquier zona. */}
+          <g
             style={{
-              filter: stale ? 'grayscale(1) brightness(0.75)' : 'saturate(0.55) brightness(0.9)',
+              transformBox: 'view-box',
+              transformOrigin: '443.5px 887px',
+              transition: 'transform 250ms ease-out',
+              transform: hovered !== null ? 'scale(1.05)' : undefined,
             }}
-            aria-hidden="true"
-          />
-          {stale && (
-            <rect
+          >
+            {/* Cuerpo holográfico. Los órganos se desaturan un poco para que no se confundan con el
+              semáforo; sin datos fiables (stale/lost), toda la figura en gris. */}
+            <image
+              href={holographicHuman}
               x="0"
               y="0"
               width="887"
               height="1774"
-              fill={`url(#${stripes})`}
-              opacity="0.6"
+              preserveAspectRatio="xMidYMid meet"
+              style={{
+                filter: stale ? 'grayscale(1) brightness(0.75)' : 'saturate(0.55) brightness(0.9)',
+              }}
               aria-hidden="true"
             />
-          )}
+            {stale && (
+              <rect
+                x="0"
+                y="0"
+                width="887"
+                height="1774"
+                fill={`url(#${stripes})`}
+                opacity="0.6"
+                aria-hidden="true"
+              />
+            )}
 
-          {/* Sin halo alrededor del cuerpo: la radiación (todo el cuerpo) se consulta y se abre
+            {/* Sin halo alrededor del cuerpo: la radiación (todo el cuerpo) se consulta y se abre
               desde la leyenda de debajo. */}
+            {zones.map(([n, d]) => zone(n, d, 'visual'))}
+          </g>
 
-          {/* Huesos (musculoesquelético): húmero, antebrazo, fémur y tibia */}
-          {region('bones', (r) => (
-            <g
-              {...shape(r)}
-              fill="none"
-              stroke={fillFor(r)}
-              strokeWidth={selectedSystemId === r.systemId ? 30 : 22}
-              strokeOpacity={0.85}
-              strokeLinecap="round"
-            >
-              <polyline points="262,385 215,620 145,850" />
-              <polyline points="625,385 672,620 742,850" />
-              <polyline points="362,905 376,1190 392,1555" />
-              <polyline points="525,905 511,1190 497,1555" />
-            </g>
-          ))}
-
-          {/* Metabólico: hígado y estómago */}
-          {region('metabolic', (r) => (
-            <ellipse cx="445" cy="590" rx="140" ry="62" {...shape(r)} />
-          ))}
-
-          {/* Corazón */}
-          {region('heart', (r) => (
-            <path
-              d="M455 535 C385 495 385 425 425 428 C443 429 452 442 455 452 C458 442 467 429 485 428 C525 425 525 495 455 535 Z"
-              {...shape(r)}
-            />
-          ))}
-
-          {/* Inmune: ganglios linfáticos (cuello, axilas, ingles) */}
-          {region('immune', (r) => (
-            <g {...shape(r)}>
-              {[
-                [398, 268],
-                [489, 268],
-                [306, 430],
-                [581, 430],
-                [372, 930],
-                [514, 930],
-              ].map(([cx, cy]) => (
-                <g key={`${cx}-${cy}`}>
-                  <circle cx={cx} cy={cy} r="38" fill="transparent" stroke="none" />
-                  {/* Anillo amarillo decorativo (a juego con el aura); el relleno sigue siendo
-                      el color del estado del sistema inmune. */}
-                  {!stale && (
-                    <circle
-                      cx={cx}
-                      cy={cy}
-                      r="27"
-                      fill="none"
-                      stroke="#fde047"
-                      strokeWidth="6"
-                      strokeOpacity="0.9"
-                    />
-                  )}
-                  <circle cx={cx} cy={cy} r="18" />
-                </g>
-              ))}
-            </g>
-          ))}
-
-          {/* Cerebro (neuro-conductual) */}
-          {region('brain', (r) => (
-            <ellipse cx="443" cy="88" rx="82" ry="58" {...shape(r)} />
-          ))}
-
-          {/* Ojos (SANS) */}
-          {region('eyes', (r) => (
-            <g {...shape(r)}>
-              <rect x="370" y="122" width="148" height="40" fill="transparent" stroke="none" />
-              <ellipse cx="403" cy="142" rx="24" ry="13" />
-              <ellipse cx="484" cy="142" rx="24" ry="13" />
-            </g>
-          ))}
+          {/* Zonas sensibles, fuera del grupo que se amplía: no se mueven bajo el ratón. */}
+          {zones.map(([n, d]) => zone(n, d, 'hit'))}
         </svg>
 
         {tooltip && (
