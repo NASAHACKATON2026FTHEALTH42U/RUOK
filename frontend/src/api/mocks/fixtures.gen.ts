@@ -9416,7 +9416,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 15,
+    "id": 17,
     "type": "device.registered",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -9431,7 +9431,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 16,
+    "id": 18,
     "type": "heartbeat",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
