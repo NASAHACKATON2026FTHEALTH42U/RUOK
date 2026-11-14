@@ -233,10 +233,21 @@ def test_validation_errors_return_422(client):
 
 
 def test_assessment_mode_depends_on_environment(client):
-    mars = client.get(API + "/members/1/assessment").json()
-    iss = client.get(API + "/members/1/assessment?env=iss").json()
-    assert mars["systems"][0]["escalation"]["mode"] == "autonomous"
-    assert iss["systems"][0]["escalation"]["mode"] == "realtime"
+    # El assessment ya es real (BE-11) y el seed (BE-07) da datos normales: se carga
+    # el escenario de la demo para tener un sistema en `critical` (sueño de Vega).
+    client.post(API + "/demo/scenarios/mars_sleep_bp")
+    try:
+        mars = client.get(API + "/members/1/assessment").json()
+        iss = client.get(API + "/members/1/assessment?env=iss").json()
+
+        def neuro(a):
+            return next(s for s in a["systems"] if s["system_id"] == "neuro_behavioral")
+
+        assert neuro(mars)["status"] == "critical"
+        assert neuro(mars)["escalation"]["mode"] == "autonomous"  # 840 s de retardo
+        assert neuro(iss)["escalation"]["mode"] == "realtime"  # mismos datos, ISS
+    finally:
+        client.post(API + "/demo/reset")  # no dejar el escenario a los demás tests
 
 
 def test_events_stream_is_sse(client):
