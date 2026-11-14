@@ -20,6 +20,7 @@ describe('roleLabel', () => {
   })
   it('sin vocabulario, un texto en español; nunca el slug si se conoce', () => {
     expect(roleLabel('family', marte)).toBe('familia')
+    expect(roleLabel('self', marte)).toBe('autocuidado')
     expect(roleLabel('caregiver', {})).toBe('cuidador')
     expect(roleLabel('otro', {})).toBe('otro')
   })

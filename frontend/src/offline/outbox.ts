@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { api, NetworkError, serverNow, type Schema } from '../api/client'
+import { api, NetworkError, serverNow, unwrap, type Schema } from '../api/client'
 import { newId } from '../api/newId'
 import { backoffMs, classify, isDue } from './backoff'
 import { getDb, type OutboxEntry } from './db'
@@ -327,4 +327,37 @@ export async function initOutbox() {
     if (useOutboxStore.getState().pending > 0) void syncNow()
   }, TICK_MS)
   force()
+}
+
+// ── Acciones sobre alertas (FE-14) ──────────────────────────
+//
+// Escalar, reconocer y resolver pasan por este módulo (punto único de escritura) pero NO se
+// encolan: no son idempotentes (encolar dos "escalar" subiría dos niveles). Sin servidor
+// lanzan NetworkError y la UI dice "sin conexión: avisa de viva voz".
+
+export function escalateAlert(alertId: string, targetRole: string | null, message?: string) {
+  return unwrap(
+    api.POST('/api/v1/alerts/{alert_id}/escalate', {
+      params: { path: { alert_id: alertId } },
+      body: { target_role: targetRole, message: message ?? null },
+    }),
+  )
+}
+
+export function ackAlert(alertId: string, actor: Schema<'Actor'>) {
+  return unwrap(
+    api.POST('/api/v1/alerts/{alert_id}/ack', {
+      params: { path: { alert_id: alertId } },
+      body: { actor },
+    }),
+  )
+}
+
+export function resolveAlert(alertId: string, actor: Schema<'Actor'>, note?: string) {
+  return unwrap(
+    api.POST('/api/v1/alerts/{alert_id}/resolve', {
+      params: { path: { alert_id: alertId } },
+      body: { actor, note: note ?? null },
+    }),
+  )
 }
