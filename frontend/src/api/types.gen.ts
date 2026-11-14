@@ -254,7 +254,7 @@ export interface paths {
         };
         /**
          * Members del entorno con su resumen
-         * @description STUB(FS-02) → BE-05
+         * @description Members de la BD con `last_measurement_at` real. `liveness`, `overall_status` y `open_alerts`: STUB(FS-02) → BE-12, BE-11 y BE-14.
          */
         get: operations["list_members_api_v1_environments__env_id__members_get"];
         put?: never;
@@ -274,7 +274,7 @@ export interface paths {
         };
         /**
          * Un member
-         * @description STUB(FS-02) → BE-05
+         * @description Member de la BD. `liveness`: STUB(FS-02) → BE-12.
          */
         get: operations["get_member_api_v1_members__member_id__get"];
         put?: never;
@@ -300,7 +300,7 @@ export interface paths {
         head?: never;
         /**
          * Compartir o no los detalles conductuales (solo el propio member)
-         * @description STUB(FS-02) → BE-05/BE-20
+         * @description Se guarda en la BD. El permiso (solo el propio member) llega con BE-27.
          */
         patch: operations["set_privacy_api_v1_members__member_id__privacy_patch"];
         trace?: never;
