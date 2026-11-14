@@ -116,7 +116,6 @@ export default function History() {
   const title = (
     <header>
       <h1 className="text-2xl font-semibold">Historial</h1>
-      <p className="mt-1 hidden text-env-muted sm:block">Evolución de tus mediciones.</p>
     </header>
   )
 
@@ -326,13 +325,15 @@ export default function History() {
           )}
 
           {rows.length > 0 && (
+            // Sin página anterior o siguiente, la flecha desaparece (`invisible`: conserva su hueco
+            // para que el contador siga centrado).
             <nav
               aria-label="Páginas del historial"
               className="flex items-center justify-between gap-3"
             >
               <button
                 type="button"
-                className="hud-btn w-[52px] !px-0 !font-sans !text-base !tracking-normal"
+                className={`hud-btn w-[52px] !px-0 !font-sans !text-base !tracking-normal ${page === 0 ? 'invisible' : ''}`}
                 onClick={() => setPage(page - 1)}
                 disabled={page === 0}
                 aria-label="Página anterior"
@@ -345,7 +346,7 @@ export default function History() {
               </span>
               <button
                 type="button"
-                className="hud-btn w-[52px] !px-0 !font-sans !text-base !tracking-normal"
+                className={`hud-btn w-[52px] !px-0 !font-sans !text-base !tracking-normal ${page >= pages - 1 ? 'invisible' : ''}`}
                 onClick={() => setPage(page + 1)}
                 disabled={page >= pages - 1}
                 aria-label="Página siguiente"

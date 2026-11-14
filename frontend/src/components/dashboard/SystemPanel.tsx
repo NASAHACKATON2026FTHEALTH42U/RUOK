@@ -7,7 +7,6 @@ import { useInterventions } from '../../api/useInterventions'
 import type { BodySystem } from '../../api/useSystems'
 import { InterventionCard } from '../behavioral/InterventionCard'
 import { StatusBadge } from '../ui/StatusBadge'
-import { formatHazard } from './format'
 import { IndicatorCard } from './IndicatorCard'
 
 type SystemAssessment = Assessment['systems'][number]
@@ -17,8 +16,6 @@ interface SystemPanelProps {
   /** Evaluación del sistema; sin ella, el sistema está "sin datos". */
   assessed: SystemAssessment | undefined
   indicators: Indicator[]
-  /** Entorno espacial: muestra los efectos en el espacio y los peligros. */
-  isSpace: boolean
   /** Liveness stale/lost: los estados se muestran como "sin datos recientes". */
   stale: boolean
   /** El rol puede registrar mediciones de este member (si no, no hay "Medir ahora"). */
@@ -29,15 +26,14 @@ interface SystemPanelProps {
 }
 
 /**
- * Detalle de un sistema del cuerpo (FE-06): función, efectos en el espacio, peligros,
- * indicadores (valor, estado, tendencia, antigüedad), recomendaciones y "Medir ahora".
- * Modal grande centrada. Se cierra con Esc, con el botón o con un clic fuera.
+ * Detalle de un sistema del cuerpo (FE-06): estado, indicadores (valor, estado, tendencia,
+ * antigüedad), recomendaciones y "Medir ahora". Sin los textos descriptivos (función, efectos
+ * en el espacio, peligros), para que quepa sin scroll. Modal grande centrada. Se cierra con Esc, con el botón o con un clic fuera.
  */
 export function SystemPanel({
   system,
   assessed,
   indicators,
-  isSpace,
   stale,
   canMeasure = true,
   provisionalIds,
@@ -89,14 +85,11 @@ export function SystemPanel({
         transition={{ type: 'tween', duration: 0.2 }}
       >
         <header className="flex items-start justify-between gap-3">
-          <div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <h2 id={titleId} className="text-2xl font-semibold">
               {system.name}
             </h2>
-            <StatusBadge
-              status={stale ? 'stale' : (assessed?.status ?? 'unknown')}
-              className="mt-2"
-            />
+            <StatusBadge status={stale ? 'stale' : (assessed?.status ?? 'unknown')} />
           </div>
           <button
             ref={closeRef}
@@ -108,37 +101,6 @@ export function SystemPanel({
             ✕
           </button>
         </header>
-
-        <section className="mt-5 grid gap-4 text-sm md:grid-cols-2">
-          <p>
-            <span className="block text-xs font-medium tracking-wide text-env-muted uppercase">
-              Función
-            </span>
-            {system.function}
-          </p>
-          {isSpace && (
-            <p>
-              <span className="block text-xs font-medium tracking-wide text-env-muted uppercase">
-                En el espacio
-              </span>
-              {system.space_effects}
-            </p>
-          )}
-          {isSpace && system.hazards && system.hazards.length > 0 && (
-            <div className="md:col-span-2">
-              <span className="block text-xs font-medium tracking-wide text-env-muted uppercase">
-                Peligros
-              </span>
-              <ul className="mt-1 flex flex-wrap gap-1.5">
-                {system.hazards.map((h) => (
-                  <li key={h} className="rounded-full border border-env-border px-2 py-0.5 text-xs">
-                    {formatHazard(h)}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </section>
 
         <section className="mt-6">
           <h3 className="text-sm font-semibold">Indicadores</h3>

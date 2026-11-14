@@ -35,8 +35,9 @@ export function Layout() {
   const { role, can } = useAuth()
   const { pathname } = useLocation()
   const wide = pathname.startsWith('/control')
-  // Páginas que ocupan justo el alto disponible y reparten el scroll por dentro (misiones).
-  const fill = pathname.startsWith('/missions')
+  // Páginas que ocupan justo el alto disponible y reparten el espacio por dentro, sin scroll
+  // de página (misiones, La Tierra).
+  const fill = ['/missions', '/earth'].some((p) => pathname.startsWith(p))
   const reducedMotion = useReducedMotion()
   const envId = useEnvironmentStore((s) => s.envId)
   const envs = useEnvironments()
