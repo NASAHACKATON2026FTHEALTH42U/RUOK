@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import type { Schema } from '../api/client'
+import { getDevice } from '../offline/device'
 
 /**
  * Textos visibles que dependen del entorno (`Environment.vocabulary`).
@@ -49,7 +50,8 @@ export const useEnvironmentStore = create<EnvironmentState>()(
     }),
     {
       // Se recuerda la sesión al recargar la tablet, también sin conexión.
-      name: 'ruok-session',
+      // Una sesión por dispositivo: dos pestañas con ?device=a y ?device=b no la comparten.
+      name: `ruok-session-${getDevice().id}`,
       version: 1,
       storage: createJSONStorage(() => localStorage),
       partialize: ({ envId, memberId, vocabulary }) => ({ envId, memberId, vocabulary }),

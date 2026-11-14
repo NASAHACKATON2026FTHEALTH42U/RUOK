@@ -3,6 +3,7 @@ import { useVocab } from '../../environments/useVocab'
 import { EnvironmentSelector } from './EnvironmentSelector'
 import { MockBanner } from './MockBanner'
 import { ServerStatus } from './ServerStatus'
+import { getDevice } from '../../offline/device'
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Panel' },
@@ -14,6 +15,7 @@ const NAV_ITEMS = [
 ]
 
 export function Layout() {
+  const device = getDevice()
   const { ground } = useVocab()
   const navItems = [...NAV_ITEMS, { to: '/ground', label: `Consola de ${ground}` }]
 
@@ -59,6 +61,11 @@ export function Layout() {
       <footer className="border-t border-env-border px-4 py-3 text-center text-xs text-env-muted">
         Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye el
         criterio de un profesional sanitario.
+        {device.mode === 'tab' && (
+          <span className="mt-1 block" title={device.id}>
+            Dispositivo: {device.name ?? `pestaña ${device.id.slice(0, 8)}`}
+          </span>
+        )}
       </footer>
     </div>
   )
