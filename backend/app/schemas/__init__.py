@@ -44,7 +44,7 @@ from app.schemas.common import (
     Status,
     Trend,
 )
-from app.schemas.config import BodySystem, Environment, Indicator, Intervention
+from app.schemas.config import BodySystem, Environment, Indicator, Intervention, TaskType
 from app.schemas.game import Badge, GameState, Leaderboard, LeaderboardEntry, Task, TaskCompleteIn
 from app.schemas.link import LinkMessage, LinkStatus
 from app.schemas.members import (
@@ -155,6 +155,7 @@ __all__ = [
     "SystemAssessment",
     "Task",
     "TaskCompleteIn",
+    "TaskType",
     "TokenResponse",
     "Trend",
     "User",

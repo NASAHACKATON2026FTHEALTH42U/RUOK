@@ -507,7 +507,7 @@ export interface paths {
         };
         /**
          * Tareas del día
-         * @description STUB(FS-02) → BE-18
+         * @description Se generan desde `environment.routine` la primera vez que se piden (o al medir). `date` por defecto: hoy (UTC, reloj del servidor). Las tareas con `indicator_id` se autocompletan con las mediciones de ese indicador del mismo día.
          */
         get: operations["list_tasks_api_v1_members__member_id__tasks_get"];
         put?: never;
@@ -529,7 +529,7 @@ export interface paths {
         put?: never;
         /**
          * Completar una tarea (idempotente por UUID)
-         * @description STUB(FS-02) → BE-18/BE-19
+         * @description Reenviar el mismo `id` no suma dos veces; una tarea ya completada (con otro UUID o por una medición) tampoco. El mismo `id` para otra tarea → 409. Emite `task.completed`. Devuelve los puntos; racha e insignias: STUB(FS-02) → BE-19.
          */
         post: operations["complete_task_api_v1_members__member_id__tasks__task_id__complete_post"];
         delete?: never;
@@ -1988,7 +1988,7 @@ export interface components {
         Task: {
             /**
              * Id
-             * @description Determinista: t_{date}_{member}_{task_type}
+             * @description Determinista: t_{date}_{member}_{task_type}, con _{n} si times_per_day > 1
              */
             id: string;
             /**
@@ -3801,6 +3801,15 @@ export interface operations {
             };
             /** @description Recurso inexistente */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Mismo id con contenido distinto */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

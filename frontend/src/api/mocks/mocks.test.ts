@@ -135,12 +135,12 @@ describe('modo mock (VITE_USE_MOCKS=true)', () => {
     const complete = () =>
       unwrap(
         api.POST('/api/v1/members/{member_id}/tasks/{task_id}/complete', {
-          params: { path: { member_id: 1, task_id: 't_2026-11-14_1_checkin' } },
+          params: { path: { member_id: 1, task_id: 't_2026-11-14_1_resistive_exercise' } },
           body: { id: newId(), completed_at: NOW },
         }),
       )
-    expect((await complete()).points).toBe(before + 10)
-    expect((await complete()).points).toBe(before + 10)
+    expect((await complete()).points).toBe(before + 20)
+    expect((await complete()).points).toBe(before + 20)
   })
 
   it('demo: enlace en LOS y fast-forward del reloj', async () => {

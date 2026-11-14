@@ -9,7 +9,9 @@ from app.schemas.common import ApiModel, Slug
 
 
 class Task(ApiModel):
-    id: str = Field(description="Determinista: t_{date}_{member}_{task_type}")
+    id: str = Field(
+        description="Determinista: t_{date}_{member}_{task_type}, con _{n} si times_per_day > 1"
+    )
     task_type: Slug
     title: str
     points: int

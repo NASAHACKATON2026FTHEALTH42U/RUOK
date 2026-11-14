@@ -117,8 +117,16 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 ### Rutina y gamificación
 | Método | Ruta | Descripción |
 |---|---|---|
-| GET | `/members/{member_id}/tasks?date=YYYY-MM-DD` | Tareas del día (`Task[]`) |
-| POST | `/members/{member_id}/tasks/{task_id}/complete` | `{id: uuid, completed_at}`, idempotente. Devuelve `GameState` |
+| GET | `/members/{member_id}/tasks?date=YYYY-MM-DD` | Tareas del día (`Task[]`). Por defecto, hoy (UTC, reloj del servidor). Se generan desde `environment.routine` |
+| POST | `/members/{member_id}/tasks/{task_id}/complete` | `{id: uuid, completed_at}`, idempotente. Devuelve `GameState`. El mismo `id` para otra tarea → 409; una tarea ya completada no suma dos veces |
+
+```jsonc
+// Task — id determinista: t_{date}_{member}_{task_type}, con sufijo _{n} (1..N) si times_per_day > 1
+{ "id": "t_2026-11-14_17_hydration_2", "task_type": "hydration", "title": "Bebe agua (2/3)",
+  "points": 5, "due": "afternoon", "completed": false, "indicator_id": "hydration_ml" }
+// Las tareas con indicator_id se autocompletan con las mediciones de ese indicador del mismo día
+// (una medición completa una tarea). Título, momento del día e indicador: app/data/task_types.json
+```
 | GET | `/members/{member_id}/game` | `GameState` |
 | GET | `/environments/{env_id}/leaderboard` | Puntos de la tripulación (cooperativo) |
 
