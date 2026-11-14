@@ -13,7 +13,7 @@ export function ServerStatus() {
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 px-2.5 py-1 text-xs text-slate-300"
+      className="inline-flex items-center gap-1.5 rounded-full border border-env-border px-2.5 py-1 text-xs text-env-muted"
       title={status.state === 'offline' ? status.error : undefined}
       role="status"
     >

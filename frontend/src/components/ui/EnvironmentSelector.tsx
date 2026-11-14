@@ -1,17 +1,20 @@
-import { PLACEHOLDER_ENVIRONMENTS, type EnvironmentId } from '../../environments'
+import { PLACEHOLDER_ENVIRONMENTS } from '../../environments'
 import { useEnvironmentStore } from '../../store/environment'
 
 export function EnvironmentSelector() {
   const envId = useEnvironmentStore((s) => s.envId)
-  const setEnvId = useEnvironmentStore((s) => s.setEnvId)
+  const selectEnvironment = useEnvironmentStore((s) => s.selectEnvironment)
 
   return (
     <label className="flex items-center gap-2 text-sm">
-      <span className="text-slate-400">Entorno</span>
+      <span className="text-env-muted">Entorno</span>
       <select
-        className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-slate-100 focus:border-sky-400 focus:outline-none"
+        className="rounded-md border border-env-border bg-env-bg px-2 py-1 text-env-text focus:outline-2 focus:outline-offset-1 focus:outline-env-primary"
         value={envId ?? ''}
-        onChange={(e) => setEnvId(e.target.value as EnvironmentId)}
+        onChange={(e) => {
+          const env = PLACEHOLDER_ENVIRONMENTS.find((x) => x.id === e.target.value)
+          if (env) selectEnvironment(env)
+        }}
       >
         <option value="" disabled>
           Elige un entorno…

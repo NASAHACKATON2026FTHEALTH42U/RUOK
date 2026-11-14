@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19).
 
 ## Comandos
 
@@ -80,11 +80,15 @@ frontend/
 ├── eslint.config.js  .prettierrc.json  .prettierignore
 ├── tsconfig.json              referencias a tsconfig.app.json (src/) y tsconfig.node.json (vite.config.ts)
 └── src/
-    ├── main.tsx               monta <App /> e importa los estilos
+    ├── main.tsx               initTheme() + monta <App /> e importa los estilos
     ├── App.tsx                router con todas las rutas
-    ├── styles/index.css       Tailwind + tema base (fondo oscuro, fuente del sistema)
-    ├── environments/index.ts  lista PROVISIONAL de los 6 entornos (ver más abajo)
-    ├── store/environment.ts   store Zustand con el entorno activo (envId)
+    ├── styles/index.css       Tailwind, colores env-* (variables CSS) y fuente del sistema
+    ├── environments/
+    │   ├── index.ts           lista PROVISIONAL de los 6 entornos con su vocabulario (TODO FS-04)
+    │   ├── useVocab.ts        hook useVocab() + capitalize()
+    │   ├── applyTheme.ts      initTheme(): aplica el tema del entorno activo en <html>
+    │   └── themes/            un tema por entorno (iss.ts, mars.ts…) + defaultTheme.ts
+    ├── store/environment.ts   store Zustand: envId, memberId, vocabulary (persistido)
     ├── api/
     │   ├── types.gen.ts       GENERADO (npm run gen:api): no editar
     │   ├── client.ts          cliente tipado, ApiError/NetworkError, configureApi, serverNow
@@ -119,8 +123,61 @@ Todas cuelgan de `Layout`, que pinta la cabecera con el selector de entorno, la 
 
 Las páginas de FE-01 solo muestran un `PagePlaceholder` con el título y la issue que las completará.
 
-## Provisional (lo sustituye FE-02)
+## Entorno activo (FE-02)
 
-- `src/environments/index.ts` tiene `PLACEHOLDER_ENVIRONMENTS` (slug + nombre) solo para que el selector funcione. La fuente de verdad es `backend/app/data/environments.json` (`GET /environments`); **no añadas aquí umbrales, vocabulario ni temas**.
-- `useEnvironmentStore` guarda solo `envId` (empieza en `null`). FE-02 añade el `Environment` completo, el tema y el vocabulario.
-- Los textos de la navegación son genéricos. Cuando una pantalla tenga que nombrar al member, el texto saldrá de `environment.vocabulary` y nunca será "astronauta" fijo.
+### Store (`src/store/environment.ts`)
+
+`useEnvironmentStore` guarda `envId`, `memberId` y `vocabulary`, y se persiste en `localStorage` (`ruok-session`), así que sobrevive a una recarga también sin conexión.
+
+- `selectEnvironment({ id, vocabulary })` cambia `envId` y `vocabulary` **a la vez** (nunca hay un vocabulario de otro entorno). Si el entorno cambia, pone `memberId` a `null`, porque cada entorno tiene sus propios members. Las claves que falten del vocabulario se rellenan con el término neutro.
+- `selectMember(id)` elige el member. Aún no lo usa nadie: la lista llega con `GET /environments/{id}/members` (FS-04 / BE-05).
+- Sin entorno elegido, el vocabulario es neutro: `persona` / `equipo` / `control externo`.
+
+### Textos: `useVocab()`
+
+```tsx
+const { member, crew, ground } = useVocab()
+<h1>{capitalize(member)}: tu panel de salud</h1>   // "Astronauta: …", "Residente: …"
+```
+
+- Nunca escribas "astronauta" (ni paciente, residente…) fijo en un componente.
+- No se generan plurales ni artículos en código. Redacta sin artículo ("Consola de {ground}"). Si hace falta un plural, se añade al contrato (`Environment.vocabulary`).
+
+### Colores: temas por entorno
+
+- Cada entorno tiene su tema en `src/environments/themes/<id>.ts`. Si falta, se usa `defaultTheme`.
+- `initTheme()` (llamado en `main.tsx` antes del primer render) escribe los tokens como variables CSS en `<html>` (`--env-bg`…), además de `color-scheme` y `data-env`, y los actualiza al cambiar de entorno, con una transición de 300 ms.
+- En los componentes se usan **solo** las clases `env-*`, nunca colores fijos de Tailwind (`slate`, `sky`…):
+
+| Token         | Clase de ejemplo        | Uso                                            |
+| ------------- | ----------------------- | ---------------------------------------------- |
+| `bg`          | `bg-env-bg`             | Fondo de la app                                |
+| `surface`     | `bg-env-surface`        | Tarjetas, cabecera, paneles                    |
+| `border`      | `border-env-border`     | Bordes y separadores                           |
+| `text`        | `text-env-text`         | Texto principal                                |
+| `muted`       | `text-env-muted`        | Texto secundario                               |
+| `primary`     | `bg-env-primary`        | **Solo relleno**: botones, enlace activo, foco |
+| `primaryText` | `text-env-primary-text` | Texto encima de `primary`                      |
+
+| Entorno     | Esquema | `bg`      | `surface` | `border`  | `text`    | `muted`   | `primary` | `primaryText` |
+| ----------- | ------- | --------- | --------- | --------- | --------- | --------- | --------- | ------------- |
+| default     | oscuro  | `#0f172a` | `#1e293b` | `#334155` | `#f1f5f9` | `#94a3b8` | `#38bdf8` | `#0f172a`     |
+| `iss`       | oscuro  | `#0b1426` | `#14223d` | `#24395f` | `#e8f0ff` | `#9db0d3` | `#4d9fff` | `#0b1426`     |
+| `moon`      | oscuro  | `#141518` | `#1f2125` | `#3a3d44` | `#ececf0` | `#a3a6ae` | `#c8ccd6` | `#141518`     |
+| `mars`      | oscuro  | `#1a0d09` | `#2a1610` | `#4a2a1e` | `#f6e7df` | `#c9a99a` | `#c1440e` | `#ffffff`     |
+| `earth`     | oscuro  | `#0b1a1f` | `#132a31` | `#24474f` | `#e3f4f7` | `#93b8c0` | `#2bb3c9` | `#0b1a1f`     |
+| `hospital`  | claro   | `#d9e2ec` | `#e6edf4` | `#b3c2d3` | `#0f2133` | `#3d5063` | `#0b5a96` | `#ffffff`     |
+| `geriatric` | claro   | `#e6dccb` | `#f0e8db` | `#c8b89e` | `#2b2118` | `#57493b` | `#6a429e` | `#ffffff`     |
+
+Reglas:
+
+- **Contraste WCAG**: texto y `muted` sobre `bg` y `surface` ≥ 4,5:1; `primary` sobre `bg` ≥ 3:1; `primaryText` sobre `primary` ≥ 4,5:1. Todas las paletas lo cumplen; si cambias un color, comprueba el contraste antes de hacer commit.
+- **`primary` no se usa como color de texto**: en Marte (`#c1440e`, el del contrato) solo da 3,7:1 sobre el fondo.
+- **El semáforo no depende del tema**: `normal`, `warning`, `critical` y `unknown` usan una paleta fija en todos los entornos (FE-04). Ningún `primary` es verde, para no confundirse con "normal".
+- Para añadir un entorno: crea `themes/<id>.ts` y regístralo en `themes/index.ts`.
+
+### Provisional
+
+- `PLACEHOLDER_ENVIRONMENTS` (`src/environments/index.ts`) tiene slug, nombre y vocabulario, copiados de `docs/environments.md`. **TODO(FS-04)**: sustituir por `GET /environments`. No añadas aquí umbrales ni otra configuración.
+- El tipo `Vocabulary` está escrito a mano. **TODO(FS-03)**: usar el tipo generado de `types.gen.ts`.
+- Con FS-04, el `theme.primary` de la API sustituirá al del archivo de tema, para no tener dos fuentes de verdad.
