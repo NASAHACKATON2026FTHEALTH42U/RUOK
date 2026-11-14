@@ -627,6 +627,7 @@ issues:
     - "Definir en el contrato y en environments.json qué niveles de escalation_ladder son de a bordo (p. ej. `external_from_level`: índice del primer nivel externo) y validarlo al cargar"
     - "En `services/assessment.py` (`build_escalation`): niveles de a bordo → `mode=realtime` y `delay_s=0`; niveles externos → realtime < 5 s, delayed, y autonomous si el retardo es ≥ 60 s y el estado es critical"
     - "Tests: Marte critical a crew → realtime/0 s; Marte a ground → autonomous/840 s; ISS → realtime"
+    - "Actualizar `tests/test_contract.py::test_assessment_mode_depends_on_environment` (tiene un TODO(BE-31)): hoy da por bueno `autonomous`/840 s para un escalado a `crew`; con el arreglo debe esperar `realtime` y delay 0"
   acceptance:
     - En Marte una alerta a la tripulación nunca lleva el retardo de 840 s
     - docs/api-contract.md y docs/alerts-and-escalation.md describen la misma regla que el código

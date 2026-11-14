@@ -277,7 +277,7 @@ Decisiones ya documentadas que todavía no están implementadas. Tenlas en cuent
 
 Todos los endpoints del contrato existen. **Reales:** `/health`, `/environments*`, `/indicators*`, `/systems`, members y privacidad (BE-05), `POST`/`GET /members/{id}/measurements` (BE-06) y `/demo/fast-forward` (a medias). **El resto** devuelve datos de ejemplo de `app/stubs.py` e indica en `description` qué issue lo implementa (`STUB(FS-02) → BE-06`). Tabla completa en [status.md](status.md#endpoints-reales-y-stubs).
 
-> ⚠️ El stub de `GET /members/{id}/assessment` **no coincide con lo que calcula el motor** (por ejemplo, 142 mmHg en Marte sale `warning` y el motor diría `critical`). No uses sus valores como referencia de las reglas: la referencia es `services/assessment.py`. Se arregla al conectar el motor en BE-11, y entonces hay que actualizar `test_assessment_mode_depends_on_environment`.
+> El assessment ya sale del motor real (BE-11). Los tests de escalado de `tests/test_contract.py` comprueban la regla del contrato. ⚠️ `test_assessment_mode_depends_on_environment` tiene un `TODO(BE-31)`: hoy acepta `autonomous` con 840 s para un escalado a `crew` (a bordo), que es el bug de BE-31 (#111). Hay que cambiarlo al arreglarlo.
 
 **Al implementar tu issue:**
 1. Sustituye el cuerpo del endpoint por la llamada a tu servicio (`app/services/…`). **No cambies la firma ni el `response_model`** sin cambiar antes el contrato.
