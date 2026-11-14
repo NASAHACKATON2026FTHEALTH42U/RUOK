@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { EnvironmentSelector } from './EnvironmentSelector'
+import { ServerStatus } from './ServerStatus'
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Panel' },
@@ -19,7 +20,10 @@ export function Layout() {
           <NavLink to="/" className="text-lg font-bold tracking-tight">
             R U OK<span className="text-sky-400">?</span>
           </NavLink>
-          <EnvironmentSelector />
+          <div className="flex items-center gap-3">
+            <ServerStatus />
+            <EnvironmentSelector />
+          </div>
         </div>
         <nav className="mx-auto max-w-6xl overflow-x-auto px-4">
           <ul className="flex gap-1 pb-2 text-sm">
