@@ -6,6 +6,11 @@ Lee esto antes de hacer tu primer commit. Son 2 minutos.
 Si usas un agente de IA (Claude, Codex, Copilot...): debe seguir AGENTS.md.
 Documentación completa: docs/README.md
 Backlog (GitHub Issues): docs/backlog.md
+Kanban (GitHub Project): https://github.com/orgs/NASAHACKATON2026FTHEALTH42U/projects/1
+  Columnas: Todo -> In Progress -> In Review -> Done
+  Al empezar: asígnate la issue y muévela a In Progress.
+  Al abrir la PR: muévela a In Review. Al mergear (Closes #n): pasa a Done.
+  Vistas por equipo: Backend / Frontend / Fullstack + Content / Ruta crítica (P0)
 
 ------------------------------------------------------------------------------
  1. REGLA DE ORO DE GIT (OBLIGATORIA)

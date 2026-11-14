@@ -25,6 +25,12 @@
 
 ## Reglas de trabajo
 - **Backlog:** GitHub Issues ([backlog.md](backlog.md)). Se coge siempre la issue **P0 o desbloqueada** de mayor prioridad de tu área. Al empezarla, asígnatela.
+- **Kanban:** [RUOK Kanban (GitHub Project)](https://github.com/orgs/NASAHACKATON2026FTHEALTH42U/projects/1).
+  - Columnas: **Todo → In Progress → In Review → Done**.
+  - Vistas: *Kanban* (todo), *Backend*, *Frontend*, *Fullstack + Content*, *Ruta crítica (P0)* y *Tabla*.
+  - Al empezar una issue, muévela a *In Progress*; al abrir la PR, a *In Review*. Al mergear con `Closes #n`, pasa sola a *Done*.
+  - Campos para filtrar o agrupar: *Área*, *Prioridad* y *Milestone*.
+  - Las issues nuevas creadas con `create_issues.py` hay que añadirlas también al Project (`gh project item-add 1 --owner NASAHACKATON2026FTHEALTH42U --url <issue>`).
 - **Ramas:** `feat/<area>-<id>-<slug>`, por ejemplo `feat/be-08-assessment-engine`. Para fixes, `fix/<slug>`.
 - **PR pequeñas** a `main`. En la descripción va `Closes #n`. Basta 1 review del mismo área o del full-stack. Los P0 se mergean en cuanto estén verdes.
 - **🚫 Push directo a `main` prohibido. Protección por convención.**

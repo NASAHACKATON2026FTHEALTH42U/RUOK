@@ -53,6 +53,7 @@ API en `http://localhost:8000/api/v1`, con Swagger en `/docs`. El front corre en
 - **Antes de implementar una issue:** léela (`gh issue view <n>`) junto con el doc enlazado en su cuerpo. Respeta sus dependencias.
 - **Alcance:** implementa solo lo que pide la issue. Si detectas trabajo nuevo, propón una issue en lugar de ampliar el alcance. Tras el freeze, solo bugs y pulido.
 - **Backlog:** para añadir o cambiar tareas, edita `scripts/github/backlog.yaml` y vuelve a ejecutar el script (es idempotente y regenera `docs/backlog.md`). No edites `docs/backlog.md` a mano.
+- **Kanban:** [RUOK Kanban](https://github.com/orgs/NASAHACKATON2026FTHEALTH42U/projects/1) (Todo → In Progress → In Review → Done). Al empezar una issue, muévela a In Progress; al abrir la PR, a In Review. Las issues nuevas se añaden con `gh project item-add 1 --owner NASAHACKATON2026FTHEALTH42U --url <issue>`.
 
 ## Herramientas, skills y MCPs recomendados
 ### CLI
