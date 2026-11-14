@@ -1,15 +1,19 @@
 import { useNavigate } from 'react-router-dom'
+import { userRoleLabel } from '../../auth/permissions'
 import { logout, useSession } from '../../auth/session'
+import { useVocab } from '../../environments/useVocab'
 
 /** Usuario de la sesión y "Salir" en la cabecera. Cerrar sesión NO borra el outbox. */
 export function SessionMenu() {
   const user = useSession((s) => s.user)
+  const vocabulary = useVocab()
   const navigate = useNavigate()
   if (!user) return null
   return (
     <span className="flex items-center gap-2 text-sm">
       <span className="text-env-muted">
-        <span className="text-env-text">{user.display_name}</span> · {user.role_label}
+        <span className="text-env-text">{user.display_name}</span> ·{' '}
+        {userRoleLabel(user.role, vocabulary, user.role_label)}
       </span>
       <button
         type="button"

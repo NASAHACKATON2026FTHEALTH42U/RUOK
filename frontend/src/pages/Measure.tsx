@@ -12,6 +12,7 @@ import { StatusBadge } from '../components/ui/StatusBadge'
 import { useVocab } from '../environments/useVocab'
 import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox'
 import { useEnvironmentStore } from '../store/environment'
+import { useActiveMemberId } from '../auth/useAuth'
 
 type Phase =
   | { kind: 'editing' }
@@ -30,7 +31,8 @@ type Phase =
  */
 export default function Measure() {
   const vocab = useVocab()
-  const memberId = useEnvironmentStore((s) => s.memberId)
+  // Un member, siempre los suyos; el resto de roles, el member elegido (FE-28).
+  const memberId = useActiveMemberId()
   const envId = useEnvironmentStore((s) => s.envId)
   const [params] = useSearchParams()
   const navigate = useNavigate()

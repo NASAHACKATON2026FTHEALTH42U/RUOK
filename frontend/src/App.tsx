@@ -1,4 +1,7 @@
+import type { ReactNode } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { ROUTE_PERMISSIONS } from './auth/permissions'
+import { RequireRole } from './components/auth/RequireRole'
 import { RequireSession } from './components/auth/RequireSession'
 import { Layout } from './components/ui/Layout'
 import Alerts from './pages/Alerts'
@@ -13,6 +16,12 @@ import Members from './pages/Members'
 import Missions from './pages/Missions'
 import NotFound from './pages/NotFound'
 
+/** Envuelve la página con el permiso de vista de su ruta (FE-28). */
+function guard(path: string, page: ReactNode) {
+  const permission = ROUTE_PERMISSIONS[path]
+  return permission ? <RequireRole permission={permission}>{page}</RequireRole> : page
+}
+
 const router = createBrowserRouter([
   // El login va fuera del Layout, pero con su propio botón "Pedir ayuda" (FE-27).
   { path: '/login', element: <Login /> },
@@ -22,15 +31,15 @@ const router = createBrowserRouter([
       {
         element: <Layout />,
         children: [
-          { path: '/', element: <EnvironmentSelect /> },
-          { path: '/members', element: <Members /> },
-          { path: '/dashboard', element: <Dashboard /> },
-          { path: '/measure', element: <Measure /> },
-          { path: '/checkin', element: <CheckIn /> },
-          { path: '/history', element: <History /> },
-          { path: '/missions', element: <Missions /> },
-          { path: '/alerts', element: <Alerts /> },
-          { path: '/ground', element: <Ground /> },
+          { path: '/', element: guard('/', <EnvironmentSelect />) },
+          { path: '/members', element: guard('/members', <Members />) },
+          { path: '/dashboard', element: guard('/dashboard', <Dashboard />) },
+          { path: '/measure', element: guard('/measure', <Measure />) },
+          { path: '/checkin', element: guard('/checkin', <CheckIn />) },
+          { path: '/history', element: guard('/history', <History />) },
+          { path: '/missions', element: guard('/missions', <Missions />) },
+          { path: '/alerts', element: guard('/alerts', <Alerts />) },
+          { path: '/ground', element: guard('/ground', <Ground />) },
           { path: '*', element: <NotFound /> },
         ],
       },

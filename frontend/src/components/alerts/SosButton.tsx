@@ -3,6 +3,7 @@ import { useEnvironments } from '../../api/useEnvironments'
 import { useInterventions } from '../../api/useInterventions'
 import { useVocab } from '../../environments/useVocab'
 import { useSession } from '../../auth/session'
+import { useAuth } from '../../auth/useAuth'
 import { useEnvironmentStore } from '../../store/environment'
 import { SosDialog } from './SosDialog'
 
@@ -22,7 +23,12 @@ export function SosButton() {
   const envs = useEnvironments()
   const interventions = useInterventions()
   const close = useCallback(() => setOpen(false), [])
+  const { can } = useAuth()
   const env = envs.state === 'ready' ? envs.data.find((e) => e.id === envId) : undefined
+
+  // Sin sesión, siempre (el SOS nunca depende del login). Con sesión, según la matriz:
+  // responder y psych están en tierra y no piden ayuda desde aquí (FE-28).
+  if (authenticated && !can('action:sos')) return null
 
   return (
     <>
