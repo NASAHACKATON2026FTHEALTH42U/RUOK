@@ -106,3 +106,57 @@ def test_unknown_environment_is_404(client):
     r = client.get("/api/v1/environments/pluto")
     assert r.status_code == 404
     assert "pluto" in r.json()["detail"]
+
+
+# ── BE-33: umbrales de liveness y escalado ───────────────────────────
+
+ESCALATE_AFTER = {
+    "iss": 21600, "moon": 21600, "mars": 21600,
+    "earth": 43200, "hospital": 7200, "geriatric": 14400,
+}
+
+
+@pytest.mark.parametrize("env", load_environments(), ids=lambda e: e.id)
+def test_liveness_thresholds_are_complete(env):
+    lv = env.liveness
+    assert (lv.stale_after_s, lv.lost_after_s) == (300, 900)
+    assert (lv.eva_stale_after_s, lv.eva_lost_after_s) == (30, 120)
+    assert lv.sleep_factor == 3
+    assert lv.warning_escalate_after_s == ESCALATE_AFTER[env.id]
+    assert lv.morning_checkin_by == ("10:00" if env.id == "geriatric" else None)
+
+
+@pytest.mark.parametrize(
+    ("activity", "expected"), [("normal", (300, 900)), ("eva", (30, 120)), ("sleep", (900, 2700))]
+)
+def test_liveness_service_reads_environment(activity, expected):
+    from app.services.liveness import thresholds_for
+
+    assert thresholds_for(environments.get_environment("mars").liveness, activity) == expected
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"eva_lost_after_s": None},  # obligatorio
+        {"sleep_factor": None},
+        {"warning_escalate_after_s": None},
+        {"morning_checkin_by": "25:00"},  # no es una hora
+        {"morning_checkin_by": "10h"},
+        {"sleep_factor": 0.5},  # el sueño no puede endurecer los umbrales
+        {"eva_lost_after_s": 20},  # menor que eva_stale_after_s
+        {"lost_after_s": 100},  # menor que stale_after_s
+    ],
+)
+def test_invalid_liveness_is_rejected(tmp_path, change):
+    data = json.loads(DATA_FILE.read_text())
+    lv = data[0]["liveness"]
+    for key, value in change.items():
+        if value is None:
+            lv.pop(key)
+        else:
+            lv[key] = value
+    bad = tmp_path / "environments.json"
+    bad.write_text(json.dumps(data))
+    with pytest.raises(ValidationError):
+        load_environments(bad)

@@ -9,7 +9,10 @@ from app.schemas.common import Liveness, Status
 from app.services.environments import get_environment
 from app.services.liveness import combine_overall, compute_liveness, thresholds_for
 
-CFG = {"stale_after_s": 300, "lost_after_s": 900, "eva_stale_after_s": 30, "ruok_timeout_s": 120}
+CFG = {
+    "stale_after_s": 300, "lost_after_s": 900, "eva_stale_after_s": 30, "eva_lost_after_s": 120,
+    "sleep_factor": 3, "ruok_timeout_s": 120, "warning_escalate_after_s": 21600,
+}
 
 
 # --- Criterio de aceptación ---------------------------------------------------
@@ -54,8 +57,11 @@ def test_thresholds_by_activity(activity, expected):
     assert thresholds_for(CFG, activity) == expected
 
 
-def test_env_eva_lost_overrides_factor():
+def test_thresholds_come_from_the_environment():
+    """Sin valores fijos en el código: cambiar la configuración cambia los umbrales."""
     assert thresholds_for({**CFG, "eva_lost_after_s": 60}, "eva") == (30, 60)
+    assert thresholds_for({**CFG, "sleep_factor": 2}, "sleep") == (600, 1800)
+    assert thresholds_for({**CFG, "sleep_factor": 1.5}, "sleep") == (450, 1350)
 
 
 def test_accepts_pydantic_thresholds():
