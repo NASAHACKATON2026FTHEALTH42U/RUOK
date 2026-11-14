@@ -1,6 +1,6 @@
 """Catálogos de solo lectura, leídos de app/data/*.json.
 
-Entornos: reales (BE-03). STUB(FS-02) → BE-04 (indicadores y sistemas) y BE-21 (intervenciones).
+Entornos (BE-03), indicadores y sistemas (BE-04): reales. STUB(FS-02) → BE-21 (intervenciones).
 """
 
 from fastapi import APIRouter, HTTPException
@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException
 from app import stubs
 from app.routers.deps import ERRORS_404, ERRORS_AUTH, AuthDep
 from app.schemas import BodySystem, Environment, Indicator, Intervention, Slug
-from app.services import environments
+from app.services import catalog, environments
 
 router = APIRouter(dependencies=[AuthDep], responses=ERRORS_AUTH)
 
@@ -44,10 +44,11 @@ def get_environment(env_id: Slug) -> Environment:
     response_model=list[Indicator],
     tags=["catalog"],
     summary="Catálogo de indicadores",
-    description="STUB(FS-02) → BE-04",
+    description="Los indicadores de app/data/indicators.json. "
+    "Rangos provisionales hasta CNT-01 (docs/sources.md).",
 )
 def list_indicators() -> list[Indicator]:
-    return stubs.INDICATORS
+    return catalog.list_indicators()
 
 
 @router.get(
@@ -56,10 +57,10 @@ def list_indicators() -> list[Indicator]:
     responses=ERRORS_404,
     tags=["catalog"],
     summary="Un indicador",
-    description="STUB(FS-02) → BE-04",
+    description="Un indicador de app/data/indicators.json. 404 si el id no existe.",
 )
 def get_indicator(indicator_id: Slug) -> Indicator:
-    ind = next((i for i in stubs.INDICATORS if i.id == indicator_id), None)
+    ind = catalog.get_indicator(indicator_id)
     if ind is None:
         raise HTTPException(404, f"Indicador desconocido: {indicator_id}")
     return ind
@@ -70,10 +71,10 @@ def get_indicator(indicator_id: Slug) -> Indicator:
     response_model=list[BodySystem],
     tags=["catalog"],
     summary="Sistemas del cuerpo",
-    description="STUB(FS-02) → BE-04",
+    description="Los sistemas de app/data/systems.json, con su región del SVG de BodyFigure.",
 )
 def list_systems() -> list[BodySystem]:
-    return stubs.SYSTEMS
+    return catalog.list_systems()
 
 
 @router.get(

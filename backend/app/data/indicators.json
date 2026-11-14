@@ -1,0 +1,646 @@
+[
+  {
+    "id": "heart_rate",
+    "name": "Frecuencia cardiaca",
+    "unit": "lpm",
+    "system_id": "cardiovascular",
+    "ranges": {
+      "normal": [
+        50,
+        100
+      ],
+      "warning": [
+        101,
+        120
+      ],
+      "critical_low": 40,
+      "critical_high": 130
+    },
+    "max_age_s": 86400,
+    "higher_is_worse": true,
+    "input": {
+      "type": "number",
+      "min": 20,
+      "max": 250,
+      "step": 1
+    },
+    "measurement_instructions": [
+      "Siéntate 5 min en reposo",
+      "Mide durante 60 s"
+    ],
+    "why_it_matters": "La microgravedad redistribuye los fluidos y altera el ritmo cardiaco.",
+    "hazards": [
+      "gravity"
+    ]
+  },
+  {
+    "id": "bp_systolic",
+    "name": "Tensión sistólica",
+    "unit": "mmHg",
+    "system_id": "cardiovascular",
+    "ranges": {
+      "normal": [
+        90,
+        129
+      ],
+      "warning": [
+        130,
+        159
+      ],
+      "critical_low": 80,
+      "critical_high": 160
+    },
+    "max_age_s": 172800,
+    "higher_is_worse": true,
+    "input": {
+      "type": "number",
+      "min": 50,
+      "max": 250,
+      "step": 1
+    },
+    "measurement_instructions": [
+      "Siéntate 5 min en reposo",
+      "Brazo a la altura del corazón"
+    ],
+    "why_it_matters": "Los cambios de gravedad afectan a la regulación de la tensión.",
+    "hazards": [
+      "gravity"
+    ]
+  },
+  {
+    "id": "bp_diastolic",
+    "name": "Tensión diastólica",
+    "unit": "mmHg",
+    "system_id": "cardiovascular",
+    "ranges": {
+      "normal": [
+        60,
+        84
+      ],
+      "warning": [
+        85,
+        99
+      ],
+      "critical_low": 50,
+      "critical_high": 100
+    },
+    "max_age_s": 172800,
+    "higher_is_worse": true,
+    "input": {
+      "type": "number",
+      "min": 30,
+      "max": 150,
+      "step": 1
+    },
+    "measurement_instructions": [
+      "Se toma junto con la sistólica"
+    ],
+    "why_it_matters": "Completa la lectura de la tensión arterial.",
+    "hazards": [
+      "gravity"
+    ]
+  },
+  {
+    "id": "spo2",
+    "name": "Saturación de oxígeno",
+    "unit": "%",
+    "system_id": "cardiovascular",
+    "ranges": {
+      "normal": [
+        95,
+        100
+      ],
+      "warning": [
+        91,
+        94
+      ],
+      "critical_low": 90
+    },
+    "max_age_s": 86400,
+    "higher_is_worse": false,
+    "input": {
+      "type": "number",
+      "min": 50,
+      "max": 100,
+      "step": 1
+    },
+    "measurement_instructions": [
+      "Pulsioxímetro en el dedo índice, 30 s"
+    ],
+    "why_it_matters": "El aire de un hábitat cerrado puede fallar; la SpO₂ lo detecta pronto.",
+    "hazards": [
+      "hostile_environment"
+    ]
+  },
+  {
+    "id": "mood",
+    "name": "Ánimo",
+    "unit": "1-5",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        3,
+        5
+      ],
+      "warning": [
+        2,
+        2.9
+      ],
+      "critical_low": 1.5
+    },
+    "max_age_s": 129600,
+    "higher_is_worse": false,
+    "input": {
+      "type": "scale_1_5",
+      "min": 1,
+      "max": 5,
+      "step": 1
+    },
+    "measurement_instructions": [
+      "¿Cómo te sientes hoy? 1 = muy mal, 5 = muy bien"
+    ],
+    "why_it_matters": "El aislamiento y el confinamiento afectan al ánimo y al rendimiento.",
+    "hazards": [
+      "isolation"
+    ]
+  },
+  {
+    "id": "temperature",
+    "name": "Temperatura",
+    "unit": "°C",
+    "system_id": "immune",
+    "ranges": {
+      "normal": [
+        36,
+        37.4
+      ],
+      "warning": [
+        37.5,
+        38.4
+      ],
+      "critical_low": 35,
+      "critical_high": 38.5
+    },
+    "max_age_s": 86400,
+    "higher_is_worse": true,
+    "input": {
+      "type": "number",
+      "min": 33,
+      "max": 43,
+      "step": 0.1
+    },
+    "measurement_instructions": [
+      "Termómetro bajo la lengua, 1 min"
+    ],
+    "why_it_matters": "La fiebre puede indicar una infección; el sistema inmune cambia en el espacio.",
+    "hazards": [
+      "hostile_environment"
+    ]
+  },
+  {
+    "id": "glucose",
+    "name": "Glucosa",
+    "unit": "mg/dL",
+    "system_id": "metabolic",
+    "ranges": {
+      "normal": [
+        70,
+        140
+      ],
+      "warning": [
+        141,
+        180
+      ],
+      "critical_low": 60,
+      "critical_high": 250
+    },
+    "max_age_s": 86400,
+    "higher_is_worse": true,
+    "input": {
+      "type": "number",
+      "min": 20,
+      "max": 600,
+      "step": 1
+    },
+    "measurement_instructions": [
+      "Glucómetro: gota de sangre del dedo"
+    ],
+    "why_it_matters": "La nutrición en misión es limitada y la glucosa refleja el estado metabólico.",
+    "hazards": [
+      "distance"
+    ]
+  },
+  {
+    "id": "exercise_min",
+    "name": "Ejercicio diario",
+    "unit": "min",
+    "system_id": "musculoskeletal",
+    "ranges": {
+      "normal": [
+        120,
+        300
+      ],
+      "warning": [
+        60,
+        119
+      ],
+      "critical_low": 30
+    },
+    "max_age_s": 86400,
+    "higher_is_worse": false,
+    "input": {
+      "type": "duration",
+      "min": 0,
+      "max": 600,
+      "step": 5
+    },
+    "measurement_instructions": [
+      "Minutos de ejercicio resistivo y aeróbico de hoy"
+    ],
+    "why_it_matters": "Sin gravedad se pierde hueso y músculo; el ejercicio es la contramedida.",
+    "hazards": [
+      "gravity"
+    ]
+  },
+  {
+    "id": "sleep_hours",
+    "name": "Horas de sueño",
+    "unit": "h",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        7,
+        10
+      ],
+      "warning": [
+        5,
+        6.9
+      ],
+      "critical_low": 4
+    },
+    "max_age_s": 129600,
+    "higher_is_worse": false,
+    "input": {
+      "type": "duration",
+      "min": 0,
+      "max": 16,
+      "step": 0.5
+    },
+    "measurement_instructions": [
+      "Horas dormidas la última noche"
+    ],
+    "why_it_matters": "El ciclo luz/oscuridad alterado y el ruido afectan al sueño.",
+    "hazards": [
+      "isolation"
+    ]
+  },
+  {
+    "id": "vision_changes",
+    "name": "Cambios en la visión",
+    "unit": "1-5",
+    "system_id": "eyes",
+    "ranges": {
+      "normal": [
+        1,
+        1.9
+      ],
+      "warning": [
+        2,
+        3.4
+      ],
+      "critical_high": 3.5
+    },
+    "max_age_s": 604800,
+    "higher_is_worse": true,
+    "input": {
+      "type": "scale_1_5",
+      "min": 1,
+      "max": 5,
+      "step": 1
+    },
+    "measurement_instructions": [
+      "1 = sin cambios, 5 = visión muy borrosa o distorsionada"
+    ],
+    "why_it_matters": "El SANS (síndrome neuro-ocular) aparece en misiones largas en microgravedad.",
+    "hazards": [
+      "gravity"
+    ]
+  },
+  {
+    "id": "radiation_dose",
+    "name": "Dosis acumulada",
+    "unit": "mSv",
+    "system_id": "radiation",
+    "ranges": {
+      "normal": [
+        0,
+        250
+      ],
+      "warning": [
+        251,
+        500
+      ],
+      "critical_high": 600
+    },
+    "max_age_s": 604800,
+    "higher_is_worse": true,
+    "input": {
+      "type": "number",
+      "min": 0,
+      "max": 2000,
+      "step": 1
+    },
+    "measurement_instructions": [
+      "Lectura del dosímetro personal"
+    ],
+    "why_it_matters": "Fuera de la magnetosfera la radiación aumenta el riesgo de cáncer.",
+    "hazards": [
+      "radiation"
+    ]
+  },
+  {
+    "id": "hydration_ml",
+    "name": "Hidratación",
+    "unit": "ml",
+    "system_id": "metabolic",
+    "ranges": {
+      "normal": [
+        1500,
+        4000
+      ],
+      "warning": [
+        801,
+        1499
+      ],
+      "critical_low": 800
+    },
+    "max_age_s": 86400,
+    "higher_is_worse": false,
+    "input": {
+      "type": "number",
+      "min": 0,
+      "max": 6000,
+      "step": 100
+    },
+    "measurement_instructions": [
+      "Suma el agua y las bebidas que has tomado hoy, en ml"
+    ],
+    "why_it_matters": "La deshidratación afecta a la tensión, a los riñones y a la concentración.",
+    "hazards": [
+      "hostile_environment"
+    ]
+  },
+  {
+    "id": "weight_kg",
+    "name": "Peso",
+    "unit": "kg",
+    "system_id": "metabolic",
+    "ranges": {
+      "normal": [
+        45,
+        110
+      ],
+      "critical_low": 40,
+      "critical_high": 150
+    },
+    "max_age_s": 604800,
+    "higher_is_worse": true,
+    "input": {
+      "type": "number",
+      "min": 20,
+      "max": 250,
+      "step": 0.1
+    },
+    "measurement_instructions": [
+      "En ayunas, después de ir al baño y con poca ropa"
+    ],
+    "why_it_matters": "Una pérdida de peso sostenida indica falta de nutrición o pérdida muscular.",
+    "hazards": [
+      "distance"
+    ]
+  },
+  {
+    "id": "stress",
+    "name": "Estrés",
+    "unit": "1-5",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        1,
+        3
+      ],
+      "warning": [
+        3.1,
+        4.4
+      ],
+      "critical_high": 4.5
+    },
+    "max_age_s": 129600,
+    "higher_is_worse": true,
+    "input": {
+      "type": "scale_1_5",
+      "min": 1,
+      "max": 5,
+      "step": 1
+    },
+    "measurement_instructions": [
+      "¿Cuánto estrés sientes hoy? 1 = nada, 5 = muchísimo"
+    ],
+    "why_it_matters": "El estrés sostenido en confinamiento afecta al sueño, al ánimo y al sistema inmune.",
+    "hazards": [
+      "isolation"
+    ]
+  },
+  {
+    "id": "energy",
+    "name": "Energía",
+    "unit": "1-5",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        3,
+        5
+      ],
+      "warning": [
+        2,
+        2.9
+      ],
+      "critical_low": 1.5
+    },
+    "max_age_s": 129600,
+    "higher_is_worse": false,
+    "input": {
+      "type": "scale_1_5",
+      "min": 1,
+      "max": 5,
+      "step": 1
+    },
+    "measurement_instructions": [
+      "¿Cuánta energía tienes hoy? 1 = ninguna, 5 = mucha"
+    ],
+    "why_it_matters": "La fatiga persistente es una señal temprana de mal sueño o de sobrecarga.",
+    "hazards": [
+      "isolation"
+    ]
+  },
+  {
+    "id": "loneliness",
+    "name": "Soledad",
+    "unit": "1-5",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        1,
+        3
+      ],
+      "warning": [
+        3.1,
+        4.4
+      ],
+      "critical_high": 4.5
+    },
+    "max_age_s": 129600,
+    "higher_is_worse": true,
+    "input": {
+      "type": "scale_1_5",
+      "min": 1,
+      "max": 5,
+      "step": 1
+    },
+    "measurement_instructions": [
+      "¿Te sientes solo/a hoy? 1 = nada, 5 = muchísimo"
+    ],
+    "why_it_matters": "La soledad es un riesgo de salud en el aislamiento y en la vejez.",
+    "hazards": [
+      "isolation"
+    ]
+  },
+  {
+    "id": "sleep_quality",
+    "name": "Calidad del sueño",
+    "unit": "1-5",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        3,
+        5
+      ],
+      "warning": [
+        2,
+        2.9
+      ],
+      "critical_low": 1.5
+    },
+    "max_age_s": 129600,
+    "higher_is_worse": false,
+    "input": {
+      "type": "scale_1_5",
+      "min": 1,
+      "max": 5,
+      "step": 1
+    },
+    "measurement_instructions": [
+      "¿Cómo has dormido? 1 = muy mal, 5 = muy bien"
+    ],
+    "why_it_matters": "Dormir mal reduce la atención y aumenta el riesgo de errores.",
+    "hazards": [
+      "isolation"
+    ]
+  },
+  {
+    "id": "crew_relation",
+    "name": "Relación con el equipo",
+    "unit": "1-5",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        3,
+        5
+      ],
+      "warning": [
+        2,
+        2.9
+      ],
+      "critical_low": 1.5
+    },
+    "max_age_s": 129600,
+    "higher_is_worse": false,
+    "input": {
+      "type": "scale_1_5",
+      "min": 1,
+      "max": 5,
+      "step": 1
+    },
+    "measurement_instructions": [
+      "¿Cómo va la relación con tu equipo? 1 = muy mal, 5 = muy bien"
+    ],
+    "why_it_matters": "Los conflictos en un grupo aislado afectan al ánimo y a la seguridad.",
+    "hazards": [
+      "isolation"
+    ]
+  },
+  {
+    "id": "pvt_mean_rt_ms",
+    "name": "PVT: tiempo de reacción medio",
+    "unit": "ms",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        100,
+        350
+      ],
+      "warning": [
+        351,
+        499
+      ],
+      "critical_high": 500
+    },
+    "max_age_s": 259200,
+    "higher_is_worse": true,
+    "input": {
+      "type": "number",
+      "min": 100,
+      "max": 2000,
+      "step": 1
+    },
+    "measurement_instructions": [
+      "Lo calcula el test PVT: pulsa en cuanto aparezca el estímulo"
+    ],
+    "why_it_matters": "Un tiempo de reacción más lento es un marcador objetivo de fatiga.",
+    "hazards": [
+      "isolation"
+    ]
+  },
+  {
+    "id": "pvt_lapses",
+    "name": "PVT: lapsos",
+    "unit": "lapsos",
+    "system_id": "neuro_behavioral",
+    "ranges": {
+      "normal": [
+        0,
+        2
+      ],
+      "warning": [
+        3,
+        5
+      ],
+      "critical_high": 6
+    },
+    "max_age_s": 259200,
+    "higher_is_worse": true,
+    "input": {
+      "type": "number",
+      "min": 0,
+      "max": 100,
+      "step": 1
+    },
+    "measurement_instructions": [
+      "Lo calcula el test PVT: respuestas de más de 500 ms"
+    ],
+    "why_it_matters": "Los lapsos de atención aumentan con la falta de sueño y la fatiga.",
+    "hazards": [
+      "isolation"
+    ]
+  }
+]
