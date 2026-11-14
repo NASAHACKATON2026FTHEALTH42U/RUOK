@@ -73,6 +73,7 @@ def make_alert(member: Member, **kw) -> Alert:
     data = dict(
         id=uid(), member_id=member.id, env_id="mars", origin="auto",
         category="indicator", severity="warning", dedupe_key=f"{member.id}:cardio",
+        target_role="self", delivery_mode="realtime",
     )
     data.update(kw)
     return Alert(**data)
@@ -274,3 +275,30 @@ def test_clock_offset_persists(session):
 
 def test_metadata_has_every_table():
     assert EXPECTED_TABLES <= set(SQLModel.metadata.tables)
+
+
+# ── BE-35: target_role y delivery_mode obligatorios ──────────────────
+
+
+@pytest.mark.parametrize("missing", ["target_role", "delivery_mode"])
+def test_alert_requires_target_role_and_delivery_mode(session, member, missing):
+    alert = make_alert(member)
+    delattr(alert, missing)  # como si no se hubiera indicado
+    session.add(alert)
+    with pytest.raises(IntegrityError):
+        session.commit()
+
+
+def test_saved_alert_serializes_with_contract_schema(session, member):
+    """Criterio de aceptación: una alerta guardada siempre valida contra el schema Alert."""
+    from app.schemas import Alert as AlertSchema
+
+    alert = make_alert(member, delay_s=840, delivery_mode="delayed", target_role="ground")
+    session.add(alert)
+    session.commit()
+    session.expire_all()
+
+    row = session.get(Alert, alert.id)
+    data = row.model_dump(exclude={"dedupe_key"})
+    parsed = AlertSchema.model_validate(data)
+    assert (parsed.target_role, parsed.delivery_mode) == ("ground", "delayed")
