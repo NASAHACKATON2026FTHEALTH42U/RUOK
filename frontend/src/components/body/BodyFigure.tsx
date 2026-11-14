@@ -280,7 +280,13 @@ export function BodyFigure({
     <div className="flex flex-col items-center gap-4">
       {stale && <StatusBadge status={liveness === 'lost' ? 'lost' : 'stale'} label={staleLabel} />}
 
-      <div ref={boxRef} className="relative w-full max-w-[300px]">
+      {/* Hasta 300 px de ancho, y menos en pantallas bajas (la figura mide el doble de alto) para
+          que el panel quepa sin scroll con las fases de la misión debajo. */}
+      <div
+        ref={boxRef}
+        className="relative w-full"
+        style={{ maxWidth: 'min(300px, max(220px, calc((100vh - 350px) / 2)))' }}
+      >
         {/* Aura de luz amarilla detrás del cuerpo, con un latido suave (degradado CSS, sin
             imágenes). Respeta "reducir movimiento"; sin datos fiables se apaga a gris y no late. */}
         <motion.div

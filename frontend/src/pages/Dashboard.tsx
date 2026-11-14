@@ -163,7 +163,7 @@ export default function Dashboard() {
   )
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 lg:pt-10">
       <header className="space-y-3">
         {/* Título solo para lectores de pantalla; el estado general va en la barra lateral. */}
         <div className="sr-only">{title}</div>
@@ -183,14 +183,11 @@ export default function Dashboard() {
         )}
       </header>
 
-      {env?.kind === 'space' && env.mission && (
-        <MissionPhaseBar mission={env.mission} now={serverNow()} canCheckIn={can('view:checkin')} />
-      )}
-
-      {/* Tres columnas en escritorio (≥ 1280 px): sistemas | cuerpo | indicadores. Más estrecho:
+      {/* Tres columnas en escritorio (≥ 1280 px): sistemas | cuerpo | indicadores, las laterales
+          centradas en vertical, y debajo las fases de la misión a todo el ancho. Más estrecho:
           cuerpo e indicadores lado a lado y los sistemas debajo; en móvil, todo en columna. */}
       <div className="grid gap-6 lg:grid-cols-[minmax(240px,320px)_1fr] xl:grid-cols-[230px_minmax(240px,320px)_1fr]">
-        <div className="order-3 lg:col-span-2 xl:order-1 xl:col-span-1">
+        <div className="order-3 lg:col-span-2 xl:order-1 xl:col-span-1 xl:self-center">
           <h2 className="mb-3 text-lg font-semibold">Sistemas</h2>
           <BodyLegend
             regions={regions}
@@ -217,7 +214,7 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="order-2 xl:order-3">
+        <div className="order-2 xl:order-3 xl:self-center">
           <h2 className="mb-3 text-lg font-semibold">Indicadores</h2>
           {cards.length === 0 ? (
             <p className="text-env-muted">Todavía no hay mediciones.</p>
@@ -240,6 +237,17 @@ export default function Dashboard() {
             </ul>
           )}
         </div>
+
+        {/* Fases de la misión debajo del cuerpo, a todo el ancho de las tres columnas. */}
+        {env?.kind === 'space' && env.mission && (
+          <div className="order-4 lg:col-span-2 xl:col-span-3">
+            <MissionPhaseBar
+              mission={env.mission}
+              now={serverNow()}
+              canCheckIn={can('view:checkin')}
+            />
+          </div>
+        )}
       </div>
 
       <AnimatePresence>
