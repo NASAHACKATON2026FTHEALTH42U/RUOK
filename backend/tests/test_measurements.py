@@ -8,7 +8,7 @@ from sqlmodel import Session, delete, select
 
 from app import clock, models
 from app.db import engine
-from app.services.members import ensure_demo_members
+from app.seed import ensure_seeded
 
 URL = "/api/v1/members/{}/measurements"
 T0 = datetime(2026, 11, 14, 10, 0, tzinfo=UTC)
@@ -44,10 +44,10 @@ def post(client, items, member_id=1):
 # ── POST ─────────────────────────────────────────────────────────────
 
 
-def test_demo_members_exist_in_db():
+def test_seeded_members_exist_in_db():
     with Session(engine) as s:
         assert {mb.id for mb in s.exec(select(models.Member)).all()} >= {1, 2, 3}
-        assert ensure_demo_members(s) == 0  # ya había members: no inserta nada
+        assert ensure_seeded(s) is False  # ya había members: no siembra otra vez
 
 
 def test_post_batch_saves_with_catalog_unit_and_server_time(client):

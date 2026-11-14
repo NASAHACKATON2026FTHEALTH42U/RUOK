@@ -6,11 +6,14 @@ BE-13 (enlace) y BE-07 (demo). `/demo/fast-forward` ya es real: usa app/clock.py
 
 import json
 from collections.abc import Iterator
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
+from sqlmodel import Session
 
-from app import clock, stubs
+from app import clock, seed, stubs
+from app.db import get_session
 from app.routers.deps import ERRORS_404, ERRORS_AUTH, AuthDep
 from app.schemas import (
     ControlOverview,
@@ -190,11 +193,14 @@ def list_link_messages(env: Slug, direction: LinkDirection | None = None) -> lis
     response_model=OkResponse,
     tags=["demo"],
     summary="Reiniciar la BD con el seed determinista",
-    description="STUB(FS-02) → BE-07",
+    description="Vacía la BD, vuelve al reloj real y siembra 30 días de datos sintéticos "
+    "(mismos datos en cada reset).",
 )
-def demo_reset() -> OkResponse:
-    clock.reset()
-    return OkResponse(detail="reset (stub): reloj a tiempo real")
+def demo_reset(session: Annotated[Session, Depends(get_session)]) -> OkResponse:
+    members, measurements = seed.reset(session)
+    return OkResponse(
+        detail=f"seed v{seed.SEED_VERSION}: {members} members y {measurements} mediciones"
+    )
 
 
 @router.post(
@@ -203,12 +209,13 @@ def demo_reset() -> OkResponse:
     responses=ERRORS_404,
     tags=["demo"],
     summary="Cargar un escenario de demo",
-    description="mars_sleep_bp | eva_no_contact | geriatric_fall_risk. STUB(FS-02) → BE-07",
+    description="mars_sleep_bp | eva_no_contact | geriatric_fall_risk. Se aplica encima de "
+    "los datos actuales sin borrar nada; aplicarlo dos veces no duplica mediciones.",
 )
-def demo_scenario(name: str) -> OkResponse:
-    if name not in {"mars_sleep_bp", "eva_no_contact", "geriatric_fall_risk"}:
+def demo_scenario(name: str, session: Annotated[Session, Depends(get_session)]) -> OkResponse:
+    if name not in seed.SCENARIOS:
         raise HTTPException(404, f"Escenario desconocido: {name}")
-    return OkResponse(detail=f"escenario {name} (stub)")
+    return OkResponse(detail=f"{name}: {seed.apply_scenario(session, name)}")
 
 
 @router.post(
