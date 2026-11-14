@@ -79,8 +79,10 @@ def decode_token(session: Session, token: str) -> TokenClaims:
             token,
             _secret(session),
             algorithms=[ALGORITHM],
-            # exp se comprueba abajo con el reloj de la demo.
-            options={"verify_exp": False, "require": ["sub", "role", "exp"]},
+            # exp se comprueba abajo con el reloj de la demo. iat tampoco se valida con la
+            # hora del sistema: tras /demo/fast-forward, iat = clock.now() queda en el
+            # "futuro" y PyJWT daría el token por inválido (BE-36).
+            options={"verify_exp": False, "verify_iat": False, "require": ["sub", "role", "exp"]},
         )
         user_id = int(payload["sub"])
         exp = int(payload["exp"])

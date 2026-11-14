@@ -289,6 +289,26 @@ html[data-hud] body {
     font: 400 15px var(--font-sans);
     color: var(--color-hud-body);
   }
+  /* Hover en las filas pulsables (secciones, SYS.01…): lavado suave y línea tenue a la izquierda */
+  a.hud-row,
+  button.hud-row {
+    transition:
+      background-color 0.15s ease,
+      box-shadow 0.15s ease,
+      color 0.15s ease;
+  }
+  a.hud-row:hover:not([aria-current], .is-active),
+  button.hud-row:hover:not([aria-current], .is-active) {
+    background: color-mix(in srgb, var(--env-primary) 6%, transparent);
+    box-shadow: inset 2px 0 0 color-mix(in srgb, var(--env-primary) 45%, transparent);
+    color: var(--env-text);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    a.hud-row,
+    button.hud-row {
+      transition: none;
+    }
+  }
   .hud-row[aria-current],
   .hud-row.is-active {
     background: rgba(95, 212, 232, 0.07);
