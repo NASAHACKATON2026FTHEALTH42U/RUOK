@@ -6,6 +6,22 @@
     system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
 }
 
+/*
+ * Colores del entorno activo. Los valores los pone initTheme() (src/environments/applyTheme.ts)
+ * en <html> a partir de src/environments/themes/<id>.ts. Clases: bg-env-bg, text-env-muted…
+ * `primary` es solo para rellenos (botones, enlace activo, foco), no para texto.
+ * Los colores del semáforo NO van aquí: son fijos en todos los entornos (FE-04).
+ */
+@theme inline {
+  --color-env-bg: var(--env-bg);
+  --color-env-surface: var(--env-surface);
+  --color-env-border: var(--env-border);
+  --color-env-text: var(--env-text);
+  --color-env-muted: var(--env-muted);
+  --color-env-primary: var(--env-primary);
+  --color-env-primary-text: var(--env-primary-text);
+}
+
 html,
 body,
 #root {
@@ -13,5 +29,12 @@ body,
 }
 
 body {
-  @apply bg-slate-950 text-slate-100 antialiased;
+  @apply bg-env-bg text-env-text antialiased;
+}
+
+/* Transición suave al cambiar de entorno. Solo se activa tras aplicar el primer tema
+   (initTheme pone data-theme-ready), para que la carga inicial no parpadee. */
+html[data-theme-ready] :is(body, header, footer, nav a, select) {
+  transition-property: background-color, border-color, color;
+  transition-duration: 300ms;
 }

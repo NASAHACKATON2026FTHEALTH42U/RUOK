@@ -82,7 +82,7 @@ def _space(id_, name, g, delay, radiation) -> Environment:
         liveness=_LIVENESS_SPACE,
         vocabulary=_SPACE_VOCAB,
         theme=Theme(
-            primary={"iss": "#1f6feb", "moon": "#8b949e", "mars": "#c1440e"}[id_],
+            primary={"iss": "#4d9fff", "moon": "#c8ccd6", "mars": "#c1440e"}[id_],
             background=f"{id_}.jpg",
         ),
         threshold_overrides={"bp_systolic": RangeOverride(warning=(130, 140))}
@@ -120,21 +120,21 @@ ENVIRONMENTS: list[Environment] = [
         "Analógico terrestre",
         ["self", "crew", "ground"],
         {"member": "participante", "crew": "equipo", "ground": "médico"},
-        "#2da44e",
+        "#2bb3c9",
     ),
     _earth(
         "hospital",
         "Planta de hospital",
         ["self", "nurse", "doctor"],
         {"member": "paciente", "crew": "planta", "ground": "médico", "medic": "enfermería"},
-        "#0969da",
+        "#0b5a96",
     ),
     _earth(
         "geriatric",
         "Residencia geriátrica",
         ["self", "caregiver", "doctor", "family"],
         {"member": "residente", "crew": "residencia", "ground": "médico", "medic": "cuidador"},
-        "#8250df",
+        "#6a429e",
     ),
 ]
 ENV_BY_ID = {e.id: e for e in ENVIRONMENTS}

@@ -185,7 +185,7 @@ export const CONTRACT_OPERATIONS = [
 
 export const health: Schema<'HealthResponse'> = {
   "status": "ok",
-  "server_time": "2026-11-14T14:40:51.895356Z"
+  "server_time": "2026-11-14T15:43:58.391613Z"
 }
 
 export const environments: Schema<'Environment'>[] = [
@@ -216,7 +216,7 @@ export const environments: Schema<'Environment'>[] = [
       "psych": "psicólogo BHP"
     },
     "theme": {
-      "primary": "#1f6feb",
+      "primary": "#4d9fff",
       "background": "iss.jpg"
     },
     "threshold_overrides": {},
@@ -280,7 +280,7 @@ export const environments: Schema<'Environment'>[] = [
       "psych": "psicólogo BHP"
     },
     "theme": {
-      "primary": "#8b949e",
+      "primary": "#c8ccd6",
       "background": "moon.jpg"
     },
     "threshold_overrides": {},
@@ -415,7 +415,7 @@ export const environments: Schema<'Environment'>[] = [
       "ground": "médico"
     },
     "theme": {
-      "primary": "#2da44e",
+      "primary": "#2bb3c9",
       "background": null
     },
     "threshold_overrides": {},
@@ -462,7 +462,7 @@ export const environments: Schema<'Environment'>[] = [
       "medic": "enfermería"
     },
     "theme": {
-      "primary": "#0969da",
+      "primary": "#0b5a96",
       "background": null
     },
     "threshold_overrides": {},
@@ -510,7 +510,7 @@ export const environments: Schema<'Environment'>[] = [
       "medic": "cuidador"
     },
     "theme": {
-      "primary": "#8250df",
+      "primary": "#6a429e",
       "background": null
     },
     "threshold_overrides": {},
@@ -1071,7 +1071,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "iss": {
     "member_id": 1,
     "env_id": "iss",
-    "generated_at": "2026-11-14T14:40:51.981443Z",
+    "generated_at": "2026-11-14T15:43:58.460537Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -1328,7 +1328,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "moon": {
     "member_id": 1,
     "env_id": "moon",
-    "generated_at": "2026-11-14T14:40:51.987370Z",
+    "generated_at": "2026-11-14T15:43:58.464974Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -1585,7 +1585,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "mars": {
     "member_id": 1,
     "env_id": "mars",
-    "generated_at": "2026-11-14T14:40:51.992924Z",
+    "generated_at": "2026-11-14T15:43:58.469169Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -1842,7 +1842,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "earth": {
     "member_id": 1,
     "env_id": "earth",
-    "generated_at": "2026-11-14T14:40:51.997491Z",
+    "generated_at": "2026-11-14T15:43:58.473415Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -2099,7 +2099,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "hospital": {
     "member_id": 1,
     "env_id": "hospital",
-    "generated_at": "2026-11-14T14:40:52.003295Z",
+    "generated_at": "2026-11-14T15:43:58.477978Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -2356,7 +2356,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
   "geriatric": {
     "member_id": 1,
     "env_id": "geriatric",
-    "generated_at": "2026-11-14T14:40:52.008788Z",
+    "generated_at": "2026-11-14T15:43:58.482157Z",
     "overall_status": "critical",
     "liveness": "active",
     "last_seen_at": "2026-11-14T10:00:00Z",
@@ -2670,7 +2670,7 @@ export const alerts: Schema<'Alert'>[] = [
 export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   "iss": {
     "env_id": "iss",
-    "as_of": "2026-11-14T14:40:52.042314Z",
+    "as_of": "2026-11-14T15:43:58.517115Z",
     "link": {
       "env_id": "iss",
       "state": "online",
@@ -2696,7 +2696,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "moon": {
     "env_id": "moon",
-    "as_of": "2026-11-14T14:40:51.046938Z",
+    "as_of": "2026-11-14T15:43:57.521263Z",
     "link": {
       "env_id": "moon",
       "state": "online",
@@ -2709,7 +2709,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "mars": {
     "env_id": "mars",
-    "as_of": "2026-11-14T14:26:52.051349Z",
+    "as_of": "2026-11-14T15:29:58.525305Z",
     "link": {
       "env_id": "mars",
       "state": "delayed",
@@ -2747,7 +2747,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "earth": {
     "env_id": "earth",
-    "as_of": "2026-11-14T14:40:52.055285Z",
+    "as_of": "2026-11-14T15:43:58.529308Z",
     "link": {
       "env_id": "earth",
       "state": "online",
@@ -2760,7 +2760,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "hospital": {
     "env_id": "hospital",
-    "as_of": "2026-11-14T14:40:52.059553Z",
+    "as_of": "2026-11-14T15:43:58.533192Z",
     "link": {
       "env_id": "hospital",
       "state": "online",
@@ -2773,7 +2773,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
   },
   "geriatric": {
     "env_id": "geriatric",
-    "as_of": "2026-11-14T14:40:52.064177Z",
+    "as_of": "2026-11-14T15:43:58.537673Z",
     "link": {
       "env_id": "geriatric",
       "state": "online",
@@ -3040,7 +3040,7 @@ export const devices: Schema<'Device'>[] = [
 ]
 
 export const controlOverview: Schema<'ControlOverview'> = {
-  "generated_at": "2026-11-14T14:40:52.226410Z",
+  "generated_at": "2026-11-14T15:43:58.697366Z",
   "environments": [
     {
       "environment": {
@@ -3295,7 +3295,7 @@ export const demoUsers: Schema<'DemoUser'>[] = [
 export const tokenTemplate: Schema<'TokenResponse'> = {
   "access_token": "stub-token-7",
   "token_type": "bearer",
-  "expires_at": "2026-11-15T02:40:52.244527Z",
+  "expires_at": "2026-11-15T03:43:58.714899Z",
   "user": {
     "id": 7,
     "username": "vega",
