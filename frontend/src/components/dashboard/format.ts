@@ -36,3 +36,16 @@ export function formatValue(value: number | null | undefined, unit: string): str
   if (unit === '1-5') return `${n} / 5`
   return unit ? `${n} ${unit}` : n
 }
+
+/** Origen de una medición (`Measurement.source`). */
+const SOURCES: Record<string, string> = {
+  manual: 'Manual',
+  device: 'Dispositivo',
+  camera: 'Cámara',
+  checkin: 'Check-in',
+  pvt: 'Test PVT',
+}
+
+export function formatSource(source: string): string {
+  return SOURCES[source] ?? source
+}
