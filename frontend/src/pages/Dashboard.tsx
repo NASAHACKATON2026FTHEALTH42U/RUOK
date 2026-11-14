@@ -163,7 +163,7 @@ export default function Dashboard() {
   )
 
   return (
-    <section className="space-y-4 lg:pt-10">
+    <section className="space-y-4 lg:pt-[clamp(2.5rem,calc(100vh-788px),7rem)]">
       <header className="space-y-3">
         {/* Título solo para lectores de pantalla; el estado general va en la barra lateral. */}
         <div className="sr-only">{title}</div>
