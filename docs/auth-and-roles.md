@@ -35,7 +35,7 @@
 | Selector de entorno | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
 | Dashboard (cuerpo + semáforo) | ✅ propio | ✅ todos los del entorno | 👁️ todos | 🔒 (usa `/ground`) | 🔒 | 👁️ agregado de su familiar | ✅ |
 | Registrar mediciones | ✅ propio | ✅ para cualquier member (asistida) | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
-| Check-in diario conductual | ✅ propio | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
+| Check-in diario conductual y test PVT | ✅ propio | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
 | Historial y gráficas | ✅ propio | ✅ entorno | 👁️ entorno | 👁️ entregado | 👁️ entregado | 🔒 | ✅ |
 | Detalles conductuales | ✅ propio | solo si comparte o hay emergencia | agregado anónimo | solo si comparte o hay emergencia | ✅ | 🔒 | ✅ |
 | Alertas: ver | ✅ propias | ✅ entorno | 👁️ entorno | ✅ entregadas | ✅ entregadas (+ psicológicas) | 👁️ de su familiar | ✅ |
@@ -48,7 +48,7 @@
 | **Centro de control** (`/control`: panorama, flujo de eventos, dispositivos, gestión) | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
 | Stream de eventos en vivo (SSE) | propios | su entorno | su entorno | solo entregados | solo entregados | 🔒 | todo |
 | Panel de demo (`/demo/*`, enlace, fast-forward) | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
-| Gestión de usuarios *(P2)* | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
+| Gestión de usuarios *(P1, FS-07; rol `family` P2)* | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
 
 La matriz vive en código en **un único sitio** por lado: `backend/app/auth/permissions.py` y `frontend/src/auth/permissions.ts`, generado o espejo del de backend. Los tests recorren la matriz completa.
 
@@ -78,7 +78,7 @@ La matriz vive en código en **un único sitio** por lado: `backend/app/auth/per
 ## Impacto en el resto del sistema
 - **Contrato** ([api-contract.md](api-contract.md#autenticación-y-roles)): todos los endpoints salvo `/health`, `/auth/*` y el SOS de emergencia requieren `Authorization`.
 - **Modelo de datos** ([data-model.md](data-model.md)): tabla `user_account` y clave `auth` en IndexedDB `kv`.
-- **Heartbeat:** solo lo envía un `member` autenticado. El token identifica al member y no hace falta enviar `member_id` en el cuerpo.
+- **Heartbeat:** solo lo envía un `member` autenticado. La ruta es `/members/{member_id}/heartbeat`, y el backend comprueba que el `member_id` de la ruta coincide con el del token (403 si no).
 - **`/ground`:** acceso solo para `responder`, `psych` y `admin`.
 - **Panel de demo y centro de control (`/control`):** solo `admin`. Ver [control-center-and-devices.md](control-center-and-devices.md).
 - **SSE:** el stream de eventos se filtra en el servidor según el rol del token.

@@ -16,6 +16,7 @@ import {
 } from '../components/dashboard/trend'
 import { useVocab } from '../environments/useVocab'
 import { useEnvironmentStore } from '../store/environment'
+import { useActiveMemberId } from '../auth/useAuth'
 
 /** Cada cuánto se recarga la serie, para que aparezcan las mediciones nuevas. */
 const REFRESH_MS = 15_000
@@ -26,7 +27,8 @@ const REFRESH_MS = 15_000
  */
 export default function History() {
   const vocab = useVocab()
-  const memberId = useEnvironmentStore((s) => s.memberId)
+  // Un member, siempre los suyos; el resto de roles, el member elegido (FE-28).
+  const memberId = useActiveMemberId()
   const envId = useEnvironmentStore((s) => s.envId)
   const [params, setParams] = useSearchParams()
   const envs = useEnvironments()

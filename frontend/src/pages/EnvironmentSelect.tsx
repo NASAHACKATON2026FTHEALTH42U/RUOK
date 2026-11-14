@@ -10,7 +10,7 @@ import { useEnvironmentStore } from '../store/environment'
 /**
  * Selección de entorno y de member (FE-03).
  * Paso 1: una tarjeta por entorno. Paso 2: members de ese entorno → /dashboard.
- * TODO(FE-28): solo para el rol admin; el resto entra directamente en su entorno.
+ * Solo para admin: la ruta está protegida con RequireRole (FE-28); el resto entra en su entorno.
  */
 export default function EnvironmentSelect() {
   const envs = useEnvironments()

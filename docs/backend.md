@@ -14,7 +14,12 @@
 | BE-09 (#16) | Evaluación agregada por sistema y global (`services/assessment.py`) | Hecho |
 | BE-03 (#9) | Perfiles de entorno en `app/data/environments.json`, loader validado y `GET /environments` reales | Hecho |
 | BE-04 (#10) | Catálogo de 20 indicadores y 7 sistemas en JSON, validación cruzada y `GET /indicators`, `/systems` reales | Hecho |
-| BE-06 (#13) | `POST` de mediciones por lotes (idempotente por UUID, atómico, 409) y `GET` con filtros | Hecho (PR pendiente de merge) |
+| BE-10 (#17) | Tendencias, línea base personal (7 días) y regla de "3 días a peor" (`services/trends.py`) | Hecho |
+| BE-11 (#18) | Composición del `Assessment` completo (`services/member_assessment.py`) | **Parcial:** el servicio está hecho, pero `GET /members/{id}/assessment` sigue en stub |
+| FS-04 (#7) | `scripts/export_mocks.py`: mocks del front generados desde la API | Hecho |
+| BE-06 (#13) | `POST` de mediciones por lotes (idempotente por UUID, atómico, 409) y `GET` con filtros | Hecho |
+
+Estado global y lista de inconsistencias pendientes: [status.md](status.md).
 
 ## Arrancar
 
@@ -45,7 +50,7 @@ backend/
 ├── pyproject.toml        dependencias (fastapi, uvicorn, sqlmodel, pydantic; dev: pytest, httpx, ruff)
 ├── uv.lock               versiones exactas (lo genera uv, no se edita a mano)
 ├── app/
-│   ├── main.py           app FastAPI: lifespan (init_db, reloj, entornos), CORS, X-Server-Time, /api/v1
+│   ├── main.py           app FastAPI: lifespan (init_db, reloj, entornos y catálogo), CORS, X-Server-Time, /api/v1
 │   ├── db.py             engine SQLite (WAL + foreign_keys), init_db(), get_session()
 │   ├── clock.py          reloj inyectable: now(), advance(), set_offset(), get_offset(), reset()
 │   ├── models.py         tablas SQLModel (15) e índices de data-model.md; tipo UTCDateTime
@@ -56,10 +61,12 @@ backend/
 │   ├── services/
 │   │   ├── app_state.py     clave-valor de app_state: get_value/set_value, save_clock/restore_clock
 │   │   ├── assessment.py    motor de evaluación por indicador y por sistema (BE-08, BE-09)
-│   │   ├── catalog.py       indicadores y sistemas: list_indicators(), get_indicator(), list_systems()
+│   │   ├── catalog.py       indicadores y sistemas: list_indicators(), get_indicator(), list_systems(), check_consistency()
 │   │   ├── environments.py  carga y valida environments.json: list_environments(), get_environment()
-│   │   ├── measurements.py  lotes idempotentes (save_batch), series (list_series), validación
-│   │   └── members.py       ensure_demo_members(): members de ejemplo en la BD (STUB → BE-07)
+│   │   ├── measurements.py  lotes idempotentes (save_batch), series (list_series), validación (BE-06)
+│   │   ├── member_assessment.py  composición del Assessment completo de un member (BE-11; aún no lo usa el endpoint)
+│   │   ├── members.py       ensure_demo_members(): members de ejemplo en la BD (STUB → BE-07)
+│   │   └── trends.py        tendencia, línea base de 7 días y regla de 3 días a peor (BE-10)
 │   ├── stubs.py          STUB(FS-02): datos de ejemplo de los routers stub (se van retirando)
 │   ├── schemas/          modelos Pydantic del contrato, uno por dominio; se importan desde app.schemas
 │   │   ├── common.py     enumeraciones (Status, Liveness, Role…), Slug, Range, ApiModel, ErrorResponse
@@ -75,10 +82,12 @@ backend/
 │       ├── health.py     GET /health
 │       ├── auth.py       /auth/*, /users
 │       ├── catalog.py    /environments, /indicators, /systems (reales), /interventions (stub)
-│       ├── members.py    /members/{id}, privacy, measurements (real), assessment, heartbeat, ruok
+│       ├── members.py    /members/{id}, privacy, measurements (real, BE-06), assessment, heartbeat, ruok (stub)
 │       ├── alerts.py     alertas del member, acciones sobre alertas, consola ground
 │       ├── game.py       tareas, game, leaderboard
-│       └── realtime.py   events (SSE), devices, control, system, link, demo
+│       └── realtime.py   events (SSE), devices, control, system, link, demo (stub salvo /demo/fast-forward)
+├── scripts/
+│   └── export_mocks.py   genera frontend/src/api/mocks/fixtures.gen.ts (FS-04)
 └── tests/
     ├── conftest.py       BD temporal, reset del reloj, fixture `client`
     ├── test_contract.py  FS-02: todo endpoint del contrato está en el OpenAPI (y viceversa) y su stub responde
@@ -86,7 +95,10 @@ backend/
     ├── test_clock.py     reloj y fast-forward
     ├── test_db.py        WAL, foreign_keys y sesión
     ├── test_models.py    tablas, índices, crear/leer cada modelo, restricciones, fechas UTC, app_state
-    ├── test_assessment.py   motor de evaluación (BE-08)
+    ├── test_assessment.py   motor de evaluación por indicador (BE-08)
+    ├── test_system_assessment.py  evaluación por sistema y global (BE-09)
+    ├── test_trends.py       tendencias y línea base (BE-10)
+    ├── test_member_assessment.py  composición del Assessment (BE-11)
     ├── test_environments.py perfiles vs docs/environments.md, JSON inválido, GET /environments y 404
     ├── test_catalog.py      indicadores y sistemas, coherencia, rangos con el motor, endpoints y 404
     └── test_measurements.py idempotencia, 409, lote atómico, validación, filtros y orden del GET
@@ -157,7 +169,7 @@ Convenciones:
 | `reset()` | Vuelve al reloj real |
 
 El desfase vive en memoria. Para que sobreviva a un reinicio se guarda en `app_state.clock_offset_s`:
-- `services.app_state.save_clock(session)` lo guarda (lo llamará `/demo/fast-forward`);
+- `services.app_state.save_clock(session)` lo guarda. ⚠️ **Todavía no lo llaman ni `/demo/fast-forward` ni `/demo/reset`**: tras un reinicio se pierde el offset. Pendiente en BE-07 (ver [status.md](status.md));
 - al arrancar, el `lifespan` llama a `restore_clock(session)` y lo recupera.
 
 ### Catálogos JSON (`app/data/`)
@@ -170,7 +182,7 @@ La configuración de dominio (entornos, indicadores, sistemas, intervenciones…
 | `indicators.json`, `systems.json` | `services/catalog.py` | BE-04 |
 | `interventions.json` | — | BE-21 |
 
-Cómo funciona `services/environments.py` (patrón a seguir en BE-04 y BE-21):
+Cómo funciona `services/environments.py` (patrón que ya sigue `catalog.py`, de BE-04, y que debe seguir BE-21):
 - `load_environments(path)` lee el fichero y lo valida con el schema del contrato (`TypeAdapter(list[Environment])`). `ApiModel` rechaza campos desconocidos, así que una errata en el JSON da error. También rechaza ids duplicados.
 - `list_environments()` y `get_environment(env_id)` usan una caché en memoria (`lru_cache`): el fichero se lee una sola vez.
 - El `lifespan` lo carga al arrancar: **si el JSON es inválido, el servidor no arranca** (mejor que fallar en mitad de la demo).
@@ -219,6 +231,17 @@ Implementa el principio **sin pérdida de datos** ([offline-and-liveness.md](off
 - Un middleware añade `X-Server-Time` (hora de `clock.now()`, ISO-8601) a **todas** las respuestas, como pide [api-contract.md](api-contract.md).
 - CORS abierto en desarrollo (`CORS_ORIGINS=*`). La cabecera `X-Server-Time` está en `expose_headers` para que el front la pueda leer.
 
+## Motor de evaluación (BE-08 … BE-11)
+
+- **Funciones puras** que reciben `now=clock.now()`, el catálogo y el entorno, y no tocan la BD. Son fáciles de testear.
+- **Orden de gravedad:** `normal < unknown < warning < critical`. Un sistema toma el peor de sus indicadores; `unknown` nunca cuenta como `normal`.
+- **Frescura:** un dato más antiguo que `indicator.max_age_s` pasa a `unknown`.
+- **Ajustes por entorno:** `environment.threshold_overrides` se fusiona con los rangos del catálogo.
+- **Escalado** (regla del contrato, [alerts-and-escalation.md](alerts-and-escalation.md#modo-de-escalado-según-el-retardo)):
+  - `self` y `crew` (y sus equivalentes en tierra) se resuelven **a bordo**: `realtime`, `delay_s = 0`. ⚠️ El código actual aún les aplica el retardo del enlace (ver [status.md](status.md)).
+  - Los niveles externos usan el retardo: `realtime` si es < 5 s, `delayed` en caso contrario, y `autonomous` si es ≥ 60 s **y** el estado es `critical`.
+- **Liveness:** el `overall_status` debe ser el peor entre la salud y el liveness. ⚠️ Aún no se combina; llega con BE-12.
+
 ## Próximas piezas que afectan a la base
 
 Decisiones ya documentadas que todavía no están implementadas. Tenlas en cuenta al tocar `main.py`, `db.py` o los modelos:
@@ -230,7 +253,9 @@ Decisiones ya documentadas que todavía no están implementadas. Tenlas en cuent
 
 ## Routers stub (FS-02)
 
-Todos los endpoints del contrato existen ya con datos de ejemplo (`app/stubs.py`), para que el front trabaje contra la API real desde el principio. Cada uno indica en `description` qué issue lo implementa (`STUB(FS-02) → BE-06`).
+Todos los endpoints del contrato existen. **Reales:** `/health`, `/environments*`, `/indicators*`, `/systems`, `POST`/`GET /members/{id}/measurements` (BE-06) y `/demo/fast-forward` (a medias). **El resto** devuelve datos de ejemplo de `app/stubs.py` e indica en `description` qué issue lo implementa (`STUB(FS-02) → BE-06`). Tabla completa en [status.md](status.md#endpoints-reales-y-stubs).
+
+> ⚠️ El stub de `GET /members/{id}/assessment` **no coincide con lo que calcula el motor** (por ejemplo, 142 mmHg en Marte sale `warning` y el motor diría `critical`). No uses sus valores como referencia de las reglas: la referencia es `services/assessment.py`. Se arregla al conectar el motor en BE-11, y entonces hay que actualizar `test_assessment_mode_depends_on_environment`.
 
 **Al implementar tu issue:**
 1. Sustituye el cuerpo del endpoint por la llamada a tu servicio (`app/services/…`). **No cambies la firma ni el `response_model`** sin cambiar antes el contrato.

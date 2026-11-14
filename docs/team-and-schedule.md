@@ -4,7 +4,7 @@
 | Rol | Responsable de |
 |---|---|
 | **Supervisor** | Alcance y prioridades (tiene la última palabra), control del tiempo y check-ins. Contenido HRP: umbrales, explicaciones, intervenciones y fuentes. Textos de la UI, pitch, slides, vídeo y envío a Space Apps. Ensayos. |
-| **Full-stack** | Scaffolding, contrato y tipos generados, mocks, integración front↔back, **red local y móviles (FS-08)**, gestión de usuarios, gamificación en la UI, PVT, docker-compose. |
+| **Full-stack** | Scaffolding, contrato y tipos generados, mocks, integración front↔back, **red local y móviles (FS-08)**, gestión de usuarios (FS-07), PVT (FE-22), docker-compose (BE-24). |
 | **Front A** | `BodyFigure` SVG, `SystemPanel`, temas por entorno, selector de entorno, barra de fase de misión, **centro de control `/control`**, Earth view. |
 | **Front B** | Dashboard, `IndicatorCard`, `TrendChart`, formularios guiados, check-in, outbox offline, SOS y alertas, consola `/ground`. |
 | **Back A** | Modelos, catálogos JSON, perfiles de entorno, members, mediciones, seed y escenarios, enlace simulado, **eventos SSE, dispositivos y endpoints de control**. |
@@ -33,7 +33,7 @@
   - Las issues nuevas creadas con `create_issues.py` hay que añadirlas también al Project (`gh project item-add 1 --owner NASAHACKATON2026FTHEALTH42U --url <issue>`).
 - **Ramas:** `feat/<area>-<id>-<slug>`, por ejemplo `feat/be-08-assessment-engine`. Para fixes, `fix/<slug>`.
 - **PR pequeñas** a `main`. En la descripción va `Closes #n`. Basta 1 review del mismo área o del full-stack. Los P0 se mergean en cuanto estén verdes.
-- **Evitar conflictos** (lecciones de las PRs #64, #88 y #89; detalle en [`LEEME.txt`](../LEEME.txt)):
+- **Evitar conflictos** (lecciones de las PRs #64, #88, #89 y #100, que dejó FE-09 fuera de `main` por estar apilada y se rescató en #104; detalle en [`LEEME.txt`](../LEEME.txt)):
   - Ramas de **vida corta** (3–4 h como máximo) y sincronizadas con `main` a menudo: `git fetch origin && git merge origin/main`. **Siempre** antes de abrir la PR y antes de mergear.
   - **No se suben commits a una PR ya mergeada**; lo siguiente va en una rama nueva.
   - **No se apilan PRs.** Si es inevitable, se mergea primero la de abajo.
@@ -55,9 +55,8 @@
   - **la CI está en verde**.
 - **CI (GitHub Actions, `.github/workflows/ci.yml`).** Se ejecuta en cada PR y en cada push a `main`:
   - **Backend:** `ruff check` + `pytest`.
-  - **Frontend:** `npm run lint` + `npm run build` (comprueba los tipos) + `npm test` si existe.
+  - **Frontend:** `npm run lint` + `npm run build` (comprueba los tipos) + `npm test`.
   - **Contrato API:** regenera `types.gen.ts` desde el OpenAPI de FastAPI y falla si hay diferencias. Si cambias la API, ejecuta `npm run gen:api` y commitea el resultado.
-  - Cada job se omite (en verde) mientras su carpeta no exista.
 - **Bloqueos:** si llevas más de 30 minutos atascado, avisa al supervisor.
 
 ## Riesgos y mitigaciones

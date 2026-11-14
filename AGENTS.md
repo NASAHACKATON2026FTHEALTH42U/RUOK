@@ -1,6 +1,6 @@
 # AGENTS.md — Instrucciones para agentes de IA (Claude, Codex, Copilot, Cursor…)
 
-Este archivo aplica a **cualquier agente de IA** que trabaje en este repo. Las instrucciones específicas de Claude Code están en [`CLAUDE.md`](CLAUDE.md). Las reglas para humanos, en [`LEEME.txt`](LEEME.txt). Las tres dicen lo mismo; si hay contradicción, manda este archivo para los agentes.
+Este archivo aplica a **cualquier agente de IA** que trabaje en este repo. Las instrucciones específicas de Claude Code están en [`CLAUDE.md`](CLAUDE.md). Las reglas para humanos, en [`LEEME.txt`](LEEME.txt). Las tres tienen que decir lo mismo: si cambias una regla, cámbiala en las tres. Si hay contradicción, manda este archivo para los agentes.
 
 ## Proyecto
 **RUOK (R U OK?)** es un prototipo para el NASA Space Apps Challenge 2026: una herramienta de autoevaluación de salud para astronautas que se adapta al entorno (ISS, Luna, Marte, Tierra, hospital, geriatría) y funciona 100 % en local.
@@ -20,8 +20,8 @@ Este archivo aplica a **cualquier agente de IA** que trabaje en este repo. Las i
 2. Hacer commits pequeños con el ID de la issue (`BE-08: umbrales por entorno`).
 3. Pasar en local lo mismo que la CI, antes de hacer push:
    - back: `cd backend && uv run pytest && uv run --with ruff ruff check .`
-   - front: `cd frontend && npm run lint && npm run build`
-   - si se ha tocado la API: `npm run gen:api` y commitear `types.gen.ts`.
+   - front: `cd frontend && npm run lint && npm run build && npm test`
+   - si se ha tocado la API: `npm run gen:api` y `npm run gen:mocks`, y commitear `types.gen.ts` y `fixtures.gen.ts`.
 4. **Antes de abrir la PR, sincronizar con `main`:** `git fetch origin && git merge origin/main`, resolver los conflictos en local y volver a pasar el paso 3.
 5. Abrir una PR a `main` con `Closes #<n>`.
 6. **El merge lo hace o lo aprueba un humano.** Si `main` ha avanzado desde la PR, el agente repite el paso 4 antes de pedir el merge.
@@ -37,7 +37,7 @@ Este archivo aplica a **cualquier agente de IA** que trabaje en este repo. Las i
 ## CI (`.github/workflows/ci.yml`)
 Tres checks que tienen que estar en verde:
 - `Backend (pytest)`
-- `Frontend (lint + build)`
+- `Frontend (lint + build)` (ejecuta también `npm test`)
 - `Contrato API (tipos TS al día)`
 
 Si fallan, se arregla en la misma rama. No se desactivan ni se marcan como opcionales.
@@ -49,7 +49,7 @@ Si fallan, se arregla en la misma rama. No se desactivan ni se marcan como opcio
 - No edites a mano `docs/backlog.md` ni `frontend/src/api/types.gen.ts`: son generados.
 
 ## Principios del producto (no negociables)
-1. **El contrato manda:** primero `docs/api-contract.md`, después `app/schemas.py`, después `npm run gen:api`.
+1. **El contrato manda:** primero `docs/api-contract.md`, después `backend/app/schemas/`, después `npm run gen:api`.
 2. **Sin datos = desconocido:** `unknown`, `stale` y `lost` nunca se muestran en verde.
 3. **Local-first:** nada de nube, CDNs ni internet en tiempo de ejecución.
 4. **Sin pérdida de datos:** los `POST` llevan un UUID del cliente, son idempotentes y las escrituras del front pasan por el outbox.

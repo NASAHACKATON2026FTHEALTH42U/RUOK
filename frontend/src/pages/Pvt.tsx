@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { serverNow } from '../api/client'
+import { useActiveMemberId } from '../auth/useAuth'
 import { newId } from '../api/newId'
 import { useIndicators } from '../api/useIndicators'
 import {
@@ -17,7 +18,6 @@ import { statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { useVocab } from '../environments/useVocab'
 import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox'
-import { useEnvironmentStore } from '../store/environment'
 
 type Phase =
   | { kind: 'intro' }
@@ -50,7 +50,7 @@ function exitFullscreen() {
  */
 export default function Pvt() {
   const vocab = useVocab()
-  const memberId = useEnvironmentStore((s) => s.memberId)
+  const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el elegido
   const catalog = useIndicators()
   const [phase, setPhase] = useState<Phase>({ kind: 'intro' })
 
