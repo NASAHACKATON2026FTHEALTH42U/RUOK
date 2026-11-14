@@ -6,8 +6,7 @@ STUB hasta su issue (ver docs/backend.md, sección "Members"):
 - `overall_status` → BE-11 (evaluación);
 - `open_alerts` → BE-14 (alertas).
 
-STUB → BE-07 (seed): mientras no exista el seed, la app inserta al arrancar los
-members de ejemplo de `app/stubs.py` (`ensure_demo_members`).
+Los members los crea el seed (app/seed.py, BE-07).
 """
 
 from datetime import datetime
@@ -20,28 +19,6 @@ from app.schemas import Member, MemberSummary
 from app.schemas.common import Liveness
 
 _STUB_BY_ID = {m.id: m for m in stubs.MEMBERS}
-
-
-def ensure_demo_members(session: Session) -> int:
-    """Si la tabla `member` está vacía, inserta los members de los stubs.
-
-    Devuelve cuántos ha insertado (0 si ya había members).
-    """
-    if session.exec(select(models.Member).limit(1)).first() is not None:
-        return 0
-    for m in stubs.MEMBERS:
-        session.add(
-            models.Member(
-                id=m.id,
-                env_id=m.env_id,
-                name=m.name,
-                position=m.position,
-                share_behavioral_details=m.share_behavioral_details,
-                last_seen_at=m.last_seen_at,
-            )
-        )
-    session.commit()
-    return len(stubs.MEMBERS)
 
 
 def get_member(session: Session, member_id: int) -> models.Member | None:
