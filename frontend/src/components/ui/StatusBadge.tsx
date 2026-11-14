@@ -4,7 +4,8 @@ interface StatusBadgeProps {
   status: DisplayState
   /** Sustituye la etiqueta por defecto (p. ej. "Sin datos desde hace 12 min"). */
   label?: string
-  size?: 'sm' | 'md'
+  /** `xs`: muy pequeño, para la barra superior. */
+  size?: 'xs' | 'sm' | 'md'
   className?: string
 }
 
@@ -18,12 +19,16 @@ const STRIPES = `repeating-linear-gradient(135deg, color-mix(in srgb, ${STATUS_C
  */
 export function StatusBadge({ status, label, size = 'md', className = '' }: StatusBadgeProps) {
   const s = statusStyle(status)
-  const icon = size === 'sm' ? 14 : 16
+  const icon = size === 'xs' ? 10 : size === 'sm' ? 14 : 16
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 border bg-env-surface font-mono font-normal tracking-[0.1em] whitespace-nowrap text-env-text uppercase ${
-        size === 'sm' ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-1 text-[11px]'
+      className={`inline-flex items-center border bg-env-surface font-mono font-normal whitespace-nowrap text-env-text uppercase ${
+        size === 'xs'
+          ? 'gap-1 px-1 py-px text-[8px] tracking-[0.06em]'
+          : size === 'sm'
+            ? 'gap-1.5 px-1.5 py-0.5 text-[10px] tracking-[0.1em]'
+            : 'gap-1.5 px-2 py-1 text-[11px] tracking-[0.1em]'
       } ${className}`}
       style={{ borderColor: s.color, ...(s.striped ? { backgroundImage: STRIPES } : {}) }}
       data-status={status}

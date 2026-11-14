@@ -145,7 +145,7 @@ function GroupPlot({
         <p className="mt-1 text-sm text-env-muted">Sin mediciones en los últimos {days} días.</p>
       ) : (
         <>
-          <div style={{ height: tall ? 220 : 150 }} aria-hidden="true" className="mt-1">
+          <div style={{ height: tall ? 220 : 130 }} aria-hidden="true" className="mt-1">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={rows}

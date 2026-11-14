@@ -154,7 +154,7 @@ export default function Dashboard() {
           <StatusBadge
             status={a.overall_status}
             label={`Estado general: ${statusStyle(a.overall_status).label}`}
-            size="sm"
+            size="xs"
           />
         )}
         {live && (
