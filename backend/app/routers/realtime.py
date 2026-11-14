@@ -44,7 +44,7 @@ from app.schemas import (
     Slug,
 )
 from app.schemas.realtime import AlertCounts, ControlMetrics, EnvironmentOverview, EnvironmentRef
-from app.services import alerts, comm_link, events, liveness_watch
+from app.services import alerts, app_state, comm_link, events, liveness_watch
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -289,6 +289,7 @@ def list_link_messages(
 )
 def demo_reset(session: Annotated[Session, Depends(get_session)]) -> OkResponse:
     members, measurements = seed.reset(session)
+    app_state.save_clock(session)  # el reloj vuelve al real también tras un reinicio (BE-32)
     return OkResponse(
         detail=f"seed v{seed.SEED_VERSION}: {members} members y {measurements} mediciones"
     )
@@ -339,6 +340,7 @@ def demo_link(body: DemoLinkIn, session: SessionDep) -> LinkStatus:
 )
 def demo_fast_forward(body: FastForwardIn, session: SessionDep) -> DemoClock:
     clock.advance(body.seconds)
+    app_state.save_clock(session)  # el offset sobrevive a un reinicio del servidor (BE-32)
     comm_link.deliver_due(session)
     alerts.reevaluate_open(session)  # escala los warnings que han persistido (BE-14)
     liveness_watch.check_all(session)  # R U OK? y no_contact con el reloj adelantado (BE-16)
