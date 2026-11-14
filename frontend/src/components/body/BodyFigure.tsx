@@ -261,14 +261,14 @@ export function BodyFigure({
         </g>
       ),
     ],
-    // Cerebro (neuro-conductual)
-    ['brain', (r) => <ellipse cx="443" cy="88" rx="82" ry="58" {...shape(r)} />],
-    // Ojos (SANS)
+    // Cerebro (neuro-conductual). Termina por encima de los ojos para no robarles el clic.
+    ['brain', (r) => <ellipse cx="443" cy="76" rx="82" ry="46" {...shape(r)} />],
+    // Ojos (SANS). Zona sensible (rect invisible) más alta que los ojos: es fácil pulsarlos.
     [
       'eyes',
       (r) => (
         <g {...shape(r)}>
-          <rect x="370" y="122" width="148" height="40" fill="transparent" stroke="none" />
+          <rect x="360" y="118" width="168" height="56" fill="transparent" stroke="none" />
           <ellipse cx="403" cy="142" rx="24" ry="13" />
           <ellipse cx="484" cy="142" rx="24" ry="13" />
         </g>
