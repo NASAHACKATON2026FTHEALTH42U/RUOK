@@ -121,7 +121,9 @@ export function Layout() {
           </section>
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        {/* La cuadrícula de fondo va en toda la columna (barra superior + contenido), para que
+            no se corte a la altura de la cabecera. */}
+        <div className="bg-grid flex min-w-0 flex-1 flex-col">
           {/* Barra superior de escritorio, con el estilo de la de fase de misión: identidad,
               usuario y el resumen de la página (TopBarPortal: estado general, avisos…) a la
               izquierda; reloj, SOS y «Salir» pegados a la derecha. Fuera
@@ -147,7 +149,7 @@ export function Layout() {
           </div>
 
           {/* Contenido. En móvil, cada pantalla debería caber sin scroll (hud-style.md §5). */}
-          <main className="bg-grid min-w-0 flex-1 overflow-x-clip overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
+          <main className="min-w-0 flex-1 overflow-x-clip overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
             <div
               className={`mx-auto w-full px-3.5 py-3.5 md:px-4 md:py-4 lg:px-6 lg:py-6 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'} ${fill ? 'flex h-full flex-col' : ''}`}
             >
