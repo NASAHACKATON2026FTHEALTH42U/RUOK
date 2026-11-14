@@ -23,6 +23,8 @@ CONTRACT_ENDPOINTS = [
     ("get", "/auth/demo-users"),
     ("get", "/users"),
     ("post", "/users"),
+    ("patch", "/users/{user_id}"),
+    ("put", "/users/{user_id}/pin"),
     ("get", "/environments"),
     ("get", "/environments/{env_id}"),
     ("get", "/indicators"),
@@ -151,9 +153,17 @@ CALLS = [
     (
         "post",
         "/users",
-        {"username": "n", "display_name": "N", "role": "medic", "env_id": "mars", "password": "x"},
+        {
+            "username": "contract-user",
+            "display_name": "N",
+            "role": "medic",
+            "env_id": "mars",
+            "password": "contraseña-segura",
+        },
         201,
     ),
+    ("patch", "/users/1", {"active": True}, 200),
+    ("put", "/users/1/pin", {"pin": "1234"}, 200),  # vega: vuelve al PIN de la demo
     ("get", "/environments", None, 200),
     ("get", "/environments/mars", None, 200),
     ("get", "/indicators", None, 200),

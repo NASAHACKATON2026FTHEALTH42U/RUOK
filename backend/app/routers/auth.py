@@ -1,4 +1,4 @@
-"""Autenticación local (BE-26). `/users` sigue siendo STUB(FS-02) → FS-07.
+"""Autenticación local (BE-26) y gestión de usuarios (FS-07, solo admin).
 
 Ver docs/auth-and-roles.md:
 - `POST /auth/login` y `POST /auth/pin` devuelven un JWT local (12 h).
@@ -14,20 +14,22 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
-from app import clock, models, stubs
+from app import clock, models
 from app.auth.security import create_token
 from app.db import get_session
-from app.routers.deps import ERRORS_AUTH, AdminDep, CurrentUser
+from app.routers.deps import ERRORS_404, ERRORS_AUTH, AdminDep, CurrentUser
 from app.schemas import (
     DemoUser,
     ErrorResponse,
     EventType,
     LoginIn,
     PinLoginIn,
+    PinReset,
     Slug,
     TokenResponse,
     User,
     UserCreate,
+    UserUpdate,
 )
 from app.services import accounts, events
 
@@ -52,6 +54,7 @@ def to_user(account: models.UserAccount) -> User:
         env_id=account.env_id,
         member_id=account.member_id,
         role_label=accounts.role_label(account),
+        active=account.active,
     )
 
 
@@ -163,34 +166,78 @@ def demo_users(session: SessionDep) -> list[DemoUser]:
     ]
 
 
+_ERR_USER = {
+    **ERRORS_AUTH,
+    409: {"model": ErrorResponse, "description": "Choca con el estado actual"},
+}
+
+
+def _get_account(session: Session, user_id: int) -> models.UserAccount:
+    account = session.get(models.UserAccount, user_id)
+    if account is None:
+        raise HTTPException(404, "Usuario inexistente")
+    return account
+
+
 @router.get(
     "/users",
     response_model=list[User],
     responses=ERRORS_AUTH,
     dependencies=[AdminDep],
     summary="Listar usuarios (admin)",
-    description="STUB(FS-02) → FS-07",
 )
-def list_users(env_id: Slug | None = None) -> list[User]:
-    return [u for u in stubs.USERS if env_id is None or u.env_id == env_id]
+def list_users(session: SessionDep, env_id: Slug | None = None) -> list[User]:
+    query = select(models.UserAccount).order_by(models.UserAccount.id)
+    if env_id is not None:
+        query = query.where(models.UserAccount.env_id == env_id)
+    return [to_user(u) for u in session.exec(query).all()]
 
 
 @router.post(
     "/users",
     response_model=User,
     status_code=201,
-    responses=ERRORS_AUTH,
+    responses=_ERR_USER,
     dependencies=[AdminDep],
     summary="Crear usuario (admin)",
-    description="STUB(FS-02) → FS-07",
 )
-def create_user(body: UserCreate) -> User:
-    return User(
-        id=100,
-        username=body.username,
-        display_name=body.display_name,
-        role=body.role,
-        env_id=body.env_id,
-        member_id=body.member_id,
-        role_label=body.role.value,
-    )
+def create_user(body: UserCreate, session: SessionDep) -> User:
+    try:
+        account = accounts.create_user(session, **body.model_dump(mode="json"))
+    except accounts.UserInvalid as exc:
+        raise HTTPException(422, str(exc)) from exc
+    except accounts.UserConflict as exc:
+        raise HTTPException(409, str(exc)) from exc
+    return to_user(account)
+
+
+@router.patch(
+    "/users/{user_id}",
+    response_model=User,
+    responses={**_ERR_USER, **ERRORS_404},
+    dependencies=[AdminDep],
+    summary="Activar o desactivar un usuario (admin)",
+)
+def update_user(user_id: int, body: UserUpdate, session: SessionDep, admin: CurrentUser) -> User:
+    account = _get_account(session, user_id)
+    try:
+        account = accounts.set_active(session, account, body.active, acting=admin)
+    except accounts.UserConflict as exc:
+        raise HTTPException(409, str(exc)) from exc
+    return to_user(account)
+
+
+@router.put(
+    "/users/{user_id}/pin",
+    response_model=User,
+    responses={**ERRORS_AUTH, **ERRORS_404},
+    dependencies=[AdminDep],
+    summary="Restablecer el PIN de un usuario (admin)",
+)
+def reset_user_pin(user_id: int, body: PinReset, session: SessionDep) -> User:
+    account = _get_account(session, user_id)
+    try:
+        account = accounts.reset_pin(session, account, body.pin)
+    except accounts.UserInvalid as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return to_user(account)
