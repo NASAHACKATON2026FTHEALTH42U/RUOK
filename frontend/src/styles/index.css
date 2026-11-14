@@ -94,20 +94,21 @@ html[data-theme-ready] :is(body, header, footer, nav a, select) {
 @keyframes critical-blink {
   0%,
   100% {
-    opacity: 1;
+    opacity: 0.8;
     filter: brightness(1.15) drop-shadow(0 0 6px rgb(208 59 59 / 0.9));
   }
   50% {
-    opacity: 0.55;
+    opacity: 0.4;
     filter: brightness(1) drop-shadow(0 0 0 rgb(208 59 59 / 0));
   }
 }
 .critical-blink {
-  animation: critical-blink 1.2s ease-in-out infinite;
+  animation: critical-blink 1.8s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .critical-blink {
     animation: none;
+    opacity: 0.8;
     filter: brightness(1.15) drop-shadow(0 0 6px rgb(208 59 59 / 0.9));
   }
 }

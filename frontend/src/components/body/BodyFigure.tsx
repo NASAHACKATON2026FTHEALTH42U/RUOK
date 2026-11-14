@@ -141,8 +141,8 @@ export function BodyFigure({
     const selected = selectedSystemId === r.systemId || hovered === r.systemId
     return {
       fill: fillFor(r),
-      // Más opaco al señalarlo o si está crítico (además, el crítico parpadea).
-      fillOpacity: hovered === r.systemId || (r.status === 'critical' && !stale) ? 0.85 : 0.55,
+      // Más opaco al señalarlo; el crítico, algo más (sin llegar a sólido) y además parpadea.
+      fillOpacity: hovered === r.systemId ? 0.85 : r.status === 'critical' && !stale ? 0.7 : 0.55,
       stroke: selected
         ? '#ffffff'
         : stale || statusStyle(r.status).striped
