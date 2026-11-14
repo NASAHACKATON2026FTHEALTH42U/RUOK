@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { withCatalogCache } from '../offline/cache'
 import { api, unwrap } from './client'
 
 const getEnvironments = () => unwrap(api.GET('/api/v1/environments'))
@@ -17,7 +18,7 @@ export type Loadable<T> =
 let cache: Promise<Environment[]> | null = null
 
 function fetchEnvironments(): Promise<Environment[]> {
-  cache ??= getEnvironments().catch((err: unknown) => {
+  cache ??= withCatalogCache('environments', getEnvironments)().catch((err: unknown) => {
     cache = null
     throw err
   })

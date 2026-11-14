@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); check-in diario "R U OK?" en **FE-19** (#27); identidad de dispositivo e IndexedDB en **FE-30** (#74).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); check-in diario "R U OK?" en **FE-19** (#27); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41); botón SOS / Pedir ayuda en **FE-13** (#43).
 
 ## Comandos
 
@@ -106,7 +106,9 @@ frontend/
     ├── offline/
     │   ├── device.ts          identidad del dispositivo: getDevice(), ?device=<nombre> (+ test)
     │   ├── db.ts              base IndexedDB ruok-<device_id> con los stores de data-model.md
-    │   └── outbox.ts          sendMeasurements(): punto único de escritura (IndexedDB en FE-11)
+    │   ├── outbox.ts          outbox + sincronizador: sendMeasurements(), syncNow(), useOutboxStore
+    │   ├── backoff.ts         backoffMs(), classify(), isDue() (+ test)
+    │   └── cache.ts           caché offline: withCatalogCache(), última evaluación, isUnavailable()
     ├── lib/time.ts            formatAgo(): "hace 12 min" con la hora del servidor (+ test)
     ├── store/environment.ts   store Zustand: envId, memberId, vocabulary (persistido)
     ├── api/
@@ -121,10 +123,12 @@ frontend/
     │   ├── useIndicators.ts   hook de GET /indicators (catálogo, una petición compartida)
     │   ├── useLoad.ts         carga genérica (loading / ready / error + retry, refresco en segundo plano)
     │   ├── useLink.ts         hook de GET /link?env= (estado del enlace)
+    │   ├── useInterventions.ts hook de GET /interventions (caché offline)
     │   ├── useMeasurements.ts hook de GET /members/{id}/measurements (serie de N días)
     │   ├── mocks/             API simulada: mode.ts, handlers.ts, mockFetch.ts, events.ts,
     │   │                      useMockStatus.ts, fixtures.gen.ts (GENERADO por npm run gen:mocks)
     │   └── *.test.ts          tests (Vitest)
+    ├── components/alerts/     SosButton, SosDialog + sos.ts (categorías, destinos, protocolo; + test)
     ├── components/body/       BodyFigure (SVG) + regions.ts (buildRegions, formatSinceLabel; + test)
     ├── components/dashboard/  SystemPanel, IndicatorCard, TrendChart, LinkChip + format.ts y trend.ts (+ tests)
     ├── components/measure/    IndicatorField + measureForm.ts (parseValue, emptyValue; + test)
@@ -135,13 +139,14 @@ frontend/
     │   ├── EnvironmentSelector.tsx
     │   ├── ServerStatus.tsx   chip de conexión con el servidor
     │   ├── StatusBadge.tsx    semáforo: icono (forma + símbolo) + etiqueta
+    │   ├── PendingSyncChip.tsx "N pendientes de sincronizar" en la cabecera
     │   ├── status.ts          statusStyle(), livenessState(), STATUS_COLORS (+ status.test.ts)
     │   ├── MockBanner.tsx     banner obligatorio con datos de ejemplo
     │   └── PagePlaceholder.tsx
     └── pages/                 una página vacía por ruta
 ```
 
-Carpetas que aún no existen y que crean sus issues: `components/{alerts,game}/`. `offline/` ya existe con `outbox.ts`; FE-11 y FE-30 añaden IndexedDB y la sincronización.
+Carpetas que aún no existen y que crean sus issues: `components/game/`. `offline/` ya existe con `outbox.ts`; FE-11 y FE-30 añaden IndexedDB y la sincronización.
 
 ## Rutas
 
@@ -350,9 +355,8 @@ Verificado con una serie sintética de 30 días (interceptando la petición en C
 
 - **Validación** (`parseValue()`): rango `[min, max]` y paso (`step`) de `indicator.input`; los errores salen bajo el campo (`role="alert"`, `aria-invalid`). Los campos vacíos no se envían; hace falta al menos uno.
 - **Un solo lote** por formulario: la tensión sistólica y la diastólica (y el resto del sistema) van juntas en `POST /members/{id}/measurements`, con un **UUID por medición** (`newId()`), `taken_at` = hora del servidor y `source: "manual"`, más la nota opcional.
-- **Reintento idempotente:** si falla la red, el formulario conserva los valores, los bloquea y el botón pasa a "Reintentar el envío", que reenvía **los mismos UUID** (el servidor no duplica).
-- **Resultado:** "N mediciones enviadas" y el estado general de la evaluación que devuelve el lote; "Ver el panel" vuelve a `/dashboard`, que vuelve a pedir la evaluación.
-- Toda escritura pasa por `src/offline/outbox.ts` (`sendMeasurements()`). **TODO(FE-11):** guardar primero en IndexedDB para no perder nada sin conexión; hoy, sin red, la medición no se guarda hasta que se reintenta.
+- **Sin conexión no se pierde nada** (FE-11): el lote se guarda primero en el outbox del dispositivo. Si llega al servidor, se ve "N mediciones enviadas" con el estado general que devuelve; si no, "Medición guardada en el dispositivo", y se envía sola cuando vuelva la conexión, con los mismos UUID (sin duplicados).
+- "Ver el panel" vuelve a `/dashboard`, que vuelve a pedir la evaluación.
 
 ## Check-in diario "R U OK?" (FE-19)
 
@@ -363,8 +367,8 @@ Verificado con una serie sintética de 30 días (interceptando la petición en C
 - **Las caras siguen la polaridad** del indicador (`higher_is_worse`, `faceFor()`): en ánimo, 5 es 😄; en estrés y soledad, 5 es 😞. Cada cara va siempre con su número y `aria-label="N de 5"`, para no depender solo del emoji. Pulsar la opción elegida la quita.
 - Hay que responder a las 6. El botón muestra el progreso ("Responde 4 / 6") hasta que están todas.
 - **Envío:** un solo lote (`buildCheckinBatch()`) por `sendMeasurements()` del outbox. Lleva una medición por respuesta con su UUID (`newId()`), `source: "checkin"`, la misma `taken_at` (hora del servidor) y la nota en todas.
-- **Reintento idempotente:** igual que en FE-10. Si falla la red, las respuestas se bloquean y "Reintentar el envío" reenvía **los mismos UUID**.
-- **Resultado:** "Check-in guardado" con el estado general que devuelve el lote, y enlaces al panel y al historial (`/history?indicator=mood`).
+- **Sin conexión no se pierde nada** (outbox, FE-11): si el lote llega al servidor, se ve "Check-in guardado" con el estado general que devuelve; si no, "Check-in guardado en el dispositivo", y se envía solo cuando vuelve la conexión, con los mismos UUID.
+- **Resultado:** en los dos casos hay enlaces al panel y al historial (`/history?indicator=mood`).
 - **Historial:** los 6 indicadores aparecen siempre en el selector de `/history`, aunque el entorno no los tenga activos. Hoy los entornos solo activan `mood`.
 - **Aviso de privacidad** al pie, según `docs/behavioral-health.md`. Quien lo aplica es el backend (BE-20, BE-17 y BE-27); el front solo informa.
 
@@ -372,7 +376,6 @@ Verificado con una serie sintética de 30 días (interceptando la petición en C
 
 **Pendiente:**
 
-- Cuando entre FE-11 (PR #107), `sendMeasurements()` devolverá `{ status: 'sent' | 'queued' }`. El check-in tendrá que mostrar "guardado en el dispositivo" si queda en cola, igual que `Measure`.
 - Activar los indicadores conductuales en `environments.json` para que entren en la evaluación (backend, BE-20).
 
 ## Dispositivo e IndexedDB (FE-30)
@@ -392,6 +395,48 @@ Cada dispositivo (o pestaña, en los ensayos) tiene su propia identidad, su base
   - la clave de la sesión de Zustand: **`ruok-session-<device_id>`**.
 - El `device_id` es siempre un UUID (el back lo valida).
 - Probado con dos pestañas `?device=a` y `?device=b`: ids, bases, sesión y outbox independientes.
+
+## Outbox offline y sincronización (FE-11)
+
+**Toda escritura pasa por `src/offline/outbox.ts`** (CLAUDE.md, principio 4). Flujo (`docs/data-model.md` §2):
+
+1. **Guardar primero** en la base del dispositivo: entrada en `outbox` (`status: pending`) y, para mediciones, cada una en `measurements` con `synced: false`. Aunque se cierre la app o no haya red, no se pierde.
+2. **Enviar.** El sincronizador recorre el outbox por orden de creación y decide con `classify(status)`:
+
+| Respuesta                  | Qué hace                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| 2xx (incluido "duplicado") | borra la entrada, marca las mediciones `synced`, guarda la evaluación devuelta |
+| sin red, 408, 429, 5xx     | `attempts + 1` y reintento con **backoff** (2 s, 4 s, 8 s… tope 60 s)          |
+| 401                        | **pausa** sin borrar nada; FE-27 pide login y llama a `resumeSync()`           |
+| otro 4xx (p. ej. 409, 422) | `failed`: se conserva para revisarla y no se reintenta en bucle                |
+
+3. **Cuándo se sincroniza:** al encolar, al arrancar, con el evento `online` y al volver a la pestaña (estos tres **sin esperar el backoff**), y cada 5 s si hay pendientes. `navigator.locks` evita envíos simultáneos desde dos pestañas del mismo dispositivo. Al arrancar, las entradas que se quedaron "enviando" (app cerrada a mitad) vuelven a `pending`.
+
+- **API:** `sendMeasurements(memberId, mediciones)` → `{ status: 'sent', result }` si ya llegó o `{ status: 'queued' }` si queda pendiente. `syncNow(force?)`, `resumeSync()`. Estado en `useOutboxStore` (`pending`, `failed`, `syncing`, `paused`).
+- **Cabecera:** `PendingSyncChip` muestra "⇡ N pendientes de sincronizar" (o "Sincronizando…", "N rechazadas"); pulsarlo fuerza un intento. Solo aparece si hay algo.
+- **Caché offline** (`src/offline/cache.ts`): `environments`, `indicators` y `systems` se guardan en el store `catalog` en cada carga y se usan si el servidor no está; la última evaluación de cada member se guarda en `assessments` y, sin servidor, el dashboard la muestra con el aviso "No se pudo actualizar: los datos pueden estar desfasados" (`useLoad({ fallback })`). Aún no hay endpoint de protocolos; las intervenciones (FE-20) pueden usar `withCatalogCache('interventions', …)`.
+- **"Sin servidor"** = error de red o 502/503/504 (`isUnavailable()`). En desarrollo, el proxy de Vite responde **503** cuando el backend está parado (`vite.config.ts`), en lugar de su 500 genérico.
+- Un 401 o un cierre de sesión **nunca** borran el outbox.
+
+**Probado** (criterio de aceptación): con el backend parado se registran 2 mediciones (temperatura y frecuencia cardiaca) → quedan en el outbox, sobreviven a una recarga y el panel se ve desde la caché → al arrancar el backend se sincronizan en 7 s; cada medición llega una sola vez (sin duplicados).
+
+## Pedir ayuda / SOS (FE-13)
+
+Botón rojo **"✚ Pedir ayuda"** fijo abajo a la derecha en todas las páginas (`SosButton` en `Layout`). Abre `SosDialog` (`role="dialog"`, Esc o clic fuera para cerrar):
+
+- **¿Qué pasa?** `symptom` (síntoma), `physical` (malestar físico), `psychological` (**"Necesito hablar"**, canal confidencial: lo dice el diálogo) o `emergency`.
+- **¿Cuánto urge?** `warning` (puede esperar), `critical` (urgente), `emergency`. Elegir "Emergencia" pone la severidad `emergency`.
+- **¿A quién avisar?** La escalera del entorno sin `self`, por defecto el siguiente nivel y **se pueden saltar niveles**. Las etiquetas salen del vocabulario (`roleLabel()`: `nurse`/`caregiver` → `medic`, `doctor` → `ground`, `family` → "familia").
+- **Mensaje** opcional (si no hay, se envía la categoría).
+
+Se envía **por el outbox** (`sendAlert()`, mismo UUID en el dispositivo y en el servidor; la alerta se guarda en el store `alerts` con `pending=true`):
+
+- **Con conexión:** "✓ Enviado a {destino}". Si el entorno tiene retardo: "le llegará en unos 14 min (hacia las HH:MM, hora del servidor)".
+- **Sin conexión:** "**No enviado. Avisa a {tripulación} de viva voz**", la petición queda guardada y se envía sola al volver la conexión. Debajo, **"Mientras tanto"**, el protocolo que hay en el dispositivo:
+  - los mensajes de escalado (`escalation.message`, primero los `autonomous`) de la **última evaluación guardada**; "Necesito hablar" solo muestra los del sistema neuro-conductual;
+  - las **intervenciones offline** (`offline: true`) del catálogo en caché; para "Necesito hablar", las del sistema neuro-conductual (p. ej. respiración en caja).
+- No hay textos clínicos en el código: todo el protocolo viene de la evaluación o del catálogo. **Falta un endpoint de protocolos** (`protocol_id` existe en la evaluación, pero no hay `GET /protocols`); cuando exista, se cachea con `withCatalogCache('protocols')`.
+- Sin member elegido, el diálogo pide elegirlo y recuerda avisar de viva voz.
 
 ### Pendiente
 

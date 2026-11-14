@@ -6,6 +6,7 @@ import { initMockModeFromUrl } from './api/mocks/mode'
 import { initTheme } from './environments/applyTheme'
 import { getDb } from './offline/db'
 import { getDevice } from './offline/device'
+import { initOutbox } from './offline/outbox'
 import './styles/index.css'
 
 // ?mocks=1 activa el modo demo sin servidor (se recuerda); ?mocks=0 lo desactiva.
@@ -14,6 +15,8 @@ initMockModeFromUrl()
 // y decide la base IndexedDB `ruok-<device_id>` (FE-30).
 configureApi({ getDeviceId: () => getDevice().id })
 void getDb()
+// Outbox offline: reenvía lo pendiente al arrancar, con `online` y cada 5 s (FE-11).
+void initOutbox()
 initTheme()
 
 createRoot(document.getElementById('root')!).render(

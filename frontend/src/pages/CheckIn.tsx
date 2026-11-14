@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ApiError, NetworkError, serverNow } from '../api/client'
+import { serverNow } from '../api/client'
 import { newId } from '../api/newId'
 import { useIndicators } from '../api/useIndicators'
 import {
@@ -13,24 +13,25 @@ import { FaceScale } from '../components/behavioral/FaceScale'
 import { statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { useVocab } from '../environments/useVocab'
-import {
-  sendMeasurements,
-  type MeasurementBatchResult,
-  type MeasurementIn,
-} from '../offline/outbox'
+import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox'
 import { useEnvironmentStore } from '../store/environment'
 
 type Phase =
   | { kind: 'editing' }
   | { kind: 'sending' }
   | { kind: 'sent'; result: MeasurementBatchResult }
+  | { kind: 'queued' }
   | { kind: 'failed'; message: string }
+
+const btnPrimary = 'rounded-lg bg-env-primary px-4 py-2 font-medium text-env-primary-text'
+const btnSecondary = 'rounded-lg border border-env-border px-4 py-2 hover:border-env-text'
 
 /**
  * Check-in diario conductual "R U OK?" (FE-19). Seis escalas 1–5 con caras (ánimo, estrés,
  * energía, soledad, calidad del sueño y relación con el equipo) y una nota opcional, en una
  * sola pantalla para hacerlo en menos de 30 s. Se envía como UN lote de mediciones con
- * `source: "checkin"`; si falla la red, el reintento reutiliza los mismos UUID.
+ * `source: "checkin"` por el outbox (FE-11): sin red queda guardado en el dispositivo y se
+ * envía solo cuando vuelve la conexión, con los mismos UUID (sin duplicados).
  */
 export default function CheckIn() {
   const vocab = useVocab()
@@ -45,8 +46,6 @@ export default function CheckIn() {
   const [answers, setAnswers] = useState<Answers>({})
   const [note, setNote] = useState('')
   const [phase, setPhase] = useState<Phase>({ kind: 'editing' })
-  // Lote pendiente: tras un fallo de red se reenvía tal cual (mismos ids, sin duplicados).
-  const [pending, setPending] = useState<MeasurementIn[] | null>(null)
 
   const title = <h1 className="text-2xl font-semibold">R U OK?</h1>
 
@@ -92,32 +91,55 @@ export default function CheckIn() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    let batch = pending
-    if (!batch) {
-      if (!complete) {
-        setPhase({ kind: 'failed', message: 'Responde a todas las preguntas.' })
-        return
-      }
-      batch = buildCheckinBatch(answers, ids, note, serverNow().toISOString(), newId)
-      setPending(batch)
+    if (!complete) {
+      setPhase({ kind: 'failed', message: 'Responde a todas las preguntas.' })
+      return
     }
+    const batch = buildCheckinBatch(answers, ids, note, serverNow().toISOString(), newId)
 
     setPhase({ kind: 'sending' })
     try {
-      const result = await sendMeasurements(memberId, batch)
-      setPending(null)
-      setPhase({ kind: 'sent', result })
+      // Se guarda en el dispositivo y se intenta enviar; sin red queda pendiente (no se pierde).
+      const r = await sendMeasurements(memberId, batch)
+      setPhase(r.status === 'sent' ? { kind: 'sent', result: r.result } : { kind: 'queued' })
     } catch (err) {
+      // Solo si falla el propio guardado local (IndexedDB no disponible).
       setPhase({
         kind: 'failed',
-        message:
-          err instanceof NetworkError
-            ? 'Sin conexión con el servidor: el check-in NO se ha guardado todavía. Vuelve a intentarlo (se reenviará el mismo, sin duplicarse).'
-            : err instanceof ApiError
-              ? `El servidor ha rechazado el check-in: ${err.message}`
-              : String(err),
+        message: `No se ha podido guardar en el dispositivo: ${String(err)}`,
       })
     }
+  }
+
+  const links = (
+    <div className="flex flex-wrap gap-2">
+      <Link to="/dashboard" className={btnPrimary}>
+        Ver el panel
+      </Link>
+      <Link to="/history?indicator=mood" className={btnSecondary}>
+        Ver el historial
+      </Link>
+    </div>
+  )
+
+  if (phase.kind === 'queued') {
+    return (
+      <section className="mx-auto max-w-xl space-y-4">
+        <h1 className="text-2xl font-semibold">Check-in guardado en el dispositivo</h1>
+        <div className="rounded-xl border border-env-border bg-env-surface p-4" role="status">
+          <p>
+            <span aria-hidden>⇡ </span>
+            No hay conexión con el servidor. Tus respuestas están guardadas aquí y{' '}
+            <strong>se enviarán solas</strong> cuando vuelva la conexión, sin duplicarse.
+          </p>
+          <p className="mt-2 text-sm text-env-muted">
+            Verás los pendientes en la cabecera. Hasta entonces, el panel y el historial pueden no
+            reflejarlas.
+          </p>
+        </div>
+        {links}
+      </section>
+    )
   }
 
   if (phase.kind === 'sent') {
@@ -136,25 +158,10 @@ export default function CheckIn() {
             />
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            to="/dashboard"
-            className="rounded-lg bg-env-primary px-4 py-2 font-medium text-env-primary-text"
-          >
-            Ver el panel
-          </Link>
-          <Link
-            to="/history?indicator=mood"
-            className="rounded-lg border border-env-border px-4 py-2 hover:border-env-text"
-          >
-            Ver el historial
-          </Link>
-        </div>
+        {links}
       </section>
     )
   }
-
-  const locked = pending !== null // tras un fallo de red, no se cambian las respuestas del lote
 
   return (
     <form onSubmit={submit} className="mx-auto max-w-xl space-y-4" noValidate>
@@ -163,7 +170,7 @@ export default function CheckIn() {
         <p className="text-env-muted">¿Cómo estás hoy? {ids.length} preguntas rápidas.</p>
       </div>
 
-      <fieldset disabled={locked || phase.kind === 'sending'} className="space-y-3">
+      <fieldset disabled={phase.kind === 'sending'} className="space-y-3">
         <legend className="sr-only">Check-in diario</legend>
         {questions.map((q) => (
           <FaceScale
@@ -199,16 +206,14 @@ export default function CheckIn() {
 
       <button
         type="submit"
-        disabled={phase.kind === 'sending' || (!complete && !locked)}
+        disabled={phase.kind === 'sending' || !complete}
         className="w-full rounded-lg bg-env-primary px-4 py-3 font-medium text-env-primary-text disabled:opacity-60"
       >
         {phase.kind === 'sending'
-          ? 'Enviando…'
-          : locked
-            ? 'Reintentar el envío'
-            : complete
-              ? 'Enviar check-in'
-              : `Responde ${done} / ${ids.length}`}
+          ? 'Guardando…'
+          : complete
+            ? 'Enviar check-in'
+            : `Responde ${done} / ${ids.length}`}
       </button>
     </form>
   )

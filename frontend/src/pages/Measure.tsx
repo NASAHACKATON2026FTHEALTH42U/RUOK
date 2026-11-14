@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { ApiError, NetworkError, serverNow } from '../api/client'
+import { serverNow } from '../api/client'
 import { newId } from '../api/newId'
 import { useEnvironments } from '../api/useEnvironments'
 import { useIndicators, type Indicator } from '../api/useIndicators'
@@ -10,17 +10,14 @@ import { emptyValue, parseValue, type RawValue } from '../components/measure/mea
 import { statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { useVocab } from '../environments/useVocab'
-import {
-  sendMeasurements,
-  type MeasurementBatchResult,
-  type MeasurementIn,
-} from '../offline/outbox'
+import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox'
 import { useEnvironmentStore } from '../store/environment'
 
 type Phase =
   | { kind: 'editing' }
   | { kind: 'sending' }
   | { kind: 'sent'; result: MeasurementBatchResult }
+  | { kind: 'queued' }
   | { kind: 'failed'; message: string }
 
 /**
@@ -28,7 +25,8 @@ type Phase =
  * o `?indicator=`: formulario de los indicadores activos del entorno, generado desde
  * `indicator.input`, con los pasos de `measurement_instructions` y validación de rango.
  * Se envía todo en UN lote (la tensión sistólica + diastólica van juntas), con un UUID por
- * medición que se reutiliza si hay que reintentar (idempotente).
+ * medición. Pasa por el outbox (FE-11): se guarda primero en el dispositivo y, si no hay
+ * conexión, se envía solo cuando vuelva, sin duplicados.
  */
 export default function Measure() {
   const vocab = useVocab()
@@ -143,54 +141,77 @@ function MeasureForm({
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [note, setNote] = useState('')
   const [phase, setPhase] = useState<Phase>({ kind: 'editing' })
-  // Lote pendiente: si falla el envío, el reintento reutiliza los MISMOS ids (idempotente).
-  const [pending, setPending] = useState<MeasurementIn[] | null>(null)
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    let batch = pending
-    if (!batch) {
-      const errs: Record<string, string> = {}
-      const ok: { id: string; value: number }[] = []
-      for (const f of fields) {
-        const r = parseValue(values[f.id], f.input, f.unit)
-        if (r.ok === true) ok.push({ id: f.id, value: r.value })
-        else if (r.ok === false) errs[f.id] = r.error
-      }
-      setErrors(errs)
-      if (Object.keys(errs).length > 0) return
-      if (ok.length === 0) {
-        setPhase({ kind: 'failed', message: 'Rellena al menos un valor.' })
-        return
-      }
-      const takenAt = serverNow().toISOString()
-      batch = ok.map((m) => ({
-        id: newId(),
-        indicator_id: m.id,
-        value: m.value,
-        taken_at: takenAt,
-        source: 'manual' as const,
-        note: note.trim() || null,
-      }))
-      setPending(batch)
+    const errs: Record<string, string> = {}
+    const ok: { id: string; value: number }[] = []
+    for (const f of fields) {
+      const r = parseValue(values[f.id], f.input, f.unit)
+      if (r.ok === true) ok.push({ id: f.id, value: r.value })
+      else if (r.ok === false) errs[f.id] = r.error
     }
+    setErrors(errs)
+    if (Object.keys(errs).length > 0) return
+    if (ok.length === 0) {
+      setPhase({ kind: 'failed', message: 'Rellena al menos un valor.' })
+      return
+    }
+    const takenAt = serverNow().toISOString()
+    const batch = ok.map((m) => ({
+      id: newId(),
+      indicator_id: m.id,
+      value: m.value,
+      taken_at: takenAt,
+      source: 'manual' as const,
+      note: note.trim() || null,
+    }))
 
     setPhase({ kind: 'sending' })
     try {
-      const result = await sendMeasurements(memberId, batch)
-      setPending(null)
-      setPhase({ kind: 'sent', result })
+      // Se guarda en el dispositivo y se intenta enviar; sin red queda pendiente (no se pierde).
+      const r = await sendMeasurements(memberId, batch)
+      setPhase(r.status === 'sent' ? { kind: 'sent', result: r.result } : { kind: 'queued' })
     } catch (err) {
+      // Solo si falla el propio guardado local (IndexedDB no disponible).
       setPhase({
         kind: 'failed',
-        message:
-          err instanceof NetworkError
-            ? 'Sin conexión con el servidor: la medición NO se ha guardado todavía. Vuelve a intentarlo (se reenviará la misma, sin duplicarse).'
-            : err instanceof ApiError
-              ? `El servidor ha rechazado la medición: ${err.message}`
-              : String(err),
+        message: `No se ha podido guardar en el dispositivo: ${String(err)}`,
       })
     }
+  }
+
+  if (phase.kind === 'queued') {
+    return (
+      <section className="mx-auto max-w-xl space-y-4">
+        <h1 className="text-2xl font-semibold">Medición guardada en el dispositivo</h1>
+        <div className="rounded-xl border border-env-border bg-env-surface p-4" role="status">
+          <p>
+            <span aria-hidden>⇡ </span>
+            No hay conexión con el servidor. La medición está guardada aquí y{' '}
+            <strong>se enviará sola</strong> cuando vuelva la conexión, sin duplicarse.
+          </p>
+          <p className="mt-2 text-sm text-env-muted">
+            Verás los pendientes en la cabecera. Hasta entonces, el panel puede no reflejarla.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onDone}
+            className="rounded-lg bg-env-primary px-4 py-2 font-medium text-env-primary-text"
+          >
+            Ver el panel
+          </button>
+          <Link
+            to="/measure"
+            className="rounded-lg border border-env-border px-4 py-2 hover:border-env-text"
+          >
+            Medir otra cosa
+          </Link>
+        </div>
+      </section>
+    )
   }
 
   if (phase.kind === 'sent') {
@@ -231,8 +252,6 @@ function MeasureForm({
     )
   }
 
-  const locked = pending !== null // tras un fallo de red, no se cambian los valores del lote
-
   return (
     <form onSubmit={submit} className="mx-auto max-w-xl space-y-4" noValidate>
       <Link to="/measure" className="text-sm text-env-muted hover:text-env-text hover:underline">
@@ -245,7 +264,7 @@ function MeasureForm({
         </p>
       )}
 
-      <fieldset disabled={locked || phase.kind === 'sending'} className="space-y-4">
+      <fieldset disabled={phase.kind === 'sending'} className="space-y-4">
         {fields.map((f) => (
           <IndicatorField
             key={f.id}
@@ -286,11 +305,7 @@ function MeasureForm({
         disabled={phase.kind === 'sending'}
         className="w-full rounded-lg bg-env-primary px-4 py-3 font-medium text-env-primary-text disabled:opacity-60"
       >
-        {phase.kind === 'sending'
-          ? 'Enviando…'
-          : locked
-            ? 'Reintentar el envío'
-            : 'Guardar medición'}
+        {phase.kind === 'sending' ? 'Guardando…' : 'Guardar medición'}
       </button>
     </form>
   )
