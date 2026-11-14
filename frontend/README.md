@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24).
 
 ## Comandos
 
@@ -103,6 +103,7 @@ frontend/
     │   ├── useVocab.ts        hook useVocab() + capitalize()
     │   ├── applyTheme.ts      initTheme(): aplica el tema del entorno activo en <html>
     │   └── themes/            un tema por entorno (iss.ts, mars.ts…) + defaultTheme.ts
+    ├── lib/time.ts            formatAgo(): "hace 12 min" con la hora del servidor (+ test)
     ├── store/environment.ts   store Zustand: envId, memberId, vocabulary (persistido)
     ├── api/
     │   ├── types.gen.ts       GENERADO (npm run gen:api): no editar
@@ -111,14 +112,23 @@ frontend/
     │   ├── useServerHealth.ts hook de GET /health
     │   ├── useEnvironments.ts hook de GET /environments (una petición compartida, con reintento)
     │   ├── useMembers.ts      hook de GET /environments/{id}/members
+    │   ├── useSystems.ts      hook de GET /systems (catálogo, una petición compartida)
+    │   ├── useAssessment.ts   hook de GET /members/{id}/assessment
+    │   ├── useIndicators.ts   hook de GET /indicators (catálogo, una petición compartida)
+    │   ├── useLoad.ts         carga genérica (loading / ready / error + retry, refresco en segundo plano)
+    │   ├── useLink.ts         hook de GET /link?env= (estado del enlace)
     │   ├── mocks/             API simulada: mode.ts, handlers.ts, mockFetch.ts, events.ts,
     │   │                      useMockStatus.ts, fixtures.gen.ts (GENERADO por npm run gen:mocks)
     │   └── *.test.ts          tests (Vitest)
+    ├── components/body/       BodyFigure (SVG) + regions.ts (buildRegions, formatSinceLabel; + test)
+    ├── components/dashboard/  SystemPanel, IndicatorCard, LinkChip + format.ts (tendencia, peligros, valores; + test)
     ├── components/environment/  EnvironmentCard (pintada con su propia paleta), MemberList
     ├── components/ui/
     │   ├── Layout.tsx         cabecera + navegación + <Outlet /> + disclaimer
     │   ├── EnvironmentSelector.tsx
     │   ├── ServerStatus.tsx   chip de conexión con el servidor
+    │   ├── StatusBadge.tsx    semáforo: icono (forma + símbolo) + etiqueta
+    │   ├── status.ts          statusStyle(), livenessState(), STATUS_COLORS (+ status.test.ts)
     │   ├── MockBanner.tsx     banner obligatorio con datos de ejemplo
     │   └── PagePlaceholder.tsx
     └── pages/                 una página vacía por ruta
@@ -206,7 +216,96 @@ Reglas:
 
 El selector de la cabecera usa el mismo `useEnvironments()`: hay una sola petición compartida.
 
+## Semáforo: `StatusBadge` (FE-04)
+
+Úsalo **siempre** que se muestre un estado de salud o de liveness (members, sistemas, indicadores, /ground). No pintes estados con colores propios.
+
+```tsx
+<StatusBadge status={m.overall_status} />                 // normal | warning | critical | unknown
+<StatusBadge status="stale" label="Sin datos desde hace 12 min" size="sm" />
+const live = livenessState(m.liveness)                      // null si 'active'
+```
+
+| Estado     | Icono           | Color     | Etiqueta            | Rayado |
+| ---------- | --------------- | --------- | ------------------- | ------ |
+| `normal`   | círculo con ✓   | `#0ca30c` | Normal              | no     |
+| `warning`  | triángulo con ! | `#fab219` | Atención            | no     |
+| `critical` | octógono con ✕  | `#d03b3b` | Crítico             | no     |
+| `unknown`  | círculo con ?   | `#898781` | Sin datos           | sí     |
+| `stale`    | círculo con ?   | `#898781` | Sin datos recientes | sí     |
+| `lost`     | señal tachada   | `#d03b3b` | Sin contacto        | sí     |
+
+Reglas:
+
+- **La paleta del semáforo es fija**: no depende del tema del entorno (`STATUS_COLORS` en `status.ts`).
+- **Nunca solo color**: cada estado tiene forma, símbolo y etiqueta propios. Un test comprueba que se distinguen sin color.
+- **`unknown`, `stale` y `lost` nunca son verdes** y llevan fondo rayado (lo comprueba `status.test.ts`).
+- El color se usa en el icono, no en el texto: la etiqueta va en `text-env-text`.
+- **Accesibilidad:** validada con el script de `dataviz` en las superficies de los 7 temas. La separación para daltonismo es ΔE ≥ 9. En los temas oscuros los 4 colores superan 3:1; en hospital y geriatría el verde y el ámbar bajan de 3:1, por eso la etiqueta es siempre visible y el icono lleva un contorno con el color de texto del tema.
+- Si `overall_status` es `unknown` por un liveness `stale`, muestra solo el badge de liveness ("Sin datos recientes"), que explica el motivo (ver `MemberList`).
+
+## Cuerpo: `BodyFigure` (FE-05)
+
+Figura humana SVG con un color por sistema del cuerpo. Está en `/dashboard` cuando hay un member elegido.
+
+```tsx
+const regions = buildRegions(systems, assessment.systems)   // catálogo (svg_region) + evaluación (status)
+<BodyFigure
+  regions={regions}
+  liveness={assessment.liveness}
+  staleLabel={formatSinceLabel(assessment.last_seen_at, serverNow())}
+  selectedSystemId={selected}
+  onSelectSystem={setSelected}
+/>
+```
+
+| `svg_region` | Dibujo                             | Sistema (stubs)        |
+| ------------ | ---------------------------------- | ---------------------- |
+| `brain`      | cerebro, en la cabeza              | neuro-conductual       |
+| `eyes`       | los dos ojos                       | ojos (SANS)            |
+| `heart`      | corazón, lado izquierdo del cuerpo | cardiovascular         |
+| `immune`     | ganglios (cuello, axilas, ingles)  | inmune                 |
+| `metabolic`  | abdomen                            | metabólico y nutrición |
+| `bones`      | huesos de brazos y piernas         | musculoesquelético     |
+| `halo`       | halo punteado alrededor del cuerpo | radiación              |
+
+- Los colores son los del semáforo (`STATUS_COLORS`). Un sistema sin evaluación es `unknown` (rayado gris), **nunca verde**.
+- Con liveness `stale` o `lost`, **toda la figura** pasa a gris rayado y arriba aparece "Sin datos desde hace X min" (calculado con `serverNow()`, no con el reloj del dispositivo). El tooltip indica el último estado conocido.
+- Cada región es un botón accesible (`role="button"`, `aria-label` con nombre y estado, Enter/Espacio) y muestra un tooltip al pasar el ratón o al enfocarla.
+- Debajo hay una **leyenda clicable** con un `StatusBadge` por sistema: la misma información sin depender del color.
+- Las regiones que no están en el catálogo de sistemas no se dibujan; un `svg_region` desconocido se ignora.
+- Al seleccionar un sistema se abre el `SystemPanel` (FE-06).
+
+## Detalle del sistema: `SystemPanel` (FE-06)
+
+Se abre al hacer clic (o Enter) en una región de la figura o en la leyenda, y se cierra con **Esc**, con el botón ✕ o con un **clic fuera**. En escritorio es un panel lateral a la derecha; en móvil, una hoja desde abajo. Al abrirse, el foco va al botón de cerrar (`role="dialog"`, `aria-modal`).
+
+Contenido:
+
+- **Función** del sistema y, en entornos espaciales (`kind: space`), **efectos en el espacio** y **peligros** (los cinco de NASA HRP: radiación, aislamiento, distancia, gravedad y entorno hostil; `formatHazard()`).
+- **Indicadores** de la evaluación: nombre (del catálogo `/indicators`), último valor con unidad (`formatValue()`: las escalas `1-5` salen como "3 / 5"), `StatusBadge`, tendencia con flecha y texto (`formatTrend()`) y antigüedad (`formatAgo()` con `serverNow()`; "Nunca medido" si no hay dato).
+- **Recomendaciones** ordenadas por prioridad.
+- Botón **"Medir ahora"** → `/measure?system=<id>` (el formulario que lo lee llega con FE-10).
+- Con liveness `stale` o `lost`, los estados se muestran como "Sin datos recientes", igual que la figura.
+
+## Dashboard (FE-07)
+
+`/dashboard` (`src/pages/Dashboard.tsx`) muestra el panel del member activo (`memberId` del store). Sin member, enlaza a `/` para elegirlo.
+
+- **Cabecera:** `StatusBadge` con el estado general (`overall_status`), el liveness si no es `active` ("Sin datos desde hace X min"), `LinkChip` con el estado del enlace con `{ground}` (en línea / con retardo · 14 min / sin enlace, y los mensajes en cola) y la frescura de los datos ("Actualizado hace…").
+- **Izquierda:** `BodyFigure` (fija al hacer scroll en escritorio).
+- **Derecha:** cuadrícula de `IndicatorCard` con todos los indicadores de la evaluación, **ordenados por gravedad** (`bySeverity`: crítico, atención, sin datos, normal). Clic en una tarjeta → `SystemPanel` de su sistema.
+- En móvil, todo en una columna.
+
+**Refresco cada 15 s.** `useAssessment(memberId, 15_000)` y `useLink(envId, 15_000)` usan `useLoad({ refreshMs })`, que recarga en segundo plano sin volver al esqueleto de carga. Si un refresco falla, se mantienen los últimos datos y la cabecera avisa **"No se pudo actualizar: los datos pueden estar desfasados"** (nunca se finge que están al día).
+
+`IndicatorCard` (`components/dashboard/`) es la tarjeta básica de un indicador (valor, semáforo, tendencia y antigüedad). La usan la cuadrícula y el `SystemPanel`. `TODO(FE-08)`: añadirle la `TrendChart` con las bandas de umbral.
+
 ### Pendiente
+
+- **TODO(FE-11):** los pendientes de sincronizar del outbox en la cabecera del dashboard (aún no existe el outbox).
+
+- **Cabecera en móvil:** a 390 px el chip de servidor y el selector de entorno no caben y hay scroll horizontal (se arregla en FE-26).
 
 - **TODO(FE-28):** `/` solo será accesible para el rol admin; el resto entra directamente en su entorno.
 - **Colores del contrato alineados:** `theme.primary` de `backend/app/data/environments.json` (BE-03) usa los mismos `primary` que `src/environments/themes/` (en `earth`, `#2bb3c9`, no verde). Si cambias uno, cambia el otro.

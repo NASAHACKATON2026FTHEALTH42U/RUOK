@@ -1,7 +1,190 @@
-import { PagePlaceholder } from '../components/ui/PagePlaceholder'
+import { AnimatePresence } from 'framer-motion'
+import { useCallback, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { serverNow } from '../api/client'
+import { useAssessment } from '../api/useAssessment'
+import { useEnvironments } from '../api/useEnvironments'
+import { useIndicators } from '../api/useIndicators'
+import { useLink } from '../api/useLink'
+import { useSystems } from '../api/useSystems'
+import { BodyFigure } from '../components/body/BodyFigure'
+import { buildRegions, formatSinceLabel, isFigureStale } from '../components/body/regions'
+import { IndicatorCard } from '../components/dashboard/IndicatorCard'
+import { LinkChip } from '../components/dashboard/LinkChip'
+import { SystemPanel } from '../components/dashboard/SystemPanel'
+import { bySeverity, livenessState, statusStyle } from '../components/ui/status'
+import { StatusBadge } from '../components/ui/StatusBadge'
 import { capitalize, useVocab } from '../environments/useVocab'
+import { formatAgo } from '../lib/time'
+import { useEnvironmentStore } from '../store/environment'
 
+/** Cada cuánto se refrescan la evaluación y el enlace (FE-07). */
+const REFRESH_MS = 15_000
+
+/**
+ * Panel del member (FE-07): cabecera con estado general, liveness, enlace y frescura de los datos;
+ * figura del cuerpo (FE-05); cuadrícula de indicadores ordenada por gravedad; detalle del sistema
+ * al hacer clic (FE-06). La evaluación se refresca cada 15 s.
+ * TODO(FE-11): mostrar los pendientes de sincronizar del outbox en la cabecera.
+ */
 export default function Dashboard() {
-  const { member } = useVocab()
-  return <PagePlaceholder title={`${capitalize(member)}: tu panel de salud`} issue="FE-07" />
+  const vocab = useVocab()
+  const memberId = useEnvironmentStore((s) => s.memberId)
+  const envId = useEnvironmentStore((s) => s.envId)
+  const assessment = useAssessment(memberId, REFRESH_MS)
+  const link = useLink(memberId !== null ? envId : null, REFRESH_MS)
+  const systems = useSystems()
+  const indicators = useIndicators()
+  const envs = useEnvironments()
+  const [selected, setSelected] = useState<string | null>(null)
+  const close = useCallback(() => setSelected(null), [])
+
+  const regions = useMemo(
+    () =>
+      assessment.state === 'ready' && systems.state === 'ready'
+        ? buildRegions(systems.data, assessment.data.systems)
+        : [],
+    [assessment, systems],
+  )
+
+  const title = (
+    <h1 className="text-2xl font-semibold">{capitalize(vocab.member)}: tu panel de salud</h1>
+  )
+
+  if (memberId === null) {
+    return (
+      <section>
+        {title}
+        <p className="mt-2 text-env-muted">
+          No hay nadie seleccionado.{' '}
+          <Link to="/" className="underline hover:text-env-text">
+            Elige entorno y {vocab.member}
+          </Link>
+          .
+        </p>
+      </section>
+    )
+  }
+
+  if (assessment.state === 'error' || systems.state === 'error') {
+    return (
+      <section className="space-y-4">
+        {title}
+        <div className="rounded-lg border border-env-border bg-env-surface p-4">
+          <p>No se ha podido cargar la evaluación.</p>
+          <button
+            type="button"
+            onClick={() => {
+              assessment.retry()
+              systems.retry()
+            }}
+            className="mt-3 rounded-md bg-env-primary px-3 py-1.5 text-sm font-medium text-env-primary-text"
+          >
+            Reintentar
+          </button>
+        </div>
+      </section>
+    )
+  }
+
+  if (assessment.state !== 'ready') {
+    return (
+      <section className="space-y-6">
+        {title}
+        <div className="grid gap-8 md:grid-cols-[minmax(240px,320px)_1fr]" aria-busy="true">
+          <div className="h-96 animate-pulse rounded-xl bg-env-surface" />
+          <div className="grid content-start gap-3 sm:grid-cols-2">
+            {Array.from({ length: 6 }, (_, i) => (
+              <div key={i} className="h-20 animate-pulse rounded-lg bg-env-surface" />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  const a = assessment.data
+  const stale = isFigureStale(a.liveness)
+  const live = livenessState(a.liveness)
+  const env = envs.state === 'ready' ? envs.data.find((e) => e.id === envId) : undefined
+  const systemById = new Map((systems.state === 'ready' ? systems.data : []).map((s) => [s.id, s]))
+  const indicatorById = new Map(
+    (indicators.state === 'ready' ? indicators.data : []).map((i) => [i.id, i]),
+  )
+  const cards = a.systems
+    .flatMap((s) => s.indicators.map((ind) => ({ systemId: s.system_id, ind })))
+    .sort((x, y) => bySeverity(x.ind.status, y.ind.status))
+  const selectedSystem = selected ? systemById.get(selected) : undefined
+
+  return (
+    <section className="space-y-6">
+      <header className="space-y-3">
+        {title}
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusBadge
+            status={a.overall_status}
+            label={`Estado general: ${statusStyle(a.overall_status).label}`}
+          />
+          {live && (
+            <StatusBadge status={live} label={formatSinceLabel(a.last_seen_at, serverNow())} />
+          )}
+          {link.state === 'ready' && <LinkChip link={link.data} ground={vocab.ground} />}
+          <span className="text-sm text-env-muted" role="status">
+            {assessment.refreshFailed
+              ? '⚠ No se pudo actualizar: los datos pueden estar desfasados'
+              : assessment.updatedAt
+                ? `Actualizado ${formatAgo(assessment.updatedAt.toISOString(), new Date())}`
+                : null}
+          </span>
+        </div>
+      </header>
+
+      <div className="grid gap-8 md:grid-cols-[minmax(240px,320px)_1fr]">
+        <div className="md:sticky md:top-4 md:self-start">
+          <BodyFigure
+            regions={regions}
+            liveness={a.liveness}
+            staleLabel={formatSinceLabel(a.last_seen_at, serverNow())}
+            selectedSystemId={selected}
+            onSelectSystem={setSelected}
+          />
+        </div>
+
+        <div>
+          <h2 className="mb-3 text-lg font-semibold">Indicadores</h2>
+          {cards.length === 0 ? (
+            <p className="text-env-muted">Todavía no hay mediciones.</p>
+          ) : (
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {cards.map(({ systemId, ind }) => (
+                <li key={`${systemId}-${ind.indicator_id}`}>
+                  <IndicatorCard
+                    indicator={ind}
+                    name={indicatorById.get(ind.indicator_id)?.name}
+                    systemName={systemById.get(systemId)?.name}
+                    stale={stale}
+                    onClick={() => setSelected(systemId)}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {selectedSystem && (
+          <SystemPanel
+            key={selectedSystem.id}
+            system={selectedSystem}
+            assessed={a.systems.find((x) => x.system_id === selectedSystem.id)}
+            indicators={indicators.state === 'ready' ? indicators.data : []}
+            isSpace={env?.kind === 'space'}
+            stale={stale}
+            onClose={close}
+          />
+        )}
+      </AnimatePresence>
+    </section>
+  )
 }

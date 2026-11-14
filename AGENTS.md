@@ -22,8 +22,17 @@ Este archivo aplica a **cualquier agente de IA** que trabaje en este repo. Las i
    - back: `cd backend && uv run pytest && uv run --with ruff ruff check .`
    - front: `cd frontend && npm run lint && npm run build`
    - si se ha tocado la API: `npm run gen:api` y commitear `types.gen.ts`.
-4. Abrir una PR a `main` con `Closes #<n>`.
-5. **El merge lo hace o lo aprueba un humano.**
+4. **Antes de abrir la PR, sincronizar con `main`:** `git fetch origin && git merge origin/main`, resolver los conflictos en local y volver a pasar el paso 3.
+5. Abrir una PR a `main` con `Closes #<n>`.
+6. **El merge lo hace o lo aprueba un humano.** Si `main` ha avanzado desde la PR, el agente repite el paso 4 antes de pedir el merge.
+
+### Evitar conflictos (reglas para agentes)
+- **PRs pequeñas y de vida corta.** Una issue = una rama = una PR. No acumular trabajo de varias issues en la misma rama.
+- **Nunca subir commits a la rama de una PR ya mergeada.** Antes de cada push, comprobar `gh pr view <n> --json state`. Si está `MERGED`, crear una rama nueva desde `main` actualizado.
+- **No apilar PRs.** Si una issue depende de otra que aún no está en `main`, esperar o avisar al humano. Si se apila, dejarlo indicado en la descripción ("mergear después de #X").
+- **Ficheros generados en conflicto** (`frontend/src/api/types.gen.ts`, `frontend/src/api/mocks/fixtures.gen.ts`, `package-lock.json`, `uv.lock`): no se editan a mano. Se acepta cualquier versión y se regenera (`npm run gen:api`, `npm run gen:mocks`, `npm install`, `uv lock`).
+- **Tras resolver un conflicto,** pasar todos los tests de back y front y revisar que la resolución no reintroduce algo ya corregido en `main` (por ejemplo, valores del contrato o de configuración).
+- **En la rama de otra persona,** resolver solo si el humano lo pide y dejar un comentario en la PR explicando los cambios.
 
 ## CI (`.github/workflows/ci.yml`)
 Tres checks que tienen que estar en verde:
