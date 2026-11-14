@@ -39,6 +39,21 @@ issues:
     - La estructura coincide con docs/architecture.md
     - El repo queda limpio tras instalar las dependencias (gitignore correcto)
 
+- id: FS-05
+  title: CI con GitHub Actions (pytest, lint/build y contrato) y protección de main
+  area: fullstack
+  priority: P0-blocker
+  milestone: m0
+  depends: [FS-01]
+  docs: team-and-schedule.md
+  tasks:
+    - Crear `.github/workflows/ci.yml` con los jobs backend (ruff + pytest), frontend (lint + build + test) y contract (tipos TS al día con el OpenAPI). Ya está en la PR de docs
+    - Comprobar que los jobs se activan solos cuando existen backend/ (BE-01), frontend/ (FE-01) y types.gen.ts (FS-03)
+    - "Activar la protección de `main`: PR obligatoria y checks `Backend`, `Frontend` y `Contrato API` en verde"
+  acceptance:
+    - Una PR con un test roto o un build roto queda en rojo y no se puede mergear
+    - Una PR que cambia la API sin regenerar los tipos falla en `Contrato API`
+
 - id: BE-01
   title: Scaffold de FastAPI con health, CORS y SQLite en WAL
   area: backend

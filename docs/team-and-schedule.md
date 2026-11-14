@@ -32,7 +32,12 @@
 - **Definición de hecho:**
   - cumple los criterios de aceptación de la issue;
   - tiene tests (back) o se ha verificado en el navegador (front);
-  - no rompe `npm run build` ni `pytest`.
+  - **la CI está en verde**.
+- **CI (GitHub Actions, `.github/workflows/ci.yml`).** Se ejecuta en cada PR y en cada push a `main`:
+  - **Backend:** `ruff check` + `pytest`.
+  - **Frontend:** `npm run lint` + `npm run build` (comprueba los tipos) + `npm test` si existe.
+  - **Contrato API:** regenera `types.gen.ts` desde el OpenAPI de FastAPI y falla si hay diferencias. Si cambias la API, ejecuta `npm run gen:api` y commitea el resultado.
+  - Cada job se omite (en verde) mientras su carpeta no exista.
 - **Bloqueos:** si llevas más de 30 minutos atascado, avisa al supervisor.
 
 ## Riesgos y mitigaciones

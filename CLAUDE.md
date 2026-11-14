@@ -43,7 +43,8 @@ API en `http://localhost:8000/api/v1`, con Swagger en `/docs`. El front corre en
   - componentes por dominio en `src/components/<dominio>/`;
   - toda llamada a la API pasa por `src/api/client.ts` y toda escritura por `src/offline/outbox.ts`;
   - el estado global va en Zustand (`src/store/`).
-- **Definición de hecho:** criterios de aceptación de la issue cumplidos, `pytest` verde, `npm run build` sin errores de TS, y verificado en el navegador si es UI.
+- **Definición de hecho:** criterios de aceptación de la issue cumplidos, **CI en verde** y verificado en el navegador si es UI.
+- **CI** (`.github/workflows/ci.yml`): jobs `Backend` (ruff + pytest), `Frontend` (lint + build + test) y `Contrato API` (`types.gen.ts` al día con el OpenAPI). Antes de abrir una PR, ejecuta lo mismo en local: `uv run pytest`, `npm run build` y `npm run gen:api` si tocaste la API. `gen:api` tiene que producir exactamente la salida de `openapi-typescript` (sin postprocesado), para que el job de contrato no falle.
 
 ## Cómo trabajar con Claude en este repo
 - **Antes de implementar una issue:** léela (`gh issue view <n>`) junto con el doc enlazado en su cuerpo. Respeta sus dependencias.

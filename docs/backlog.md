@@ -12,16 +12,17 @@ Scaffolding, contrato v0, catálogos. Desbloquea a todo el equipo.
 
 | ID | Issue | Área | Prio | Depende de | Bloquea |
 |---|---|---|---|---|---|
-| FS-01 | — Scaffolding del monorepo | fullstack | P0-blocker | — | BE-01, FE-01 |
-| BE-01 | — Scaffold de FastAPI con health, CORS y SQLite en WAL | backend | P0-blocker | FS-01 | FS-02, FS-03, BE-02, BE-03, BE-04, BE-24 |
-| FE-01 | — Scaffold de Vite + React + TS con Tailwind, Router y Zustand | frontend | P0-blocker | FS-01 | FS-03, FE-02, FE-04, BE-24 |
-| FS-02 | — Contrato de la API v0 y schemas Pydantic stub | fullstack | P0-blocker | BE-01 | FS-03, BE-02 |
-| FS-03 | — Tipos TS generados desde OpenAPI y cliente API | fullstack | P0-blocker | BE-01, FE-01, FS-02 | FS-04 |
-| FS-04 | — Mocks del front con la forma del contrato y conmutador mock/real | fullstack | P0-blocker | FS-03 | FE-02, FE-05, FE-08, FE-10, FE-13 |
-| BE-02 | — Modelos SQLModel del dominio | backend | P0-blocker | BE-01, FS-02 | BE-05, BE-06, BE-13, BE-12, BE-18 |
-| BE-03 | — Perfiles de entorno (6) en JSON y GET /environments | backend | P0-blocker | BE-01 | BE-05, BE-08, BE-13, BE-18 |
-| BE-04 | — Catálogo de indicadores y sistemas, con GET /indicators y /systems | backend | P0-blocker | BE-01 | BE-06, BE-08, BE-20, BE-21 |
-| CNT-01 | — Tabla de umbrales HRP y fuentes | content | P0-blocker | — | CNT-02, CNT-03 |
+| FS-01 | [#2](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/2) Scaffolding del monorepo | fullstack | P0-blocker | — | FS-05, BE-01, FE-01 |
+| FS-05 | [#60](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/60) CI con GitHub Actions (pytest, lint/build y contrato) y protección de main | fullstack | P0-blocker | FS-01 | — |
+| BE-01 | [#3](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/3) Scaffold de FastAPI con health, CORS y SQLite en WAL | backend | P0-blocker | FS-01 | FS-02, FS-03, BE-02, BE-03, BE-04, BE-24 |
+| FE-01 | [#4](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/4) Scaffold de Vite + React + TS con Tailwind, Router y Zustand | frontend | P0-blocker | FS-01 | FS-03, FE-02, FE-04, BE-24 |
+| FS-02 | [#5](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/5) Contrato de la API v0 y schemas Pydantic stub | fullstack | P0-blocker | BE-01 | FS-03, BE-02 |
+| FS-03 | [#6](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/6) Tipos TS generados desde OpenAPI y cliente API | fullstack | P0-blocker | BE-01, FE-01, FS-02 | FS-04 |
+| FS-04 | [#7](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/7) Mocks del front con la forma del contrato y conmutador mock/real | fullstack | P0-blocker | FS-03 | FE-02, FE-05, FE-08, FE-10, FE-13 |
+| BE-02 | [#8](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/8) Modelos SQLModel del dominio | backend | P0-blocker | BE-01, FS-02 | BE-05, BE-06, BE-13, BE-12, BE-18 |
+| BE-03 | [#9](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/9) Perfiles de entorno (6) en JSON y GET /environments | backend | P0-blocker | BE-01 | BE-05, BE-08, BE-13, BE-18 |
+| BE-04 | [#10](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/10) Catálogo de indicadores y sistemas, con GET /indicators y /systems | backend | P0-blocker | BE-01 | BE-06, BE-08, BE-20, BE-21 |
+| CNT-01 | [#11](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/11) Tabla de umbrales HRP y fuentes | content | P0-blocker | — | CNT-02, CNT-03 |
 
 ## Hito 1 (sáb noche)
 
@@ -29,24 +30,24 @@ Dashboard con cuerpo + semáforo con datos reales y cambio de entorno.
 
 | ID | Issue | Área | Prio | Depende de | Bloquea |
 |---|---|---|---|---|---|
-| BE-05 | — Endpoints de members | backend | P0-blocker | BE-02, BE-03 | BE-07 |
-| BE-06 | — POST de mediciones por lotes e idempotente, y GET con filtros | backend | P0-blocker | BE-02, BE-04 | BE-07, BE-08, FE-11 |
-| BE-07 | — Seed de 30 días sintéticos y escenarios de demo | backend | P0-blocker | BE-05, BE-06 | — |
-| BE-08 | — Motor de evaluación por indicador con umbrales y ajustes de entorno | backend | P0-blocker | BE-03, BE-04, BE-06 | BE-09, BE-10 |
-| BE-09 | — Evaluación agregada por sistema y global con recomendaciones | backend | P0-blocker | BE-08 | BE-11 |
-| BE-10 | — Tendencias y línea base personal | backend | P1 | BE-08 | BE-20 |
-| BE-11 | — GET /members/{id}/assessment?env= | backend | P0-blocker | BE-09 | BE-14, BE-12 |
-| FE-02 | — Temas por entorno y store del entorno activo | frontend | P0-blocker | FE-01, FS-04 | FE-03, FE-21 |
-| FE-03 | — Página de selección de entorno con transición | frontend | P1 | FE-02 | — |
-| FE-04 | — StatusBadge y paleta de semáforo con estado unknown/stale | frontend | P0-blocker | FE-01 | FE-05, FE-08, FE-12 |
-| FE-05 | — BodyFigure SVG clicable con color por sistema | frontend | P0-blocker | FE-04, FS-04 | FE-06, FE-07 |
-| FE-06 | — SystemPanel con el detalle de cada sistema | frontend | P1 | FE-05 | — |
-| FE-07 | — Layout del dashboard | frontend | P1 | FE-05 | FE-26 |
-| FE-08 | — IndicatorCard y TrendChart con bandas de umbral | frontend | P1 | FE-04, FS-04 | FE-09 |
-| FE-10 | — Formularios guiados de medición multi-indicador | frontend | P0-blocker | FS-04 | FE-19, FE-11, FE-22 |
-| FE-19 | — Check-in diario conductual "R U OK?" | frontend | P1 | FE-10 | — |
-| BE-20 | — Indicadores conductuales, regla de línea base y privacidad | backend | P1 | BE-10, BE-04 | — |
-| CNT-02 | — Textos por sistema e indicador e instrucciones de medición | content | P1 | CNT-01 | — |
+| BE-05 | [#12](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/12) Endpoints de members | backend | P0-blocker | BE-02, BE-03 | BE-07 |
+| BE-06 | [#13](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/13) POST de mediciones por lotes e idempotente, y GET con filtros | backend | P0-blocker | BE-02, BE-04 | BE-07, BE-08, FE-11 |
+| BE-07 | [#14](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/14) Seed de 30 días sintéticos y escenarios de demo | backend | P0-blocker | BE-05, BE-06 | — |
+| BE-08 | [#15](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/15) Motor de evaluación por indicador con umbrales y ajustes de entorno | backend | P0-blocker | BE-03, BE-04, BE-06 | BE-09, BE-10 |
+| BE-09 | [#16](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/16) Evaluación agregada por sistema y global con recomendaciones | backend | P0-blocker | BE-08 | BE-11 |
+| BE-10 | [#17](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/17) Tendencias y línea base personal | backend | P1 | BE-08 | BE-20 |
+| BE-11 | [#18](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/18) GET /members/{id}/assessment?env= | backend | P0-blocker | BE-09 | BE-14, BE-12 |
+| FE-02 | [#19](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/19) Temas por entorno y store del entorno activo | frontend | P0-blocker | FE-01, FS-04 | FE-03, FE-21 |
+| FE-03 | [#20](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/20) Página de selección de entorno con transición | frontend | P1 | FE-02 | — |
+| FE-04 | [#21](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/21) StatusBadge y paleta de semáforo con estado unknown/stale | frontend | P0-blocker | FE-01 | FE-05, FE-08, FE-12 |
+| FE-05 | [#22](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/22) BodyFigure SVG clicable con color por sistema | frontend | P0-blocker | FE-04, FS-04 | FE-06, FE-07 |
+| FE-06 | [#23](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/23) SystemPanel con el detalle de cada sistema | frontend | P1 | FE-05 | — |
+| FE-07 | [#24](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/24) Layout del dashboard | frontend | P1 | FE-05 | FE-26 |
+| FE-08 | [#25](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/25) IndicatorCard y TrendChart con bandas de umbral | frontend | P1 | FE-04, FS-04 | FE-09 |
+| FE-10 | [#26](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/26) Formularios guiados de medición multi-indicador | frontend | P0-blocker | FS-04 | FE-19, FE-11, FE-22 |
+| FE-19 | [#27](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/27) Check-in diario conductual "R U OK?" | frontend | P1 | FE-10 | — |
+| BE-20 | [#28](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/28) Indicadores conductuales, regla de línea base y privacidad | backend | P1 | BE-10, BE-04 | — |
+| CNT-02 | [#29](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/29) Textos por sistema e indicador e instrucciones de medición | content | P1 | CNT-01 | — |
 
 ## Hito 2 (dom 09:00)
 
@@ -54,28 +55,28 @@ MVP integrado: alertas, offline, liveness, gamificación, consola ground.
 
 | ID | Issue | Área | Prio | Depende de | Bloquea |
 |---|---|---|---|---|---|
-| BE-13 | — Enlace simulado con la Tierra (outbox/inbox, retardo, LOS) | backend | P0-blocker | BE-02, BE-03 | BE-14, BE-17, FE-17, BE-22 |
-| BE-14 | — Alertas automáticas desde la evaluación con deduplicación y escalera | backend | P0-blocker | BE-11, BE-13 | BE-15, BE-16 |
-| BE-15 | — Alertas manuales (crear, escalar, ack, resolve, mensajes) | backend | P1 | BE-14 | BE-17, FE-14 |
-| BE-12 | — Heartbeat y liveness combinados en el estado global | backend | P0-blocker | BE-02, BE-11 | BE-16, FE-15 |
-| BE-16 | — Alerta no_contact y timeout del check-in "R U OK?" | backend | P1 | BE-12, BE-14 | — |
-| BE-17 | — Endpoint de la consola ground con estado as-of y filtro de privacidad | backend | P1 | BE-15, BE-13 | FE-16 |
-| BE-18 | — Rutina de tareas diarias desde el perfil del entorno | backend | P1 | BE-02, BE-03 | BE-19 |
-| BE-19 | — Gamificación (puntos, rachas, insignias, leaderboard cooperativo) | backend | P1 | BE-18 | FE-18, BE-23 |
-| BE-21 | — Catálogo de intervenciones y GET /interventions | backend | P1 | BE-04 | FE-20 |
-| BE-24 | — FastAPI sirve el build del front y docker-compose | fullstack | P1 | BE-01, FE-01 | — |
-| FE-09 | — Página de historial (7/30 días) | frontend | P1 | FE-08 | — |
-| FE-11 | — Outbox offline en IndexedDB y sincronización | frontend | P0-blocker | FE-10, BE-06 | FE-12, FE-13 |
-| FE-12 | — Semáforo provisional offline | frontend | P1 | FE-11, FE-04 | — |
-| FE-13 | — Botón SOS / Pedir ayuda | frontend | P1 | FS-04, FE-11 | FE-14 |
-| FE-14 | — Panel de alertas con timeline, escalado, ETA y protocolo autónomo | frontend | P1 | FE-13, BE-15 | FE-16 |
-| FE-15 | — Heartbeat del cliente y modal "R U OK?" | frontend | P1 | BE-12 | — |
-| FE-16 | — Consola /ground con estado as-of | frontend | P1 | FE-14, BE-17 | — |
-| FE-17 | — Indicador del estado del enlace y controles de demo | frontend | P1 | BE-13 | — |
-| FE-18 | — UI de misiones diarias, puntos, racha e insignias | frontend | P1 | BE-19 | — |
-| FE-20 | — Tarjetas de intervención | frontend | P1 | BE-21 | — |
-| FE-21 | — Barra de fase de misión y aviso del tercer cuarto | frontend | P1 | FE-02 | — |
-| CNT-03 | — Contenido de las intervenciones y los protocolos autónomos | content | P1 | CNT-01 | — |
+| BE-13 | [#30](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/30) Enlace simulado con la Tierra (outbox/inbox, retardo, LOS) | backend | P0-blocker | BE-02, BE-03 | BE-14, BE-17, FE-17, BE-22 |
+| BE-14 | [#31](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/31) Alertas automáticas desde la evaluación con deduplicación y escalera | backend | P0-blocker | BE-11, BE-13 | BE-15, BE-16 |
+| BE-15 | [#32](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/32) Alertas manuales (crear, escalar, ack, resolve, mensajes) | backend | P1 | BE-14 | BE-17, FE-14 |
+| BE-12 | [#33](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/33) Heartbeat y liveness combinados en el estado global | backend | P0-blocker | BE-02, BE-11 | BE-16, FE-15 |
+| BE-16 | [#34](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/34) Alerta no_contact y timeout del check-in "R U OK?" | backend | P1 | BE-12, BE-14 | — |
+| BE-17 | [#35](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/35) Endpoint de la consola ground con estado as-of y filtro de privacidad | backend | P1 | BE-15, BE-13 | FE-16 |
+| BE-18 | [#36](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/36) Rutina de tareas diarias desde el perfil del entorno | backend | P1 | BE-02, BE-03 | BE-19 |
+| BE-19 | [#37](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/37) Gamificación (puntos, rachas, insignias, leaderboard cooperativo) | backend | P1 | BE-18 | FE-18, BE-23 |
+| BE-21 | [#38](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/38) Catálogo de intervenciones y GET /interventions | backend | P1 | BE-04 | FE-20 |
+| BE-24 | [#39](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/39) FastAPI sirve el build del front y docker-compose | fullstack | P1 | BE-01, FE-01 | — |
+| FE-09 | [#40](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/40) Página de historial (7/30 días) | frontend | P1 | FE-08 | — |
+| FE-11 | [#41](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/41) Outbox offline en IndexedDB y sincronización | frontend | P0-blocker | FE-10, BE-06 | FE-12, FE-13 |
+| FE-12 | [#42](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/42) Semáforo provisional offline | frontend | P1 | FE-11, FE-04 | — |
+| FE-13 | [#43](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/43) Botón SOS / Pedir ayuda | frontend | P1 | FS-04, FE-11 | FE-14 |
+| FE-14 | [#44](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/44) Panel de alertas con timeline, escalado, ETA y protocolo autónomo | frontend | P1 | FE-13, BE-15 | FE-16 |
+| FE-15 | [#45](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/45) Heartbeat del cliente y modal "R U OK?" | frontend | P1 | BE-12 | — |
+| FE-16 | [#46](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/46) Consola /ground con estado as-of | frontend | P1 | FE-14, BE-17 | — |
+| FE-17 | [#47](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/47) Indicador del estado del enlace y controles de demo | frontend | P1 | BE-13 | — |
+| FE-18 | [#48](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/48) UI de misiones diarias, puntos, racha e insignias | frontend | P1 | BE-19 | — |
+| FE-20 | [#49](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/49) Tarjetas de intervención | frontend | P1 | BE-21 | — |
+| FE-21 | [#50](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/50) Barra de fase de misión y aviso del tercer cuarto | frontend | P1 | FE-02 | — |
+| CNT-03 | [#51](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/51) Contenido de las intervenciones y los protocolos autónomos | content | P1 | CNT-01 | — |
 
 ## Freeze (dom 11:00)
 
@@ -83,20 +84,22 @@ P2 y pulido. Lo no terminado a las 11:00 se corta.
 
 | ID | Issue | Área | Prio | Depende de | Bloquea |
 |---|---|---|---|---|---|
-| FE-22 | — Test de vigilancia psicomotora (PVT) | fullstack | P2 | FE-10 | — |
-| BE-22 | — Backend de "Mensaje a casa" por el enlace | backend | P2 | BE-13 | FE-23 |
-| FE-23 | — UI de "Mensaje a casa" | frontend | P2 | BE-22 | — |
-| BE-23 | — Backend de kudos y misiones de tripulación | backend | P2 | BE-19 | FE-24 |
-| FE-24 | — UI de kudos y misiones de tripulación | frontend | P2 | BE-23 | — |
-| FE-25 | — Galería Earth view | frontend | P2 | — | — |
-| FE-26 | — Pulido de animaciones, responsive y disclaimer médico | frontend | P1 | FE-07 | — |
-| CNT-04 | — Guion, slides, vídeo y envío a Space Apps | content | P1 | — | — |
+| FE-22 | [#52](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/52) Test de vigilancia psicomotora (PVT) | fullstack | P2 | FE-10 | — |
+| BE-22 | [#53](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/53) Backend de "Mensaje a casa" por el enlace | backend | P2 | BE-13 | FE-23 |
+| FE-23 | [#54](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/54) UI de "Mensaje a casa" | frontend | P2 | BE-22 | — |
+| BE-23 | [#55](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/55) Backend de kudos y misiones de tripulación | backend | P2 | BE-19 | FE-24 |
+| FE-24 | [#56](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/56) UI de kudos y misiones de tripulación | frontend | P2 | BE-23 | — |
+| FE-25 | [#57](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/57) Galería Earth view | frontend | P2 | — | — |
+| FE-26 | [#58](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/58) Pulido de animaciones, responsive y disclaimer médico | frontend | P1 | FE-07 | — |
+| CNT-04 | [#59](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/59) Guion, slides, vídeo y envío a Space Apps | content | P1 | — | — |
 
 ## Ruta crítica (P0)
 
 ```mermaid
 graph LR
   FS_01["FS-01<br/>Scaffolding del monorepo"]
+  FS_05["FS-05<br/>CI con GitHub Actions (pytest, lint/buil"]
+  FS_01 --> FS_05
   BE_01["BE-01<br/>Scaffold de FastAPI con health, CORS y S"]
   FS_01 --> BE_01
   FE_01["FE-01<br/>Scaffold de Vite + React + TS con Tailwi"]
