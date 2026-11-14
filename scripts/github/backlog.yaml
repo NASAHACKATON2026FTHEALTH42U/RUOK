@@ -11,13 +11,13 @@ milestones:
   freeze: { title: "Freeze (dom 11:00)", description: "P2 y pulido. Lo no terminado a las 11:00 se corta." }
 
 labels:
-  "area:backend":     { color: "1d76db", description: "FastAPI / Python" }
+  "area:backend":     { color: "0052cc", description: "FastAPI / Python" }
   "area:frontend":    { color: "0e8a16", description: "React / TS" }
-  "area:fullstack":   { color: "5319e7", description: "Integración front-back, tooling" }
+  "area:fullstack":   { color: "6f42c1", description: "Integración front-back, tooling" }
   "area:content":     { color: "fbca04", description: "Contenido HRP, textos, pitch (supervisor)" }
   "P0-blocker":       { color: "b60205", description: "Genera dependencias: hacer primero" }
   "P1":               { color: "d93f0b", description: "MVP" }
-  "P2":               { color: "c5def5", description: "Si da tiempo; se corta en el freeze" }
+  "P2":               { color: "bfbfbf", description: "Si da tiempo; se corta en el freeze" }
   "module:alerts":    { color: "f9d0c4", description: "Alertas, escalado, enlace" }
   "module:offline":   { color: "bfdadc", description: "Offline, sync, liveness" }
   "module:behavioral": { color: "d4c5f9", description: "Aislamiento / salud conductual" }
