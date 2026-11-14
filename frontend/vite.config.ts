@@ -16,6 +16,16 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: env.VITE_API_PROXY_TARGET ?? 'http://localhost:8000',
           changeOrigin: true,
+          // Backend parado → 503 (no disponible), no el 500 genérico de Vite: así el front lo
+          // trata como "sin servidor" (outbox reintenta, caché offline) y no como un fallo del back.
+          configure: (proxy) => {
+            proxy.on('error', (_err, _req, res) => {
+              if ('writeHead' in res && !res.headersSent) {
+                res.writeHead(503, { 'Content-Type': 'application/json' })
+                res.end(JSON.stringify({ detail: 'Servidor de a bordo no disponible' }))
+              }
+            })
+          },
         },
       },
     },

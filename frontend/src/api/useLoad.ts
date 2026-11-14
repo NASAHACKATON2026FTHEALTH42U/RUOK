@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { isUnavailable } from '../offline/cache'
 import type { Loadable } from './useEnvironments'
 
-interface LoadOptions {
+interface LoadOptions<T> {
   /** Con false no pide nada (p. ej. sin member elegido). */
   enabled?: boolean
   /** Si se indica, recarga en segundo plano cada `refreshMs` sin volver a "loading". */
   refreshMs?: number
+  /**
+   * Sin red, datos guardados en el dispositivo (FE-11). Si devuelve algo, se muestran y
+   * `refreshFailed` queda a true: la UI avisa de que pueden estar desfasados.
+   */
+  fallback?: () => Promise<T | undefined>
 }
 
 export type LoadResult<T> = Loadable<T> & {
@@ -24,7 +30,7 @@ export type LoadResult<T> = Loadable<T> & {
 export function useLoad<T>(
   load: () => Promise<T>,
   deps: readonly unknown[],
-  { enabled = true, refreshMs }: LoadOptions = {},
+  { enabled = true, refreshMs, fallback }: LoadOptions<T> = {},
 ): LoadResult<T> {
   const [status, setStatus] = useState<Loadable<T>>({ state: 'loading' })
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null)
@@ -32,6 +38,8 @@ export function useLoad<T>(
   const [attempt, setAttempt] = useState(0)
   const loadRef = useRef(load)
   loadRef.current = load
+  const fallbackRef = useRef(fallback)
+  fallbackRef.current = fallback
 
   useEffect(() => {
     if (!enabled) return
@@ -45,9 +53,17 @@ export function useLoad<T>(
           setUpdatedAt(new Date())
           setRefreshFailed(false)
         },
-        (err: unknown) => {
+        async (err: unknown) => {
           if (cancelled) return
-          if (background) setRefreshFailed(true)
+          const cached =
+            isUnavailable(err) && fallbackRef.current
+              ? await fallbackRef.current().catch(() => undefined)
+              : undefined
+          if (cancelled) return
+          if (cached !== undefined) {
+            setStatus({ state: 'ready', data: cached })
+            setRefreshFailed(true)
+          } else if (background) setRefreshFailed(true)
           else setStatus({ state: 'error', error: String(err) })
         },
       )

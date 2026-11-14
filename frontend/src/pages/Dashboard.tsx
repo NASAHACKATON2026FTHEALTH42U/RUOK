@@ -17,6 +17,7 @@ import { StatusBadge } from '../components/ui/StatusBadge'
 import { capitalize, useVocab } from '../environments/useVocab'
 import { formatAgo } from '../lib/time'
 import { useEnvironmentStore } from '../store/environment'
+import { useActiveMemberId, useAuth } from '../auth/useAuth'
 
 /** Cada cuánto se refrescan la evaluación y el enlace (FE-07). */
 const REFRESH_MS = 15_000
@@ -25,11 +26,16 @@ const REFRESH_MS = 15_000
  * Panel del member (FE-07): cabecera con estado general, liveness, enlace y frescura de los datos;
  * figura del cuerpo (FE-05); cuadrícula de indicadores ordenada por gravedad; detalle del sistema
  * al hacer clic (FE-06). La evaluación se refresca cada 15 s.
- * TODO(FE-11): mostrar los pendientes de sincronizar del outbox en la cabecera.
+ * Los pendientes de sincronizar del outbox se ven en la cabecera global (PendingSyncChip, FE-11).
  */
 export default function Dashboard() {
   const vocab = useVocab()
-  const memberId = useEnvironmentStore((s) => s.memberId)
+  // Un member, siempre los suyos; el resto de roles, el member elegido (FE-28).
+  const memberId = useActiveMemberId()
+  const { user, can } = useAuth()
+  // Medir: un member para sí mismo; medic/admin para cualquiera ("medir para otro solo medic").
+  const canMeasure =
+    can('action:measure-others') || (can('view:measure') && user?.member_id === memberId)
   const envId = useEnvironmentStore((s) => s.envId)
   const assessment = useAssessment(memberId, REFRESH_MS)
   const link = useLink(memberId !== null ? envId : null, REFRESH_MS)
@@ -181,6 +187,7 @@ export default function Dashboard() {
             indicators={indicators.state === 'ready' ? indicators.data : []}
             isSpace={env?.kind === 'space'}
             stale={stale}
+            canMeasure={canMeasure}
             onClose={close}
           />
         )}

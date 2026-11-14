@@ -19,6 +19,8 @@ interface SystemPanelProps {
   isSpace: boolean
   /** Liveness stale/lost: los estados se muestran como "sin datos recientes". */
   stale: boolean
+  /** El rol puede registrar mediciones de este member (si no, no hay "Medir ahora"). */
+  canMeasure?: boolean
   onClose: () => void
 }
 
@@ -33,6 +35,7 @@ export function SystemPanel({
   indicators,
   isSpace,
   stale,
+  canMeasure = true,
   onClose,
 }: SystemPanelProps) {
   const closeRef = useRef<HTMLButtonElement>(null)
@@ -158,12 +161,14 @@ export function SystemPanel({
           </section>
         )}
 
-        <Link
-          to={`/measure?system=${encodeURIComponent(system.id)}`}
-          className="mt-6 block rounded-lg bg-env-primary px-4 py-2.5 text-center font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
-        >
-          Medir ahora
-        </Link>
+        {canMeasure && (
+          <Link
+            to={`/measure?system=${encodeURIComponent(system.id)}`}
+            className="mt-6 block rounded-lg bg-env-primary px-4 py-2.5 text-center font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
+          >
+            Medir ahora
+          </Link>
+        )}
       </motion.aside>
     </div>
   )

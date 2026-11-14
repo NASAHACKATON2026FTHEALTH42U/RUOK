@@ -1,4 +1,5 @@
 import { api, unwrap } from './client'
+import { loadCachedAssessment, saveAssessment } from '../offline/cache'
 import { useLoad } from './useLoad'
 
 const getAssessment = (memberId: number) =>
@@ -14,8 +15,17 @@ export type Assessment = Awaited<ReturnType<typeof getAssessment>>
  * Con `refreshMs` se refresca en segundo plano (el dashboard usa 15 s).
  */
 export function useAssessment(memberId: number | null, refreshMs?: number) {
-  return useLoad(() => getAssessment(memberId!), [memberId], {
-    enabled: memberId !== null,
-    refreshMs,
-  })
+  return useLoad(
+    async () => {
+      const a = await getAssessment(memberId!)
+      void saveAssessment(memberId!, a) // última evaluación, para verla sin conexión (FE-11)
+      return a
+    },
+    [memberId],
+    {
+      enabled: memberId !== null,
+      refreshMs,
+      fallback: () => loadCachedAssessment<Assessment>(memberId!),
+    },
+  )
 }

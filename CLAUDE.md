@@ -16,14 +16,14 @@ Toda la documentación está en [`docs/`](docs/README.md). **Léela antes de dis
 |---|---|---|
 | `backend/` | Python 3.11+, FastAPI, SQLModel, SQLite (WAL), pytest | `cd backend && uv run uvicorn app.main:app --reload` · `uv run pytest` |
 | `frontend/` | React 18 + Vite 6 + TS, Tailwind 4, React Router 6, Zustand, Recharts, Framer Motion, idb, openapi-fetch, Vitest | `cd frontend && npm run dev` · `npm run lint` · `npm run build` · `npm test` · `npm run format` · `npm run gen:api` · `npm run gen:mocks` |
-| Todo | docker-compose | `docker compose up` |
+| Todo | docker-compose (**pendiente, BE-24**) | `docker compose up` (aún no existe) |
 | Backlog | `scripts/github/backlog.yaml` | `python3 scripts/github/create_issues.py [--dry-run]` |
 
 API en `http://localhost:8000/api/v1`, con Swagger en `/docs`. El front corre en `http://localhost:5173`.
-*(Los del front están activos desde FE-01, salvo `gen:api`, que llega con FS-03. Los del back se activan con BE-01. Si cambian, actualiza esta tabla; detalle del front en [`frontend/README.md`](frontend/README.md).)*
+*(Si cambian, actualiza esta tabla. Detalle en [`frontend/README.md`](frontend/README.md) y [`docs/backend.md`](docs/backend.md). Estado del proyecto: [`docs/status.md`](docs/status.md).)*
 
 ## Principios no negociables
-1. **El contrato manda.** Un cambio de API se hace primero en `docs/api-contract.md`, después en `app/schemas.py`, después `npm run gen:api`. Nunca se editan a mano los tipos generados (`src/api/types.gen.ts`).
+1. **El contrato manda.** Un cambio de API se hace primero en `docs/api-contract.md`, después en `backend/app/schemas/` (un módulo por dominio), después `npm run gen:api` (y `npm run gen:mocks`). Nunca se editan a mano los tipos generados (`src/api/types.gen.ts`).
 2. **Sin datos = desconocido.** `unknown`, `stale` y `lost` **nunca** se pintan en verde. El estado global es el peor entre la salud y el liveness.
 3. **Local-first.** Nada de servicios en la nube, CDNs ni dependencias de internet en tiempo de ejecución. Fuentes, iconos e imágenes van empaquetados.
 4. **Sin pérdida de datos.** Todo `POST` que crea datos lleva un **UUID generado en el cliente** y es idempotente. El front escribe primero en el outbox de IndexedDB.
@@ -49,7 +49,7 @@ API en `http://localhost:8000/api/v1`, con Swagger en `/docs`. El front corre en
   - toda llamada a la API pasa por `src/api/client.ts` y toda escritura por `src/offline/outbox.ts`;
   - el estado global va en Zustand (`src/store/`).
 - **Definición de hecho:** criterios de aceptación de la issue cumplidos, **CI en verde** y verificado en el navegador si es UI.
-- **CI** (`.github/workflows/ci.yml`): jobs `Backend` (ruff + pytest), `Frontend` (lint + build + test) y `Contrato API` (`types.gen.ts` al día con el OpenAPI). Antes de abrir una PR, ejecuta lo mismo en local: `uv run pytest`, `npm run build` y `npm run gen:api` si tocaste la API. `gen:api` tiene que producir exactamente la salida de `openapi-typescript` (sin postprocesado), para que el job de contrato no falle.
+- **CI** (`.github/workflows/ci.yml`): jobs `Backend` (ruff + pytest), `Frontend` (lint + build + test) y `Contrato API` (`types.gen.ts` al día con el OpenAPI). Antes de abrir una PR, ejecuta lo mismo en local: back `uv run pytest && uv run --with ruff ruff check .`; front `npm run lint && npm run build && npm test`; y `npm run gen:api` (+ `npm run gen:mocks`) si tocaste la API. `gen:api` tiene que producir exactamente la salida de `openapi-typescript` (sin postprocesado), para que el job de contrato no falle.
 
 ## Cómo trabajar con Claude en este repo
 - **Antes de implementar una issue:** léela (`gh issue view <n>`) junto con el doc enlazado en su cuerpo. Respeta sus dependencias.

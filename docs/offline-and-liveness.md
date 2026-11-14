@@ -9,7 +9,7 @@ No se pierde nada. Los mensajes (alertas, escalados, respuestas) quedan en el ou
 - **Primero se guarda en local.** Cada medición, tarea completada, respuesta de check-in o petición de ayuda se guarda en **IndexedDB** (`frontend/src/offline/`) y después se intenta enviar.
 - **UUID generado en el cliente** en cada registro. Los `POST` son idempotentes, así que reintentar nunca duplica datos.
 - **Sincronización automática** al reconectar: evento `online`, reintento con backoff y un indicador en la cabecera ("3 pendientes de sincronizar").
-- **Sin conflictos.** Los datos solo se añaden y nunca se editan. Se guarda `taken_at` (hora del dispositivo) y `received_at` (hora del servidor).
+- **Sin conflictos.** Los datos solo se añaden y nunca se editan. Se guarda `taken_at` (instante de la medición según el reloj del servidor que conoce el dispositivo, `serverNow()`) y `received_at` (hora real de llegada al servidor). Con el outbox, `taken_at` es cuándo se midió y `received_at` cuándo se sincronizó.
 - **Semáforo provisional.** El front tiene en caché el catálogo de indicadores y sus rangos, y calcula un estado preliminar marcado como "provisional". Al sincronizar, lo sustituye la evaluación completa del servidor.
 - **SOS sin conexión.** Se encola, se muestra *"No enviado. Avisa a la tripulación de viva voz"* y se abre el protocolo autónomo, que está en caché.
 - **Caso no cubierto en el MVP:** que se rompa el dispositivo antes de sincronizar. Para eso, en el roadmap está la replicación entre los dispositivos de la tripulación.
