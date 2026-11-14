@@ -1,20 +1,18 @@
 """Alertas, escalado y consola ground.
 
-Reales: automáticas (BE-14), manuales y acciones (BE-15). STUB(FS-02) → BE-17 (consola
-ground). En la consola ground el `link` ya es real (BE-13).
+Reales: automáticas (BE-14), manuales y acciones (BE-15) y consola ground (BE-17).
 
 Permisos (BE-27): la autenticación va por endpoint y no en el router, porque el SOS de
 emergencia se acepta SIN token (docs/auth-and-roles.md: "el SOS nunca depende del login").
 """
 
-from datetime import timedelta
 from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 
-from app import clock, models, stubs
+from app import models
 from app.db import get_session
 from app.routers.deps import (
     ERRORS_404,
@@ -39,7 +37,7 @@ from app.schemas import (
 )
 from app.schemas.common import ErrorResponse
 from app.services import alerts as alerts_service
-from app.services import comm_link
+from app.services import comm_link, ground
 
 router = APIRouter(tags=["alerts"], responses={**ERRORS_AUTH, **ERRORS_404})
 
@@ -193,21 +191,18 @@ def add_message(alert_id: UUID, body: AlertMessageIn, session: SessionDep) -> Al
     "/environments/{env_id}/alerts",
     response_model=GroundView,
     summary="Consola /ground: solo lo ENTREGADO por el enlace, con estado as-of",
-    description="STUB(FS-02) → BE-17",
-    dependencies=[Depends(allow_env("ground:read"))],
+    description="Alertas que el enlace ya ha entregado a tierra, members con su resumen y "
+    "`as_of` = ahora − retardo (en LOS, el último momento conocido y estado `unknown`). "
+    "El detalle conductual se oculta salvo que el member lo comparta, sea una emergencia "
+    "o quien consulta sea `psych`.",
 )
 def ground_view(
     env_id: Slug,
-    session: Annotated[Session, Depends(get_session)],
+    session: SessionDep,
+    user: Annotated[models.UserAccount, Depends(allow_env("ground:read"))],
     view: Literal["ground"] = "ground",
 ) -> GroundView:
-    env = stubs.ENV_BY_ID.get(env_id)
-    if env is None:
-        raise HTTPException(404, f"Entorno desconocido: {env_id}")
-    return GroundView(
-        env_id=env_id,
-        as_of=clock.now() - timedelta(seconds=env.comm_delay_s),
-        link=comm_link.status(session, env_id),  # real (BE-13)
-        members=[stubs.member_summary(m) for m in stubs.MEMBERS if m.env_id == env_id],
-        alerts=[],  # la alerta de ejemplo sigue en cola (ETA 14 min): aún no entregada
-    )
+    try:
+        return ground.ground_view(session, env_id, viewer_role=user.role)
+    except comm_link.UnknownEnvironment as exc:
+        raise HTTPException(404, str(exc)) from exc

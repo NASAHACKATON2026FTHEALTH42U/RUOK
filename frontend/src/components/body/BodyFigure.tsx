@@ -8,9 +8,11 @@ import {
   type PointerEvent,
   type ReactNode,
 } from 'react'
-import holographicHuman from '../../assets/holographic-human.webp'
+import xrayHuman from '../../assets/xray-human.webp'
 import { STATUS_COLORS, statusStyle, type Liveness } from '../ui/status'
 import { StatusBadge } from '../ui/StatusBadge'
+import { BodyLegend } from './BodyLegend'
+import { BRAIN, HEART, STOMACH, type OrganIcon } from './organIcons'
 import { isFigureStale, type BodyRegion, type RegionState } from './regions'
 
 interface BodyFigureProps {
@@ -20,50 +22,97 @@ interface BodyFigureProps {
   staleLabel?: string
   selectedSystemId?: string | null
   onSelectSystem?: (systemId: string) => void
+  /** Zona señalada controlada desde fuera (p. ej. por una leyenda en otra columna). */
+  hoveredSystemId?: string | null
+  onHoverSystem?: (systemId: string | null) => void
+  /** Leyenda de sistemas debajo de la figura (por defecto, sí). */
+  showLegend?: boolean
 }
 
 interface Tooltip {
   region: RegionState
   x: number
   y: number
+  /** Dónde va el cartel respecto a la zona: encima (por defecto) o a su derecha. */
+  side: 'top' | 'right'
 }
 
 /**
- * Figura humana con un color por sistema (estado de la evaluación) y halo de radiación.
+ * Figura humana con un color por sistema (estado de la evaluación); la radiación se ve en el
+ * tamaño e intensidad del aura amarilla de detrás.
  * - Cada región es enfocable y clicable: emite `onSelectSystem`.
  * - Con liveness stale o lost, toda la figura pasa a gris rayado (nunca el último verde).
  * - Debajo hay una leyenda con StatusBadge: el estado nunca depende solo del color.
  */
+/**
+ * Aura amarilla detrás del cuerpo según la radiación: cuanto peor el estado, más grande e
+ * intensa. Sin dato de radiación (`unknown`) se queda en el tamaño base; nunca "tranquiliza".
+ */
+const RADIATION_AURA: Record<string, { scale: number; opacity: number }> = {
+  normal: { scale: 1, opacity: 0.75 },
+  warning: { scale: 1.25, opacity: 0.9 },
+  critical: { scale: 1.5, opacity: 1 },
+}
+const AURA_BASE = { scale: 1, opacity: 0.75 }
+
 export function BodyFigure({
   regions,
   liveness,
   staleLabel,
   selectedSystemId,
   onSelectSystem,
+  hoveredSystemId,
+  onHoverSystem,
+  showLegend = true,
 }: BodyFigureProps) {
   const uid = useId().replace(/:/g, '')
   const stripes = `stripes-${uid}`
   const glow = `glow-${uid}`
+  const critical = `critical-${uid}`
   const boxRef = useRef<HTMLDivElement>(null)
   const [tooltip, setTooltip] = useState<Tooltip | null>(null)
   // Zona señalada (ratón, foco de teclado o su botón de la leyenda): se ilumina y el resto se atenúa.
-  const [hovered, setHovered] = useState<string | null>(null)
+  const [ownHovered, setOwnHovered] = useState<string | null>(null)
+  const hovered = hoveredSystemId !== undefined ? hoveredSystemId : ownHovered
+  const setHovered = (id: string | null) => {
+    setOwnHovered(id)
+    onHoverSystem?.(id)
+  }
   const stale = isFigureStale(liveness)
   // Latido del aura: no si el usuario pide reducir movimiento ni sin datos fiables.
   const reducedMotion = useReducedMotion()
   const pulse = !stale && !reducedMotion
   const byRegion = new Map(regions.map((r) => [r.region, r]))
+  // Tamaño e intensidad del aura según el estado de la radiación (sistema en la zona `halo`).
+  const radiation = byRegion.get('halo')
+  const baseAura = (radiation && RADIATION_AURA[radiation.status]) ?? AURA_BASE
+  // Radiación señalada (el aura, su botón en "Sistemas" o el teclado): el aura se intensifica.
+  const auraLit = !!radiation && hovered === radiation.systemId
+  const aura = auraLit ? { scale: baseAura.scale * 1.12, opacity: 1 } : baseAura
 
   const showTooltip = (region: RegionState, target: Element) => {
     const box = boxRef.current?.getBoundingClientRect()
     const el = target.getBoundingClientRect()
     if (!box) return
-    setTooltip({ region, x: el.left + el.width / 2 - box.left, y: el.top - box.top })
+    // Inmune (ganglios repartidos por el cuerpo): el cartel va a la derecha, no encima.
+    if (region.region === 'immune')
+      setTooltip({
+        region,
+        x: el.right - box.left + 10,
+        y: el.top + el.height / 2 - box.top,
+        side: 'right',
+      })
+    else
+      setTooltip({ region, x: el.left + el.width / 2 - box.left, y: el.top - box.top, side: 'top' })
   }
 
   /** Relleno de una región: color del estado, o rayado gris si no hay datos fiables. */
   const fillFor = (r: RegionState) =>
-    stale || statusStyle(r.status).striped ? `url(#${stripes})` : STATUS_COLORS[r.status]
+    stale || statusStyle(r.status).striped
+      ? `url(#${stripes})`
+      : r.status === 'critical'
+        ? `url(#${critical})` // degradado radial que late (centro siempre con color)
+        : STATUS_COLORS[r.status]
 
   const regionProps = (region: BodyRegion) => {
     const r = byRegion.get(region)
@@ -77,14 +126,6 @@ export function BodyFigure({
         'aria-label': label,
         'aria-pressed': selectedSystemId === r.systemId,
         className: 'cursor-pointer outline-none',
-        style: {
-          transformBox: 'fill-box' as const,
-          transformOrigin: 'center',
-          transition: 'transform 150ms ease-out, opacity 150ms ease-out, filter 150ms ease-out',
-          transform: hovered === r.systemId ? 'scale(1.08)' : undefined,
-          opacity: hovered !== null && hovered !== r.systemId ? 0.4 : 1,
-          filter: hovered === r.systemId ? `url(#${glow})` : undefined,
-        },
         onClick: () => onSelectSystem?.(r.systemId),
         onKeyDown: (e: KeyboardEvent) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -114,36 +155,188 @@ export function BodyFigure({
 
   /**
    * Estilo común de las zonas sobre la imagen: relleno semitransparente del color del estado
-   * (deja ver el órgano) y contorno del mismo color; más grueso y blanco si está seleccionada.
+   * (deja ver el órgano), sin contorno salvo al señalarla (blanco).
    */
   const shape = (r: RegionState) => {
-    const selected = selectedSystemId === r.systemId || hovered === r.systemId
+    const lit = hovered === r.systemId
     return {
       fill: fillFor(r),
-      fillOpacity: hovered === r.systemId ? 0.85 : 0.55,
-      stroke: selected
-        ? '#ffffff'
-        : stale || statusStyle(r.status).striped
-          ? STATUS_COLORS.unknown
-          : STATUS_COLORS[r.status],
+      // Más opaco al señalarlo; el crítico, algo más (sin llegar a sólido) y además late.
+      fillOpacity: lit || (r.status === 'critical' && !stale) ? 0.85 : 0.55,
+      // Sin contorno: solo aparece, en blanco, al señalar la zona.
+      stroke: lit ? '#ffffff' : 'none',
       strokeOpacity: 1,
-      strokeWidth: selected ? 9 : 5,
+      strokeWidth: lit ? 9 : 0,
     }
   }
 
   // Función (no componente): si fuera un componente definido aquí, React lo remontaría en cada
   // render y se perdería el foco de teclado al mostrar el tooltip.
-  const region = (name: BodyRegion, draw: (r: RegionState) => ReactNode) => {
+  // Dos capas: la zona sensible (invisible, FIJA, recibe ratón y teclado) y el dibujo visible,
+  // que crece, brilla o se atenúa sin mover la zona sensible: así el hover no parpadea.
+  const zone = (name: BodyRegion, draw: (r: RegionState) => ReactNode, layer: 'hit' | 'visual') => {
     const p = regionProps(name)
     if (!p) return null
-    return <g {...p.g}>{draw(p.r)}</g>
+    if (layer === 'hit')
+      return (
+        <g key={name} {...p.g}>
+          <g opacity={0}>{draw(p.r)}</g>
+        </g>
+      )
+    const lit = hovered === p.r.systemId
+    return (
+      <g
+        key={name}
+        aria-hidden="true"
+        pointerEvents="none"
+        style={{
+          transformBox: 'fill-box',
+          transformOrigin: 'center',
+          transition: 'transform 150ms ease-out, filter 150ms ease-out, opacity 150ms ease-out',
+          // Huesos y ganglios no crecen: están repartidos por todo el cuerpo y, al escalarlos
+          // juntos, los de los extremos se abrían hacia fuera. Se resaltan con el brillo.
+          transform: lit && name !== 'bones' && name !== 'immune' ? 'scale(1.08)' : undefined,
+          filter: lit ? `url(#${glow})` : undefined,
+          opacity: hovered !== null && !lit ? 0.4 : 1,
+        }}
+      >
+        {/* Crítico: color más intenso que parpadea con un resplandor rojo (fijo con "reducir
+            movimiento"). Sin datos fiables no se marca: la figura va en gris. */}
+        <g className={p.r.status === 'critical' && !stale ? 'critical-blink' : undefined}>
+          {draw(p.r)}
+        </g>
+      </g>
+    )
   }
+
+  /**
+   * Icono de órgano (viewBox 512) colocado en (x, y) con ancho `w` y alto `h`, en coordenadas de la
+   * figura. Silueta con el estilo del estado (shape) y, si lo tiene, detalle oscuro encima. El
+   * contorno al señalarlo se compensa por la escala para que se vea igual que en las demás zonas.
+   */
+  const organ = (
+    r: RegionState,
+    icon: OrganIcon,
+    x: number,
+    y: number,
+    w: number,
+    h: number = w,
+    pad = true,
+  ) => {
+    const kx = w / 512
+    const ky = h / 512
+    const k = (kx + ky) / 2
+    const style = shape(r)
+    // Sin datos: gris liso (no rayado) en los iconos; tampoco es verde, y el "Sin datos" se lee
+    // en el tooltip y en la columna de sistemas.
+    if (stale || statusStyle(r.status).striped) style.fill = STATUS_COLORS.unknown
+    return (
+      <g transform={`translate(${x} ${y}) scale(${kx} ${ky})`}>
+        {/* Zona sensible invisible que cubre el icono (los iconos tienen huecos). El cerebro no
+            la lleva: solo su forma, para no invadir los ojos que tiene debajo. */}
+        {pad && <ellipse cx="256" cy="256" rx="256" ry="256" fill="transparent" stroke="none" />}
+        {icon.shape.map((d, i) => (
+          <path key={i} d={d} {...style} strokeWidth={style.strokeWidth / k} />
+        ))}
+        {icon.detail?.map((d, i) => (
+          <path key={`d${i}`} d={d} fill="#000000" fillOpacity={0.3} stroke="none" />
+        ))}
+      </g>
+    )
+  }
+
+  /** Zonas del cuerpo, en coordenadas de la imagen original (887 × 1774). */
+  const zones: [BodyRegion, (r: RegionState) => ReactNode][] = [
+    // Radiación (todo el cuerpo): el aura de detrás del cuerpo. Va primero, por debajo de los
+    // órganos: señalar un órgano no activa la radiación. Sin relleno propio (lo que se ve es el
+    // aura, que se intensifica al señalarla).
+    [
+      'halo',
+      () => <ellipse cx="443.5" cy="860" rx="470" ry="900" fill="transparent" stroke="none" />,
+    ],
+    // Huesos (musculoesquelético): húmero, antebrazo, fémur y tibia
+    [
+      'bones',
+      (r) => (
+        <g
+          {...shape(r)}
+          fill="none"
+          stroke={fillFor(r)}
+          strokeWidth={selectedSystemId === r.systemId || hovered === r.systemId ? 30 : 22}
+          strokeOpacity={0.85}
+          strokeLinecap="round"
+        >
+          <polyline points="288,377 243,635 164,855" />
+          <polyline points="600,377 655,635 720,855" />
+          <polyline points="343,858 353,1240 353,1635" />
+          <polyline points="545,858 532,1240 532,1635" />
+        </g>
+      ),
+    ],
+    // Metabólico: estómago (icono), en la parte alta del abdomen
+    ['metabolic', (r) => organ(r, STOMACH, 365, 575, 200)],
+    // Corazón (icono)
+    ['heart', (r) => organ(r, HEART, 380, 400, 154)],
+    // Inmune: ganglios linfáticos (cuello, axilas, ingles)
+    [
+      'immune',
+      (r) => (
+        <g {...shape(r)}>
+          {[
+            [398, 268],
+            [489, 268],
+            [306, 430],
+            [581, 430],
+            [372, 930],
+            [514, 930],
+          ].map(([cx, cy]) => (
+            <g key={`${cx}-${cy}`}>
+              <circle cx={cx} cy={cy} r="38" fill="transparent" stroke="none" />
+              {/* Anillo amarillo decorativo (a juego con el aura); el relleno sigue siendo
+                      el color del estado del sistema inmune. */}
+              {!stale && (
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r="27"
+                  fill="none"
+                  stroke="#fde047"
+                  strokeWidth="6"
+                  strokeOpacity="0.9"
+                />
+              )}
+              <circle cx={cx} cy={cy} r="18" />
+            </g>
+          ))}
+        </g>
+      ),
+    ],
+    // Cerebro (neuro-conductual). Termina por encima de los ojos para no robarles el clic.
+    ['brain', (r) => organ(r, BRAIN, 366, 22, 154, 104, false)],
+    // Ojos (SANS). Zona sensible (rect invisible) más alta que los ojos: es fácil pulsarlos.
+    [
+      'eyes',
+      (r) => (
+        <g {...shape(r)}>
+          <rect x="360" y="118" width="168" height="56" fill="transparent" stroke="none" />
+          <ellipse cx="418" cy="137" rx="24" ry="13" />
+          <ellipse cx="473" cy="137" rx="24" ry="13" />
+        </g>
+      ),
+    ],
+  ]
 
   return (
     <div className="flex flex-col items-center gap-4">
       {stale && <StatusBadge status={liveness === 'lost' ? 'lost' : 'stale'} label={staleLabel} />}
 
-      <div ref={boxRef} className="relative w-full max-w-[300px]">
+      {/* Hasta 300 px de ancho, y menos en pantallas bajas (la figura mide el doble de alto) para
+          que el panel quepa sin scroll con las fases de la misión debajo. */}
+      <div
+        ref={boxRef}
+        className="relative w-full"
+        style={{ maxWidth: 'min(300px, max(220px, calc((100vh - 350px) / 2)))' }}
+      >
         {/* Aura de luz amarilla detrás del cuerpo, con un latido suave (degradado CSS, sin
             imágenes). Respeta "reducir movimiento"; sin datos fiables se apaga a gris y no late. */}
         <motion.div
@@ -156,8 +349,12 @@ export function BodyFigure({
           }}
           animate={
             !pulse
-              ? { opacity: 0.8, scale: 1 }
-              : { opacity: [0.7, 1, 0.7], scale: [0.97, 1.05, 0.97] } // un latido por ciclo
+              ? { opacity: stale ? 0.8 : aura.opacity, scale: stale ? 1 : aura.scale }
+              : {
+                  // un latido por ciclo, alrededor del tamaño que marca la radiación
+                  opacity: [aura.opacity * 0.85, aura.opacity, aura.opacity * 0.85],
+                  scale: [0.97 * aura.scale, 1.05 * aura.scale, 0.97 * aura.scale],
+                }
           }
           transition={
             !pulse ? { duration: 0.4 } : { duration: 4, repeat: Infinity, ease: 'easeInOut' }
@@ -166,7 +363,7 @@ export function BodyFigure({
         {/* Coordenadas en píxeles de la imagen original (887 × 1774). */}
         <svg
           viewBox="0 0 887 1774"
-          className="relative h-auto w-full"
+          className="relative h-auto w-full overflow-visible"
           role="group"
           aria-label="Estado por sistema del cuerpo"
         >
@@ -181,6 +378,35 @@ export function BodyFigure({
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+            {/* Crítico: el centro mantiene siempre el rojo y el color se expande y se contrae hacia
+                los bordes (que nunca quedan del todo transparentes). Fijo con "reducir movimiento". */}
+            <radialGradient id={critical} cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0" stopColor={STATUS_COLORS.critical} stopOpacity="1" />
+              <stop offset="0.35" stopColor={STATUS_COLORS.critical} stopOpacity="0.95">
+                {!reducedMotion && (
+                  <animate
+                    attributeName="offset"
+                    values="0.35;0.85;0.35"
+                    dur="1.8s"
+                    calcMode="spline"
+                    keySplines="0.4 0 0.6 1;0.4 0 0.6 1"
+                    repeatCount="indefinite"
+                  />
+                )}
+              </stop>
+              <stop offset="1" stopColor={STATUS_COLORS.critical} stopOpacity="0.45">
+                {!reducedMotion && (
+                  <animate
+                    attributeName="stop-opacity"
+                    values="0.45;0.85;0.45"
+                    dur="1.8s"
+                    calcMode="spline"
+                    keySplines="0.4 0 0.6 1;0.4 0 0.6 1"
+                    repeatCount="indefinite"
+                  />
+                )}
+              </stop>
+            </radialGradient>
             <pattern
               id={stripes}
               width="24"
@@ -193,117 +419,51 @@ export function BodyFigure({
             </pattern>
           </defs>
 
-          {/* Cuerpo holográfico. Los órganos se desaturan un poco para que no se confundan con el
+          {/* La imagen del cuerpo no se amplía al señalar: solo se resalta el órgano. */}
+          <g>
+            {/* Cuerpo holográfico. Los órganos se desaturan un poco para que no se confundan con el
               semáforo; sin datos fiables (stale/lost), toda la figura en gris. */}
-          <image
-            href={holographicHuman}
-            x="0"
-            y="0"
-            width="887"
-            height="1774"
-            preserveAspectRatio="xMidYMid meet"
-            style={{
-              filter: stale ? 'grayscale(1) brightness(0.75)' : 'saturate(0.55) brightness(0.9)',
-            }}
-            aria-hidden="true"
-          />
-          {stale && (
-            <rect
-              x="0"
-              y="0"
-              width="887"
-              height="1774"
-              fill={`url(#${stripes})`}
-              opacity="0.6"
+            {/* Figura de rayos X (900 × 1820) colocada para que cabeza (y 30) y pies (y 1720)
+                caigan donde estaban: las zonas mantienen sus coordenadas. */}
+            <image
+              href={xrayHuman}
+              x="6"
+              y="-28"
+              width="876"
+              height="1770"
+              preserveAspectRatio="none"
+              style={{
+                filter: stale ? 'grayscale(1) brightness(0.75)' : 'saturate(0.55) brightness(0.9)',
+              }}
               aria-hidden="true"
             />
-          )}
+            {stale && (
+              <rect
+                x="0"
+                y="0"
+                width="887"
+                height="1774"
+                fill={`url(#${stripes})`}
+                opacity="0.6"
+                aria-hidden="true"
+              />
+            )}
 
-          {/* Sin halo alrededor del cuerpo: la radiación (todo el cuerpo) se consulta y se abre
-              desde la leyenda de debajo. */}
+            {zones.map(([n, d]) => zone(n, d, 'visual'))}
 
-          {/* Huesos (musculoesquelético): húmero, antebrazo, fémur y tibia */}
-          {region('bones', (r) => (
-            <g
-              {...shape(r)}
-              fill="none"
-              stroke={fillFor(r)}
-              strokeWidth={selectedSystemId === r.systemId ? 30 : 22}
-              strokeOpacity={0.85}
-              strokeLinecap="round"
-            >
-              <polyline points="262,385 215,620 145,850" />
-              <polyline points="625,385 672,620 742,850" />
-              <polyline points="362,905 376,1190 392,1555" />
-              <polyline points="525,905 511,1190 497,1555" />
-            </g>
-          ))}
-
-          {/* Metabólico: hígado y estómago */}
-          {region('metabolic', (r) => (
-            <ellipse cx="445" cy="590" rx="140" ry="62" {...shape(r)} />
-          ))}
-
-          {/* Corazón */}
-          {region('heart', (r) => (
-            <path
-              d="M455 535 C385 495 385 425 425 428 C443 429 452 442 455 452 C458 442 467 429 485 428 C525 425 525 495 455 535 Z"
-              {...shape(r)}
-            />
-          ))}
-
-          {/* Inmune: ganglios linfáticos (cuello, axilas, ingles) */}
-          {region('immune', (r) => (
-            <g {...shape(r)}>
-              {[
-                [398, 268],
-                [489, 268],
-                [306, 430],
-                [581, 430],
-                [372, 930],
-                [514, 930],
-              ].map(([cx, cy]) => (
-                <g key={`${cx}-${cy}`}>
-                  <circle cx={cx} cy={cy} r="38" fill="transparent" stroke="none" />
-                  {/* Anillo amarillo decorativo (a juego con el aura); el relleno sigue siendo
-                      el color del estado del sistema inmune. */}
-                  {!stale && (
-                    <circle
-                      cx={cx}
-                      cy={cy}
-                      r="27"
-                      fill="none"
-                      stroke="#fde047"
-                      strokeWidth="6"
-                      strokeOpacity="0.9"
-                    />
-                  )}
-                  <circle cx={cx} cy={cy} r="18" />
-                </g>
-              ))}
-            </g>
-          ))}
-
-          {/* Cerebro (neuro-conductual) */}
-          {region('brain', (r) => (
-            <ellipse cx="443" cy="88" rx="82" ry="58" {...shape(r)} />
-          ))}
-
-          {/* Ojos (SANS) */}
-          {region('eyes', (r) => (
-            <g {...shape(r)}>
-              <rect x="370" y="122" width="148" height="40" fill="transparent" stroke="none" />
-              <ellipse cx="403" cy="142" rx="24" ry="13" />
-              <ellipse cx="484" cy="142" rx="24" ry="13" />
-            </g>
-          ))}
+            {/* Zonas sensibles (invisibles) encima del dibujo, en las mismas coordenadas: lo que
+                se ve y lo que responde coinciden. */}
+            {zones.map(([n, d]) => zone(n, d, 'hit'))}
+          </g>
         </svg>
 
         {tooltip && (
           <div
             role="tooltip"
-            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-lg border border-env-border bg-env-bg px-3 py-2 text-sm shadow-lg"
-            style={{ left: tooltip.x, top: tooltip.y - 6 }}
+            className={`pointer-events-none absolute z-10 rounded-lg border border-env-border bg-env-bg px-3 py-2 text-sm whitespace-nowrap shadow-lg ${
+              tooltip.side === 'right' ? '-translate-y-1/2' : '-translate-x-1/2 -translate-y-full'
+            }`}
+            style={{ left: tooltip.x, top: tooltip.side === 'right' ? tooltip.y : tooltip.y - 6 }}
           >
             <p className="font-medium whitespace-nowrap">{tooltip.region.name}</p>
             <StatusBadge
@@ -320,30 +480,15 @@ export function BodyFigure({
         )}
       </div>
 
-      {/* Leyenda: misma información sin depender del color, y clicable */}
-      <ul className="flex w-full flex-wrap justify-center gap-2" aria-label="Sistemas">
-        {regions.map((r) => (
-          <li key={r.systemId}>
-            <button
-              type="button"
-              onClick={() => onSelectSystem?.(r.systemId)}
-              onPointerEnter={() => setHovered(r.systemId)}
-              onPointerLeave={() => setHovered(null)}
-              onFocus={() => setHovered(r.systemId)}
-              onBlur={() => setHovered(null)}
-              aria-pressed={selectedSystemId === r.systemId}
-              className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
-                selectedSystemId === r.systemId
-                  ? 'border-env-text bg-env-surface'
-                  : 'border-env-border hover:bg-env-surface'
-              }`}
-            >
-              {r.name}
-              <StatusBadge status={stale ? 'stale' : r.status} size="sm" />
-            </button>
-          </li>
-        ))}
-      </ul>
+      {showLegend && (
+        <BodyLegend
+          regions={regions}
+          stale={stale}
+          selectedSystemId={selectedSystemId}
+          onSelectSystem={onSelectSystem}
+          onHoverSystem={setHovered}
+        />
+      )}
     </div>
   )
 }

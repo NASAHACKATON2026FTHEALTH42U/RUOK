@@ -85,3 +85,11 @@ Fotos de la NASA Image and Video Library (Johnson Space Center), **dominio públ
 | iss045e013851 | Earth Observation from the International Space Station | 2015-09-17 |
 
 Fuente: https://images.nasa.gov · Uso: https://www.nasa.gov/nasa-brand-center/images-and-media/
+
+## Imágenes del cuerpo (FE-05)
+| Archivo | Uso | Origen y licencia |
+|---|---|---|
+| `frontend/src/assets/xray-human.webp` | Figura del cuerpo (`BodyFigure`), estilo rayos X | Generada con Gemini (Google) por el equipo; *confirmar condiciones de uso* |
+| `frontend/src/components/body/organIcons.ts` | Iconos de cerebro, corazón y estómago (solo los trazados; el color lo pone la app) | SVG Repo (svgrepo.com): "brain", "heart 2" y "stomach 3"; *confirmar la licencia de cada icono* |
+
+Antes de la presentación hay que confirmar que se puede usar (y con qué atribución).

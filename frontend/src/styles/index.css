@@ -1,9 +1,14 @@
 @import 'tailwindcss';
 
-/* Local-first: sin fuentes externas, se usa la pila del sistema. */
+/* Local-first: fuentes empaquetadas (src/main.tsx), nunca de un CDN. Textos en Jura; mensajes de sistema en
+   IBM Plex Mono. */
 @theme {
   --font-sans:
-    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    'Jura', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
+    sans-serif;
+  /* Mensajes de sistema: estados, badges, leyendas, conexión (clase font-mono). */
+  --font-mono:
+    'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
 }
 
 /*
@@ -35,6 +40,249 @@ body {
 /* Transición suave al cambiar de entorno. Solo se activa tras aplicar el primer tema
    (initTheme pone data-theme-ready), para que la carga inicial no parpadee. */
 html[data-theme-ready] :is(body, header, footer, nav a, select) {
-  transition-property: background-color, border-color, color;
-  transition-duration: 300ms;
+  transition-property: background-color, border-color, color, outline-offset, box-shadow;
+  transition-duration: 300ms, 300ms, 300ms, 120ms, 120ms;
+}
+
+/*
+ * Interacción común (FE-26). En @layer base para que las utilidades de cada componente
+ * (p. ej. outline-none en las zonas del cuerpo, que tienen su propio resaltado) manden.
+ */
+@layer base {
+  /* Cursor de mano en todo lo pulsable; "no permitido" si está desactivado. */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  a[href],
+  summary,
+  select:not(:disabled),
+  label:has(> input[type='checkbox'], > input[type='radio']),
+  input[type='checkbox']:not(:disabled),
+  input[type='radio']:not(:disabled),
+  input[type='range']:not(:disabled) {
+    cursor: pointer;
+  }
+  button:disabled,
+  select:disabled,
+  input:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
+  /*
+   * Foco de teclado elegante y uniforme: anillo del color primario del entorno, separado del
+   * elemento, con un halo suave y una transición corta. Solo con teclado (:focus-visible).
+   */
+  :where(a, button, input, select, textarea, summary, [tabindex], [role='button']) {
+    transition:
+      outline-offset 120ms ease-out,
+      box-shadow 120ms ease-out;
+  }
+  :where(a, button, input, select, textarea, summary, [tabindex], [role='button']):focus-visible {
+    outline: 2px solid var(--env-primary);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--env-primary) 22%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(a, button, input, select, textarea, summary, [tabindex], [role='button']) {
+    transition: none;
+  }
+}
+
+/* Órgano en estado crítico (BodyFigure): el latido del color va en un degradado radial del
+   SVG; aquí solo un resplandor rojo que acompaña (sin cambiar la opacidad del órgano). */
+@keyframes critical-blink {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 rgb(208 59 59 / 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 7px rgb(208 59 59 / 0.85));
+  }
+}
+.critical-blink {
+  animation: critical-blink 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .critical-blink {
+    animation: none;
+    filter: drop-shadow(0 0 5px rgb(208 59 59 / 0.7));
+  }
+}
+
+/*
+ * Marca de agua de cuadrícula suave en el área de contenido (Layout). Usa el color de texto del
+ * entorno al 5 %: se adapta a temas claros y oscuros y no resta contraste a los textos.
+ */
+.bg-grid {
+  --grid-line: color-mix(in srgb, var(--env-text) 5%, transparent);
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
+}
+
+/*
+ * Estilo "consola de a bordo" (login, Login.dc.html): paneles con esquina recortada, cabeceras y
+ * etiquetas en mono, botones con esquina recortada. Colores del entorno activo (no fijos).
+ */
+.hud-grid {
+  --hud-line: color-mix(in srgb, var(--env-primary) 6%, transparent);
+  background-image:
+    linear-gradient(var(--hud-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hud-line) 1px, transparent 1px);
+  background-size: 39px 39px;
+}
+.hud-panel {
+  position: relative;
+  background: color-mix(in srgb, var(--env-surface) 92%, transparent);
+  border: 1px solid var(--env-border);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+}
+.hud-panel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(
+    45deg,
+    transparent calc(50% - 0.7px),
+    var(--env-border) calc(50% - 0.7px),
+    var(--env-border) calc(50% + 0.7px),
+    transparent calc(50% + 0.7px)
+  );
+}
+.hud-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px 10px;
+  border-bottom: 1px solid var(--env-border);
+  font: 400 11px var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.hud-head b {
+  font-weight: 400;
+  color: var(--env-primary);
+}
+.hud-chip {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 7px;
+  border: 1px solid currentColor;
+  color: var(--env-muted);
+  font: 400 10px var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.hud-chip::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  background: var(--env-primary);
+}
+.hud-label {
+  font: 400 10px var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--env-muted);
+}
+.hud-input {
+  height: 44px;
+  width: 100%;
+  box-sizing: border-box;
+  background: color-mix(in srgb, var(--env-bg) 60%, transparent);
+  border: 1px solid var(--env-border);
+  color: var(--env-text);
+  font: 400 16px var(--font-mono);
+  padding: 0 12px;
+}
+.hud-input:focus {
+  border-color: var(--env-primary);
+}
+.hud-btn {
+  --hud-edge: var(--env-primary);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 52px;
+  border: 1px solid var(--env-primary);
+  background: color-mix(in srgb, var(--env-primary) 7%, transparent);
+  color: var(--env-text);
+  font: 500 12px var(--font-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+}
+/* El recorte se come el borde en la esquina: se dibuja la diagonal con el color del borde. */
+.hud-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(
+    45deg,
+    transparent calc(50% - 0.7px),
+    var(--hud-edge) calc(50% - 0.7px),
+    var(--hud-edge) calc(50% + 0.7px),
+    transparent calc(50% + 0.7px)
+  );
+  pointer-events: none;
+}
+.hud-btn:disabled {
+  opacity: 0.6;
+}
+.hud-btn-primary {
+  background: var(--env-primary);
+  color: var(--env-primary-text);
+}
+.hud-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.hud-btn-danger {
+  --hud-edge: #ef4444;
+  border-color: #ef4444;
+  /* Rojo mezclado con el texto del entorno: claro en temas oscuros, oscuro en temas claros. */
+  color: color-mix(in srgb, #ef4444 65%, var(--env-text));
+  background: color-mix(in srgb, #dc2626 14%, transparent);
+}
+.hud-btn-danger:hover {
+  background: color-mix(in srgb, #dc2626 24%, transparent);
+}
+/* Dentro de los botones y paneles recortados, el foco va hacia dentro (fuera se recortaría). */
+.hud-btn:focus-visible,
+.hud-panel :focus-visible {
+  outline-offset: -3px;
+  box-shadow: none;
+}
+@keyframes ruok-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.ruok-spin {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ruok-spin 24s linear infinite;
+}
+.ruok-spin-reverse {
+  animation-direction: reverse;
+  animation-duration: 60s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ruok-spin {
+    animation: none;
+  }
 }

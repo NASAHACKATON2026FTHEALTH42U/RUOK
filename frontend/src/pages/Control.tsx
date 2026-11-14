@@ -44,9 +44,12 @@ export default function Control() {
   const [fresh, setFresh] = useState<Set<number>>(new Set())
   const [filters, setFilters] = useState<FeedFilters>(EMPTY_FILTERS)
 
+  // Depende de los datos, no del objeto de useLoad (es nuevo en cada render): si no, cada
+  // setEvents provocaba otro render y otro efecto ("Maximum update depth exceeded").
+  const recentData = recent.state === 'ready' ? recent.data : null
   useEffect(() => {
-    if (recent.state === 'ready') setEvents((cur) => mergeEvents(cur, recent.data))
-  }, [recent])
+    if (recentData) setEvents((cur) => mergeEvents(cur, recentData))
+  }, [recentData])
 
   // Feed en vivo: todos los eventos (el admin recibe todo por SSE, FE-29).
   useEvents(
