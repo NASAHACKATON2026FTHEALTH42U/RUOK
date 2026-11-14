@@ -133,47 +133,53 @@ export default function Dashboard() {
     .sort((x, y) => bySeverity(x.ind.status, y.ind.status))
   const selectedSystem = selected ? systemById.get(selected) : undefined
 
-  const summary = (sidebar: boolean) => (
-    <div
-      className={
-        sidebar
-          ? 'flex flex-col items-start gap-1.5 rounded-lg border border-env-border p-2.5 text-xs'
-          : 'flex flex-wrap items-center gap-2 md:hidden'
-      }
-    >
-      {/* Si el "sin datos" se debe a un liveness stale, basta el badge de liveness (FE-34).
-          En móvil el estado general ya lo cuenta el anillo (SystemsRing). */}
-      {sidebar && !(live === 'stale' && a.overall_status === 'unknown') && (
-        <StatusBadge
-          status={a.overall_status}
-          label={`Estado general: ${statusStyle(a.overall_status).label}`}
-          size={sidebar ? 'sm' : 'md'}
-        />
-      )}
-      {live && <StatusBadge status={live} label={formatSinceLabel(a.last_seen_at, serverNow())} />}
-      <span
-        className={`${sidebar ? 'text-xs' : 'text-[11px]'} font-mono text-env-muted`}
-        role={sidebar ? 'status' : undefined}
+  // En móvil solo se muestra si hay algo que avisar (liveness o fallo al actualizar): la pantalla
+  // tiene que caber sin scroll (docs/design/hud-style.md §5).
+  const summary = (sidebar: boolean) =>
+    (sidebar || live || assessment.refreshFailed) && (
+      <div
+        className={
+          sidebar
+            ? 'flex flex-col items-start gap-1.5 rounded-lg border border-env-border p-2.5 text-xs'
+            : 'mb-3 flex flex-wrap items-center gap-2 md:hidden'
+        }
       >
-        {assessment.refreshFailed
-          ? '⚠ No se pudo actualizar: los datos pueden estar desfasados'
-          : assessment.updatedAt
-            ? `Actualizado ${formatAgo(assessment.updatedAt.toISOString(), serverNow())}`
-            : null}
-      </span>
-    </div>
-  )
+        {/* Si el "sin datos" se debe a un liveness stale, basta el badge de liveness (FE-34).
+          En móvil el estado general ya lo cuenta el anillo (SystemsRing). */}
+        {sidebar && !(live === 'stale' && a.overall_status === 'unknown') && (
+          <StatusBadge
+            status={a.overall_status}
+            label={`Estado general: ${statusStyle(a.overall_status).label}`}
+            size={sidebar ? 'sm' : 'md'}
+          />
+        )}
+        {live && (
+          <StatusBadge status={live} label={formatSinceLabel(a.last_seen_at, serverNow())} />
+        )}
+        <span
+          className={`${sidebar ? 'text-xs' : 'text-[11px]'} font-mono text-env-muted`}
+          role={sidebar ? 'status' : undefined}
+        >
+          {assessment.refreshFailed
+            ? '⚠ No se pudo actualizar: los datos pueden estar desfasados'
+            : assessment.updatedAt
+              ? `Actualizado ${formatAgo(assessment.updatedAt.toISOString(), serverNow())}`
+              : null}
+        </span>
+      </div>
+    )
 
   return (
     <section className="space-y-4 lg:pt-[clamp(2.5rem,calc(100vh-788px),7rem)]">
-      <header className="space-y-3">
+      {/* En móvil, `contents`: sin hueco arriba cuando no hay nada que avisar. */}
+      <header className="max-md:contents md:space-y-3">
         {/* Título solo para lectores de pantalla; el estado general va en la barra lateral. */}
         <div className="sr-only">{title}</div>
         {/* Estado general: en la barra lateral (escritorio) y, en móvil, aquí arriba. */}
         <SidebarPortal>{summary(true)}</SidebarPortal>
         {summary(false)}
         {provisionalIds && provisionalIds.size > 0 && (
-          <p className="rounded-lg border border-dashed border-env-border px-3 py-2 text-sm text-env-muted">
+          <p className="max-md:mb-3 rounded-lg border border-dashed border-env-border px-3 py-2 text-sm text-env-muted">
             <span aria-hidden>⇡ </span>
             <strong className="text-env-text">Estado provisional:</strong>{' '}
             {provisionalIds.size === 1
