@@ -148,7 +148,7 @@ export function SystemPanel({
             <h2 id={titleId} className="text-2xl font-semibold">
               {system.name}
             </h2>
-            <StatusBadge status={stale ? 'stale' : (assessed?.status ?? 'unknown')} />
+            <StatusBadge status={stale ? 'stale' : (assessed?.status ?? 'unknown')} size="sm" />
           </div>
           <button
             ref={closeRef}
@@ -161,7 +161,10 @@ export function SystemPanel({
           </button>
         </header>
 
-        <section className="mt-4">
+        {/* Las secciones plegadas (indicadores, recomendaciones, intervenciones) se abren SOBRE
+            este bloque, ocupando justo su hueco y con scroll propio: no empujan el contenido ni
+            se salen de la ventana. */}
+        <section className={`relative mt-4 ${current ? 'min-h-48' : ''}`}>
           {!assessed || assessed.indicators.length === 0 ? (
             <p className="text-sm text-env-muted">Todavía no hay mediciones de este sistema.</p>
           ) : (
@@ -174,22 +177,20 @@ export function SystemPanel({
               }))}
             />
           )}
+          {current && (
+            <div
+              id={`${titleId}-extra`}
+              role="region"
+              aria-label={current.label}
+              className="absolute inset-0 z-10 overflow-y-auto rounded-lg border border-env-border bg-env-bg p-3 [scrollbar-color:var(--env-border)_transparent]"
+            >
+              {current.content}
+            </div>
+          )}
         </section>
 
-        {/* Indicadores, recomendaciones e intervenciones: plegados. Al abrir uno, se muestra por
-            encima de la gráfica (no empuja el contenido), para que la ventana quepa sin scroll. */}
         {sections.length > 0 && (
-          <div className="relative mt-3">
-            {current && (
-              <div
-                id={`${titleId}-extra`}
-                role="region"
-                aria-label={current.label}
-                className="absolute inset-x-0 bottom-full z-10 mb-2 max-h-[60vh] overflow-y-auto rounded-xl border border-env-border bg-env-bg p-3 shadow-2xl"
-              >
-                {current.content}
-              </div>
-            )}
+          <div className="mt-3">
             <div className="flex flex-wrap gap-2">
               {sections.map((sec) => (
                 <button
