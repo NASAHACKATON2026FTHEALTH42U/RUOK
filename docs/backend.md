@@ -291,7 +291,7 @@ Todos los endpoints del contrato existen. **Reales:** `/health`, `/environments*
 
 ## Exportar mocks para el front (FS-04)
 
-`uv run python scripts/export_mocks.py` (o `npm run gen:mocks` desde `frontend/`) llama a cada endpoint con el `TestClient` y genera `frontend/src/api/mocks/fixtures.gen.ts`. Hoy los datos salen de `app/stubs.py`. Cuando los endpoints sean reales, ejecútalo tras el seed (BE-07) para tener mocks con datos realistas. **Si añades un endpoint, el test de mocks del front exige un handler para él** (`frontend/src/api/mocks/handlers.ts`).
+`uv run python scripts/export_mocks.py` (o `npm run gen:mocks` desde `frontend/`) llama a cada endpoint con el `TestClient` y genera `frontend/src/api/mocks/fixtures.gen.ts`. **Es determinista:** el reloj se congela en `FROZEN_NOW` (14/11 10:00 UTC), así que dos ejecuciones dan el mismo fichero y solo cambia cuando cambian los datos. Si una PR muestra cambios en `fixtures.gen.ts` sin haber tocado datos, algo usa la hora real en lugar de `clock.now()`. Hoy los datos salen de `app/stubs.py`. Cuando los endpoints sean reales, ejecútalo tras el seed (BE-07) para tener mocks con datos realistas. **Si añades un endpoint, el test de mocks del front exige un handler para él** (`frontend/src/api/mocks/handlers.ts`).
 
 ## Cómo añadir un endpoint
 
