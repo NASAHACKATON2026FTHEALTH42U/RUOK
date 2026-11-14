@@ -12,6 +12,7 @@ import Earth from './pages/Earth'
 import EnvironmentSelect from './pages/EnvironmentSelect'
 import Ground from './pages/Ground'
 import History from './pages/History'
+import HomeMessages from './pages/HomeMessages'
 import Login from './pages/Login'
 import Measure from './pages/Measure'
 import Members from './pages/Members'
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
           { path: '/checkin', element: guard('/checkin', <CheckIn />) },
           { path: '/pvt', element: guard('/pvt', <Pvt />) },
           { path: '/earth', element: guard('/earth', <Earth />) },
+          { path: '/home', element: guard('/home', <HomeMessages />) },
           { path: '/history', element: guard('/history', <History />) },
           { path: '/missions', element: guard('/missions', <Missions />) },
           { path: '/alerts', element: guard('/alerts', <Alerts />) },

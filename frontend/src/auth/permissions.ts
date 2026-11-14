@@ -17,6 +17,8 @@ export const PERMISSIONS = {
   'view:missions': ['member', 'medic', 'commander', 'admin'],
   'view:alerts': ['member', 'medic', 'commander', 'responder', 'psych', 'family', 'admin'],
   'view:ground': ['responder', 'psych', 'admin'],
+  // Mensaje a casa (FE-23). `family` (recibe/responde, P2) aún no existe en el backend.
+  'view:home-messages': ['member', 'admin'],
   'view:control': ['admin'],
   // Acciones
   'action:sos': ['member', 'medic', 'commander', 'family', 'admin'],
@@ -43,6 +45,7 @@ export const ROUTE_PERMISSIONS: Record<string, Permission> = {
   '/checkin': 'view:checkin',
   '/pvt': 'view:checkin', // el test PVT va con el check-in (docs/auth-and-roles.md)
   '/earth': 'view:checkin', // Earth view (FE-25): bienestar del member, como el check-in
+  '/home': 'view:home-messages', // Mensaje a casa (FE-23): el hilo es solo del member
   '/history': 'view:history',
   '/missions': 'view:missions',
   '/alerts': 'view:alerts',

@@ -22,6 +22,8 @@ export type MeasurementIn = Schema<'MeasurementIn'>
 export type AlertIn = Schema<'AlertIn'>
 export type TaskCompleteIn = Schema<'TaskCompleteIn'>
 export type GameState = Schema<'GameState'>
+export type HomeMessageIn = Schema<'HomeMessageIn'>
+export type HomeMessage = Schema<'HomeMessage'>
 
 // ── Estado visible (contador de la cabecera) ─────────────────
 
@@ -77,6 +79,13 @@ function postTaskComplete(memberId: number, taskId: string, body: TaskCompleteIn
   })
 }
 
+function postHomeMessage(memberId: number, message: HomeMessageIn) {
+  return api.POST('/api/v1/members/{member_id}/home-messages', {
+    params: { path: { member_id: memberId } },
+    body: message,
+  })
+}
+
 function postMeasurements(memberId: number, measurements: MeasurementIn[]) {
   return api.POST('/api/v1/members/{member_id}/measurements', {
     params: { path: { member_id: memberId } },
@@ -110,6 +119,14 @@ async function send(
       case 'task_completion': {
         const body = entry.body as { task_id: string; completion: TaskCompleteIn }
         const r = await postTaskComplete(entry.member_id, body.task_id, body.completion)
+        return {
+          status: r.response.status,
+          data: r.data,
+          error: r.error ? JSON.stringify(r.error) : undefined,
+        }
+      }
+      case 'home_message': {
+        const r = await postHomeMessage(entry.member_id, entry.body as HomeMessageIn)
         return {
           status: r.response.status,
           data: r.data,
@@ -368,6 +385,41 @@ export function completeTask(
 export async function locallyCompletedTasks(memberId: number, date: string): Promise<Set<string>> {
   const rows = await (await getDb()).getAllFromIndex('tasks', 'by_member_date', [memberId, date])
   return new Set(rows.filter((r) => r.completed_local).map((r) => r.id))
+}
+
+/**
+ * "Mensaje a casa" (FE-23): el mensaje lleva su UUID de cliente (idempotente). Sin conexión
+ * con el servidor de a bordo se queda en el outbox y sale solo después; el viaje por el enlace
+ * con la Tierra (cola en LOS, retardo) lo lleva el servidor.
+ */
+export function sendHomeMessage(
+  memberId: number,
+  text: string,
+): Promise<SubmitResult<HomeMessage>> {
+  const message: HomeMessageIn = { id: newId(), text }
+  return submit<HomeMessage>(
+    'home_message',
+    message.id,
+    memberId,
+    `/members/${memberId}/home-messages`,
+    message,
+    async () => {},
+  )
+}
+
+/** Mensajes a casa de un member que siguen en este dispositivo (sin enviar o rechazados). */
+export async function pendingHomeMessages(
+  memberId: number,
+): Promise<{ id: string; text: string; created_at: string; failed: boolean }[]> {
+  const entries = await (await getDb()).getAll('outbox')
+  return entries
+    .filter((e) => e.kind === 'home_message' && e.member_id === memberId)
+    .map((e) => ({
+      id: e.id,
+      text: (e.body as HomeMessageIn).text,
+      created_at: e.created_at,
+      failed: e.status === 'failed',
+    }))
 }
 
 // ── Arranque ────────────────────────────────────────────────

@@ -28,6 +28,7 @@ export function navItems(vocab: { crew: string; ground: string }): NavItem[] {
     { to: '/pvt', label: 'Test de vigilancia', code: 'PVT', icon: 'list' },
     { to: '/history', label: 'Historial', code: 'HST', icon: 'list' },
     { to: '/earth', label: 'La Tierra', code: 'ERT', icon: 'list' },
+    { to: '/home', label: 'Mensaje a casa', code: 'MSJ', icon: 'list' },
     { to: '/ground', label: `Consola de ${vocab.ground}`, code: 'GND', icon: 'alerts' },
     { to: '/control', label: 'Centro de control', code: 'CTL', icon: 'panel' },
     { to: '/', label: 'Entornos', code: 'ENV', icon: 'list' },
