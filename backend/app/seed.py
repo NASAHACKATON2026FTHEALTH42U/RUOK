@@ -267,7 +267,7 @@ def scenario_geriatric_fall_risk(session: Session) -> str:
     """Rosa bebe poco, duerme mal, pierde peso y tiene la tensión baja (paso 8)."""
     s, r = "geriatric_fall_risk", FALL_RISK_RESIDENT
     added = _add_points(session, s, r, "hydration_ml", [1300, 1100, 1000, 900])
-    added += _add_points(session, s, r, "sleep_hours", [6, 5.5, 5, 4.5])
+    added += _add_points(session, s, r, "sleep_hours", [6, 5.5, 5, 4])
     added += _add_points(session, s, r, "bp_systolic", [96, 93, 90, 88])
     added += _add_points(session, s, r, "weight_kg", [62, 61, 59.5, 58])
     return f"{added} mediciones nuevas para Rosa Martí"
