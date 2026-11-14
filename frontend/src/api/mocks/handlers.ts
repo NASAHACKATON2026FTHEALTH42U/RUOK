@@ -131,6 +131,7 @@ function mockUser(username: string): Schema<'User'> | undefined {
     env_id: d.env_id ?? null,
     member_id: member?.id ?? null,
     role_label: d.role_label,
+    active: true,
   }
 }
 
@@ -171,8 +172,16 @@ export const handlers: Record<string, Handler> = {
       env_id: b.env_id ?? null,
       member_id: b.member_id ?? null,
       role_label: b.role,
+      active: true,
     })
   },
+  'PATCH /users/{user_id}': (req) => {
+    const u = fx.users.find((x) => String(x.id) === req.params.user_id)
+    if (!u) return notFound('Usuario inexistente')
+    return { ...u, active: body<Schema<'UserUpdate'>>(req).active }
+  },
+  'PUT /users/{user_id}/pin': (req) =>
+    fx.users.find((x) => String(x.id) === req.params.user_id) ?? notFound('Usuario inexistente'),
 
   // Configuración
   'GET /environments': () => fx.environments,

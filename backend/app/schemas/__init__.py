@@ -20,7 +20,16 @@ from app.schemas.alerts import (
     GroundView,
     ResolveIn,
 )
-from app.schemas.auth import DemoUser, LoginIn, PinLoginIn, TokenResponse, User, UserCreate
+from app.schemas.auth import (
+    DemoUser,
+    LoginIn,
+    PinLoginIn,
+    PinReset,
+    TokenResponse,
+    User,
+    UserCreate,
+    UserUpdate,
+)
 from app.schemas.common import (
     Activity,
     Actor,
@@ -115,6 +124,7 @@ __all__ = [
     "DemoClock",
     "DemoLinkIn",
     "DemoUser",
+    "PinReset",
     "Device",
     "DeviceKind",
     "Environment",
@@ -170,4 +180,5 @@ __all__ = [
     "Trend",
     "User",
     "UserCreate",
+    "UserUpdate",
 ]

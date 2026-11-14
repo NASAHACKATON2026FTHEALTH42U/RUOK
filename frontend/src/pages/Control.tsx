@@ -21,6 +21,7 @@ import { severityStyle } from '../components/alerts/alertFormat'
 import { ConnectQr } from '../components/control/ConnectQr'
 import { DemoControls } from '../components/control/DemoControls'
 import { EnvironmentConfig } from '../components/control/EnvironmentConfig'
+import { UsersPanel } from '../components/control/UsersPanel'
 import { describeLink, hhmm } from '../components/ui/link'
 import { livenessState } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
@@ -43,6 +44,7 @@ export default function Control() {
   const [events, setEvents] = useState<RealtimeEvent[]>([])
   const [fresh, setFresh] = useState<Set<number>>(new Set())
   const [filters, setFilters] = useState<FeedFilters>(EMPTY_FILTERS)
+  const [tab, setTab] = useState<'overview' | 'users'>('overview')
 
   // Depende de los datos, no del objeto de useLoad (es nuevo en cada render): si no, cada
   // setEvents provocaba otro render y otro efecto ("Maximum update depth exceeded").
@@ -105,178 +107,208 @@ export default function Control() {
         </p>
       </header>
 
-      {/* 1. Métricas */}
-      <section aria-label="Métricas" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {[
-          ['Mediciones (última hora)', metrics?.measurements_last_hour],
-          ['Alertas abiertas', metrics?.open_alerts],
+      <nav aria-label="Secciones" role="tablist" className="flex gap-2">
+        {(
           [
-            'Respuesta media a alertas',
-            metrics ? formatDuration(metrics.avg_alert_response_s) : undefined,
-          ],
-          ['Dispositivos activos', metrics?.active_devices],
-        ].map(([label, value]) => (
-          <div
-            key={label as string}
-            className="rounded-xl border border-env-border bg-env-surface p-4"
+            ['overview', 'Panorama'],
+            ['users', 'Usuarios'],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={tab === id}
+            onClick={() => setTab(id)}
+            className={`rounded-lg border px-4 py-1.5 text-sm ${
+              tab === id ? 'border-env-text font-semibold' : 'border-env-border text-env-muted'
+            }`}
           >
-            <p className="text-sm text-env-muted">{label}</p>
-            <p className="mt-1 text-3xl font-semibold tabular-nums">{value ?? '—'}</p>
-          </div>
+            {label}
+          </button>
         ))}
-      </section>
+      </nav>
 
-      {/* Gestión de la demo (FE-32) */}
-      {overview.state === 'ready' && (
-        <DemoControls overview={overview.data} onChanged={overview.refresh} />
+      {tab === 'users' && (
+        <UsersPanel environments={allEnvs.state === 'ready' ? allEnvs.data : []} />
       )}
 
-      <div className="grid gap-6 xl:grid-cols-[3fr_2fr]">
-        {/* 2. Panorama por entorno */}
-        <section aria-label="Panorama">
-          <h2 className="mb-3 text-xl font-semibold">Entornos</h2>
-          {overview.state === 'loading' && (
-            <div className="h-48 animate-pulse rounded-xl bg-env-surface" />
-          )}
-          {overview.state === 'error' && (
-            <p className="text-env-muted">
-              No se ha podido cargar el panorama.{' '}
-              <button type="button" onClick={overview.retry} className="underline">
-                Reintentar
-              </button>
-            </p>
-          )}
-          {overview.state === 'ready' && (
-            <div className="grid gap-3 md:grid-cols-2">
-              {overview.data.environments.map((e) => (
-                <EnvironmentPanel key={e.environment.id} env={e} now={now} />
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* 3. Feed de eventos */}
-        <section aria-label="Eventos en vivo" className="min-w-0">
-          <h2 className="mb-3 text-xl font-semibold">Eventos en vivo</h2>
-          <div className="mb-3 grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
-            <FilterSelect
-              label="Entorno"
-              value={filters.envId}
-              onChange={(envId) => setFilters({ ...filters, envId })}
-              options={(overview.state === 'ready' ? overview.data.environments : []).map((e) => [
-                e.environment.id,
-                e.environment.name,
-              ])}
-            />
-            <FilterSelect
-              label="Tipo"
-              value={filters.group}
-              onChange={(group) => setFilters({ ...filters, group })}
-              options={Object.entries(GROUPS).map(([k, g]) => [k, g.label])}
-            />
-            <FilterSelect
-              label="Usuario"
-              value={filters.userId}
-              onChange={(userId) => setFilters({ ...filters, userId })}
-              options={[...new Set(events.map((e) => e.user_id).filter((u) => u != null))].map(
-                (u) => [String(u), `#${u}`],
-              )}
-            />
-            <FilterSelect
-              label="Dispositivo"
-              value={filters.deviceId}
-              onChange={(deviceId) => setFilters({ ...filters, deviceId })}
-              options={[...new Set(events.map((e) => e.device_id).filter(Boolean) as string[])].map(
-                (d) => [d, deviceLabel.get(d) ?? d.slice(0, 8)],
-              )}
-            />
-          </div>
-          <ol
-            aria-live="polite"
-            className="max-h-[32rem] overflow-y-auto rounded-xl border border-env-border bg-env-surface"
-          >
-            {shown.length === 0 && <li className="p-4 text-env-muted">Sin eventos.</li>}
-            {shown.map((e) => (
-              <li
-                key={e.id}
-                className={`flex gap-3 border-b border-env-border px-3 py-2 text-sm transition-colors last:border-b-0 ${
-                  fresh.has(e.id) ? 'bg-env-border/60' : ''
-                }`}
+      {tab === 'overview' && (
+        <>
+          {/* 1. Métricas */}
+          <section aria-label="Métricas" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {[
+              ['Mediciones (última hora)', metrics?.measurements_last_hour],
+              ['Alertas abiertas', metrics?.open_alerts],
+              [
+                'Respuesta media a alertas',
+                metrics ? formatDuration(metrics.avg_alert_response_s) : undefined,
+              ],
+              ['Dispositivos activos', metrics?.active_devices],
+            ].map(([label, value]) => (
+              <div
+                key={label as string}
+                className="rounded-xl border border-env-border bg-env-surface p-4"
               >
-                <span aria-hidden className="w-5 shrink-0 text-center">
-                  {GROUPS[groupOf(e.type)]?.icon ?? '·'}
-                </span>
-                <span className="w-12 shrink-0 tabular-nums text-env-muted">{hhmm(e.at)}</span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate">{e.summary || e.type}</span>
-                  <span className="block truncate text-xs text-env-muted">
-                    {e.type}
-                    {e.env_id && ` · ${e.env_id}`}
-                    {e.device_id && ` · ${deviceLabel.get(e.device_id) ?? e.device_id.slice(0, 8)}`}
-                  </span>
-                </span>
-              </li>
+                <p className="text-sm text-env-muted">{label}</p>
+                <p className="mt-1 text-3xl font-semibold tabular-nums">{value ?? '—'}</p>
+              </div>
             ))}
-          </ol>
-        </section>
-      </div>
+          </section>
 
-      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
-        <EnvironmentConfig environments={allEnvs.state === 'ready' ? allEnvs.data : []} />
-        <ConnectQr />
-      </div>
+          {/* Gestión de la demo (FE-32) */}
+          {overview.state === 'ready' && (
+            <DemoControls overview={overview.data} onChanged={overview.refresh} />
+          )}
 
-      {/* 4. Dispositivos */}
-      <section aria-label="Dispositivos">
-        <h2 className="mb-3 text-xl font-semibold">Dispositivos</h2>
-        {devices.state === 'ready' && devices.data.length === 0 && (
-          <p className="text-env-muted">Ningún dispositivo registrado.</p>
-        )}
-        {devices.state === 'ready' && devices.data.length > 0 && (
-          <div className="overflow-x-auto rounded-xl border border-env-border">
-            <table className="w-full text-sm">
-              <thead className="bg-env-surface text-left text-env-muted">
-                <tr>
-                  {[
-                    'Dispositivo',
-                    'Tipo',
-                    'Usuario',
-                    'IP',
-                    'Visto',
-                    'Pendientes',
-                    'Última sincronización',
-                  ].map((h) => (
-                    <th key={h} className="px-3 py-2 font-medium">
-                      {h}
-                    </th>
+          <div className="grid gap-6 xl:grid-cols-[3fr_2fr]">
+            {/* 2. Panorama por entorno */}
+            <section aria-label="Panorama">
+              <h2 className="mb-3 text-xl font-semibold">Entornos</h2>
+              {overview.state === 'loading' && (
+                <div className="h-48 animate-pulse rounded-xl bg-env-surface" />
+              )}
+              {overview.state === 'error' && (
+                <p className="text-env-muted">
+                  No se ha podido cargar el panorama.{' '}
+                  <button type="button" onClick={overview.retry} className="underline">
+                    Reintentar
+                  </button>
+                </p>
+              )}
+              {overview.state === 'ready' && (
+                <div className="grid gap-3 md:grid-cols-2">
+                  {overview.data.environments.map((e) => (
+                    <EnvironmentPanel key={e.environment.id} env={e} now={now} />
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {devices.data.map((d) => (
-                  <tr key={d.id} className="border-t border-env-border">
-                    <td className="px-3 py-2" title={d.id}>
-                      {d.label ?? d.id.slice(0, 8)}
-                    </td>
-                    <td className="px-3 py-2">{d.kind ?? '—'}</td>
-                    <td className="px-3 py-2">{d.user_id != null ? `#${d.user_id}` : '—'}</td>
-                    <td className="px-3 py-2 tabular-nums">{d.ip ?? '—'}</td>
-                    <td className="px-3 py-2">{formatAgo(d.last_seen_at, now)}</td>
-                    <td
-                      className={`px-3 py-2 tabular-nums ${d.pending_outbox > 0 ? 'font-semibold' : ''}`}
-                    >
-                      {d.pending_outbox > 0 ? `⇡ ${d.pending_outbox}` : '0'}
-                    </td>
-                    <td className="px-3 py-2">
-                      {d.last_sync_at ? formatAgo(d.last_sync_at, now) : 'nunca'}
-                    </td>
-                  </tr>
+                </div>
+              )}
+            </section>
+
+            {/* 3. Feed de eventos */}
+            <section aria-label="Eventos en vivo" className="min-w-0">
+              <h2 className="mb-3 text-xl font-semibold">Eventos en vivo</h2>
+              <div className="mb-3 grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
+                <FilterSelect
+                  label="Entorno"
+                  value={filters.envId}
+                  onChange={(envId) => setFilters({ ...filters, envId })}
+                  options={(overview.state === 'ready' ? overview.data.environments : []).map(
+                    (e) => [e.environment.id, e.environment.name],
+                  )}
+                />
+                <FilterSelect
+                  label="Tipo"
+                  value={filters.group}
+                  onChange={(group) => setFilters({ ...filters, group })}
+                  options={Object.entries(GROUPS).map(([k, g]) => [k, g.label])}
+                />
+                <FilterSelect
+                  label="Usuario"
+                  value={filters.userId}
+                  onChange={(userId) => setFilters({ ...filters, userId })}
+                  options={[...new Set(events.map((e) => e.user_id).filter((u) => u != null))].map(
+                    (u) => [String(u), `#${u}`],
+                  )}
+                />
+                <FilterSelect
+                  label="Dispositivo"
+                  value={filters.deviceId}
+                  onChange={(deviceId) => setFilters({ ...filters, deviceId })}
+                  options={[
+                    ...new Set(events.map((e) => e.device_id).filter(Boolean) as string[]),
+                  ].map((d) => [d, deviceLabel.get(d) ?? d.slice(0, 8)])}
+                />
+              </div>
+              <ol
+                aria-live="polite"
+                className="max-h-[32rem] overflow-y-auto rounded-xl border border-env-border bg-env-surface"
+              >
+                {shown.length === 0 && <li className="p-4 text-env-muted">Sin eventos.</li>}
+                {shown.map((e) => (
+                  <li
+                    key={e.id}
+                    className={`flex gap-3 border-b border-env-border px-3 py-2 text-sm transition-colors last:border-b-0 ${
+                      fresh.has(e.id) ? 'bg-env-border/60' : ''
+                    }`}
+                  >
+                    <span aria-hidden className="w-5 shrink-0 text-center">
+                      {GROUPS[groupOf(e.type)]?.icon ?? '·'}
+                    </span>
+                    <span className="w-12 shrink-0 tabular-nums text-env-muted">{hhmm(e.at)}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate">{e.summary || e.type}</span>
+                      <span className="block truncate text-xs text-env-muted">
+                        {e.type}
+                        {e.env_id && ` · ${e.env_id}`}
+                        {e.device_id &&
+                          ` · ${deviceLabel.get(e.device_id) ?? e.device_id.slice(0, 8)}`}
+                      </span>
+                    </span>
+                  </li>
                 ))}
-              </tbody>
-            </table>
+              </ol>
+            </section>
           </div>
-        )}
-      </section>
+
+          <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
+            <EnvironmentConfig environments={allEnvs.state === 'ready' ? allEnvs.data : []} />
+            <ConnectQr />
+          </div>
+
+          {/* 4. Dispositivos */}
+          <section aria-label="Dispositivos">
+            <h2 className="mb-3 text-xl font-semibold">Dispositivos</h2>
+            {devices.state === 'ready' && devices.data.length === 0 && (
+              <p className="text-env-muted">Ningún dispositivo registrado.</p>
+            )}
+            {devices.state === 'ready' && devices.data.length > 0 && (
+              <div className="overflow-x-auto rounded-xl border border-env-border">
+                <table className="w-full text-sm">
+                  <thead className="bg-env-surface text-left text-env-muted">
+                    <tr>
+                      {[
+                        'Dispositivo',
+                        'Tipo',
+                        'Usuario',
+                        'IP',
+                        'Visto',
+                        'Pendientes',
+                        'Última sincronización',
+                      ].map((h) => (
+                        <th key={h} className="px-3 py-2 font-medium">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {devices.data.map((d) => (
+                      <tr key={d.id} className="border-t border-env-border">
+                        <td className="px-3 py-2" title={d.id}>
+                          {d.label ?? d.id.slice(0, 8)}
+                        </td>
+                        <td className="px-3 py-2">{d.kind ?? '—'}</td>
+                        <td className="px-3 py-2">{d.user_id != null ? `#${d.user_id}` : '—'}</td>
+                        <td className="px-3 py-2 tabular-nums">{d.ip ?? '—'}</td>
+                        <td className="px-3 py-2">{formatAgo(d.last_seen_at, now)}</td>
+                        <td
+                          className={`px-3 py-2 tabular-nums ${d.pending_outbox > 0 ? 'font-semibold' : ''}`}
+                        >
+                          {d.pending_outbox > 0 ? `⇡ ${d.pending_outbox}` : '0'}
+                        </td>
+                        <td className="px-3 py-2">
+                          {d.last_sync_at ? formatAgo(d.last_sync_at, now) : 'nunca'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        </>
+      )}
     </section>
   )
 }
