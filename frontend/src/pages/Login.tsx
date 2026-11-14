@@ -1,26 +1,78 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api, unwrap } from '../api/client'
+import { useEnvironments } from '../api/useEnvironments'
 import { useLoad } from '../api/useLoad'
 import { homeFor } from '../auth/roles'
 import { login, useSession, type LoginError } from '../auth/session'
 import { SosButton } from '../components/alerts/SosButton'
+import { useVocab } from '../environments/useVocab'
+import { useEnvironmentStore } from '../store/environment'
 
 /** PIN de los usuarios demo (docs/auth-and-roles.md, solo con DEMO_MODE). */
 const DEMO_PIN = '1234'
 
-const inputCls =
-  'mt-1 w-full rounded-md border border-env-border bg-env-bg px-3 py-2 text-env-text focus:outline-2 focus:outline-offset-1 focus:outline-env-primary'
+/** Logo: anillos que giran despacio alrededor de "R U OK" (quietos con "reducir movimiento"). */
+function RuokRings() {
+  return (
+    <div className="relative mx-auto h-[132px] w-full max-w-[390px]" aria-hidden="true">
+      <svg viewBox="0 0 390 132" className="absolute inset-0 h-full w-full">
+        <circle
+          cx="195"
+          cy="66"
+          r="62"
+          fill="none"
+          stroke="var(--env-border)"
+          strokeWidth="4"
+          strokeDasharray="1 4.4"
+        />
+        <circle
+          className="ruok-spin"
+          cx="195"
+          cy="66"
+          r="50"
+          fill="none"
+          stroke="var(--env-primary)"
+          strokeWidth="7"
+          strokeDasharray="38 14"
+          strokeOpacity="0.8"
+        />
+        <circle
+          className="ruok-spin ruok-spin-reverse"
+          cx="195"
+          cy="66"
+          r="38"
+          fill="none"
+          stroke="var(--env-primary)"
+          strokeOpacity="0.4"
+          strokeWidth="2"
+          strokeDasharray="6 5"
+        />
+        <path d="M40 66H118M272 66H350" stroke="var(--env-border)" />
+        <rect x="116" y="64" width="5" height="5" fill="var(--env-primary)" />
+        <rect x="269" y="64" width="5" height="5" fill="var(--env-primary)" />
+      </svg>
+      <span className="absolute inset-x-0 top-[56px] text-center font-mono text-[15px] tracking-[0.2em]">
+        R U OK<span className="text-env-primary">?</span>
+      </span>
+    </div>
+  )
+}
 
 /**
- * Login (FE-27): usuario + contraseña, pestaña PIN y selector de usuarios demo. Tras entrar,
- * cada rol va a su vista inicial (o a donde iba, si la sesión había caducado). El botón
- * "Pedir ayuda" está también aquí: el SOS nunca depende del login.
+ * Login (FE-27) con el estilo de consola de a bordo (Login.dc.html): usuario + contraseña o PIN,
+ * accesos de los usuarios demo y "Pedir ayuda sin sesión" (el SOS nunca depende del login).
+ * Colores del entorno activo; tras entrar, cada rol va a su vista inicial (o a donde iba, si la
+ * sesión había caducado).
  */
 export default function Login() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const previous = useSession((s) => s.user)
+  const vocab = useVocab()
+  const envId = useEnvironmentStore((s) => s.envId)
+  const envs = useEnvironments()
+  const envName = envs.state === 'ready' ? envs.data.find((e) => e.id === envId)?.name : undefined
   const [mode, setMode] = useState<'password' | 'pin'>('password')
   const [username, setUsername] = useState(previous?.username ?? '')
   const [secret, setSecret] = useState('')
@@ -45,52 +97,35 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-full flex-col">
-      <main className="mx-auto w-full max-w-md flex-1 px-4 py-10">
-        <h1 className="text-3xl font-bold tracking-tight">
-          R U OK<span className="text-env-primary">?</span>
-        </h1>
-        <p className="mt-1 text-env-muted">Inicia sesión en el sistema de a bordo.</p>
+    <div className="hud-grid flex min-h-full flex-col">
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-3.5 pt-4 pb-4">
+        <div className="flex justify-between px-1">
+          <span className="hud-label text-[9px]">
+            Nodo{envName ? `.${envName}` : ''} / Servidor a bordo
+          </span>
+          <span className="hud-label text-[9px]">Sin internet · Local</span>
+        </div>
+
+        <div className="mt-2">
+          <RuokRings />
+        </div>
+
+        <div className="mt-1 text-center">
+          <h1 className="text-[30px] leading-tight font-light">
+            Hola de nuevo, <span className="text-env-primary">{vocab.member}.</span>
+          </h1>
+          <p className="mt-0.5 text-sm text-env-muted">Inicia sesión en el sistema de a bordo.</p>
+        </div>
 
         {expired && (
-          <p
-            role="status"
-            className="mt-4 rounded-lg border border-env-border bg-env-surface p-3 text-sm"
-          >
+          <p role="status" className="hud-panel mt-4 p-3 text-sm">
             Tu sesión ha caducado. Vuelve a entrar: lo que tengas pendiente en este dispositivo se
             enviará después, no se ha perdido nada.
           </p>
         )}
 
-        <div
-          role="tablist"
-          aria-label="Método"
-          className="mt-6 flex rounded-lg border border-env-border p-1 text-sm"
-        >
-          {(['password', 'pin'] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              role="tab"
-              aria-selected={mode === m}
-              onClick={() => {
-                setMode(m)
-                setSecret('')
-                setError(null)
-              }}
-              className={`flex-1 rounded-md px-3 py-1.5 ${
-                mode === m
-                  ? 'bg-env-primary text-env-primary-text'
-                  : 'text-env-muted hover:text-env-text'
-              }`}
-            >
-              {m === 'password' ? 'Contraseña' : 'PIN rápido'}
-            </button>
-          ))}
-        </div>
-
         <form
-          className="mt-4 space-y-3"
+          className="hud-panel mt-4"
           onSubmit={(e) => {
             e.preventDefault()
             void enter(
@@ -99,61 +134,93 @@ export default function Login() {
             )
           }}
         >
-          <label className="block text-sm">
-            Usuario
-            <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoComplete="username"
-              autoCapitalize="none"
-              required
-              className={inputCls}
-            />
-          </label>
-          <label className="block text-sm">
-            {mode === 'password' ? 'Contraseña' : 'PIN (4–6 dígitos)'}
-            <input
-              type="password"
-              value={secret}
-              onChange={(e) => setSecret(e.target.value)}
-              autoComplete={mode === 'password' ? 'current-password' : 'one-time-code'}
-              inputMode={mode === 'pin' ? 'numeric' : undefined}
-              pattern={mode === 'pin' ? '[0-9]{4,6}' : undefined}
-              required
-              className={inputCls}
-            />
-          </label>
-          {error && (
-            <p role="alert" className="text-sm">
-              ⚠ {error.message}
-              {error.kind === 'offline' && ' Si necesitas ayuda, usa el botón "Pedir ayuda".'}
-            </p>
-          )}
-          <button
-            type="submit"
-            disabled={busy}
-            className="w-full rounded-lg bg-env-primary px-4 py-2.5 font-medium text-env-primary-text disabled:opacity-60"
-          >
-            {busy ? 'Entrando…' : 'Entrar'}
-          </button>
+          <div className="hud-head">
+            <b>AUTH.01</b>Acceso
+            {envName && <span className="hud-chip">{envName}</span>}
+          </div>
+          <div className="flex flex-col gap-3 px-3.5 pt-3 pb-3.5">
+            <div
+              role="tablist"
+              aria-label="Método"
+              className="grid grid-cols-2 border border-env-border"
+            >
+              {(['password', 'pin'] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  role="tab"
+                  aria-selected={mode === m}
+                  onClick={() => {
+                    setMode(m)
+                    setSecret('')
+                    setError(null)
+                  }}
+                  className={`h-10 font-mono text-[11px] tracking-[0.14em] uppercase ${
+                    mode === m
+                      ? 'bg-env-primary/15 text-env-text shadow-[inset_0_-2px_0_var(--env-primary)]'
+                      : 'text-env-muted hover:text-env-text'
+                  }`}
+                >
+                  {m === 'password' ? 'Contraseña' : 'PIN rápido'}
+                </button>
+              ))}
+            </div>
+
+            <label className="flex flex-col gap-1.5">
+              <span className="hud-label">Usuario</span>
+              <input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoComplete="username"
+                autoCapitalize="none"
+                required
+                className="hud-input"
+              />
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="hud-label">
+                {mode === 'password' ? 'Contraseña' : 'PIN · 4–6 dígitos'}
+              </span>
+              <input
+                type="password"
+                value={secret}
+                onChange={(e) => setSecret(e.target.value)}
+                autoComplete={mode === 'password' ? 'current-password' : 'one-time-code'}
+                inputMode={mode === 'pin' ? 'numeric' : undefined}
+                pattern={mode === 'pin' ? '[0-9]{4,6}' : undefined}
+                required
+                className={`hud-input ${mode === 'pin' ? 'text-lg tracking-[0.5em]' : ''}`}
+              />
+            </label>
+            {error && (
+              <p role="alert" className="text-sm">
+                ⚠ {error.message}
+                {error.kind === 'offline' && ' Si necesitas ayuda, usa "Pedir ayuda sin sesión".'}
+              </p>
+            )}
+            <button type="submit" disabled={busy} className="hud-btn hud-btn-primary w-full">
+              {busy ? 'Entrando…' : 'Entrar'}
+            </button>
+          </div>
         </form>
 
         {demo.state === 'ready' && demo.data.length > 0 && (
-          <section className="mt-8">
-            <h2 className="text-sm font-medium text-env-muted">
-              Usuarios de la demo (PIN {DEMO_PIN})
-            </h2>
-            <ul className="mt-2 grid gap-2 sm:grid-cols-2">
+          <section className="hud-panel mt-3" aria-label="Usuarios de la demo">
+            <div className="hud-head">
+              <b>DEMO.02</b>Usuarios
+              <span className="hud-chip">PIN {DEMO_PIN}</span>
+            </div>
+            <ul className="grid grid-cols-2">
               {demo.data.map((u) => (
-                <li key={u.username}>
+                <li key={u.username} className="border-r border-b border-env-border/60">
                   <button
                     type="button"
                     disabled={busy}
                     onClick={() => void enter(u.username, { pin: DEMO_PIN })}
-                    className="w-full rounded-lg border border-env-border bg-env-surface px-3 py-2 text-left hover:border-env-text disabled:opacity-60"
+                    className="flex min-h-11 w-full flex-col gap-0.5 px-3 py-2.5 text-left hover:bg-env-primary/10 disabled:opacity-60"
                   >
-                    <span className="block font-medium">{u.display_name}</span>
-                    <span className="block text-xs text-env-muted">
+                    <span className="text-sm">{u.display_name}</span>
+                    <span className="hud-label text-[9px]">
                       {u.role_label}
                       {u.env_id ? ` · ${u.env_id}` : ' · global'}
                     </span>
@@ -163,12 +230,15 @@ export default function Login() {
             </ul>
           </section>
         )}
+
+        <div className="mt-auto flex flex-col gap-2.5 pt-4">
+          <SosButton variant="inline" label="Pedir ayuda sin sesión" />
+          <p className="text-center text-xs leading-snug text-env-muted">
+            Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
+            el criterio de un profesional sanitario.
+          </p>
+        </div>
       </main>
-      <footer className="border-t border-env-border px-4 pt-3 pb-20 text-center text-xs text-env-muted">
-        Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye el
-        criterio de un profesional sanitario.
-      </footer>
-      <SosButton />
     </div>
   )
 }
