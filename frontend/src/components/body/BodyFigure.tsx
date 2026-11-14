@@ -71,6 +71,8 @@ export function BodyFigure({
   const [tooltip, setTooltip] = useState<Tooltip | null>(null)
   // Zona señalada (ratón, foco de teclado o su botón de la leyenda): se ilumina y el resto se atenúa.
   const [ownHovered, setOwnHovered] = useState<string | null>(null)
+  // Ratón dentro de la figura: el cuerpo se amplía (estable mientras esté dentro).
+  const [overFigure, setOverFigure] = useState(false)
   const hovered = hoveredSystemId !== undefined ? hoveredSystemId : ownHovered
   const setHovered = (id: string | null) => {
     setOwnHovered(id)
@@ -207,6 +209,7 @@ export function BodyFigure({
     y: number,
     w: number,
     h: number = w,
+    pad = true,
   ) => {
     const kx = w / 512
     const ky = h / 512
@@ -214,8 +217,9 @@ export function BodyFigure({
     const style = shape(r)
     return (
       <g transform={`translate(${x} ${y}) scale(${kx} ${ky})`}>
-        {/* Zona sensible invisible que cubre el icono (los iconos tienen huecos). */}
-        <ellipse cx="256" cy="256" rx="256" ry="256" fill="transparent" stroke="none" />
+        {/* Zona sensible invisible que cubre el icono (los iconos tienen huecos). El cerebro no
+            la lleva: solo su forma, para no invadir los ojos que tiene debajo. */}
+        {pad && <ellipse cx="256" cy="256" rx="256" ry="256" fill="transparent" stroke="none" />}
         {icon.shape.map((d, i) => (
           <path key={i} d={d} {...style} strokeWidth={style.strokeWidth / k} />
         ))}
@@ -286,7 +290,7 @@ export function BodyFigure({
       ),
     ],
     // Cerebro (neuro-conductual). Termina por encima de los ojos para no robarles el clic.
-    ['brain', (r) => organ(r, BRAIN, 366, 22, 154, 104)],
+    ['brain', (r) => organ(r, BRAIN, 366, 22, 154, 104, false)],
     // Ojos (SANS). Zona sensible (rect invisible) más alta que los ojos: es fácil pulsarlos.
     [
       'eyes',
@@ -308,6 +312,8 @@ export function BodyFigure({
           que el panel quepa sin scroll con las fases de la misión debajo. */}
       <div
         ref={boxRef}
+        onPointerEnter={() => setOverFigure(true)}
+        onPointerLeave={() => setOverFigure(false)}
         className="relative w-full"
         style={{ maxWidth: 'min(300px, max(220px, calc((100vh - 350px) / 2)))' }}
       >
@@ -399,7 +405,7 @@ export function BodyFigure({
               transformBox: 'view-box',
               transformOrigin: '443.5px 887px',
               transition: 'transform 250ms ease-out',
-              transform: hovered !== null ? 'scale(1.12)' : undefined,
+              transform: hovered !== null || overFigure ? 'scale(1.12)' : undefined,
             }}
           >
             {/* Cuerpo holográfico. Los órganos se desaturan un poco para que no se confundan con el
@@ -431,10 +437,12 @@ export function BodyFigure({
             )}
 
             {zones.map(([n, d]) => zone(n, d, 'visual'))}
-          </g>
 
-          {/* Zonas sensibles, fuera del grupo que se amplía: no se mueven bajo el ratón. */}
-          {zones.map(([n, d]) => zone(n, d, 'hit'))}
+            {/* Zonas sensibles DENTRO del grupo que se amplía: crecen con el dibujo, así lo que se
+                ve y lo que responde coinciden (antes, al crecer, los ojos quedaban sobre la zona
+                del cerebro). No parpadea: la figura se amplía al entrar en ella, no por zona. */}
+            {zones.map(([n, d]) => zone(n, d, 'hit'))}
+          </g>
         </svg>
 
         {tooltip && (
