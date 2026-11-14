@@ -9726,6 +9726,36 @@ export const events: Schema<'Event'>[] = [
   },
   {
     "id": 17,
+    "type": "device.registered",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": 1,
+    "device_id": "a3f9c2d1-7b6e-4f5a-8c9d-0e1f2a3b4c5d",
+    "ref_id": null,
+    "summary": "Nuevo dispositivo (mobile) de Cmdr. Vega",
+    "payload": {
+      "kind": "mobile",
+      "ip": "192.168.8.21"
+    }
+  },
+  {
+    "id": 18,
+    "type": "heartbeat",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": 1,
+    "device_id": "a3f9c2d1-7b6e-4f5a-8c9d-0e1f2a3b4c5d",
+    "ref_id": null,
+    "summary": "Heartbeat de Cmdr. Vega",
+    "payload": {
+      "activity": "normal",
+      "pending_outbox": 2
+    }
+  },
+  {
+    "id": 19,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "iss",
@@ -9743,7 +9773,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 18,
+    "id": 20,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "iss",
@@ -9761,7 +9791,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 19,
+    "id": 21,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "iss",
@@ -9779,7 +9809,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 20,
+    "id": 22,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "iss",
@@ -9797,7 +9827,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 21,
+    "id": 23,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "iss",
@@ -9815,7 +9845,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 22,
+    "id": 24,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "iss",
@@ -9833,7 +9863,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 23,
+    "id": 25,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "moon",
@@ -9851,7 +9881,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 24,
+    "id": 26,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "moon",
@@ -9869,7 +9899,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 25,
+    "id": 27,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "moon",
@@ -9887,7 +9917,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 26,
+    "id": 28,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "moon",
@@ -9905,7 +9935,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 27,
+    "id": 29,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "moon",
@@ -9923,7 +9953,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 28,
+    "id": 30,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "moon",
@@ -9941,7 +9971,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 29,
+    "id": 31,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -9959,7 +9989,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 30,
+    "id": 32,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -9977,7 +10007,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 31,
+    "id": 33,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -9995,7 +10025,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 32,
+    "id": 34,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -10013,7 +10043,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 33,
+    "id": 35,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -10031,7 +10061,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 34,
+    "id": 36,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -10049,7 +10079,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 35,
+    "id": 37,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "earth",
@@ -10067,7 +10097,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 36,
+    "id": 38,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "earth",
@@ -10085,7 +10115,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 37,
+    "id": 39,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "earth",
@@ -10103,7 +10133,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 38,
+    "id": 40,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "hospital",
@@ -10121,7 +10151,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 39,
+    "id": 41,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "hospital",
@@ -10139,7 +10169,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 40,
+    "id": 42,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "hospital",
@@ -10157,7 +10187,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 41,
+    "id": 43,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -10175,7 +10205,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 42,
+    "id": 44,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -10193,7 +10223,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 43,
+    "id": 45,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -10211,7 +10241,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 44,
+    "id": 46,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -10229,7 +10259,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 45,
+    "id": 47,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -10247,7 +10277,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 46,
+    "id": 48,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -10265,7 +10295,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 47,
+    "id": 49,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -10283,7 +10313,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 48,
+    "id": 50,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -10305,14 +10335,14 @@ export const events: Schema<'Event'>[] = [
 export const devices: Schema<'Device'>[] = [
   {
     "id": "a3f9c2d1-7b6e-4f5a-8c9d-0e1f2a3b4c5d",
-    "user_id": 7,
+    "user_id": 1,
     "kind": "mobile",
-    "label": "movil-vega",
+    "label": null,
     "ip": "192.168.8.21",
-    "user_agent": null,
+    "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile/15E148",
     "first_seen_at": "2026-11-14T10:00:00Z",
     "last_seen_at": "2026-11-14T10:00:00Z",
-    "pending_outbox": 0,
+    "pending_outbox": 2,
     "last_sync_at": "2026-11-14T10:00:00Z"
   }
 ]
