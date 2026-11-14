@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40).
 
 ## Comandos
 
@@ -307,15 +307,27 @@ Contenido:
 Serie temporal de un indicador con Recharts, dentro de cada `IndicatorCard` del `SystemPanel` (`showTrend`). En la cuadrícula del dashboard no se muestra, para no lanzar una petición por indicador cada 15 s.
 
 - **Datos:** `useMeasurements(memberId, indicatorId, días)` → `GET /members/{id}/measurements?indicator_id=&from=`, con `from` calculado con la hora del servidor.
-- **Periodo:** selector **7 d / 30 d**.
+- **Periodo:** selector **7 d / 30 d** (`PeriodSwitch`).
+- **Piezas:** `TrendPlot` es solo la gráfica (recibe los puntos); `TrendChart` la usa en las tarjetas cargando sus propios datos; el historial la usa con sus datos compartidos con la tabla.
 - **Bandas:** `normal` y `warning` de `IndicatorAssessment.range` (ya ajustadas al entorno), como lavado suave (12 %) de los colores del semáforo. La zona fuera de las bandas queda sin sombrear.
 - **Marcas** (especificaciones de `dataviz`): una sola serie y por tanto sin leyenda (el pie dice periodo y unidad); línea de 2 px en el color de texto del tema; puntos solo si hay 14 o menos; el último punto siempre marcado (r 4,5 con anillo del color de fondo); rejilla horizontal fina; ejes con texto `muted`.
-- **Eje Y** (`yDomain()`): cubre datos y bandas con un 8 % de margen y números redondos, para que las bandas se vean siempre enteras.
+- **Eje Y** (`yDomain()` y `yTicks()`): cubre datos y bandas con un 8 % de margen y marcas en números redondos (40, 60, 80…), para que las bandas se vean siempre enteras.
 - **Tooltip** con línea vertical: fecha, hora y valor con unidad.
 - **Accesibilidad:** la gráfica es `aria-hidden` y debajo hay una tabla desplegable **"Ver datos (N)"** con todas las mediciones.
 - Estados de carga, error con reintento y "Sin mediciones en los últimos N días".
 
 Verificado con una serie sintética de 30 días (interceptando la petición en Chrome), porque el seed de 30 días (BE-07) aún no existe: con el seed real debería verse igual.
+
+## Historial (FE-09)
+
+`/history` (`src/pages/History.tsx`):
+
+- **Selector de indicador**: los indicadores activos del entorno (`Environment.indicators`), con su nombre del catálogo.
+- **Selector de periodo**: 7 d / 30 d.
+- El indicador y el periodo van en la URL: `/history?indicator=bp_systolic&days=30` (se puede enlazar directamente).
+- **Gráfica** grande (`TrendPlot`) con las bandas del entorno: si el indicador está en la evaluación se usan sus rangos ajustados; si no, los del catálogo.
+- **Tabla** con todas las mediciones del periodo, de la más reciente a la más antigua: fecha, valor con unidad, origen (`formatSource()`: manual, dispositivo, cámara, check-in, test PVT) y nota. En móvil la tabla hace scroll dentro de su caja.
+- **Mediciones nuevas:** la serie se recarga cada 15 s en segundo plano, así que una medición nueva aparece sin recargar la página. Si el refresco falla, se avisa.
 
 ### Pendiente
 

@@ -1,5 +1,9 @@
 /** Lógica pura de TrendChart (fácil de testear). */
 
+/** Periodos disponibles en días. */
+export const PERIODS = [7, 30] as const
+export type Period = (typeof PERIODS)[number]
+
 export interface TrendPoint {
   /** Milisegundos (eje X temporal). */
   t: number
@@ -37,6 +41,16 @@ export function yDomain(points: TrendPoint[], range: Ranges): [number, number] {
   const pad = (hi - lo) * 0.08
   const step = niceStep(hi - lo)
   return [Math.floor((lo - pad) / step) * step, Math.ceil((hi + pad) / step) * step]
+}
+
+/** Marcas del eje Y: múltiplos del mismo paso redondo que usa `yDomain` (p. ej. 40, 60, 80…). */
+export function yTicks([lo, hi]: [number, number]): number[] {
+  const step = niceStep(hi - lo)
+  const ticks: number[] = []
+  for (let v = Math.ceil(lo / step) * step; v <= hi + step / 1e6; v += step) {
+    ticks.push(Number(v.toFixed(6)))
+  }
+  return ticks
 }
 
 function niceStep(span: number): number {
