@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); check-in diario "R U OK?" en **FE-19** (#27); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41); botón SOS / Pedir ayuda en **FE-13** (#43).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41); botón SOS / Pedir ayuda en **FE-13** (#43); login y sesión en **FE-27** (#68); permisos por rol en **FE-28** (#70); check-in diario "R U OK?" en **FE-19** (#27).
 
 ## Comandos
 
@@ -46,19 +46,19 @@ Antes de abrir una PR: `npm run lint && npm run build && npm test` (es lo que ej
 
 ## Stack instalado (FE-01)
 
-| Paquete                               | Versión   | Uso                                                                  |
-| ------------------------------------- | --------- | -------------------------------------------------------------------- |
-| `react`, `react-dom`                  | 18.3      | UI                                                                   |
-| `react-router-dom`                    | 6.30      | Rutas (`createBrowserRouter`)                                        |
-| `zustand`                             | 5         | Estado global (`src/store/`)                                         |
-| `recharts`                            | 3         | Gráficas (`TrendChart`, FE-08)                                       |
-| `framer-motion`                       | 14        | Animaciones y transiciones                                           |
-| `idb`                                 | 8         | IndexedDB para el outbox offline (FE-11)                             |
-| `vite` + `@vitejs/plugin-react`       | 6.4 + 4.7 | Bundler y dev server                                                 |
-| `tailwindcss` + `@tailwindcss/vite`   | 4         | Estilos (sin `tailwind.config.js`: se configura en CSS con `@theme`) |
-| `typescript`                          | 5.6       | Modo `strict`                                                        |
-| `eslint` + `typescript-eslint`        | 9 + 8     | Lint (flat config en `eslint.config.js`)                             |
-| `prettier` + `eslint-config-prettier` | 3 + 10    | Formato                                                              |
+| Paquete                               | Versión   | Uso                                                                   |
+| ------------------------------------- | --------- | --------------------------------------------------------------------- |
+| `react`, `react-dom`                  | 18.3      | UI                                                                    |
+| `react-router-dom`                    | 6.30      | Rutas (`createBrowserRouter`)                                         |
+| `zustand`                             | 5         | Estado global (`src/store/`)                                          |
+| `recharts`                            | 3         | Gráficas (`TrendChart`, FE-08)                                        |
+| `framer-motion`                       | 14        | Animaciones y transiciones                                            |
+| `idb`                                 | 8         | IndexedDB por dispositivo `ruok-<device_id>` (FE-30; outbox en FE-11) |
+| `vite` + `@vitejs/plugin-react`       | 6.4 + 4.7 | Bundler y dev server                                                  |
+| `tailwindcss` + `@tailwindcss/vite`   | 4         | Estilos (sin `tailwind.config.js`: se configura en CSS con `@theme`)  |
+| `typescript`                          | 5.6       | Modo `strict`                                                         |
+| `eslint` + `typescript-eslint`        | 9 + 8     | Lint (flat config en `eslint.config.js`)                              |
+| `prettier` + `eslint-config-prettier` | 3 + 10    | Formato                                                               |
 
 Notas:
 
@@ -69,13 +69,13 @@ Notas:
 
 ## Mocks: el front sin backend (FS-04)
 
-| Modo                             | Cómo                                                                                         | Qué pasa                                                                                                                                                            |
-| -------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Real** (por defecto)           | `npm run dev`                                                                                | Llama al backend. Sin servidor: chip "sin conexión" y `NetworkError`; **nunca datos inventados**                                                                    |
-| **Mock**                         | `VITE_USE_MOCKS=true npm run dev`, o `?mocks=1` en la URL (se recuerda; `?mocks=0` lo quita) | Todo el front funciona contra una API simulada en memoria. Banner amarillo **"DATOS DE EJEMPLO"**                                                                   |
-| **Fallback** (plan B de la demo) | `VITE_MOCK_FALLBACK=true`                                                                    | Si el servidor no responde, **solo las lecturas** usan mocks y aparece el banner. **Las escrituras nunca se simulan**: lanzan `NetworkError` y el outbox las guarda |
+| Modo                             | Cómo                                                                                         | Qué pasa                                                                                                                                                                                                                                  |
+| -------------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Real** (por defecto)           | `npm run dev`                                                                                | Llama al backend. Sin servidor: chip "sin conexión" y `NetworkError`; **nunca datos inventados**                                                                                                                                          |
+| **Mock**                         | `VITE_USE_MOCKS=true npm run dev`, o `?mocks=1` en la URL (se recuerda; `?mocks=0` lo quita) | Todo el front funciona contra una API simulada en memoria. Banner amarillo **"DATOS DE EJEMPLO"**                                                                                                                                         |
+| **Fallback** (plan B de la demo) | `VITE_MOCK_FALLBACK=true`                                                                    | Si el servidor no responde, **solo las lecturas** usan mocks y aparece el banner. **Las escrituras nunca se simulan**: lanzan `NetworkError`; el formulario conserva los datos para reintentar (guardado persistente en IndexedDB: FE-11) |
 
-- **Datos:** `src/api/mocks/fixtures.gen.ts` lo genera `npm run gen:mocks`, que llama a cada endpoint del backend con su `TestClient` (hoy, los stubs de `backend/app/stubs.py`). Cada fixture lleva su tipo (`: Schema<'Assessment'>`), así que **si el contrato cambia y los mocks no encajan, `npm run build` falla**. No se edita a mano.
+- **Datos:** `src/api/mocks/fixtures.gen.ts` lo genera `npm run gen:mocks`, que llama a cada endpoint del backend con su `TestClient`: el catálogo sale de los JSON reales (`backend/app/data/`) y el resto, mientras no esté implementado, de `backend/app/stubs.py`. Cada fixture lleva su tipo (`: Schema<'Assessment'>`), así que **si el contrato cambia y los mocks no encajan, `npm run build` falla**. No se edita a mano.
 - **Estado en memoria** (`handlers.ts`): las mediciones enviadas aparecen en el historial (idempotentes por UUID), los SOS se crean, escalan y resuelven, las tareas suman puntos, `/demo/link` y `/demo/fast-forward` funcionan. `POST /demo/reset` lo reinicia.
 - **El assessment de ejemplo** tiene los 7 sistemas con los 4 estados (`normal`, `warning`, `critical`, `unknown`), y el modo de escalado cambia según el entorno (`?env=`).
 - **Usuarios demo:** `vega` (member, Marte), `medic-mars`, `surgeon-mars` y `admin`, con cualquier contraseña.
@@ -91,7 +91,7 @@ frontend/
 ├── public/favicon.svg
 ├── vite.config.ts             React + Tailwind, puerto 5173, proxy /api → :8000, config de Vitest
 ├── scripts/gen-api.mjs        npm run gen:api (OpenAPI → src/api/types.gen.ts)
-├── .env.example               VITE_API_PROXY_TARGET, VITE_API_ORIGIN
+├── .env.example               VITE_API_PROXY_TARGET, VITE_API_ORIGIN, VITE_USE_MOCKS, VITE_MOCK_FALLBACK
 ├── eslint.config.js  .prettierrc.json  .prettierignore
 ├── tsconfig.json              referencias a tsconfig.app.json (src/) y tsconfig.node.json (vite.config.ts)
 └── src/
@@ -128,6 +128,9 @@ frontend/
     │   ├── mocks/             API simulada: mode.ts, handlers.ts, mockFetch.ts, events.ts,
     │   │                      useMockStatus.ts, fixtures.gen.ts (GENERADO por npm run gen:mocks)
     │   └── *.test.ts          tests (Vitest)
+    ├── auth/                  session.ts (login, logout, kv.auth, 401), roles.ts (homeFor),
+    │                          permissions.ts (matriz de acceso), useAuth.ts (+ tests)
+    ├── components/auth/       RequireSession, RequireRole, SessionMenu
     ├── components/alerts/     SosButton, SosDialog + sos.ts (categorías, destinos, protocolo; + test)
     ├── components/body/       BodyFigure (SVG) + regions.ts (buildRegions, formatSinceLabel; + test)
     ├── components/dashboard/  SystemPanel, IndicatorCard, TrendChart, LinkChip + format.ts y trend.ts (+ tests)
@@ -143,10 +146,10 @@ frontend/
     │   ├── status.ts          statusStyle(), livenessState(), STATUS_COLORS (+ status.test.ts)
     │   ├── MockBanner.tsx     banner obligatorio con datos de ejemplo
     │   └── PagePlaceholder.tsx
-    └── pages/                 una página vacía por ruta
+    └── pages/                 una página por ruta (CheckIn, Missions, Alerts y Ground aún son PagePlaceholder)
 ```
 
-Carpetas que aún no existen y que crean sus issues: `components/game/`. `offline/` ya existe con `outbox.ts`; FE-11 y FE-30 añaden IndexedDB y la sincronización.
+Carpetas que aún no existen y que crean sus issues: `components/game/`. `offline/` tiene la identidad de dispositivo y la base IndexedDB (FE-30) y el outbox persistente con su sincronización (FE-11).
 
 ## Rutas
 
@@ -164,16 +167,16 @@ Todas cuelgan de `Layout`, que pinta la cabecera con el selector de entorno, la 
 | `/ground`    | `Ground`            | FE-16         |
 | `*`          | `NotFound`          | —             |
 
-Las páginas de FE-01 solo muestran un `PagePlaceholder` con el título y la issue que las completará.
+Las rutas `/checkin` (FE-19), `/missions` (FE-18), `/alerts` (FE-14) y `/ground` (FE-16) aún muestran un `PagePlaceholder` con la issue que las completará.
 
 ## Entorno activo (FE-02)
 
 ### Store (`src/store/environment.ts`)
 
-`useEnvironmentStore` guarda `envId`, `memberId` y `vocabulary`, y se persiste en `localStorage` (`ruok-session`), así que sobrevive a una recarga también sin conexión.
+`useEnvironmentStore` guarda `envId`, `memberId` y `vocabulary`, y se persiste en `localStorage` con la clave `ruok-session-<device_id>` (una sesión por dispositivo o pestaña, FE-30), así que sobrevive a una recarga también sin conexión.
 
 - `selectEnvironment({ id, vocabulary })` cambia `envId` y `vocabulary` **a la vez** (nunca hay un vocabulario de otro entorno). Si el entorno cambia, pone `memberId` a `null`, porque cada entorno tiene sus propios members. Las claves que falten del vocabulario se rellenan con el término neutro.
-- `selectMember(id)` elige el member. Aún no lo usa nadie: la lista llega con `GET /environments/{id}/members` (FS-04 / BE-05).
+- `selectMember(id)` elige el member (lo usa `MemberList` en FE-03).
 - Sin entorno elegido, el vocabulario es neutro: `persona` / `equipo` / `control externo`.
 
 ### Textos: `useVocab()`
@@ -218,6 +221,7 @@ Reglas:
 - **`primary` no se usa como color de texto**: en Marte (`#c1440e`, el del contrato) solo da 3,7:1 sobre el fondo.
 - **El semáforo no depende del tema**: `normal`, `warning`, `critical` y `unknown` usan una paleta fija en todos los entornos (FE-04). Ningún `primary` es verde, para no confundirse con "normal".
 - Para añadir un entorno: crea `themes/<id>.ts` y regístralo en `themes/index.ts`.
+- **Colores alineados con el backend:** `theme.primary` de `backend/app/data/environments.json` usa los mismos `primary` que `src/environments/themes/` (en `earth`, `#2bb3c9`, no verde). Si cambias uno, cambia el otro.
 
 ### Selección de entorno y member (FE-03)
 
@@ -271,15 +275,15 @@ const regions = buildRegions(systems, assessment.systems)   // catálogo (svg_re
 />
 ```
 
-| `svg_region` | Dibujo                             | Sistema (stubs)        |
-| ------------ | ---------------------------------- | ---------------------- |
-| `brain`      | cerebro, en la cabeza              | neuro-conductual       |
-| `eyes`       | los dos ojos                       | ojos (SANS)            |
-| `heart`      | corazón, lado izquierdo del cuerpo | cardiovascular         |
-| `immune`     | ganglios (cuello, axilas, ingles)  | inmune                 |
-| `metabolic`  | abdomen                            | metabólico y nutrición |
-| `bones`      | huesos de brazos y piernas         | musculoesquelético     |
-| `halo`       | halo punteado alrededor del cuerpo | radiación              |
+| `svg_region` | Dibujo                             | Sistema (`systems.json`) |
+| ------------ | ---------------------------------- | ------------------------ |
+| `brain`      | cerebro, en la cabeza              | neuro-conductual         |
+| `eyes`       | los dos ojos                       | ojos (SANS)              |
+| `heart`      | corazón, lado izquierdo del cuerpo | cardiovascular           |
+| `immune`     | ganglios (cuello, axilas, ingles)  | inmune                   |
+| `metabolic`  | abdomen                            | metabólico y nutrición   |
+| `bones`      | huesos de brazos y piernas         | musculoesquelético       |
+| `halo`       | halo punteado alrededor del cuerpo | radiación                |
 
 - Los colores son los del semáforo (`STATUS_COLORS`). Un sistema sin evaluación es `unknown` (rayado gris), **nunca verde**.
 - Con liveness `stale` o `lost`, **toda la figura** pasa a gris rayado y arriba aparece "Sin datos desde hace X min" (calculado con `serverNow()`, no con el reloj del dispositivo). El tooltip indica el último estado conocido.
@@ -297,7 +301,7 @@ Contenido:
 - **Función** del sistema y, en entornos espaciales (`kind: space`), **efectos en el espacio** y **peligros** (los cinco de NASA HRP: radiación, aislamiento, distancia, gravedad y entorno hostil; `formatHazard()`).
 - **Indicadores** de la evaluación: nombre (del catálogo `/indicators`), último valor con unidad (`formatValue()`: las escalas `1-5` salen como "3 / 5"), `StatusBadge`, tendencia con flecha y texto (`formatTrend()`) y antigüedad (`formatAgo()` con `serverNow()`; "Nunca medido" si no hay dato).
 - **Recomendaciones** ordenadas por prioridad.
-- Botón **"Medir ahora"** → `/measure?system=<id>` (el formulario que lo lee llega con FE-10).
+- Botón **"Medir ahora"** → `/measure?system=<id>` (formulario de FE-10).
 - Con liveness `stale` o `lost`, los estados se muestran como "Sin datos recientes", igual que la figura.
 
 ## Dashboard (FE-07)
@@ -396,6 +400,10 @@ Cada dispositivo (o pestaña, en los ensayos) tiene su propia identidad, su base
 - El `device_id` es siempre un UUID (el back lo valida).
 - Probado con dos pestañas `?device=a` y `?device=b`: ids, bases, sesión y outbox independientes.
 
+- **Efectos conocidos:**
+  - `?mocks=1` es **global** (se guarda en `localStorage` sin `device_id`): afecta a todas las pestañas, aunque tengan `?device=` distinto.
+  - Cada pestaña abierta con `?device=tab` deja una base IndexedDB y una clave `ruok-session-<uuid>` que no se borran solas. Para limpiar tras los ensayos: DevTools → Application → Clear storage.
+
 ## Outbox offline y sincronización (FE-11)
 
 **Toda escritura pasa por `src/offline/outbox.ts`** (CLAUDE.md, principio 4). Flujo (`docs/data-model.md` §2):
@@ -438,11 +446,55 @@ Se envía **por el outbox** (`sendAlert()`, mismo UUID en el dispositivo y en el
 - No hay textos clínicos en el código: todo el protocolo viene de la evaluación o del catálogo. **Falta un endpoint de protocolos** (`protocol_id` existe en la evaluación, pero no hay `GET /protocols`); cuando exista, se cachea con `withCatalogCache('protocols')`.
 - Sin member elegido, el diálogo pide elegirlo y recuerda avisar de viva voz.
 
-### Pendiente
+## Login y sesión (FE-27)
 
-- **TODO(FE-11):** los pendientes de sincronizar del outbox en la cabecera del dashboard (aún no existe el outbox).
+Diseño completo en [`docs/auth-and-roles.md`](../docs/auth-and-roles.md).
 
-- **Cabecera en móvil:** a 390 px el chip de servidor y el selector de entorno no caben y hay scroll horizontal (se arregla en FE-26).
+- **`/login`** (`src/pages/Login.tsx`), fuera del `Layout` pero **con el botón "Pedir ayuda"**:
+  - usuario + **contraseña** (`POST /auth/login`) o pestaña **PIN rápido** (`POST /auth/pin`);
+  - **usuarios demo** (`GET /auth/demo-users`) para entrar con un clic (PIN `1234`); la lista se reintenta cada 10 s si el servidor no responde;
+  - errores: credenciales incorrectas, sin servidor (recuerda el SOS) y bloqueo por intentos (429).
+- **Sesión** (`src/auth/session.ts`): `{token, user, exp}` en IndexedDB `kv.auth` y `kv.last_member_id` (para el SOS sin sesión). `initSession()` la recupera al arrancar y conecta el cliente: **`Authorization: Bearer`** en todas las peticiones.
+- **Tras el login** se fija el entorno del usuario (y su `member_id` si es member), se reanuda el outbox (`resumeSync()`) y cada rol va a su **vista inicial** (`homeFor()`):
 
-- **TODO(FE-28):** `/` solo será accesible para el rol admin; el resto entra directamente en su entorno.
-- **Colores del contrato alineados:** `theme.primary` de `backend/app/data/environments.json` (BE-03) usa los mismos `primary` que `src/environments/themes/` (en `earth`, `#2bb3c9`, no verde). Si cambias uno, cambia el otro.
+| Rol                  | Vista inicial                      |
+| -------------------- | ---------------------------------- |
+| `member`, `family`   | `/dashboard`                       |
+| `medic`, `commander` | `/members` (members de su entorno) |
+| `responder`, `psych` | `/ground`                          |
+| `admin`              | `/` (selector de entorno)          |
+
+- **Rutas protegidas:** `RequireSession` envuelve todo menos `/login`. Sin sesión → `/login?next=<ruta>`.
+- **401 o `exp` vencido:** la sesión pasa a "caducada" y se va a `/login?expired=1` ("Tu sesión ha caducado… no se ha perdido nada"); al volver a entrar se regresa a la página donde se estaba. El outbox se pausa solo con el 401 (FE-11) y se reanuda tras el login.
+- **"Salir"** (cabecera, `SessionMenu`) borra `kv.auth` pero **nunca el outbox**: lo pendiente se envía al volver a entrar.
+- **SOS sin sesión:** usa `kv.last_member_id` y solo permite la categoría _emergencia_ (lo único que el back acepta sin token). Si el dispositivo nunca tuvo sesión, pide iniciarla y recuerda avisar de viva voz.
+- **Para FE-15:** el modal "R U OK?" debe montarse también en `/login` (fuera del `Layout`), como el SOS.
+
+## Permisos por rol (FE-28)
+
+**Un solo sitio:** `src/auth/permissions.ts` es el espejo de la matriz de [`docs/auth-and-roles.md`](../docs/auth-and-roles.md#matriz-de-acceso-a-vistas). Si cambia la matriz, se cambia allí y aquí (y en el back). `permissions.test.ts` recorre la matriz completa rol a rol y comprueba que la vista inicial de cada rol está permitida (sin bucles de redirección).
+
+```ts
+const { user, role, can } = useAuth()
+can('view:ground') // vistas: view:dashboard, view:measure, view:checkin, view:ground…
+can('action:measure-others') // acciones: action:sos, action:change-environment, action:ack-alerts…
+const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el elegido
+```
+
+- **Rutas:** cada ruta de `App.tsx` va envuelta en `<RequireRole>` con el permiso de `ROUTE_PERMISSIONS`. Una ruta prohibida **redirige a la vista inicial del rol** (`homeFor`).
+- **Menú:** la navegación solo muestra las vistas permitidas (p. ej. el flight surgeon ve Historial, Alertas y su consola; el medic, además, "Tripulación"). El logo lleva a la vista inicial del rol.
+- **Selector de entorno** de la cabecera y página `/`: solo `admin`.
+- **"Medir ahora"** del `SystemPanel`: el member para sí mismo; medic y admin para cualquiera ("medir para otro solo medic").
+- **SOS:** sin sesión, siempre visible. Con sesión, oculto para `responder` y `psych` (están en tierra).
+- **Cabecera:** usuario y rol con el **vocabulario del entorno** (`userRoleLabel()`: astronauta, oficial médico, flight surgeon…; si no hay término, el `role_label` del servidor).
+- El panel de demo y `/control` ya tienen permiso (`action:demo-panel`, `view:control`) para FE-31/FE-32.
+- Ocultar en la UI **no es seguridad**: el back comprueba rol y propiedad en cada endpoint (BE-27).
+
+## Pendiente
+
+- **FE-26 / FE-34:**
+  - a 390 px, con el selector de entorno (desde FE-28 solo lo ve el admin), el chip de servidor y el selector no caben y hay scroll horizontal;
+  - el chip "Servidor conectado" usa verde fijo (se confunde con "normal") y hay colores fijos de Tailwind en `ServerStatus` e `IndicatorField`;
+  - el dashboard muestra dos badges cuando `unknown` se debe a `stale`;
+  - "actualizado hace X" usa el reloj del dispositivo en vez de `serverNow()`.
+- **Protocolos:** `protocol_id` llega en la evaluación pero no existe `GET /protocols` (lo usa el SOS sin conexión, FE-13).

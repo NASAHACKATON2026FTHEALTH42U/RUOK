@@ -8,7 +8,7 @@ El **perfil de entorno** es el núcleo de RUOK. Es un JSON (`backend/app/data/en
 |---|---|---|---|---|---|---|
 | `iss` | Estación Espacial Internacional | 0 g (microgravedad) | ~0 s → `realtime` | media | self → crew → ground | astronauta / tripulación / flight surgeon |
 | `moon` | Base lunar Artemis | 0,16 g | ~1,3 s → `realtime` | alta | self → crew → ground | astronauta / tripulación / flight surgeon |
-| `mars` | Base marciana | 0,38 g | 4–24 min (demo: 840 s) → `autonomous` + `delayed` | alta | self → crew → ground | astronauta / tripulación / flight surgeon |
+| `mars` | Base marciana | 0,38 g | 4–24 min (demo: 840 s) → `delayed` (`autonomous` si es `critical`) | alta | self → crew → ground | astronauta / tripulación / flight surgeon |
 | `earth` | Analógico terrestre (control) | 1 g | 0 s | baja | self → crew → ground | participante / equipo / médico |
 | `hospital` | Planta de hospital | 1 g | 0 s | — | self → nurse → doctor | paciente / planta / enfermería |
 | `geriatric` | Residencia geriátrica | 1 g | 0 s | — | self → caregiver → doctor → family | residente / residencia / cuidador |
@@ -21,7 +21,8 @@ El **perfil de entorno** es el núcleo de RUOK. Es un JSON (`backend/app/data/en
 - **`indicators`**: indicadores activos. La dosis de radiación solo aparece en el espacio; el riesgo de caídas y la hidratación tienen más peso en geriatría.
 - **`comm_delay_s`**: decide `escalation.mode`.
   - Por debajo de 5 s se usa `realtime`.
-  - Por encima, `delayed` con ETA, y además se muestra un **protocolo autónomo** mientras no llega la respuesta.
+  - Por encima, `delayed` con ETA. Si además el retardo es ≥ 60 s y el estado es `critical`, el modo es `autonomous`: se muestra el **protocolo autónomo** mientras no llega la respuesta.
+  - El retardo solo afecta a los niveles **externos** de la escalera: `self` y `crew` (o sus equivalentes) se resuelven a bordo, en tiempo real.
 - **`escalation_ladder`**: los niveles que siguen las alertas automáticas y entre los que se puede elegir al escalar a mano.
 - **`liveness`**: umbrales de heartbeat (normal, EVA, sueño) y el timeout del "R U OK?".
 - **`routine`**: tareas diarias para la gamificación. Por ejemplo, el ejercicio resistivo en el espacio y el paseo o la hidratación en geriatría.

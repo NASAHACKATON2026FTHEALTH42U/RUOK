@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { serverNow } from '../api/client'
+import { useActiveMemberId } from '../auth/useAuth'
 import { newId } from '../api/newId'
 import { useIndicators } from '../api/useIndicators'
 import {
@@ -14,7 +15,6 @@ import { statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { useVocab } from '../environments/useVocab'
 import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox'
-import { useEnvironmentStore } from '../store/environment'
 
 type Phase =
   | { kind: 'editing' }
@@ -35,7 +35,7 @@ const btnSecondary = 'rounded-lg border border-env-border px-4 py-2 hover:border
  */
 export default function CheckIn() {
   const vocab = useVocab()
-  const memberId = useEnvironmentStore((s) => s.memberId)
+  const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el elegido
   const catalog = useIndicators()
 
   const questions = useMemo(() => {

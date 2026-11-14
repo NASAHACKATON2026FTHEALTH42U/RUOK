@@ -363,6 +363,8 @@ issues:
     - Crear el endpoint que compone el Assessment completo
     - Aceptar el parámetro `env` opcional para evaluar con otro perfil sin modificar datos
     - Recalcular en el POST de mediciones y devolverlo
+    - "Retirar `stubs.assessment()` y `_simple_system()`; el endpoint usa `member_assessment.build_assessment` con el catálogo real (hoy el stub da 142 mmHg en Marte como warning, y el motor diría critical)"
+    - "Actualizar `tests/test_contract.py::test_assessment_mode_depends_on_environment`, que hoy exige autonomous en un warning (contrario a la regla del contrato), y regenerar los mocks del front (`npm run gen:mocks`)"
   acceptance:
     - La respuesta valida contra el schema
     - Con `?env=geriatric`, los mismos datos dan otro resultado (test)
@@ -511,6 +513,8 @@ issues:
   tasks:
     - Implementar las reglas de docs/behavioral-health.md (ánimo bajo frente a la línea base durante 5 días, soledad en aumento, PVT junto con sueño)
     - Añadir al assessment el bloque `behavioral` con `details_visible` según share_behavioral_details
+    - "Activar en los perfiles espaciales de environments.json los indicadores conductuales del check-in y el PVT (mood ya está; stress, energy, loneliness, sleep_quality, crew_relation, pvt_mean_rt_ms y pvt_lapses no los evalúa ningún entorno)"
+    - "Si `details_visible` es false, no exponer `last_value` ni `trend` de los indicadores conductuales en `systems[]`"
   acceptance:
     - Hay tests de las reglas
     - Si el member no comparte, los detalles se ocultan
@@ -611,6 +615,66 @@ issues:
     - Test que emite un evento y lo recibe un cliente SSE
     - Reconectar con `Last-Event-ID` no pierde eventos
 
+- id: BE-31
+  title: Escalado a bordo sin retardo (self/crew en tiempo real)
+  area: backend
+  comp: engine
+  priority: P0-blocker
+  milestone: h1
+  depends: [BE-09]
+  docs: alerts-and-escalation.md
+  tasks:
+    - "Definir en el contrato y en environments.json qué niveles de escalation_ladder son de a bordo (p. ej. `external_from_level`: índice del primer nivel externo) y validarlo al cargar"
+    - "En `services/assessment.py` (`build_escalation`): niveles de a bordo → `mode=realtime` y `delay_s=0`; niveles externos → realtime < 5 s, delayed, y autonomous si el retardo es ≥ 60 s y el estado es critical"
+    - "Tests: Marte critical a crew → realtime/0 s; Marte a ground → autonomous/840 s; ISS → realtime"
+  acceptance:
+    - En Marte una alerta a la tripulación nunca lleva el retardo de 840 s
+    - docs/api-contract.md y docs/alerts-and-escalation.md describen la misma regla que el código
+
+- id: BE-33
+  title: Umbrales de liveness y escalado que faltan en environments.json
+  area: backend
+  comp: config
+  priority: P0-blocker
+  milestone: h1
+  depends: [BE-03]
+  docs: offline-and-liveness.md
+  tasks:
+    - "Añadir al contrato (docs/api-contract.md, `LivenessThresholds`) y a `schemas/config.py`: `eva_lost_after_s`, `sleep_factor`, `morning_checkin_by` (geriatría) y `warning_escalate_after_s` (escalar un warning persistente)"
+    - "Rellenarlos en los 6 perfiles de `backend/app/data/environments.json` con los valores de docs/offline-and-liveness.md (EVA 30 s/2 min, sueño ×3, check-in 10:00)"
+    - "`npm run gen:api` y `npm run gen:mocks` en el front"
+  acceptance:
+    - BE-12, BE-14 y BE-16 pueden leer estos valores sin escribirlos fijos en el código
+    - test_environments.py valida los campos nuevos
+
+- id: BE-35
+  title: Alert.target_role y delivery_mode obligatorios en el modelo
+  area: backend
+  comp: db
+  priority: P0-blocker
+  milestone: h1
+  depends: [BE-02]
+  docs: data-model.md
+  tasks:
+    - "En `app/models.py`, `target_role` y `delivery_mode` de `Alert` pasan a NOT NULL, igual que en el schema `Alert` del contrato"
+    - Test que intenta guardar una alerta sin esos campos y falla
+  acceptance:
+    - Una alerta guardada siempre se puede serializar con el schema Alert
+
+- id: BE-32
+  title: Persistir el reloj de demo en fast-forward y reset
+  area: backend
+  comp: setup
+  priority: P1
+  milestone: h1
+  depends: [BE-02]
+  docs: backend.md
+  tasks:
+    - "`POST /demo/fast-forward` y `POST /demo/reset` llaman a `services.app_state.save_clock(session)` tras cambiar el reloj"
+    - Test que hace fast-forward, simula un reinicio (restore_clock) y conserva el offset
+  acceptance:
+    - Tras reiniciar el servidor, el reloj de la demo sigue donde estaba
+
 # ───────────────────────── HITO 2 ─────────────────────────
 - id: BE-13
   title: Enlace simulado con la Tierra (outbox/inbox, retardo, LOS)
@@ -635,7 +699,7 @@ issues:
   comp: alerts
   priority: P0-blocker
   milestone: h2
-  depends: [BE-11, BE-13]
+  depends: [BE-35, BE-33, BE-31, BE-11, BE-13]
   docs: alerts-and-escalation.md
   tasks:
     - Crear `services/alerts.py`; tras cada assessment, abrir o actualizar una alerta por member y sistema
@@ -668,13 +732,14 @@ issues:
   comp: liveness
   priority: P0-blocker
   milestone: h2
-  depends: [BE-02, BE-11]
+  depends: [BE-33, BE-02, BE-11]
   docs: offline-and-liveness.md
   tasks:
     - Crear `POST /members/{id}/heartbeat` (con la actividad normal, eva o sleep)
     - Crear `services/liveness.py` para calcular active/stale/lost con los umbrales del entorno y de la actividad
     - Hacer overall_status igual al peor entre la salud y el liveness
     - El heartbeat acepta `pending_outbox`, `last_sync_at` y `device_kind` y actualiza el registro del dispositivo (BE-29); emitir `liveness.changed`
+    - "En `member_assessment.build_assessment`: `liveness` sin dato = stale (nunca active por defecto) y `overall_status` = peor entre la salud y el liveness (stale da al menos unknown; lost da critical)"
   acceptance:
     - Un member sin heartbeat nunca da overall normal (test con fast-forward)
 
@@ -684,7 +749,7 @@ issues:
   comp: liveness
   priority: P1
   milestone: h2
-  depends: [BE-12, BE-14]
+  depends: [BE-33, BE-12, BE-14]
   docs: offline-and-liveness.md
   tasks:
     - Crear una tarea periódica que revise el liveness
@@ -795,6 +860,7 @@ issues:
     - Cachear en IndexedDB el catálogo, los protocolos y el último assessment
     - Un 401 nunca borra el outbox: se pausa la sincronización, se pide el login y se reanuda (FE-27)
     - Usar la base IndexedDB del dispositivo (`ruok-<device_id>`, FE-30)
+    - "Corregir el texto de `MockBanner` en modo fallback: solo puede decir que lo registrado se guarda cuando el outbox persistente esté funcionando"
   acceptance:
     - Con el back parado se registran 2 mediciones, se arranca el back y se sincronizan sin duplicados
 
@@ -832,7 +898,7 @@ issues:
   comp: alerts
   priority: P1
   milestone: h2
-  depends: [FE-29, FE-13, BE-15]
+  depends: [BE-34, FE-29, FE-13, BE-15]
   docs: alerts-and-escalation.md
   tasks:
     - Lista de alertas del member con origen, severidad y estado
@@ -954,6 +1020,7 @@ issues:
     - Aceptar el SOS de emergencia sin token, marcado con `authenticated=false`
     - Filtro conductual por rol (psych ve los detalles)
     - Cubrir también `/events/stream` (filtro por rol), `/devices`, `/control/*` (solo admin) y `/system/network-info` (público)
+    - "`X-Device-Id` mal formado no debe dar 422 en el SOS de emergencia: validarlo de forma suave (aceptar y registrar)"
   acceptance:
     - Test parametrizado que recorre la matriz (rol × endpoint → 200/403)
     - Un member no puede leer los datos de otro (403)
@@ -1064,6 +1131,40 @@ issues:
     - Probar en Android Chrome e iOS Safari por la red local
   acceptance:
     - El flujo del astronauta del guion de demo se completa entero en un móvil
+
+- id: BE-34
+  title: Validación cruzada de threshold_overrides y vocabulario de la escalera
+  area: backend
+  comp: config
+  priority: P1
+  milestone: h2
+  depends: [BE-03, BE-04]
+  docs: environments.md
+  tasks:
+    - "`services/catalog.py` `check_consistency()`: falla si una clave de `threshold_overrides` no existe en el catálogo o no está en `env.indicators`"
+    - "Falla si un rol de `escalation_ladder` (salvo `self`) no tiene texto en `vocabulary`"
+    - "Añadir a environments.json el vocabulario que falta: `nurse` y `doctor` (hospital), `caregiver`, `doctor` y `family` (geriatría), `medic`, `commander` y `psych` (earth)"
+  acceptance:
+    - Una errata en un override o en un rol rompe al arrancar, no en silencio
+    - El front puede mostrar el nombre de cualquier nivel de la escalera con useVocab()
+
+- id: FE-34
+  title: Correcciones de reglas del front detectadas en la revisión
+  area: frontend
+  comp: ui
+  priority: P1
+  milestone: h2
+  depends: [FE-04, FE-07]
+  docs: status.md
+  tasks:
+    - "`ServerStatus.tsx`: sin verde fijo (se confunde con el estado normal) ni colores fijos de Tailwind; usar tokens env-* o forma + texto"
+    - "`IndicatorField.tsx`: el borde de error usa `STATUS_COLORS.critical` o un token, no `#d03b3b` copiado"
+    - "`pages/Dashboard.tsx`: si `overall_status` es unknown por un liveness stale, mostrar solo el badge de liveness (igual que MemberList)"
+    - "`api/useLoad.ts` y `Dashboard.tsx`: 'actualizado hace X' con `serverNow()`, no con el reloj del dispositivo"
+    - "`main.tsx`: `getDb()` con `.catch()` (IndexedDB puede no existir en modo privado)"
+  acceptance:
+    - Ningún estado de salud ni de conexión se pinta en verde si no es "normal"
+    - lint, build y tests en verde
 
 # ───────────────────────── FREEZE / P2 ─────────────────────────
 - id: FE-22

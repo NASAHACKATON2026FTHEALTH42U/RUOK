@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 import { configureApi } from './api/client'
 import { initMockModeFromUrl } from './api/mocks/mode'
+import { initSession } from './auth/session'
 import { initTheme } from './environments/applyTheme'
 import { getDb } from './offline/db'
 import { getDevice } from './offline/device'
@@ -17,6 +18,8 @@ configureApi({ getDeviceId: () => getDevice().id })
 void getDb()
 // Outbox offline: reenvía lo pendiente al arrancar, con `online` y cada 5 s (FE-11).
 void initOutbox()
+// Sesión guardada en kv.auth + token y 401 en el cliente (FE-27).
+void initSession()
 initTheme()
 
 createRoot(document.getElementById('root')!).render(

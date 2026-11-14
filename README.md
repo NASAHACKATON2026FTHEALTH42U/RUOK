@@ -23,44 +23,47 @@ presentation/   slides y capturas (los vídeos van al Drive)
 ## Requisitos
 | Herramienta | Versión | Instalación (sin sudo) |
 |---|---|---|
-| Python | 3.12+ | ya incluido en Ubuntu 24.04 |
+| Python | 3.11+ (la CI usa 3.12) | ya incluido en Ubuntu 24.04 |
 | [uv](https://docs.astral.sh/uv/) | reciente | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
-| Node.js | 20 LTS | [nvm](https://github.com/nvm-sh/nvm): `nvm install 20` |
-| gh (opcional) | reciente | ver `docs/team-and-schedule.md` |
+| Node.js | 20 LTS | [nvm](https://github.com/nvm-sh/nvm): `nvm install 20`, o el binario oficial de nodejs.org |
+| gh (opcional) | reciente | ver "Herramientas" en [`CLAUDE.md`](CLAUDE.md) |
+
+## Estado actual
+Qué está hecho, qué endpoints son reales y qué queda: [`docs/status.md`](docs/status.md). Resumen: **el front ya tiene selección de entorno, dashboard con cuerpo y semáforo, historial y formularios de medición. En el backend son reales el catálogo (entornos, indicadores, sistemas) y el motor de evaluación como servicio, y el resto de endpoints aún devuelve datos de ejemplo (stubs).** Para ver la app completa hoy, usa el **modo mock** (`?mocks=1`).
 
 ## Arrancar en local
-> Los comandos del backend funcionan en cuanto esté mergeado BE-01 (#3). El frontend ya está disponible (FE-01, #4).
+Usa **dos terminales**, una para el backend y otra para el frontend.
 
-**Backend**: API en http://localhost:8000/api/v1, Swagger en `/docs`.
+**Terminal 1, backend**: API en http://localhost:8000/api/v1, Swagger en http://localhost:8000/docs
 ```bash
 cd backend
 uv sync
 uv run uvicorn app.main:app --reload
-uv run pytest            # tests
+uv run pytest && uv run --with ruff ruff check .   # tests + lint (igual que la CI)
 ```
 
-**Frontend**: http://localhost:5173
+**Terminal 2, frontend**: http://localhost:5173 (Vite reenvía `/api` al backend: sin CORS)
 ```bash
 cd frontend
 npm ci
 npm run dev
-npm run lint             # ESLint
-npm run build            # comprueba los tipos y genera el build
-npm run gen:api          # regenera los tipos desde el OpenAPI (con el back arrancado; llega con FS-03)
+npm run lint && npm run build && npm test           # igual que la CI
+npm run gen:api       # tipos TS desde el OpenAPI (lee el código de FastAPI con uv; no hace falta el servidor)
+npm run gen:mocks     # mocks del front desde las respuestas del backend
 ```
-Para trabajar sin backend: `VITE_USE_MOCKS=true npm run dev` (llega con FS-04). Detalles en [`frontend/README.md`](frontend/README.md).
 
-**Red local con móviles** (FS-08). Los móviles abren `http://<IP-del-portátil>:5173` en desarrollo, o `:8000` en modo a bordo:
+**Sin backend (modo demo):** abre http://localhost:5173/?mocks=1, o arranca con `VITE_USE_MOCKS=true npm run dev`. Aparece el banner "DATOS DE EJEMPLO". Detalles en [`frontend/README.md`](frontend/README.md).
+
+**Red local con móviles** (FS-08). Los móviles abren `http://<IP-del-portátil>:5173` (desarrollo):
 ```bash
 sudo ufw allow 8000/tcp && sudo ufw allow 5173/tcp
+# terminal 1
 cd backend  && uv run uvicorn app.main:app --host 0.0.0.0 --reload
+# terminal 2
 cd frontend && npm run dev -- --host
 ```
 Montaje de la red sin internet y checklist: [`docs/control-center-and-devices.md`](docs/control-center-and-devices.md).
 
-**Todo junto (modo "a bordo", sin internet)**, disponible con BE-24:
-```bash
-docker compose up
-```
+**Todo junto en un proceso (modo "a bordo")**: **pendiente de BE-24 (#39)**. FastAPI servirá el build del front y habrá `docker compose up`. Todavía no existe `docker-compose.yml`.
 
 > ⚠️ Prototipo de hackathon: **no es un dispositivo médico**.

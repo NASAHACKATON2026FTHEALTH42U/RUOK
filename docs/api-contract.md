@@ -58,8 +58,8 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 | POST | `/auth/pin` | — | `{username, pin}` → igual que login (PIN rápido en tablets) |
 | GET | `/auth/me` | ✅ | `User` actual |
 | GET | `/auth/demo-users` | — | Solo con `DEMO_MODE=true`: usuarios sembrados para el selector de la demo |
-| GET | `/users?env_id=` *(P2)* | admin | Listado de usuarios |
-| POST | `/users` *(P2)* | admin | Crear usuario |
+| GET | `/users?env_id=` *(P1, FS-07)* | admin | Listado de usuarios (pestaña Usuarios de `/control`) |
+| POST | `/users` *(P1, FS-07)* | admin | Crear usuario |
 
 **Permisos por endpoint:** los define la matriz de [auth-and-roles.md](auth-and-roles.md#matriz-de-acceso-a-vistas). Reglas generales:
 - un `member` solo accede a `/members/{su_member_id}/…`;
@@ -195,6 +195,8 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 //   (listas de members, /ground y /control)
 
 // MeasurementIn  (POST, en lote)
+// taken_at = instante de la medición según el RELOJ DEL SERVIDOR que conoce el dispositivo (serverNow() en el
+//            front, a partir de X-Server-Time), así funciona igual con el fast-forward de la demo.
 { "id": "uuid", "indicator_id": "bp_systolic", "value": 142, "taken_at": "...",
   "source": "manual", "note": null }
 // Measurement  (respuesta)  = MeasurementIn + { member_id, unit, received_at }
@@ -211,8 +213,10 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
                      "baseline": 118, "range": { "normal": [90, 129] } }],
     "recommendations": [{ "id": "rec_bp_repeat", "text": "Repite en reposo en 15 min", "priority": 1,
                          "intervention_id": null }],
-    "escalation": { "level": 0, "target_role": "self", "mode": "autonomous",   // level = índice en escalation_ladder
-                    "delay_s": 840, "message": "...", "protocol_id": "proto_bp_high" }
+    "escalation": { "level": 0, "target_role": "self", "mode": "realtime",     // level = índice en escalation_ladder.
+                    // self/crew (a bordo) → realtime, delay_s 0. Externos: realtime <5 s, delayed,
+                    // autonomous si retardo ≥ 60 s Y critical (ver alerts-and-escalation.md)
+                    "delay_s": 0, "message": "...", "protocol_id": "proto_bp_high" }
   }],
   "behavioral": { "status": "normal", "details_visible": true },  // privacidad
   "provisional": false                                            // true solo en el cálculo offline del front
@@ -234,7 +238,7 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 // AlertEvent.type = created | updated | escalated | queued | delivered | acknowledged | message | resolved
 
 // Task
-{ "id": "t_2026-11-14_measure_bp", "task_type": "measure_bp", "title": "Mide tu tensión",
+{ "id": "t_2026-11-14_1_measure_bp", "task_type": "measure_bp", "title": "Mide tu tensión",
   "points": 10, "due": "morning", "completed": false, "indicator_id": "bp_systolic" }
 
 // GameState

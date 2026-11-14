@@ -29,6 +29,8 @@ type Phase =
 
 interface SosDialogProps {
   memberId: number | null
+  /** Sin sesión: el servidor solo acepta emergencias sin token (docs/auth-and-roles.md). */
+  anonymous?: boolean
   env: Environment | undefined
   vocabulary: Vocabulary
   interventions: Intervention[]
@@ -40,10 +42,18 @@ interface SosDialogProps {
  * (se pueden saltar niveles) y mensaje. Se envía por el outbox: sin conexión queda guardado
  * y se muestra "No enviado. Avisa de viva voz" con el protocolo que haya en el dispositivo.
  */
-export function SosDialog({ memberId, env, vocabulary, interventions, onClose }: SosDialogProps) {
+export function SosDialog({
+  memberId,
+  anonymous = false,
+  env,
+  vocabulary,
+  interventions,
+  onClose,
+}: SosDialogProps) {
   const ladder = env?.escalation_ladder ?? ['self', 'crew', 'ground']
-  const [category, setCategory] = useState<AlertCategory | null>(null)
-  const [severity, setSeverity] = useState<AlertSeverity>('warning')
+  const [category, setCategory] = useState<AlertCategory | null>(anonymous ? 'emergency' : null)
+  const [severity, setSeverity] = useState<AlertSeverity>(anonymous ? 'emergency' : 'warning')
+  const categories = anonymous ? CATEGORIES.filter((c) => c.id === 'emergency') : CATEGORIES
   const [target, setTarget] = useState<string | null>(defaultTarget(ladder))
   const [message, setMessage] = useState('')
   const [phase, setPhase] = useState<Phase>({ kind: 'form' })
@@ -110,10 +120,16 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
 
         {memberId === null ? (
           <p className="mt-3">
-            Primero{' '}
-            <Link to="/" onClick={onClose} className="underline">
-              elige entorno y {vocabulary.member}
-            </Link>
+            {anonymous ? (
+              'Este dispositivo no sabe quién eres: inicia sesión para pedir ayuda desde aquí'
+            ) : (
+              <>
+                Primero{' '}
+                <Link to="/" onClick={onClose} className="underline">
+                  elige entorno y {vocabulary.member}
+                </Link>
+              </>
+            )}
             . Si es una emergencia, avisa ya de viva voz a {roleLabel('crew', vocabulary)}.
           </p>
         ) : phase.kind === 'sent' ? (
@@ -131,7 +147,7 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
             <fieldset>
               <legend className="text-sm font-medium">¿Qué pasa?</legend>
               <div className="mt-2 grid grid-cols-2 gap-2" role="radiogroup">
-                {CATEGORIES.map((c) => (
+                {categories.map((c) => (
                   <button
                     key={c.id}
                     type="button"
@@ -152,6 +168,12 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
                   </button>
                 ))}
               </div>
+              {anonymous && (
+                <p className="mt-2 text-sm text-env-muted">
+                  Sin sesión solo se puede enviar una emergencia. Para otras peticiones, inicia
+                  sesión.
+                </p>
+              )}
               {category === 'psychological' && (
                 <p className="mt-2 text-sm text-env-muted">
                   🔒 Confidencial: solo lo verá{' '}
