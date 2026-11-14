@@ -5,7 +5,7 @@
 |---|---|
 | Frontend | React 18 + Vite 6 + TypeScript 5.6 (strict), Tailwind 4 (`@tailwindcss/vite`), React Router 6, Zustand 5, Recharts 3, Framer Motion, IndexedDB (`idb`). ESLint 9 + Prettier. Versiones y estructura en [`frontend/README.md`](../frontend/README.md) |
 | Backend | Python 3.11+, FastAPI, SQLModel, SQLite (modo WAL), pytest |
-| Contrato | OpenAPI generado por FastAPI → tipos TS con `openapi-typescript` |
+| Contrato | OpenAPI generado por FastAPI → tipos TS con `openapi-typescript` (`npm run gen:api`) → cliente tipado `openapi-fetch` (`frontend/src/api/client.ts`) |
 | Ejecución | Local: `docker compose up` o dos terminales. FastAPI sirve `frontend/dist` en modo "a bordo", escuchando en `0.0.0.0` para que se conecten **móviles y tablets por la red local** ([control-center-and-devices.md](control-center-and-devices.md)) |
 | Tiempo real | Server-Sent Events (`/events/stream`) + tabla `event_log` |
 
@@ -51,7 +51,7 @@ RUOK/
 │   ├── public/                 fondos de los entornos, imágenes de Earth view
 │   └── src/
 │       ├── main.tsx  App.tsx
-│       ├── api/                client.ts, types.gen.ts (generado), mocks/
+│       ├── api/                client.ts, newId.ts, types.gen.ts (generado), mocks/
 │       ├── offline/            outbox IndexedDB, sincronización, caché, device_id
 │       ├── auth/               sesión, useAuth, permissions.ts, RequireRole
 │       ├── realtime/           cliente SSE + fallback a polling

@@ -15,7 +15,7 @@ Toda la documentación está en [`docs/`](docs/README.md). **Léela antes de dis
 | Parte | Stack | Comandos |
 |---|---|---|
 | `backend/` | Python 3.11+, FastAPI, SQLModel, SQLite (WAL), pytest | `cd backend && uv run uvicorn app.main:app --reload` · `uv run pytest` |
-| `frontend/` | React 18 + Vite 6 + TS, Tailwind 4, React Router 6, Zustand, Recharts, Framer Motion, idb | `cd frontend && npm run dev` · `npm run lint` · `npm run build` · `npm run format` · `npm run gen:api` (FS-03) |
+| `frontend/` | React 18 + Vite 6 + TS, Tailwind 4, React Router 6, Zustand, Recharts, Framer Motion, idb, openapi-fetch, Vitest | `cd frontend && npm run dev` · `npm run lint` · `npm run build` · `npm test` · `npm run format` · `npm run gen:api` |
 | Todo | docker-compose | `docker compose up` |
 | Backlog | `scripts/github/backlog.yaml` | `python3 scripts/github/create_issues.py [--dry-run]` |
 
