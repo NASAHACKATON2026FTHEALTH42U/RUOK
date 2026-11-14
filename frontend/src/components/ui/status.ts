@@ -54,3 +54,10 @@ export function statusStyle(state: DisplayState): StatusStyle {
 export function livenessState(liveness: Liveness): DisplayState | null {
   return liveness === 'active' ? null : liveness
 }
+
+/** Orden por gravedad para listar lo urgente primero (sin datos va por delante de normal). */
+const SEVERITY: Record<Status, number> = { critical: 0, warning: 1, unknown: 2, normal: 3 }
+
+export function bySeverity(a: Status, b: Status): number {
+  return SEVERITY[a] - SEVERITY[b]
+}

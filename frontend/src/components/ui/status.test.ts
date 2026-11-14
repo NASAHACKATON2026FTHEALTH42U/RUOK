@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { livenessState, STATUS_COLORS, statusStyle, type DisplayState } from './status'
+import { bySeverity, livenessState, STATUS_COLORS, statusStyle, type DisplayState } from './status'
 
 const ALL: DisplayState[] = ['normal', 'warning', 'critical', 'unknown', 'stale', 'lost']
 
@@ -34,5 +34,12 @@ describe('livenessState', () => {
     expect(livenessState('active')).toBeNull()
     expect(livenessState('stale')).toBe('stale')
     expect(livenessState('lost')).toBe('lost')
+  })
+})
+
+describe('bySeverity', () => {
+  it('crítico, atención, sin datos y normal', () => {
+    const list = ['normal', 'unknown', 'critical', 'warning'] as const
+    expect([...list].sort(bySeverity)).toEqual(['critical', 'warning', 'unknown', 'normal'])
   })
 })
