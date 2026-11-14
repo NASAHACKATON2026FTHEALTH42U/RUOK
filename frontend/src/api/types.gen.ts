@@ -496,7 +496,7 @@ export interface paths {
         };
         /**
          * Consola /ground: solo lo ENTREGADO por el enlace, con estado as-of
-         * @description STUB(FS-02) → BE-17
+         * @description Alertas que el enlace ya ha entregado a tierra, members con su resumen y `as_of` = ahora − retardo (en LOS, el último momento conocido y estado `unknown`). El detalle conductual se oculta salvo que el member lo comparta o sea una emergencia.
          */
         get: operations["ground_view_api_v1_environments__env_id__alerts_get"];
         put?: never;
