@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { to: '/dashboard', label: 'Panel' },
   { to: '/measure', label: 'Medir' },
   { to: '/checkin', label: 'Check-in' },
+  { to: '/pvt', label: 'Test PVT' },
   { to: '/history', label: 'Historial' },
   { to: '/missions', label: 'Misiones' },
   { to: '/alerts', label: 'Alertas' },

@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41); botón SOS / Pedir ayuda en **FE-13** (#43); login y sesión en **FE-27** (#68).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41); botón SOS / Pedir ayuda en **FE-13** (#43); login y sesión en **FE-27** (#68); test PVT en **FE-22** (#52).
 
 ## Comandos
 
@@ -134,6 +134,7 @@ frontend/
     ├── components/body/       BodyFigure (SVG) + regions.ts (buildRegions, formatSinceLabel; + test)
     ├── components/dashboard/  SystemPanel, IndicatorCard, TrendChart, LinkChip + format.ts y trend.ts (+ tests)
     ├── components/measure/    IndicatorField + measureForm.ts (parseValue, emptyValue; + test)
+    ├── components/behavioral/ PvtRunner + pvt.ts (summarize, buildPvtBatch, randomIsi; + test)
     ├── components/environment/  EnvironmentCard (pintada con su propia paleta), MemberList
     ├── components/ui/
     │   ├── Layout.tsx         cabecera + navegación + <Outlet /> + disclaimer
@@ -147,7 +148,7 @@ frontend/
     └── pages/                 una página vacía por ruta
 ```
 
-Carpetas que aún no existen y que crean sus issues: `components/{behavioral,game}/`. `offline/` ya existe con `outbox.ts`; FE-11 y FE-30 añaden IndexedDB y la sincronización.
+Carpetas que aún no existen y que crean sus issues: `components/game/`. `offline/` ya existe con `outbox.ts`; FE-11 y FE-30 añaden IndexedDB y la sincronización.
 
 ## Rutas
 
@@ -159,6 +160,7 @@ Todas cuelgan de `Layout`, que pinta la cabecera con el selector de entorno, la 
 | `/dashboard` | `Dashboard`         | FE-07         |
 | `/measure`   | `Measure`           | FE-10         |
 | `/checkin`   | `CheckIn`           | FE-19         |
+| `/pvt`       | `Pvt`               | FE-22         |
 | `/history`   | `History`           | FE-09         |
 | `/missions`  | `Missions`          | FE-18         |
 | `/alerts`    | `Alerts`            | FE-14         |
@@ -334,7 +336,7 @@ Verificado con una serie sintética de 30 días (interceptando la petición en C
 
 `/history` (`src/pages/History.tsx`):
 
-- **Selector de indicador**: los indicadores activos del entorno (`Environment.indicators`), con su nombre del catálogo.
+- **Selector de indicador**: los indicadores activos del entorno (`Environment.indicators`) más los del test PVT (FE-22), con su nombre del catálogo.
 - **Selector de periodo**: 7 d / 30 d.
 - El indicador y el periodo van en la URL: `/history?indicator=bp_systolic&days=30` (se puede enlazar directamente).
 - **Gráfica** grande (`TrendPlot`) con las bandas del entorno: si el indicador está en la evaluación se usan sus rangos ajustados; si no, los del catálogo.
@@ -452,3 +454,32 @@ Diseño completo en [`docs/auth-and-roles.md`](../docs/auth-and-roles.md).
 
 - **TODO(FE-28):** `/` solo será accesible para el rol admin; el resto entra directamente en su entorno.
 - **Colores del contrato alineados:** `theme.primary` de `backend/app/data/environments.json` (BE-03) usa los mismos `primary` que `src/environments/themes/` (en `earth`, `#2bb3c9`, no verde). Si cambias uno, cambia el otro.
+
+## Test de vigilancia psicomotora: PVT (FE-22)
+
+`/pvt` (`src/pages/Pvt.tsx`, en el menú como "Test PVT"). Es el marcador objetivo de fatiga de [`docs/behavioral-health.md`](../docs/behavioral-health.md), y en la demo lo hace el juez desde su móvil (paso 7 del guion).
+
+- **Dos modos** (`PVT_MODES`): **test completo de 3 min** y **versión demo de 30 s**. Se elige en la pantalla de inicio, que explica el test en 3 pasos.
+- **Mecánica** (`PvtRunner`, a pantalla completa):
+  1. Espera aleatoria de **2–10 s** (`randomIsi()`), con un círculo vacío.
+  2. Aparece el estímulo: la pantalla pasa al color primario del entorno y dice **"¡Pulsa!"**. La hora de aparición se toma con `performance.now()` en el siguiente `requestAnimationFrame`, para acercarla al momento en que se pinta.
+  3. Al pulsar se mide el tiempo de reacción y se muestra 0,8 s ("312 ms · Bien" / "Lapso").
+  4. Pulsar durante la espera es un **falso inicio**: muestra "Demasiado pronto" y reinicia la espera. Si no hay respuesta en 10 s, cuenta como lapso.
+  5. El test acaba al terminar la duración, sin cortar un estímulo que ya esté en pantalla.
+- **Móvil:**
+  - se responde con `pointerdown` (sin el retraso de `click`) en toda la pantalla;
+  - `touch-action: manipulation` evita el zoom por doble toque, y `select-none` y el menú contextual bloqueado evitan selecciones accidentales;
+  - `requestFullscreen()` es best-effort, porque iOS Safari no lo permite; aun así, el test ocupa toda la ventana.
+  - En el ordenador también vale la **barra espaciadora**. "Cancelar" vuelve al inicio sin guardar nada.
+- **Resultado** (`summarize()`): tiempo de reacción medio de las respuestas válidas, en ms enteros; **lapsos** (más de 500 ms); y falsos inicios (pulsar en la espera o responder en menos de 100 ms). Las definiciones son las de [S12] en `docs/sources.md`. Los rangos normal y de aviso **no** están en el front: los aplica el backend con el catálogo.
+- **Guardado automático** al acabar: `buildPvtBatch()` → `sendMeasurements()` (outbox). Son 2 mediciones, `pvt_mean_rt_ms` y `pvt_lapses`, con `source: "pvt"`, la misma `taken_at` y una nota de resumen ("Versión demo (30 s) · 4 respuestas · 0 falsos inicios"). Cada valor se acota a `indicator.input` del catálogo para que el servidor no dé un 422. Sin respuestas válidas no se guarda nada y se pide repetir el test.
+- Al acabar muestra "Test guardado" con el estado general, o "guardado en el dispositivo" si no hay red. Desde ahí se puede repetir el test o ir al historial (`/history?indicator=pvt_mean_rt_ms`) o al panel.
+- **Historial:** los 2 indicadores PVT aparecen siempre en el selector de `/history`. Ningún entorno los tiene activos todavía.
+
+**Probado:**
+
+- Lint, build y tests (`pvt.test.ts`: intervalos, clasificación, resumen, lote y acotado) en verde.
+- Contra el backend real, a través del proxy de Vite: el lote da `accepted: 2` y `GET /members/1/measurements?indicator_id=pvt_mean_rt_ms` lo devuelve con `source: "pvt"` y la nota.
+- **Falta probarlo a mano en un móvil real**: la sensación táctil y la pantalla completa.
+
+**Pendiente:** activar `pvt_mean_rt_ms` y `pvt_lapses` en `environments.json` para que entren en la evaluación y en la regla "PVT peor que la línea base + sueño < 6 h" (backend, BE-20).

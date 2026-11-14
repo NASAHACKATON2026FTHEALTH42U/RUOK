@@ -12,6 +12,7 @@ import Measure from './pages/Measure'
 import Members from './pages/Members'
 import Missions from './pages/Missions'
 import NotFound from './pages/NotFound'
+import Pvt from './pages/Pvt'
 
 const router = createBrowserRouter([
   // El login va fuera del Layout, pero con su propio botón "Pedir ayuda" (FE-27).
@@ -27,6 +28,7 @@ const router = createBrowserRouter([
           { path: '/dashboard', element: <Dashboard /> },
           { path: '/measure', element: <Measure /> },
           { path: '/checkin', element: <CheckIn /> },
+          { path: '/pvt', element: <Pvt /> },
           { path: '/history', element: <History /> },
           { path: '/missions', element: <Missions /> },
           { path: '/alerts', element: <Alerts /> },
