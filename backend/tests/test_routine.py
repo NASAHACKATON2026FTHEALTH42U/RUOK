@@ -7,7 +7,7 @@ from datetime import UTC, date, datetime
 import pytest
 from sqlmodel import Session, col, delete, select
 
-from app import models
+from app import clock, models
 from app.db import engine
 from app.schemas import EventType, TaskType
 from app.services import environments, routine
@@ -56,7 +56,7 @@ def task_events() -> list[models.EventLog]:
 
 
 @pytest.fixture(autouse=True)
-def clean(client):
+def clean(client, vega_auth):  # vega_auth: login antes de adelantar el reloj
     """Sin tareas, completados ni mediciones de DAY de otros tests (la BD es compartida)."""
     with Session(engine) as s:
         s.exec(delete(models.Measurement).where(
@@ -66,6 +66,9 @@ def clean(client):
         s.exec(delete(models.EventLog).where(
             models.EventLog.type == EventType.task_completed.value))
         s.commit()
+    # Hoy, lejos de las mediciones del seed: /complete sincroniza el día de hoy (BE-19)
+    # y las del seed sumarían puntos.
+    clock.advance(60 * 86400)
     yield
 
 
@@ -187,7 +190,10 @@ def test_complete_from_outbox_before_the_day_was_generated(client):
     r = client.post(COMPLETE.format(1, "t_2031-03-10_1_checkin"), json=completion())
     assert r.status_code == 200, r.text
     assert r.json()["points"] == 10
-    assert count(models.Task) == 3
+    assert len(get_tasks(client)) == 3
+    with Session(engine) as s:
+        day_tasks = s.exec(select(models.Task).where(models.Task.date == DAY)).all()
+    assert len(day_tasks) == 3
 
 
 def test_member_cannot_complete_another_members_task(client, vega_auth):

@@ -14,7 +14,7 @@ from app.routers import alerts, auth, catalog, game, health, members, realtime
 from app.routers.deps import device_id_header
 from app.seed import ensure_seeded
 from app.services import catalog as catalog_service
-from app.services import environments, events, liveness_watch, routine
+from app.services import environments, events, gamification, liveness_watch, routine
 from app.services.app_state import restore_clock
 
 
@@ -28,6 +28,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     environments.list_environments()  # valida app/data/environments.json al arrancar
     catalog_service.list_indicators()  # valida indicators.json y systems.json (y su coherencia)
     routine.list_task_types()  # valida task_types.json y la rutina de los entornos (BE-18)
+    gamification.list_badges()  # valida badges.json (BE-19)
     watcher = None
     if liveness_watch.watch_enabled():  # R U OK? y no_contact (BE-16)
         watcher = asyncio.create_task(liveness_watch.watch_loop(engine))

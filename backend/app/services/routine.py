@@ -11,8 +11,8 @@
 - Las tareas con `indicator_id` se autocompletan con las mediciones de ese indicador del
   mismo día (UTC): una medición completa como mucho una tarea, la primera pendiente.
 - El "día" es la fecha UTC del reloj del servidor (`clock.now()`).
-- Cada completado emite `task.completed` (BE-28). Puntos y rachas se calculan a partir de
-  `task_completion` (BE-19).
+- Cada completado emite `task.completed` (BE-28). Puntos, rachas e insignias se calculan a
+  partir de `task_completion` en `services/gamification.py` (BE-19).
 """
 
 from __future__ import annotations
@@ -29,8 +29,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, col, select
 
 from app import clock, models
-from app.schemas import GameState, TaskCompleteIn, TaskType
 from app.schemas import Task as TaskOut
+from app.schemas import TaskCompleteIn, TaskType
 from app.schemas.common import EventType
 from app.schemas.config import Environment
 from app.services import catalog, environments, events
@@ -230,6 +230,11 @@ def on_measurements(session: Session, member_id: int, rows: list[models.Measurem
         _autocomplete_day(session, member, day)
 
 
+def sync_day(session: Session, member: models.Member, day: date | None = None) -> None:
+    """Genera y autocompleta las tareas del día (hoy por defecto). Hace commit."""
+    list_tasks(session, member, day)
+
+
 def list_tasks(session: Session, member: models.Member, day: date | None = None) -> list[TaskOut]:
     """Tareas del día (hoy por defecto), generándolas si hace falta. Hace commit."""
     day = day or today()
@@ -295,36 +300,6 @@ def _complete(session: Session, member: models.Member, tid: str, body: TaskCompl
     _add_completion(session, member, task, cid, completed_at, auto=False)
     session.commit()
     return True
-
-
-# ── Puntos (base para BE-19) ─────────────────────────────────────────
-
-
-def _points(session: Session, member_ids: list[int]) -> int:
-    if not member_ids:
-        return 0
-    rows = session.exec(
-        select(models.Task.points)
-        .join(models.TaskCompletion, col(models.TaskCompletion.task_id) == col(models.Task.id))
-        .where(col(models.Task.member_id).in_(member_ids))
-    ).all()
-    return sum(rows)
-
-
-def game_state(session: Session, member: models.Member) -> GameState:
-    """Puntos del member y de su tripulación, sumados de las tareas completadas.
-
-    STUB(BE-19): la racha y las insignias.
-    """
-    crew = session.exec(
-        select(models.Member.id).where(models.Member.env_id == member.env_id)
-    ).all()
-    return GameState(
-        points=_points(session, [member.id]),
-        streak_days=0,
-        badges=[],
-        crew_points=_points(session, [i for i in crew if i is not None]),
-    )
 
 
 def to_schema(task: models.Task, completed: bool) -> TaskOut:

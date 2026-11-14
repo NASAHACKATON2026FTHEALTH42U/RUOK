@@ -44,7 +44,15 @@ from app.schemas.common import (
     Status,
     Trend,
 )
-from app.schemas.config import BodySystem, Environment, Indicator, Intervention, TaskType
+from app.schemas.config import (
+    BadgeDef,
+    BadgeRule,
+    BodySystem,
+    Environment,
+    Indicator,
+    Intervention,
+    TaskType,
+)
 from app.schemas.game import Badge, GameState, Leaderboard, LeaderboardEntry, Task, TaskCompleteIn
 from app.schemas.link import LinkMessage, LinkStatus
 from app.schemas.members import (
@@ -99,6 +107,8 @@ __all__ = [
     "AlertStatus",
     "Assessment",
     "Badge",
+    "BadgeDef",
+    "BadgeRule",
     "BehavioralSummary",
     "BodySystem",
     "ControlOverview",
