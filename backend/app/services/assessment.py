@@ -38,6 +38,7 @@ __all__ = [
     "is_stale",
     "merge_ranges",
     "overall_status",
+    "intervention_recommendations",
     "recommendations_for",
     "system_status",
     "worst_status",
@@ -68,9 +69,7 @@ def merge_ranges(indicator: Any, env: Any = None) -> dict[str, Any]:
     return ranges
 
 
-def is_stale(
-    taken_at: datetime | None, indicator: Any, now: datetime | None
-) -> bool:
+def is_stale(taken_at: datetime | None, indicator: Any, now: datetime | None) -> bool:
     """True si el dato es más antiguo que ``max_age_s`` del indicador."""
     max_age_s = _as_dict(indicator).get("max_age_s")
     if taken_at is None or now is None or max_age_s is None:
@@ -193,6 +192,46 @@ def recommendations_for(protocol: Mapping[str, Any] | None) -> list[Recommendati
         return []
     recs = [Recommendation.model_validate(r) for r in protocol.get("recommendations", [])]
     return sorted(recs, key=lambda r: r.priority)
+
+
+MAX_INTERVENTIONS_PER_SYSTEM = 3
+_NEEDS_ACTION = (Status.warning, Status.critical)
+
+
+def intervention_recommendations(
+    system_id: str,
+    status: Status | str,
+    indicator_statuses: Mapping[str, Status | str],
+    interventions: Iterable[Any],
+    first_priority: int = 1,
+) -> list[Recommendation]:
+    """Intervenciones sugeridas para un sistema en ``warning`` o ``critical`` (BE-21).
+
+    - Primero las de sus indicadores alterados (``warning``/``critical``), en el orden
+      del JSON; después siempre las **genéricas** del sistema (``indicator_ids`` vacío),
+      para que un sistema alterado sugiera al menos una aunque el indicador no tenga
+      ninguna propia. Como mucho ``MAX_INTERVENTIONS_PER_SYSTEM``.
+    - ``unknown`` o ``normal``: ninguna (sin datos no se recomienda nada).
+    """
+    if Status(status) not in _NEEDS_ACTION:
+        return []
+    flagged = {i for i, st in indicator_statuses.items() if Status(st) in _NEEDS_ACTION}
+    own = [_as_dict(i) for i in interventions]
+    own = [i for i in own if i.get("system_id") == system_id]
+    specific = [i for i in own if flagged & set(i.get("indicator_ids") or [])]
+    generic = [i for i in own if not i.get("indicator_ids")]
+    chosen = (specific[: MAX_INTERVENTIONS_PER_SYSTEM - 1] + generic)[:MAX_INTERVENTIONS_PER_SYSTEM]
+    if not generic:
+        chosen = specific[:MAX_INTERVENTIONS_PER_SYSTEM]
+    return [
+        Recommendation(
+            id=f"rec_{item['id']}",
+            text=f"{item['title']} ({item['duration_min']} min)",
+            priority=first_priority + n,
+            intervention_id=item["id"],
+        )
+        for n, item in enumerate(chosen)
+    ]
 
 
 def escalation_for_level(

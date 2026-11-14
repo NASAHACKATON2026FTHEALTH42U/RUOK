@@ -1391,19 +1391,181 @@ export const systems: Schema<'BodySystem'>[] = [
 
 export const interventions: Schema<'Intervention'>[] = [
   {
+    "id": "int_reach_out",
+    "title": "Habla con alguien de confianza",
+    "category": "support",
+    "system_id": "neuro_behavioral",
+    "duration_min": 10,
+    "steps": [
+      "Piensa en una persona con la que te sientas a gusto: alguien del equipo, de casa o el servicio de apoyo psicológico",
+      "Cuéntale cómo te sientes estos días, sin necesidad de dar detalles",
+      "Si prefieres hacerlo en privado, usa «Necesito hablar»: va por un canal confidencial",
+      "Si el malestar sigue varios días, pide apoyo profesional"
+    ],
+    "offline": true,
+    "indicator_ids": [],
+    "sources": [
+      "S3",
+      "S11"
+    ]
+  },
+  {
     "id": "int_box_breathing",
     "title": "Respiración en caja",
     "category": "stress",
     "system_id": "neuro_behavioral",
     "duration_min": 4,
     "steps": [
-      "Inhala 4 s",
-      "Mantén 4 s",
-      "Exhala 4 s",
-      "Mantén 4 s",
+      "Siéntate cómodo y suelta los hombros",
+      "Inhala por la nariz contando 4 segundos",
+      "Mantén el aire 4 segundos",
+      "Exhala por la boca contando 4 segundos",
+      "Mantén los pulmones vacíos 4 segundos",
       "Repite 4 ciclos"
     ],
-    "offline": true
+    "offline": true,
+    "indicator_ids": [
+      "stress"
+    ],
+    "sources": [
+      "S3"
+    ]
+  },
+  {
+    "id": "int_cbt_reframe",
+    "title": "Reencuadre de pensamientos (TCC breve)",
+    "category": "mood",
+    "system_id": "neuro_behavioral",
+    "duration_min": 8,
+    "steps": [
+      "Escribe la situación que te preocupa en una frase",
+      "Anota el pensamiento automático que te viene («todo va a salir mal»)",
+      "Busca pruebas a favor y en contra de ese pensamiento",
+      "Escribe una alternativa más equilibrada",
+      "Puntúa de 1 a 5 cómo te sientes antes y después"
+    ],
+    "offline": true,
+    "indicator_ids": [
+      "mood",
+      "stress"
+    ],
+    "sources": [
+      "S3"
+    ]
+  },
+  {
+    "id": "int_journal",
+    "title": "Diario de 5 minutos",
+    "category": "journal",
+    "system_id": "neuro_behavioral",
+    "duration_min": 5,
+    "steps": [
+      "Escribe tres cosas que hayan ido bien hoy, por pequeñas que sean",
+      "Anota una cosa que te haya costado y cómo la has llevado",
+      "Escribe algo que te apetezca hacer mañana",
+      "El diario se queda en este dispositivo: no se comparte"
+    ],
+    "offline": true,
+    "indicator_ids": [
+      "mood",
+      "loneliness"
+    ],
+    "sources": [
+      "S3",
+      "S10"
+    ]
+  },
+  {
+    "id": "int_connect_crew",
+    "title": "Un rato con el equipo o con casa",
+    "category": "social",
+    "system_id": "neuro_behavioral",
+    "duration_min": 15,
+    "steps": [
+      "Propón una actividad compartida: una comida, un juego o una película",
+      "O graba un mensaje para alguien de casa",
+      "Comparte algo de tu día, aunque sea breve",
+      "Al terminar, haz tu check-in y compara cómo te sientes"
+    ],
+    "offline": true,
+    "indicator_ids": [
+      "loneliness",
+      "crew_relation"
+    ],
+    "sources": [
+      "S10",
+      "S11"
+    ]
+  },
+  {
+    "id": "int_sleep_light",
+    "title": "Higiene del sueño y luz",
+    "category": "sleep",
+    "system_id": "neuro_behavioral",
+    "duration_min": 5,
+    "steps": [
+      "Mantén la misma hora de acostarte y de levantarte",
+      "Busca luz intensa por la mañana y luz tenue en la última hora del día",
+      "Deja las pantallas 30 minutos antes de dormir",
+      "Evita la cafeína en las 6 horas antes de acostarte",
+      "Intenta dormir al menos 7 horas"
+    ],
+    "offline": true,
+    "indicator_ids": [
+      "sleep_hours",
+      "sleep_quality",
+      "energy",
+      "pvt_mean_rt_ms",
+      "pvt_lapses"
+    ],
+    "sources": [
+      "S26",
+      "S10",
+      "S12"
+    ]
+  },
+  {
+    "id": "int_movement_break",
+    "title": "Pausa activa",
+    "category": "exercise",
+    "system_id": "neuro_behavioral",
+    "duration_min": 10,
+    "steps": [
+      "Levántate y estira cuello, hombros y espalda",
+      "Haz 5 minutos de ejercicio suave: sentadillas, zancadas o bicicleta",
+      "Termina con tres respiraciones lentas",
+      "Anota cómo está tu energía antes y después"
+    ],
+    "offline": true,
+    "indicator_ids": [
+      "energy",
+      "mood",
+      "stress"
+    ],
+    "sources": [
+      "S3",
+      "S14"
+    ]
+  },
+  {
+    "id": "int_exercise_session",
+    "title": "Sesión de ejercicio de resistencia",
+    "category": "exercise",
+    "system_id": "musculoskeletal",
+    "duration_min": 30,
+    "steps": [
+      "Calienta 5 minutos",
+      "Haz ejercicios de resistencia para piernas, cadera y espalda",
+      "Añade una parte aeróbica (cinta, bicicleta o marcha)",
+      "Registra los minutos de ejercicio al terminar"
+    ],
+    "offline": true,
+    "indicator_ids": [
+      "exercise_min"
+    ],
+    "sources": [
+      "S14"
+    ]
   }
 ]
 
@@ -1786,7 +1948,14 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_exercise_session",
+            "text": "Sesión de ejercicio de resistencia (30 min)",
+            "priority": 1,
+            "intervention_id": "int_exercise_session"
+          }
+        ],
         "escalation": {
           "level": 0,
           "target_role": "self",
@@ -2006,7 +2175,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_sleep_light",
+            "text": "Higiene del sueño y luz (5 min)",
+            "priority": 1,
+            "intervention_id": "int_sleep_light"
+          },
+          {
+            "id": "rec_int_reach_out",
+            "text": "Habla con alguien de confianza (10 min)",
+            "priority": 2,
+            "intervention_id": "int_reach_out"
+          }
+        ],
         "escalation": {
           "level": 1,
           "target_role": "crew",
@@ -2180,7 +2362,14 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_exercise_session",
+            "text": "Sesión de ejercicio de resistencia (30 min)",
+            "priority": 1,
+            "intervention_id": "int_exercise_session"
+          }
+        ],
         "escalation": {
           "level": 0,
           "target_role": "self",
@@ -2400,7 +2589,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_sleep_light",
+            "text": "Higiene del sueño y luz (5 min)",
+            "priority": 1,
+            "intervention_id": "int_sleep_light"
+          },
+          {
+            "id": "rec_int_reach_out",
+            "text": "Habla con alguien de confianza (10 min)",
+            "priority": 2,
+            "intervention_id": "int_reach_out"
+          }
+        ],
         "escalation": {
           "level": 1,
           "target_role": "crew",
@@ -2574,7 +2776,14 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_exercise_session",
+            "text": "Sesión de ejercicio de resistencia (30 min)",
+            "priority": 1,
+            "intervention_id": "int_exercise_session"
+          }
+        ],
         "escalation": {
           "level": 0,
           "target_role": "self",
@@ -2794,7 +3003,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_sleep_light",
+            "text": "Higiene del sueño y luz (5 min)",
+            "priority": 1,
+            "intervention_id": "int_sleep_light"
+          },
+          {
+            "id": "rec_int_reach_out",
+            "text": "Habla con alguien de confianza (10 min)",
+            "priority": 2,
+            "intervention_id": "int_reach_out"
+          }
+        ],
         "escalation": {
           "level": 1,
           "target_role": "crew",
@@ -3021,7 +3243,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_sleep_light",
+            "text": "Higiene del sueño y luz (5 min)",
+            "priority": 1,
+            "intervention_id": "int_sleep_light"
+          },
+          {
+            "id": "rec_int_reach_out",
+            "text": "Habla con alguien de confianza (10 min)",
+            "priority": 2,
+            "intervention_id": "int_reach_out"
+          }
+        ],
         "escalation": {
           "level": 1,
           "target_role": "crew",
@@ -3214,7 +3449,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_sleep_light",
+            "text": "Higiene del sueño y luz (5 min)",
+            "priority": 1,
+            "intervention_id": "int_sleep_light"
+          },
+          {
+            "id": "rec_int_reach_out",
+            "text": "Habla con alguien de confianza (10 min)",
+            "priority": 2,
+            "intervention_id": "int_reach_out"
+          }
+        ],
         "escalation": {
           "level": 1,
           "target_role": "nurse",
@@ -3456,7 +3704,20 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             }
           }
         ],
-        "recommendations": [],
+        "recommendations": [
+          {
+            "id": "rec_int_sleep_light",
+            "text": "Higiene del sueño y luz (5 min)",
+            "priority": 1,
+            "intervention_id": "int_sleep_light"
+          },
+          {
+            "id": "rec_int_reach_out",
+            "text": "Habla con alguien de confianza (10 min)",
+            "priority": 2,
+            "intervention_id": "int_reach_out"
+          }
+        ],
         "escalation": {
           "level": 1,
           "target_role": "caregiver",

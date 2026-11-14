@@ -302,9 +302,14 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 // OkResponse  = { ok: true, detail? }    (demo/reset, demo/scenarios, control/liveness/pause)
 // DemoClock   = { server_time, offset_s } (demo/fast-forward)
 
-// Intervention
+// Intervention (app/data/interventions.json, BE-21)
 { "id": "int_box_breathing", "title": "Respiración en caja", "category": "stress",
-  "system_id": "neuro_behavioral", "duration_min": 4, "steps": ["..."], "offline": true }
+  "system_id": "neuro_behavioral", "duration_min": 4, "steps": ["..."], "offline": true,
+  "indicator_ids": ["stress"],   // a qué indicadores responde; [] = genérica del sistema
+  "sources": ["S3"] }            // IDs de docs/sources.md
+// En el assessment, un sistema en warning o critical recomienda las intervenciones de sus
+// indicadores alterados y siempre las genéricas del sistema (Recommendation.intervention_id).
+// Si behavioral.details_visible es false, solo las genéricas: no revelan qué indicador saltó.
 ```
 
 ### SSE: formato de `/events/stream`

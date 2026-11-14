@@ -22,7 +22,6 @@ from app.schemas import (
     Escalation,
     Event,
     IndicatorAssessment,
-    Intervention,
     Measurement,
     Member,
     MemberSummary,
@@ -40,17 +39,7 @@ ENVIRONMENTS: list[Environment] = environments.list_environments()
 ENV_BY_ID = {e.id: e for e in ENVIRONMENTS}
 
 # Indicadores y sistemas: reales desde BE-04 (app/data/indicators.json y systems.json).
-
-INTERVENTIONS: list[Intervention] = [
-    Intervention(
-        id="int_box_breathing",
-        title="Respiración en caja",
-        category="stress",
-        system_id="neuro_behavioral",
-        duration_min=4,
-        steps=["Inhala 4 s", "Mantén 4 s", "Exhala 4 s", "Mantén 4 s", "Repite 4 ciclos"],
-    ),
-]
+# Intervenciones: reales desde BE-21 (app/data/interventions.json).
 
 MEMBERS: list[Member] = [
     Member(

@@ -186,6 +186,11 @@ class Intervention(ApiModel):
     title: str
     category: str = Field(examples=["stress"])
     system_id: Slug | None = None
-    duration_min: int
-    steps: list[str]
+    duration_min: int = Field(ge=1)
+    steps: list[str] = Field(min_length=1)
     offline: bool = True
+    indicator_ids: list[Slug] = Field(
+        default_factory=list,
+        description="Indicadores a los que responde; vacío = genérica del sistema",
+    )
+    sources: list[str] = Field(default_factory=list, description="IDs de docs/sources.md")

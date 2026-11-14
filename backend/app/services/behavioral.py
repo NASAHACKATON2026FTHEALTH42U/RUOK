@@ -35,6 +35,7 @@ from pathlib import Path
 from typing import Any
 
 from app.schemas.members import Assessment
+from app.services import catalog
 from app.services.trends import _points, baseline, daily_means, worsening_streak
 
 __all__ = [
@@ -159,8 +160,9 @@ def redact(assessment: Assessment, private: Iterable[str] | None = None) -> Asse
     """Copia del assessment sin los indicadores privados si ``details_visible`` es False.
 
     Se quitan de ``systems[].indicators`` (valor, tendencia, línea base y estado
-    individual). El estado del sistema, su escalado y ``behavioral`` se mantienen:
-    quien no puede ver los detalles sigue viendo el semáforo agregado.
+    individual) y las recomendaciones de intervenciones ligadas a esos indicadores.
+    El estado del sistema, su escalado y ``behavioral`` se mantienen: quien no puede
+    ver los detalles sigue viendo el semáforo agregado.
     """
     if assessment.behavioral.details_visible:
         return assessment
@@ -168,4 +170,16 @@ def redact(assessment: Assessment, private: Iterable[str] | None = None) -> Asse
     out = assessment.model_copy(deep=True)
     for system in out.systems:
         system.indicators = [i for i in system.indicators if i.indicator_id not in hidden]
+        # Una intervención ligada a un indicador privado delata cuál ha saltado (BE-21):
+        # solo quedan las genéricas del sistema.
+        system.recommendations = [
+            r for r in system.recommendations if not _reveals(r.intervention_id, hidden)
+        ]
     return out
+
+
+def _reveals(intervention_id: str | None, hidden: set[str]) -> bool:
+    if intervention_id is None:
+        return False
+    item = catalog.get_intervention(intervention_id)
+    return item is not None and bool(hidden & set(item.indicator_ids))
