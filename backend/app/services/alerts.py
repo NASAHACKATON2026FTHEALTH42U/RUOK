@@ -367,7 +367,12 @@ def _same_request(alert: models.Alert, member_id: int, body) -> bool:
 
 
 def create_manual(
-    session: Session, member: models.Member, body
+    session: Session,
+    member: models.Member,
+    body,
+    *,
+    authenticated: bool = True,
+    created_by_user_id: int | None = None,
 ) -> tuple[models.Alert, bool]:
     """Pedir ayuda / SOS (`AlertIn`). Idempotente por el UUID del cliente.
 
@@ -396,7 +401,8 @@ def create_manual(
         member_id=member.id,
         env_id=member.env_id,
         origin="manual",
-        authenticated=True,  # TODO(BE-27): False si llega sin token (SOS de emergencia)
+        authenticated=authenticated,  # False: SOS de emergencia sin sesión (BE-27)
+        created_by_user_id=created_by_user_id,
         category=body.category,
         severity=body.severity,
         system_id=body.system_id,

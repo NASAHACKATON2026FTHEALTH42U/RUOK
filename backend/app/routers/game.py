@@ -2,10 +2,10 @@
 
 from datetime import date
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from app import stubs
-from app.routers.deps import ERRORS_404, ERRORS_AUTH, AuthDep
+from app.routers.deps import ERRORS_404, ERRORS_AUTH, AuthDep, allow_env, allow_member
 from app.schemas import GameState, Leaderboard, Slug, Task, TaskCompleteIn
 
 router = APIRouter(tags=["game"], dependencies=[AuthDep], responses={**ERRORS_AUTH, **ERRORS_404})
@@ -16,6 +16,7 @@ router = APIRouter(tags=["game"], dependencies=[AuthDep], responses={**ERRORS_AU
     response_model=list[Task],
     summary="Tareas del día",
     description="STUB(FS-02) → BE-18",
+    dependencies=[Depends(allow_member("game:read"))],
 )
 def list_tasks(member_id: int, date: date | None = None) -> list[Task]:  # noqa: A002
     return stubs.TASKS
@@ -26,6 +27,7 @@ def list_tasks(member_id: int, date: date | None = None) -> list[Task]:  # noqa:
     response_model=GameState,
     summary="Completar una tarea (idempotente por UUID)",
     description="STUB(FS-02) → BE-18/BE-19",
+    dependencies=[Depends(allow_member("game:write"))],
 )
 def complete_task(member_id: int, task_id: str, body: TaskCompleteIn) -> GameState:
     task = next((t for t in stubs.TASKS if t.id == task_id), None)
@@ -39,6 +41,7 @@ def complete_task(member_id: int, task_id: str, body: TaskCompleteIn) -> GameSta
     response_model=GameState,
     summary="Puntos, racha e insignias",
     description="STUB(FS-02) → BE-19",
+    dependencies=[Depends(allow_member("game:read"))],
 )
 def game_state(member_id: int) -> GameState:
     return stubs.GAME
@@ -49,6 +52,7 @@ def game_state(member_id: int) -> GameState:
     response_model=Leaderboard,
     summary="Puntos de la tripulación (cooperativo)",
     description="STUB(FS-02) → BE-19",
+    dependencies=[Depends(allow_env("game:read"))],
 )
 def leaderboard(env_id: Slug) -> Leaderboard:
     if env_id not in stubs.ENV_BY_ID:

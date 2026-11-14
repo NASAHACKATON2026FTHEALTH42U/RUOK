@@ -19,7 +19,7 @@
 - **Dispositivo.** Todas las peticiones llevan la cabecera `X-Device-Id: <uuid>` (ver [control-center-and-devices.md](control-center-and-devices.md#4-identidad-de-dispositivo-y-aislamiento)).
 - **Hora del servidor.** Las respuestas llevan la cabecera `X-Server-Time`, que es el reloj de la demo (puede ir acelerado).
 - **CORS** abierto en desarrollo.
-- **Autenticación:** `Authorization: Bearer <jwt>` en todos los endpoints salvo `/health`, `/auth/*` y el SOS de emergencia. `401` = sin sesión válida; `403` = rol sin permiso o dato ajeno. Ver [auth-and-roles.md](auth-and-roles.md).
+- **Autenticación:** `Authorization: Bearer <jwt>` en todos los endpoints salvo `/health`, `/auth/*`, `/system/network-info`, el catálogo de solo lectura (`/environments`, `/indicators`, `/systems`, `/interventions`: lo usan el SOS y el protocolo autónomo sin sesión) y el SOS de emergencia. `401` = sin sesión válida; `403` = rol sin permiso o dato ajeno. Ver [auth-and-roles.md](auth-and-roles.md).
 
 ## Enumeraciones
 ```

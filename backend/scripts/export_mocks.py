@@ -92,13 +92,23 @@ def _demo_state(post) -> None:
 def main() -> None:
     with TestClient(app) as c:
 
+        def login(username: str, password: str) -> dict[str, str]:
+            r = c.post(API + "/auth/login", json={"username": username, "password": password})
+            r.raise_for_status()
+            return {"Authorization": f"Bearer {r.json()['access_token']}"}
+
+        # Desde BE-27 todo pide sesión: admin puede leerlo todo. El heartbeat es solo
+        # del propio member, así que va como vega (member 1).
+        c.headers.update(login("admin", "ruok-admin"))
+        vega = login("vega", "ruok-mars")
+
         def get(path: str):
             r = c.get(API + path)
             r.raise_for_status()
             return r.json()
 
-        def post(path: str, body: dict | None = None):
-            r = c.post(API + path, json=body)
+        def post(path: str, body: dict | None = None, headers: dict[str, str] | None = None):
+            r = c.post(API + path, json=body, headers=headers)
             r.raise_for_status()
             return r.json()
 
@@ -169,7 +179,11 @@ def main() -> None:
             (
                 "heartbeatResult",
                 "Schema<'HeartbeatResult'>",
-                post("/members/1/heartbeat", {"device_id": "a3f9c2d1-7b6e-4f5a-8c9d-0e1f2a3b4c5d"}),
+                post(
+                    "/members/1/heartbeat",
+                    {"device_id": "a3f9c2d1-7b6e-4f5a-8c9d-0e1f2a3b4c5d"},
+                    headers=vega,
+                ),
             ),
         ]
         operations = sorted(

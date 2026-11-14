@@ -15,7 +15,15 @@ from sqlmodel import Session
 
 from app import clock, seed, stubs
 from app.db import get_session
-from app.routers.deps import ERRORS_404, ERRORS_AUTH, AuthDep
+from app.routers.deps import (
+    ERRORS_404,
+    ERRORS_AUTH,
+    AdminDep,
+    AuthDep,
+    CurrentUser,
+    check_env,
+    stream_user,
+)
 from app.schemas import (
     ControlOverview,
     DemoClock,
@@ -38,7 +46,14 @@ from app.services import alerts, comm_link, liveness_watch
 SessionDep = Annotated[Session, Depends(get_session)]
 
 router = APIRouter(dependencies=[AuthDep], responses=ERRORS_AUTH)
+# Sin cabecera Authorization obligatoria: /system/network-info (público) y el SSE, cuyo
+# token va en `?token=` porque EventSource no admite cabeceras.
 public = APIRouter()
+
+
+def _link_scope(env: Slug, user: CurrentUser) -> None:
+    """El enlace de un entorno: lo ve quien es de ese entorno (o admin)."""
+    check_env(user, env)
 
 
 # ── Eventos ─────────────────────────────────────────────────
@@ -50,19 +65,22 @@ def _sse(events: list[Event]) -> Iterator[str]:
         yield f"id: {ev.id}\nevent: {ev.type.value}\ndata: {data}\n\n"
 
 
-@router.get(
+@public.get(
     "/events/stream",
+    dependencies=[Depends(stream_user)],
     tags=["realtime"],
     response_class=StreamingResponse,
     summary="Stream SSE de eventos (filtrado por rol)",
     description="`text/event-stream`. Cada mensaje: `id` (= Event.id, usable como Last-Event-ID), "
     "`event` (= Event.type) y `data` (= Event en JSON). El token va en `?token=` porque "
-    "EventSource no admite cabeceras. STUB(FS-02): emite los eventos de ejemplo y cierra → BE-28",
+    "EventSource no admite cabeceras (sin token válido → 401). STUB(FS-02): emite los eventos "
+    "de ejemplo y cierra → BE-28 (que filtra cada evento según el rol del token).",
     responses={
+        **ERRORS_AUTH,
         200: {
             "content": {"text/event-stream": {"schema": {"$ref": "#/components/schemas/Event"}}},
             "description": "Stream de eventos",
-        }
+        },
     },
 )
 def events_stream(
@@ -83,6 +101,7 @@ def events_stream(
     tags=["realtime"],
     summary="Historial de eventos (admin; fallback de polling)",
     description="STUB(FS-02) → BE-28",
+    dependencies=[AdminDep],
 )
 def list_events(
     since_id: int = 0,
@@ -108,6 +127,7 @@ def list_events(
     tags=["realtime"],
     summary="Dispositivos registrados (admin)",
     description="STUB(FS-02) → BE-29",
+    dependencies=[AdminDep],
 )
 def list_devices(env_id: Slug | None = None) -> list[Device]:
     return [stubs.DEVICE]
@@ -119,6 +139,7 @@ def list_devices(env_id: Slug | None = None) -> list[Device]:
     tags=["control"],
     summary="Vista global del centro de control (admin, sin retardo)",
     description="STUB(FS-02) → BE-30",
+    dependencies=[AdminDep],
 )
 def control_overview(session: SessionDep) -> ControlOverview:
     envs = [
@@ -145,6 +166,7 @@ def control_overview(session: SessionDep) -> ControlOverview:
     tags=["control"],
     summary="Pausar las alertas de liveness de un entorno (presentación)",
     description="STUB(FS-02) → BE-30",
+    dependencies=[AdminDep],
 )
 def pause_liveness(body: LivenessPauseIn) -> OkResponse:
     return OkResponse(detail=f"liveness {'pausado' if body.paused else 'activo'} en {body.env_id}")
@@ -172,6 +194,7 @@ def network_info() -> NetworkInfo:
     summary="Estado del enlace con tierra",
     description="Estado (online | delayed | los), retardo de ida y mensajes pendientes. "
     "Entrega antes los mensajes cuya ETA ya ha pasado (reloj de la demo).",
+    dependencies=[Depends(_link_scope)],
 )
 def get_link(env: Slug, session: SessionDep) -> LinkStatus:
     try:
@@ -187,6 +210,7 @@ def get_link(env: Slug, session: SessionDep) -> LinkStatus:
     tags=["link"],
     summary="Mensajes del enlace (pendientes o entregados)",
     description="Por orden de envío; `direction` = up (a tierra) | down (a bordo).",
+    dependencies=[Depends(_link_scope)],
 )
 def list_link_messages(
     env: Slug, session: SessionDep, direction: LinkDirection | None = None
@@ -208,6 +232,7 @@ def list_link_messages(
     summary="Reiniciar la BD con el seed determinista",
     description="Vacía la BD, vuelve al reloj real y siembra 30 días de datos sintéticos "
     "(mismos datos en cada reset).",
+    dependencies=[AdminDep],
 )
 def demo_reset(session: Annotated[Session, Depends(get_session)]) -> OkResponse:
     members, measurements = seed.reset(session)
@@ -224,6 +249,7 @@ def demo_reset(session: Annotated[Session, Depends(get_session)]) -> OkResponse:
     summary="Cargar un escenario de demo",
     description="mars_sleep_bp | eva_no_contact | geriatric_fall_risk. Se aplica encima de "
     "los datos actuales sin borrar nada; aplicarlo dos veces no duplica mediciones.",
+    dependencies=[AdminDep],
 )
 def demo_scenario(name: str, session: Annotated[Session, Depends(get_session)]) -> OkResponse:
     if name not in seed.SCENARIOS:
@@ -239,6 +265,7 @@ def demo_scenario(name: str, session: Annotated[Session, Depends(get_session)]) 
     summary="Forzar el estado del enlace",
     description="Al pasar a `los` todo lo que se envía queda en cola; al salir de `los` "
     "la cola se envía con el retardo del entorno.",
+    dependencies=[AdminDep],
 )
 def demo_link(body: DemoLinkIn, session: SessionDep) -> LinkStatus:
     try:
@@ -255,6 +282,7 @@ def demo_link(body: DemoLinkIn, session: SessionDep) -> LinkStatus:
     summary="Avanzar el reloj de la demo",
     description="Avanza el reloj de la demo (app/clock.py), entrega los mensajes del enlace "
     "cuya ETA ya ha pasado y reevalúa las alertas abiertas.",
+    dependencies=[AdminDep],
 )
 def demo_fast_forward(body: FastForwardIn, session: SessionDep) -> DemoClock:
     clock.advance(body.seconds)

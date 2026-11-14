@@ -1,7 +1,9 @@
 """Alertas, escalado y consola ground.
 
 Reales: automáticas (BE-14), manuales y acciones (BE-15) y consola ground (BE-17).
-Pendiente: BE-27 (SOS de emergencia sin token y rol de quien consulta).
+
+Permisos (BE-27): la autenticación va por endpoint y no en el router, porque el SOS de
+emergencia se acepta SIN token (docs/auth-and-roles.md: "el SOS nunca depende del login").
 """
 
 from typing import Annotated, Literal
@@ -12,7 +14,16 @@ from sqlmodel import Session
 
 from app import models
 from app.db import get_session
-from app.routers.deps import ERRORS_404, ERRORS_AUTH, AuthDep
+from app.routers.deps import (
+    ERRORS_404,
+    ERRORS_AUTH,
+    OptionalUser,
+    allow_alert,
+    allow_env,
+    allow_member,
+    check,
+    check_member,
+)
 from app.schemas import (
     AckIn,
     Alert,
@@ -28,7 +39,7 @@ from app.schemas.common import ErrorResponse
 from app.services import alerts as alerts_service
 from app.services import comm_link, ground
 
-router = APIRouter(tags=["alerts"], dependencies=[AuthDep], responses={**ERRORS_AUTH, **ERRORS_404})
+router = APIRouter(tags=["alerts"], responses={**ERRORS_AUTH, **ERRORS_404})
 
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -61,6 +72,7 @@ def _run(session: Session, fn, *args, **kwargs) -> Alert:
     summary="Alertas del member",
     description="Alertas del member (las más recientes primero) con su timeline. Las automáticas "
     "son reales (BE-14); las manuales llegan con BE-15.",
+    dependencies=[Depends(allow_member("alerts:read"))],
 )
 def list_member_alerts(
     member_id: int,
@@ -75,6 +87,25 @@ def list_member_alerts(
     return [alerts_service.to_schema(session, a) for a in rows]
 
 
+def _may_create(user: models.UserAccount | None, member: models.Member, *, emergency: bool) -> bool:
+    """True si la petición va autenticada y con permiso; False si es un SOS sin sesión.
+
+    Fuera de una emergencia, sin sesión → 401 y sin permiso → 403.
+    """
+    if user is None:
+        if emergency:
+            return False
+        raise HTTPException(401, "Falta el token de sesión", headers={"WWW-Authenticate": "Bearer"})
+    try:
+        check(user, "alerts:create")
+        check_member(user, member)
+    except HTTPException:
+        if emergency:
+            return False  # el SOS nunca se rechaza por permisos
+        raise
+    return True
+
+
 @router.post(
     "/members/{member_id}/alerts",
     response_model=Alert,
@@ -83,14 +114,22 @@ def list_member_alerts(
     description="Idempotente por el UUID del cliente (mismo id y contenido → la misma alerta; "
     "contenido distinto → 409). Destino: `target_role` (se pueden saltar niveles); si no, "
     "emergency/critical suben hasta el primer nivel externo (a bordo al instante, tierra por "
-    "el enlace) y warning va a la tripulación. El SOS sin token llega con BE-27.",
+    "el enlace) y warning va a la tripulación. Con `category=emergency` se acepta SIN token "
+    "(o con un token sin permiso sobre ese member) y la alerta queda `authenticated=false`.",
 )
-def create_alert(member_id: int, body: AlertIn, session: SessionDep) -> Alert:
+def create_alert(member_id: int, body: AlertIn, session: SessionDep, user: OptionalUser) -> Alert:
     member = session.get(models.Member, member_id)
     if member is None:
         raise HTTPException(404, f"Member desconocido: {member_id}")
+    authenticated = _may_create(user, member, emergency=body.category == "emergency")
     try:
-        alert, _created = alerts_service.create_manual(session, member, body)
+        alert, _created = alerts_service.create_manual(
+            session,
+            member,
+            body,
+            authenticated=authenticated,
+            created_by_user_id=user.id if authenticated else None,
+        )
     except alerts_service.AlertConflict as exc:
         raise HTTPException(409, str(exc)) from exc
     except alerts_service.InvalidAlert as exc:
@@ -105,6 +144,7 @@ def create_alert(member_id: int, body: AlertIn, session: SessionDep) -> Alert:
     summary="Escalar (por defecto al siguiente nivel; permite saltar niveles)",
     description="Los niveles externos salen por el enlace con su ETA. 422 si el destino no "
     "está en la escalera o ya está en el último nivel; 409 si está resuelta.",
+    dependencies=[Depends(allow_alert("alerts:escalate"))],
 )
 def escalate(alert_id: UUID, body: EscalateIn, session: SessionDep) -> Alert:
     alert = _alert(session, alert_id)
@@ -116,6 +156,7 @@ def escalate(alert_id: UUID, body: EscalateIn, session: SessionDep) -> Alert:
     response_model=Alert,
     responses=ERRORS_409,
     summary="Reconocer la alerta",
+    dependencies=[Depends(allow_alert("alerts:ack"))],
 )
 def ack(alert_id: UUID, body: AckIn, session: SessionDep) -> Alert:
     return _run(session, alerts_service.acknowledge, _alert(session, alert_id), body.actor)
@@ -126,6 +167,7 @@ def ack(alert_id: UUID, body: AckIn, session: SessionDep) -> Alert:
     response_model=Alert,
     responses=ERRORS_409,
     summary="Resolver la alerta",
+    dependencies=[Depends(allow_alert("alerts:ack"))],
 )
 def resolve(alert_id: UUID, body: ResolveIn, session: SessionDep) -> Alert:
     alert = _alert(session, alert_id)
@@ -138,6 +180,7 @@ def resolve(alert_id: UUID, body: ResolveIn, session: SessionDep) -> Alert:
     summary="Mensaje en la alerta (viaja por el enlace si va a tierra)",
     description="Si la alerta está en un nivel externo, el mensaje viaja por el enlace "
     "(member → tierra, responder → a bordo) y el evento lleva su ETA.",
+    dependencies=[Depends(allow_alert("alerts:message"))],
 )
 def add_message(alert_id: UUID, body: AlertMessageIn, session: SessionDep) -> Alert:
     alert = _alert(session, alert_id)
@@ -150,15 +193,16 @@ def add_message(alert_id: UUID, body: AlertMessageIn, session: SessionDep) -> Al
     summary="Consola /ground: solo lo ENTREGADO por el enlace, con estado as-of",
     description="Alertas que el enlace ya ha entregado a tierra, members con su resumen y "
     "`as_of` = ahora − retardo (en LOS, el último momento conocido y estado `unknown`). "
-    "El detalle conductual se oculta salvo que el member lo comparta o sea una emergencia.",
+    "El detalle conductual se oculta salvo que el member lo comparta, sea una emergencia "
+    "o quien consulta sea `psych`.",
 )
 def ground_view(
     env_id: Slug,
     session: SessionDep,
+    user: Annotated[models.UserAccount, Depends(allow_env("ground:read"))],
     view: Literal["ground"] = "ground",
 ) -> GroundView:
     try:
-        # TODO(BE-27): pasar el rol de quien consulta (psych ve el detalle conductual).
-        return ground.ground_view(session, env_id)
+        return ground.ground_view(session, env_id, viewer_role=user.role)
     except comm_link.UnknownEnvironment as exc:
         raise HTTPException(404, str(exc)) from exc

@@ -1,16 +1,19 @@
 """Catálogos de solo lectura, leídos de app/data/*.json.
 
 Entornos (BE-03), indicadores y sistemas (BE-04): reales. STUB(FS-02) → BE-21 (intervenciones).
+
+Públicos (BE-27): son configuración sin datos personales, y el modal de SOS y el protocolo
+autónomo los necesitan también sin sesión (docs/auth-and-roles.md, principio 3).
 """
 
 from fastapi import APIRouter, HTTPException
 
 from app import stubs
-from app.routers.deps import ERRORS_404, ERRORS_AUTH, AuthDep
+from app.routers.deps import ERRORS_404
 from app.schemas import BodySystem, Environment, Indicator, Intervention, Slug
 from app.services import catalog, environments
 
-router = APIRouter(dependencies=[AuthDep], responses=ERRORS_AUTH)
+router = APIRouter()
 
 
 @router.get(

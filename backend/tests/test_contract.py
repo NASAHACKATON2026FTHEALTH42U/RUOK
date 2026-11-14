@@ -62,7 +62,20 @@ CONTRACT_ENDPOINTS = [
     ("post", "/demo/fast-forward"),
 ]
 
-PUBLIC = {"/health", "/auth/login", "/auth/pin", "/auth/demo-users", "/system/network-info"}
+PUBLIC = {
+    "/health",
+    "/auth/login",
+    "/auth/pin",
+    "/auth/demo-users",
+    "/system/network-info",
+    # Catálogo de configuración: lo usan el SOS y el protocolo autónomo sin sesión (BE-27).
+    "/environments",
+    "/environments/{env_id}",
+    "/indicators",
+    "/indicators/{indicator_id}",
+    "/systems",
+    "/interventions",
+}
 
 
 @pytest.fixture(scope="module")
@@ -200,11 +213,16 @@ CALLS = [
 ALERT_BODY = {"id": ALERT_ID, "category": "symptom", "severity": "warning", "message": "mareo"}
 
 
+MEMBER_ONLY = {"/members/1/privacy", "/members/1/heartbeat"}
+
+
 @pytest.mark.parametrize(("method", "path", "body", "status"), CALLS)
 def test_stub_responds(client, method, path, body, status):
-    # Desde BE-26 el token es real: se envía en todas las llamadas (el resto de
-    # endpoints aún lo aceptan opcional hasta BE-27).
+    # Token real (BE-26). Con los permisos de BE-27, admin puede casi todo; lo que es
+    # solo del propio member (privacidad, heartbeat) se llama como vega (member 1).
     login = {"username": "admin", "password": "ruok-admin"}
+    if path.split("?")[0] in MEMBER_ONLY:
+        login = {"username": "vega", "password": "ruok-mars"}
     token = client.post(API + "/auth/login", json=login).json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
     if ALERT_ID in path:  # idempotente: la crea si no existe (o un reset la ha borrado)
