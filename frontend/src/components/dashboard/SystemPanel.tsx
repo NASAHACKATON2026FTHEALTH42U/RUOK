@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Assessment } from '../../api/useAssessment'
 import type { Indicator } from '../../api/useIndicators'
@@ -27,8 +27,9 @@ interface SystemPanelProps {
 }
 
 /**
- * Detalle de un sistema del cuerpo (FE-06): estado, indicadores (valor, estado, tendencia,
- * antigüedad), recomendaciones y "Medir ahora". Sin los textos descriptivos (función, efectos
+ * Detalle de un sistema del cuerpo (FE-06): estado, las tendencias en un bloque y, plegados
+ * (se abren por encima, sin ocupar sitio), indicadores, recomendaciones e intervenciones; y
+ * "Medir ahora". Sin los textos descriptivos (función, efectos
  * en el espacio, peligros), para que quepa sin scroll. Modal grande centrada. Se cierra con Esc, con el botón o con un clic fuera.
  */
 export function SystemPanel({
@@ -53,6 +54,63 @@ export function SystemPanel({
   const interventions = allInterventions
     .filter((i) => recommendedIds.has(i.id) || i.system_id === system.id)
     .sort((a, b) => Number(recommendedIds.has(b.id)) - Number(recommendedIds.has(a.id)))
+
+  // Secciones plegadas: solo una abierta a la vez.
+  const [open, setOpen] = useState<string | null>(null)
+  const sections = [
+    assessed && assessed.indicators.length > 0
+      ? {
+          id: 'indicators',
+          label: 'Indicadores',
+          count: assessed.indicators.length,
+          content: (
+            <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {assessed.indicators.map((ind) => (
+                <li key={ind.indicator_id}>
+                  <IndicatorCard
+                    indicator={ind}
+                    name={byId.get(ind.indicator_id)?.name}
+                    stale={stale}
+                    provisional={provisionalIds?.has(ind.indicator_id)}
+                  />
+                </li>
+              ))}
+            </ul>
+          ),
+        }
+      : null,
+    recommendations.length > 0
+      ? {
+          id: 'recommendations',
+          label: 'Recomendaciones',
+          count: recommendations.length,
+          content: (
+            <ol className="list-decimal space-y-1 pl-5 text-sm">
+              {recommendations.map((r) => (
+                <li key={r.id}>{r.text}</li>
+              ))}
+            </ol>
+          ),
+        }
+      : null,
+    interventions.length > 0
+      ? {
+          id: 'interventions',
+          label: 'Qué puedes hacer ahora',
+          count: interventions.length,
+          content: (
+            <ul className="grid gap-2 md:grid-cols-2">
+              {interventions.map((i) => (
+                <li key={i.id}>
+                  <InterventionCard intervention={i} compact />
+                </li>
+              ))}
+            </ul>
+          ),
+        }
+      : null,
+  ].filter((x) => x !== null)
+  const current = sections.find((x) => x.id === open)
 
   useEffect(() => {
     closeRef.current?.focus()
@@ -79,7 +137,7 @@ export function SystemPanel({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-env-border bg-env-bg p-5 shadow-2xl md:p-8"
+        className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-env-border bg-env-bg p-5 shadow-2xl md:p-6"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
@@ -90,7 +148,7 @@ export function SystemPanel({
             <h2 id={titleId} className="text-2xl font-semibold">
               {system.name}
             </h2>
-            <StatusBadge status={stale ? 'stale' : (assessed?.status ?? 'unknown')} />
+            <StatusBadge status={stale ? 'stale' : (assessed?.status ?? 'unknown')} size="sm" />
           </div>
           <button
             ref={closeRef}
@@ -103,69 +161,62 @@ export function SystemPanel({
           </button>
         </header>
 
-        <section className="mt-6">
-          <h3 className="text-sm font-semibold">Indicadores</h3>
+        {/* Las secciones plegadas (indicadores, recomendaciones, intervenciones) se abren SOBRE
+            este bloque, ocupando justo su hueco y con scroll propio: no empujan el contenido ni
+            se salen de la ventana. */}
+        <section className={`relative mt-4 ${current ? 'min-h-48' : ''}`}>
           {!assessed || assessed.indicators.length === 0 ? (
-            <p className="mt-2 text-sm text-env-muted">
-              Todavía no hay mediciones de este sistema.
-            </p>
+            <p className="text-sm text-env-muted">Todavía no hay mediciones de este sistema.</p>
           ) : (
-            <>
-              {/* Valor, estado y tendencia de cada indicador; las gráficas van juntas debajo. */}
-              <ul className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {assessed.indicators.map((ind) => (
-                  <li key={ind.indicator_id}>
-                    <IndicatorCard
-                      indicator={ind}
-                      name={byId.get(ind.indicator_id)?.name}
-                      stale={stale}
-                      provisional={provisionalIds?.has(ind.indicator_id)}
-                    />
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-3">
-                <SystemTrends
-                  series={assessed.indicators.map((ind) => ({
-                    id: ind.indicator_id,
-                    name: byId.get(ind.indicator_id)?.name ?? ind.indicator_id,
-                    unit: ind.unit,
-                    range: ind.range,
-                  }))}
-                />
-              </div>
-            </>
+            <SystemTrends
+              series={assessed.indicators.map((ind) => ({
+                id: ind.indicator_id,
+                name: byId.get(ind.indicator_id)?.name ?? ind.indicator_id,
+                unit: ind.unit,
+                range: ind.range,
+              }))}
+            />
+          )}
+          {current && (
+            <div
+              id={`${titleId}-extra`}
+              role="region"
+              aria-label={current.label}
+              className="absolute inset-0 z-10 overflow-y-auto rounded-lg border border-env-border bg-env-bg p-3 [scrollbar-color:var(--env-border)_transparent]"
+            >
+              {current.content}
+            </div>
           )}
         </section>
 
-        {recommendations.length > 0 && (
-          <section className="mt-6">
-            <h3 className="text-sm font-semibold">Recomendaciones</h3>
-            <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">
-              {recommendations.map((r) => (
-                <li key={r.id}>{r.text}</li>
+        {sections.length > 0 && (
+          <div className="mt-3">
+            <div className="flex flex-wrap gap-2">
+              {sections.map((sec) => (
+                <button
+                  key={sec.id}
+                  type="button"
+                  aria-expanded={open === sec.id}
+                  aria-controls={open === sec.id ? `${titleId}-extra` : undefined}
+                  onClick={() => setOpen(open === sec.id ? null : sec.id)}
+                  className={`rounded-lg border px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
+                    open === sec.id
+                      ? 'border-env-text bg-env-surface'
+                      : 'border-env-border text-env-muted hover:border-env-text hover:text-env-text'
+                  }`}
+                >
+                  <span aria-hidden>{open === sec.id ? '▾ ' : '▸ '}</span>
+                  {sec.label} ({sec.count})
+                </button>
               ))}
-            </ol>
-          </section>
-        )}
-
-        {interventions.length > 0 && (
-          <section className="mt-6">
-            <h3 className="text-sm font-semibold">Qué puedes hacer ahora</h3>
-            <ul className="mt-2 grid gap-2 md:grid-cols-2">
-              {interventions.map((i) => (
-                <li key={i.id}>
-                  <InterventionCard intervention={i} compact />
-                </li>
-              ))}
-            </ul>
-          </section>
+            </div>
+          </div>
         )}
 
         {canMeasure && (
           <Link
             to={`/measure?system=${encodeURIComponent(system.id)}`}
-            className="mx-auto mt-6 block max-w-sm rounded-lg bg-env-primary px-4 py-2.5 text-center font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
+            className="mx-auto mt-4 block max-w-sm rounded-lg bg-env-primary px-4 py-2 text-center font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
           >
             Medir ahora
           </Link>

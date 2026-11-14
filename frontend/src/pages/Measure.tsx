@@ -307,26 +307,22 @@ function MeasureForm({
     // en dos columnas (un par de filas) en vez de en una sola columna larga.
     <form
       onSubmit={submit}
-      className={`mx-auto space-y-4 ${fields.length > 1 ? 'max-w-4xl' : 'max-w-xl'}`}
+      className={`mx-auto space-y-4 max-[341px]:space-y-1.5 max-[341px]:[&_h1]:text-xl max-[341px]:[&_textarea]:h-8 max-[341px]:[&_textarea]:py-1 ${fields.length > 1 ? 'max-w-4xl' : 'max-w-xl'}`}
       noValidate
     >
       <Link to="/measure" className="text-sm text-env-muted hover:text-env-text hover:underline">
         ← Elegir otra cosa
       </Link>
       <h1 className="text-2xl font-semibold">{heading}</h1>
-      {fields.length > 1 && (
-        <p className="text-sm text-env-muted">
-          Rellena lo que hayas medido: se envía todo junto. Los campos vacíos no se envían.
-        </p>
-      )}
 
-      <fieldset disabled={phase.kind === 'sending'} className="space-y-4">
+      <fieldset disabled={phase.kind === 'sending'} className="space-y-4 max-[341px]:space-y-2">
         <div
           // También en móvil (< 768 px) van de dos en dos, con el contenido más compacto, para
-          // no tener que bajar con scroll.
+          // no tener que bajar con scroll. Hasta 340 px no caben dos: una columna, pero con
+          // tarjetas pequeñas (sin el rótulo «Cómo medir», letra y campos más bajos).
           className={`grid gap-4 ${
             fields.length > 1
-              ? 'grid-cols-2 max-md:gap-2 [&_fieldset]:min-w-0 max-md:[&_fieldset]:p-2.5 max-md:[&_input]:min-w-0 max-md:[&_input]:px-2 max-md:[&_legend]:text-sm max-md:[&_ol]:text-xs'
+              ? 'grid-cols-2 max-md:gap-2 [&_fieldset]:min-w-0 max-md:[&_fieldset]:p-2.5 max-md:[&_input]:min-w-0 max-md:[&_input]:px-2 max-md:[&_legend]:text-sm max-md:[&_ol]:text-xs max-[341px]:grid-cols-1 max-[341px]:gap-1 max-[341px]:[&_fieldset]:px-2 max-[341px]:[&_fieldset]:py-1 max-[341px]:[&_input]:px-1.5 max-[341px]:[&_input]:py-1 max-[341px]:[&_input]:text-sm max-[341px]:[&_ol]:space-y-0 max-[341px]:[&_ol]:text-[11px] max-[341px]:[&_ol]:leading-tight max-[341px]:[&_p.uppercase]:hidden'
               : ''
           }`}
         >
@@ -369,7 +365,7 @@ function MeasureForm({
       <button
         type="submit"
         disabled={phase.kind === 'sending'}
-        className="w-full rounded-lg bg-env-primary px-4 py-3 font-medium text-env-primary-text disabled:opacity-60"
+        className="w-full rounded-lg bg-env-primary px-4 py-3 font-medium max-[341px]:py-2 text-env-primary-text disabled:opacity-60"
       >
         {phase.kind === 'sending' ? 'Guardando…' : 'Guardar medición'}
       </button>

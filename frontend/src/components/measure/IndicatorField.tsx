@@ -22,9 +22,18 @@ export function IndicatorField({ indicator, value, error, onChange }: IndicatorF
   const errId = `${id}-err`
   const { input, unit } = indicator
   const invalid = Boolean(error)
+  // Pantallas muy estrechas (≤ 340 px): con un campo numérico simple, las instrucciones van a
+  // la izquierda y la casilla a la derecha, en la misma fila, para que la tarjeta sea baja.
+  const row = input.type !== 'scale_1_5' && input.type !== 'duration'
 
   return (
-    <fieldset className="rounded-xl border border-env-border bg-env-surface p-4">
+    <fieldset
+      className={`rounded-xl border border-env-border bg-env-surface p-4 ${
+        row
+          ? 'max-[341px]:grid max-[341px]:grid-cols-[1fr_8.75rem] max-[341px]:items-center max-[341px]:gap-x-2'
+          : ''
+      }`}
+    >
       <legend className="px-1 font-semibold">{indicator.name}</legend>
 
       {indicator.measurement_instructions.length > 0 && (
@@ -46,7 +55,7 @@ export function IndicatorField({ indicator, value, error, onChange }: IndicatorF
         </div>
       )}
 
-      <div className="mt-3">
+      <div className={`mt-3 ${row ? 'max-[341px]:col-start-2 max-[341px]:mt-0' : ''}`}>
         {input.type === 'scale_1_5' && 'text' in value ? (
           <div role="radiogroup" aria-label={indicator.name} className="flex gap-2">
             {[1, 2, 3, 4, 5].map((n) => (
