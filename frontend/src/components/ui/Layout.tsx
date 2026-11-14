@@ -17,10 +17,10 @@ export function Layout() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur">
+      <header className="border-b border-env-border bg-env-surface">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
           <NavLink to="/" className="text-lg font-bold tracking-tight">
-            R U OK<span className="text-sky-400">?</span>
+            R U OK<span className="text-env-primary">?</span>
           </NavLink>
           <EnvironmentSelector />
         </div>
@@ -33,8 +33,8 @@ export function Layout() {
                   className={({ isActive }) =>
                     `block whitespace-nowrap rounded-md px-3 py-1.5 ${
                       isActive
-                        ? 'bg-slate-800 text-white'
-                        : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+                        ? 'bg-env-primary text-env-primary-text'
+                        : 'text-env-muted hover:bg-env-border/50 hover:text-env-text'
                     }`
                   }
                 >
@@ -50,9 +50,13 @@ export function Layout() {
         <Outlet />
       </main>
 
-      <footer className="border-t border-slate-800 px-4 py-3 text-center text-xs text-slate-500">
+      <footer className="border-t border-env-border px-4 py-3 text-center text-xs text-env-muted">
         Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye el
         criterio de un profesional sanitario.
+        {/* TEMPORAL (FE-02): borrar junto con /dev/themes antes del freeze. */}
+        <NavLink to="/dev/themes" className="ml-2 underline hover:text-env-text">
+          Paletas (temporal)
+        </NavLink>
       </footer>
     </div>
   )

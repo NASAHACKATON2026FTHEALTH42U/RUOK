@@ -7,9 +7,9 @@ export function EnvironmentSelector() {
 
   return (
     <label className="flex items-center gap-2 text-sm">
-      <span className="text-slate-400">Entorno</span>
+      <span className="text-env-muted">Entorno</span>
       <select
-        className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-slate-100 focus:border-sky-400 focus:outline-none"
+        className="rounded-md border border-env-border bg-env-bg px-2 py-1 text-env-text focus:outline-2 focus:outline-offset-1 focus:outline-env-primary"
         value={envId ?? ''}
         onChange={(e) => {
           const env = PLACEHOLDER_ENVIRONMENTS.find((x) => x.id === e.target.value)
