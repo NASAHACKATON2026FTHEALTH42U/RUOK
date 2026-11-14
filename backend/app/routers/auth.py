@@ -2,17 +2,19 @@
 
 Ver docs/auth-and-roles.md:
 - `POST /auth/login` y `POST /auth/pin` devuelven un JWT local (12 h).
-- Credenciales incorrectas, cuenta inexistente o bloqueada → 401. Los 5 fallos
+- Credenciales incorrectas o cuenta inexistente → 401. Cuenta bloqueada → 429 con
+  `Retry-After` (el front lo muestra como "demasiados intentos"). Los 5 fallos
   seguidos y el bloqueo de 5 min están en `services/accounts.py` (BE-25).
 - `GET /auth/demo-users` solo existe con `DEMO_MODE=true` (si no, 404).
 """
 
+import math
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
-from app import models, stubs
+from app import clock, models, stubs
 from app.auth.security import create_token
 from app.db import get_session
 from app.routers.deps import ERRORS_AUTH, AuthDep, CurrentUser
@@ -32,7 +34,10 @@ router = APIRouter(tags=["auth"])
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
-_ERR_LOGIN = {401: {"model": ErrorResponse, "description": "Credenciales incorrectas"}}
+_ERR_LOGIN = {
+    401: {"model": ErrorResponse, "description": "Credenciales incorrectas"},
+    429: {"model": ErrorResponse, "description": "Cuenta bloqueada tras 5 fallos (Retry-After)"},
+}
 _BAD_CREDENTIALS = "Usuario o contraseña incorrectos"
 _ROLE_ORDER = ["member", "medic", "commander", "responder", "psych", "family", "admin"]
 
@@ -62,7 +67,12 @@ def _authenticate(session: Session, username: str, secret: str, *, pin: bool) ->
     except accounts.AccountLocked as exc:
         # TODO(BE-28): events.emit("auth.failed", reason="locked")
         until = exc.locked_until.isoformat(timespec="seconds")
-        raise HTTPException(401, f"Cuenta bloqueada por demasiados intentos hasta {until}") from exc
+        retry = max(1, math.ceil((exc.locked_until - clock.now()).total_seconds()))
+        raise HTTPException(
+            429,
+            f"Cuenta bloqueada por demasiados intentos hasta {until}",
+            headers={"Retry-After": str(retry)},
+        ) from exc
     if not ok:
         # TODO(BE-28): events.emit("auth.failed", reason="bad_credentials")
         raise HTTPException(401, "PIN incorrecto" if pin else _BAD_CREDENTIALS)

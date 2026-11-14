@@ -163,9 +163,10 @@ def test_pin_is_locked_after_five_failures(client):
         assert _pin(client, "okafor", "0000").status_code == 401
 
     resp = _pin(client, "okafor", "1234")  # PIN correcto, pero bloqueada
-    assert resp.status_code == 401
+    assert resp.status_code == 429  # el front lo muestra como "demasiados intentos"
     assert "bloqueada" in resp.json()["detail"]
-    assert _login(client, "okafor", "ruok-mars").status_code == 401  # también con contraseña
+    assert 0 < int(resp.headers["retry-after"]) <= accounts.LOCK_SECONDS
+    assert _login(client, "okafor", "ruok-mars").status_code == 429  # también con contraseña
 
     clock.advance(accounts.LOCK_SECONDS + 1)
     assert _pin(client, "okafor", "1234").status_code == 200
