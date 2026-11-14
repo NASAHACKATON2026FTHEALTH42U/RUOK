@@ -139,7 +139,7 @@ issues:
   priority: P0-blocker
   milestone: m0
   depends: [BE-01, FS-02]
-  docs: api-contract.md
+  docs: data-model.md
   tasks:
     - Crear los modelos Member (con env_id, share_behavioral_details, last_seen_at, last_activity), Measurement (con id UUID, taken_at, received_at y source), Task, TaskCompletion (UUID), Alert, AlertEvent, LinkMessage y Badge
     - Crear las tablas al arrancar
@@ -455,7 +455,7 @@ issues:
   priority: P0-blocker
   milestone: h2
   depends: [BE-02, BE-03]
-  docs: alerts-and-escalation.md
+  docs: data-model.md
   modules: [alerts, offline]
   tasks:
     - Crear `services/comm_link.py` con una cola LinkMessage persistida; `send()` calcula la ETA a partir de comm_delay_s y `deliver_due()` usa el reloj de la demo
@@ -616,7 +616,7 @@ issues:
   priority: P0-blocker
   milestone: h2
   depends: [FE-10, BE-06]
-  docs: offline-and-liveness.md
+  docs: data-model.md
   modules: [offline]
   tasks:
     - Crear `src/offline/outbox.ts`; todos los POST de creación pasan por el outbox (guardar, enviar, marcar como enviado)
