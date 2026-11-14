@@ -160,7 +160,10 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
   "id": "mars", "name": "Base marciana", "kind": "space",   // space | earth
   "gravity_g": 0.38, "comm_delay_s": 840, "radiation_level": "high",
   "escalation_ladder": ["self", "crew", "ground"],
-  "liveness": { "stale_after_s": 300, "lost_after_s": 900, "eva_stale_after_s": 30, "ruok_timeout_s": 120 },
+  "liveness": { "stale_after_s": 300, "lost_after_s": 900, "eva_stale_after_s": 30, "eva_lost_after_s": 120,
+                "sleep_factor": 3, "ruok_timeout_s": 120,
+                "morning_checkin_by": null,           // "HH:MM" (geriatría: "10:00"); sin check-in a esa hora → stale
+                "warning_escalate_after_s": 21600 },  // un warning que persiste este tiempo escala al siguiente nivel
   "vocabulary": { "member": "astronauta", "crew": "tripulación", "ground": "flight surgeon" },
   "theme": { "primary": "#c1440e", "background": "mars.jpg" },
   "threshold_overrides": { "bp_systolic": { "warning": [130, 140] } },
