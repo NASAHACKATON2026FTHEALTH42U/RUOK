@@ -11,7 +11,7 @@
       ],
       "warning": [
         101,
-        120
+        130
       ],
       "critical_low": 40,
       "critical_high": 130
@@ -45,10 +45,10 @@
       ],
       "warning": [
         130,
-        159
+        180
       ],
       "critical_low": 80,
-      "critical_high": 160
+      "critical_high": 180
     },
     "max_age_s": 172800,
     "higher_is_worse": true,
@@ -75,14 +75,14 @@
     "ranges": {
       "normal": [
         60,
-        84
+        79
       ],
       "warning": [
-        85,
-        99
+        80,
+        120
       ],
       "critical_low": 50,
-      "critical_high": 100
+      "critical_high": 120
     },
     "max_age_s": 172800,
     "higher_is_worse": true,
@@ -111,10 +111,11 @@
         100
       ],
       "warning": [
-        91,
+        90,
         94
       ],
-      "critical_low": 90
+      "critical_low": 90,
+      "critical_high": null
     },
     "max_age_s": 86400,
     "higher_is_worse": false,
@@ -143,10 +144,11 @@
         5
       ],
       "warning": [
-        2,
+        1.5,
         2.9
       ],
-      "critical_low": 1.5
+      "critical_low": 1.5,
+      "critical_high": null
     },
     "max_age_s": 129600,
     "higher_is_worse": false,
@@ -171,15 +173,15 @@
     "system_id": "immune",
     "ranges": {
       "normal": [
-        36,
-        37.4
+        36.0,
+        37.9
       ],
       "warning": [
-        37.5,
-        38.4
+        38.0,
+        39.5
       ],
-      "critical_low": 35,
-      "critical_high": 38.5
+      "critical_low": 35.0,
+      "critical_high": 39.5
     },
     "max_age_s": 86400,
     "higher_is_worse": true,
@@ -209,9 +211,9 @@
       ],
       "warning": [
         141,
-        180
+        250
       ],
-      "critical_low": 60,
+      "critical_low": 54,
       "critical_high": 250
     },
     "max_age_s": 86400,
@@ -241,10 +243,11 @@
         300
       ],
       "warning": [
-        60,
+        30,
         119
       ],
-      "critical_low": 30
+      "critical_low": 30,
+      "critical_high": null
     },
     "max_age_s": 86400,
     "higher_is_worse": false,
@@ -273,10 +276,11 @@
         10
       ],
       "warning": [
-        5,
+        4,
         6.9
       ],
-      "critical_low": 4
+      "critical_low": 4,
+      "critical_high": null
     },
     "max_age_s": 129600,
     "higher_is_worse": false,
@@ -306,9 +310,10 @@
       ],
       "warning": [
         2,
-        3.4
+        3.5
       ],
-      "critical_high": 3.5
+      "critical_high": 3.5,
+      "critical_low": null
     },
     "max_age_s": 604800,
     "higher_is_worse": true,
@@ -334,13 +339,14 @@
     "ranges": {
       "normal": [
         0,
-        250
+        299
       ],
       "warning": [
-        251,
-        500
+        300,
+        600
       ],
-      "critical_high": 600
+      "critical_high": 600,
+      "critical_low": null
     },
     "max_age_s": 604800,
     "higher_is_worse": true,
@@ -369,10 +375,11 @@
         4000
       ],
       "warning": [
-        801,
+        800,
         1499
       ],
-      "critical_low": 800
+      "critical_low": 800,
+      "critical_high": null
     },
     "max_age_s": 86400,
     "higher_is_worse": false,
@@ -431,9 +438,10 @@
       ],
       "warning": [
         3.1,
-        4.4
+        4.5
       ],
-      "critical_high": 4.5
+      "critical_high": 4.5,
+      "critical_low": null
     },
     "max_age_s": 129600,
     "higher_is_worse": true,
@@ -462,10 +470,11 @@
         5
       ],
       "warning": [
-        2,
+        1.5,
         2.9
       ],
-      "critical_low": 1.5
+      "critical_low": 1.5,
+      "critical_high": null
     },
     "max_age_s": 129600,
     "higher_is_worse": false,
@@ -495,9 +504,10 @@
       ],
       "warning": [
         3.1,
-        4.4
+        4.5
       ],
-      "critical_high": 4.5
+      "critical_high": 4.5,
+      "critical_low": null
     },
     "max_age_s": 129600,
     "higher_is_worse": true,
@@ -526,10 +536,11 @@
         5
       ],
       "warning": [
-        2,
+        1.5,
         2.9
       ],
-      "critical_low": 1.5
+      "critical_low": 1.5,
+      "critical_high": null
     },
     "max_age_s": 129600,
     "higher_is_worse": false,
@@ -558,10 +569,11 @@
         5
       ],
       "warning": [
-        2,
+        1.5,
         2.9
       ],
-      "critical_low": 1.5
+      "critical_low": 1.5,
+      "critical_high": null
     },
     "max_age_s": 129600,
     "higher_is_worse": false,
@@ -587,13 +599,14 @@
     "ranges": {
       "normal": [
         100,
-        350
+        354
       ],
       "warning": [
-        351,
-        499
+        355,
+        500
       ],
-      "critical_high": 500
+      "critical_high": 500,
+      "critical_low": null
     },
     "max_age_s": 259200,
     "higher_is_worse": true,
@@ -623,9 +636,10 @@
       ],
       "warning": [
         3,
-        5
+        6
       ],
-      "critical_high": 6
+      "critical_high": 6,
+      "critical_low": null
     },
     "max_age_s": 259200,
     "higher_is_worse": true,
