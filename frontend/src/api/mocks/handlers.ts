@@ -42,6 +42,7 @@ interface MockState {
   points: number
   links: Record<string, LinkStatus>
   privacy: Map<number, boolean>
+  homeMessages: Schema<'HomeMessage'>[]
 }
 
 const clone = <T>(v: T): T => structuredClone(v)
@@ -56,6 +57,7 @@ function initialState(): MockState {
     points: fx.game.points,
     links: clone(fx.linkByEnv),
     privacy: new Map(),
+    homeMessages: [],
   }
 }
 
@@ -346,6 +348,59 @@ export const handlers: Record<string, Handler> = {
   'GET /members/{member_id}/game': () => ({ ...fx.game, points: state.points }),
   'GET /environments/{env_id}/leaderboard': (req) =>
     fx.leaderboardByEnv[req.params.env_id] ?? notFound('Entorno desconocido'),
+
+  // Mensaje a casa (BE-22): en el mock el retardo es de 5 s y la respuesta llega 5 s después.
+  'GET /members/{member_id}/home-messages': (req) => {
+    const now = mockNow().getTime()
+    return state.homeMessages
+      .filter((m) => m.member_id === Number(req.params.member_id))
+      .filter((m) => m.direction === 'up' || new Date(m.eta).getTime() <= now)
+      .map((m) => {
+        const arrived = new Date(m.eta).getTime() <= now
+        return {
+          ...m,
+          state: arrived ? ('delivered' as const) : ('in_transit' as const),
+          delivered_at: arrived ? m.eta : null,
+        }
+      })
+  },
+  'POST /members/{member_id}/home-messages': (req) => {
+    const { id, text } = body<Schema<'HomeMessageIn'>>(req)
+    const memberId = Number(req.params.member_id)
+    const existing = state.homeMessages.find((m) => m.id === id)
+    if (existing) {
+      return existing.text === text
+        ? existing
+        : new MockResponse(409, { detail: 'Ese id ya se usó con otro mensaje (mock)' })
+    }
+    const sent = mockNow().getTime()
+    const up: Schema<'HomeMessage'> = {
+      id,
+      member_id: memberId,
+      direction: 'up',
+      text,
+      sender: null,
+      in_reply_to: null,
+      sent_at: new Date(sent).toISOString(),
+      eta: new Date(sent + 5000).toISOString(),
+      delivered_at: null,
+      state: 'in_transit',
+    }
+    const reply: Schema<'HomeMessage'> = {
+      id: crypto.getRandomValues(new Uint32Array(1))[0].toString(16).padStart(8, '0') + id.slice(8),
+      member_id: memberId,
+      direction: 'down',
+      text: 'Gracias por escribir. Te mandamos un abrazo enorme desde casa.',
+      sender: 'Casa',
+      in_reply_to: id,
+      sent_at: new Date(sent + 5000).toISOString(),
+      eta: new Date(sent + 10000).toISOString(),
+      delivered_at: null,
+      state: 'in_transit',
+    }
+    state.homeMessages.push(up, reply)
+    return up
+  },
 
   // Tiempo real, dispositivos y control
   'GET /events/stream': () => fx.events, // mockFetch lo serializa como text/event-stream

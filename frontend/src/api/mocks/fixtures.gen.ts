@@ -91,6 +91,10 @@ export const CONTRACT_OPERATIONS = [
   ],
   [
     "GET",
+    "/members/{member_id}/home-messages"
+  ],
+  [
+    "GET",
     "/members/{member_id}/measurements"
   ],
   [
@@ -168,6 +172,10 @@ export const CONTRACT_OPERATIONS = [
   [
     "POST",
     "/members/{member_id}/heartbeat"
+  ],
+  [
+    "POST",
+    "/members/{member_id}/home-messages"
   ],
   [
     "POST",

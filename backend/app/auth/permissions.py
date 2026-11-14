@@ -58,6 +58,9 @@ PERMISSIONS: dict[str, frozenset[str]] = {
     # Rutina y gamificación
     "game:read": frozenset({"member", "medic", "commander", "admin"}),
     "game:write": frozenset({"member", "admin"}),
+    # Mensaje a casa: privado del member
+    "home:read": frozenset({"member", "admin"}),
+    "home:write": frozenset({"member", "admin"}),
     # Solo admin: centro de control, eventos, dispositivos, demo y usuarios
     "admin": ADMIN,
 }

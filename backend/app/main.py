@@ -10,7 +10,7 @@ from sqlmodel import Session
 
 from app import clock
 from app.db import engine, init_db
-from app.routers import alerts, auth, catalog, game, health, members, realtime
+from app.routers import alerts, auth, catalog, game, health, home, members, realtime
 from app.routers.deps import device_id_header
 from app.seed import ensure_seeded
 from app.services import catalog as catalog_service
@@ -77,6 +77,7 @@ api.include_router(catalog.router)
 api.include_router(members.router)
 api.include_router(alerts.router)
 api.include_router(game.router)
+api.include_router(home.router)
 api.include_router(realtime.router)
 api.include_router(realtime.public)
 app.include_router(api)

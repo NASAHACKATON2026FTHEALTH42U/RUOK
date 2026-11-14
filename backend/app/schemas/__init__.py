@@ -65,6 +65,7 @@ from app.schemas.config import (
     TaskType,
 )
 from app.schemas.game import Badge, GameState, Leaderboard, LeaderboardEntry, Task, TaskCompleteIn
+from app.schemas.home import HomeMessage, HomeMessageIn
 from app.schemas.link import LinkMessage, LinkStatus
 from app.schemas.members import (
     Assessment,
@@ -126,6 +127,8 @@ __all__ = [
     "DemoClock",
     "DemoLinkIn",
     "DemoUser",
+    "HomeMessage",
+    "HomeMessageIn",
     "PinReset",
     "Device",
     "DeviceKind",

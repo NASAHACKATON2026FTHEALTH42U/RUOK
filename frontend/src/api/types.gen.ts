@@ -606,6 +606,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/members/{member_id}/home-messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Hilo de mensajes a casa
+         * @description Lo enviado y las respuestas ya entregadas a bordo, por orden de envío. Una respuesta en camino no aparece hasta que llega.
+         */
+        get: operations["list_home_messages_api_v1_members__member_id__home_messages_get"];
+        put?: never;
+        /**
+         * Enviar un mensaje a casa (idempotente por UUID)
+         * @description Sale por el enlace con la Tierra: con el retardo del entorno, o en cola si hay LOS. Cuando llega, casa responde (simulado). Reenviar el mismo `id` devuelve el mensaje original; el mismo `id` con otro texto → 409.
+         */
+        post: operations["send_home_message_api_v1_members__member_id__home_messages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/events": {
         parameters: {
             query?: never;
@@ -1430,6 +1454,55 @@ export interface components {
              * @description true → mostrar el modal 'R U OK?' a pantalla completa
              */
             checkin_required: boolean;
+        };
+        /** HomeMessage */
+        HomeMessage: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Member Id */
+            member_id: number;
+            /** @description up = del member a casa; down = respuesta */
+            direction: components["schemas"]["LinkDirection"];
+            /** Text */
+            text: string;
+            /**
+             * Sender
+             * @description Quién responde (solo `down`)
+             */
+            sender: string | null;
+            /** In Reply To */
+            in_reply_to: string | null;
+            /**
+             * Sent At
+             * Format: date-time
+             */
+            sent_at: string;
+            /**
+             * Eta
+             * Format: date-time
+             */
+            eta: string;
+            /** Delivered At */
+            delivered_at: string | null;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "queued" | "in_transit" | "delivered";
+        };
+        /** HomeMessageIn */
+        HomeMessageIn: {
+            /**
+             * Id
+             * Format: uuid
+             * @description UUID v4 generado en el cliente (idempotencia)
+             */
+            id: string;
+            /** Text */
+            text: string;
         };
         /** Indicator */
         Indicator: {
@@ -4149,6 +4222,141 @@ export interface operations {
             };
             /** @description Recurso inexistente */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_home_messages_api_v1_members__member_id__home_messages_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
+                "x-device-id"?: string | null;
+            };
+            path: {
+                member_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HomeMessage"][];
+                };
+            };
+            /** @description Sin sesión válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rol sin permiso o dato ajeno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    send_home_message_api_v1_members__member_id__home_messages_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
+                "x-device-id"?: string | null;
+            };
+            path: {
+                member_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HomeMessageIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HomeMessage"];
+                };
+            };
+            /** @description Sin sesión válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rol sin permiso o dato ajeno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Mismo id con contenido distinto */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

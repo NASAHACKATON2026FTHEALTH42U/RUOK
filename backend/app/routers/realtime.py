@@ -274,13 +274,16 @@ def get_link(env: Slug, session: SessionDep) -> LinkStatus:
     dependencies=[Depends(_link_scope)],
 )
 def list_link_messages(
-    env: Slug, session: SessionDep, direction: LinkDirection | None = None
+    env: Slug, session: SessionDep, user: CurrentUser, direction: LinkDirection | None = None
 ) -> list[LinkMessage]:
     try:
         rows = comm_link.list_messages(session, env, direction)
     except comm_link.UnknownEnvironment as exc:
         raise HTTPException(404, str(exc)) from exc
-    return [comm_link.to_schema(r) for r in rows]
+    # Los mensajes a casa son privados del member: solo los ve el admin (BE-22).
+    return [
+        comm_link.to_schema(r) for r in rows if user.role == "admin" or r.kind != "home_message"
+    ]
 
 
 # ── Demo (admin) ────────────────────────────────────────────
