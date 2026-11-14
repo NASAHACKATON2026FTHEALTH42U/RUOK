@@ -26,7 +26,7 @@ from sqlmodel import Session, col, delete, select
 
 from app import clock, models
 from app.schemas import Indicator
-from app.services import app_state, catalog, environments
+from app.services import accounts, app_state, catalog, environments
 
 SEED = 2026
 DAYS = 30
@@ -135,9 +135,9 @@ def _series(member_id: int, indicator: Indicator, anchor: datetime) -> list[mode
 
 
 def seed(session: Session) -> tuple[int, int]:
-    """Inserta los members y sus mediciones. Devuelve (members, mediciones)."""
+    """Inserta los members, sus cuentas (BE-25) y sus mediciones. Devuelve (members, mediciones)."""
     anchor = _anchor()
-    session.add_all(
+    members = [
         models.Member(
             id=m.id,
             env_id=m.env_id,
@@ -148,10 +148,12 @@ def seed(session: Session) -> tuple[int, int]:
             created_at=anchor - timedelta(days=DAYS),
         )
         for m in MEMBERS
-    )
+    ]
+    session.add_all(members)
     # Los modelos no declaran relationship(): sin este flush, SQLAlchemy podría
-    # insertar las mediciones antes que los members y fallaría la FK.
+    # insertar las mediciones (y las cuentas) antes que los members y fallaría la FK.
     session.flush()
+    accounts.seed_users(session, members)  # BE-25: solo con DEMO_MODE=true hay demo
 
     total = 0
     for m in MEMBERS:
