@@ -21,7 +21,7 @@ export function ServerStatus() {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs ${
         strong ? 'border-env-text font-semibold text-env-text' : 'border-env-border text-env-muted'
       }`}
       title={status.state === 'offline' ? status.error : undefined}

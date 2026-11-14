@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { ROUTE_PERMISSIONS } from '../../auth/permissions'
@@ -15,6 +16,7 @@ import { LinkStatusChip } from './LinkStatusChip'
 import { MockBanner } from './MockBanner'
 import { PendingSyncChip } from './PendingSyncChip'
 import { ServerStatus } from './ServerStatus'
+import { SIDEBAR_SLOT_ID } from './SidebarPortal'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Entornos' },
@@ -43,6 +45,7 @@ export function Layout() {
   const { pathname } = useLocation()
   const wide = pathname.startsWith('/control')
   const [open, setOpen] = useState(false)
+  const reducedMotion = useReducedMotion()
 
   // Solo las vistas que permite el rol (FE-28, src/auth/permissions.ts).
   const navItems = [
@@ -101,7 +104,7 @@ export function Layout() {
         <aside
           id="sidebar"
           aria-label="Menú principal"
-          className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col gap-3 overflow-y-auto border-r border-env-border bg-env-surface px-4 py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden transition-transform duration-200 md:sticky md:top-0 md:z-auto md:h-screen md:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col gap-3 overflow-y-auto border-r border-env-border bg-env-surface px-4 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden transition-transform duration-200 md:sticky md:top-0 md:z-auto md:h-screen md:translate-x-0 ${
             open ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
@@ -118,6 +121,9 @@ export function Layout() {
           </div>
 
           <SessionMenu />
+
+          {/* Resumen de la página actual (p. ej. estado general del panel), vía SidebarPortal */}
+          <div id={SIDEBAR_SLOT_ID} className="empty:hidden" />
 
           <nav aria-label="Secciones">
             <ul className="flex flex-col gap-0.5 text-sm">
@@ -152,21 +158,38 @@ export function Layout() {
             <LivenessGuard />
             {can('action:change-environment') && <EnvironmentSelector />}
           </section>
-        </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          {/* El centro de control usa todo el ancho (proyector o pantalla grande). */}
-          <main
-            className={`mx-auto w-full flex-1 px-4 py-6 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
-          >
-            <Outlet />
-          </main>
-
-          <footer className="border-t border-env-border px-4 pt-3 pb-20 text-center text-xs text-env-muted">
+          {/* Aviso siempre visible en escritorio (en móvil va en el pie de página). */}
+          <p className="hidden text-[11px] leading-snug text-env-muted md:block">
             Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
             el criterio de un profesional sanitario.
+          </p>
+        </aside>
+
+        <div className="bg-grid flex min-w-0 flex-1 flex-col overflow-x-clip">
+          {/* El centro de control usa todo el ancho (proyector o pantalla grande). */}
+          <main
+            className={`mx-auto w-full flex-1 px-4 py-4 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
+          >
+            {/* Fundido corto al cambiar de página. Solo opacidad: un transform crearía un bloque
+                contenedor y descolocaría las modales `fixed` de las páginas. */}
+            <motion.div
+              key={pathname}
+              initial={reducedMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+            >
+              <Outlet />
+            </motion.div>
+          </main>
+
+          <footer className="border-t border-env-border px-4 pt-3 pb-20 text-center text-xs text-env-muted md:pb-6">
+            <span className="md:hidden">
+              Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
+              el criterio de un profesional sanitario.
+            </span>
             {device.mode === 'tab' && (
-              <span className="mt-1 block" title={device.id}>
+              <span className="mt-1 block md:mt-0" title={device.id}>
                 Dispositivo: {device.name ?? `pestaña ${device.id.slice(0, 8)}`}
               </span>
             )}

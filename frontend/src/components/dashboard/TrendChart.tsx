@@ -86,7 +86,13 @@ export function TrendPlot({ points, unit, range, days, height = 144 }: TrendPlot
   return (
     <div style={{ height }} aria-hidden="true">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={points} margin={{ top: 6, right: 8, bottom: 0, left: -18 }}>
+        {/* Sin capa de accesibilidad de Recharts: la gráfica es aria-hidden (la tabla da los
+            datos) y un SVG enfocable dentro de aria-hidden confunde al lector de pantalla. */}
+        <LineChart
+          data={points}
+          margin={{ top: 6, right: 8, bottom: 0, left: -18 }}
+          accessibilityLayer={false}
+        >
           {bands(range).map((b) => (
             <ReferenceArea
               key={b.kind}

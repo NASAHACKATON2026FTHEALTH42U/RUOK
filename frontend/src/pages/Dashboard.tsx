@@ -11,6 +11,8 @@ import { MissionPhaseBar } from '../components/behavioral/MissionPhaseBar'
 import { buildRegions, formatSinceLabel, isFigureStale } from '../components/body/regions'
 import { IndicatorCard } from '../components/dashboard/IndicatorCard'
 import { SystemPanel } from '../components/dashboard/SystemPanel'
+import { BodyLegend } from '../components/body/BodyLegend'
+import { SidebarPortal } from '../components/ui/SidebarPortal'
 import { bySeverity, livenessState, statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { capitalize, useVocab } from '../environments/useVocab'
@@ -43,6 +45,8 @@ export default function Dashboard() {
   const indicators = useIndicators()
   const envs = useEnvironments()
   const [selected, setSelected] = useState<string | null>(null)
+  // Sistema señalado en la leyenda (columna derecha) o en la figura: se resalta en ambas.
+  const [hovered, setHovered] = useState<string | null>(null)
   const close = useCallback(() => setSelected(null), [])
   const env = envs.state === 'ready' ? envs.data.find((e) => e.id === envId) : undefined
   // Semáforo provisional (FE-12): mediciones aún sin sincronizar, evaluadas en el dispositivo.
@@ -128,29 +132,44 @@ export default function Dashboard() {
     .sort((x, y) => bySeverity(x.ind.status, y.ind.status))
   const selectedSystem = selected ? systemById.get(selected) : undefined
 
+  const summary = (sidebar: boolean) => (
+    <div
+      className={
+        sidebar
+          ? 'flex flex-col items-start gap-1.5 rounded-lg border border-env-border p-2.5 text-xs'
+          : 'flex flex-wrap items-center gap-2 md:hidden'
+      }
+    >
+      {/* Si el "sin datos" se debe a un liveness stale, basta el badge de liveness (FE-34). */}
+      {!(live === 'stale' && a.overall_status === 'unknown') && (
+        <StatusBadge
+          status={a.overall_status}
+          label={`Estado general: ${statusStyle(a.overall_status).label}`}
+          size={sidebar ? 'sm' : 'md'}
+        />
+      )}
+      {live && <StatusBadge status={live} label={formatSinceLabel(a.last_seen_at, serverNow())} />}
+      <span
+        className={`${sidebar ? 'text-xs' : 'text-sm'} font-mono text-env-muted`}
+        role={sidebar ? 'status' : undefined}
+      >
+        {assessment.refreshFailed
+          ? '⚠ No se pudo actualizar: los datos pueden estar desfasados'
+          : assessment.updatedAt
+            ? `Actualizado ${formatAgo(assessment.updatedAt.toISOString(), serverNow())}`
+            : null}
+      </span>
+    </div>
+  )
+
   return (
-    <section className="space-y-6">
+    <section className="space-y-4 lg:pt-[clamp(2.5rem,calc(100vh-788px),7rem)]">
       <header className="space-y-3">
-        {title}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Si el "sin datos" se debe a un liveness stale, basta el badge de liveness (FE-34). */}
-          {!(live === 'stale' && a.overall_status === 'unknown') && (
-            <StatusBadge
-              status={a.overall_status}
-              label={`Estado general: ${statusStyle(a.overall_status).label}`}
-            />
-          )}
-          {live && (
-            <StatusBadge status={live} label={formatSinceLabel(a.last_seen_at, serverNow())} />
-          )}
-          <span className="text-sm text-env-muted" role="status">
-            {assessment.refreshFailed
-              ? '⚠ No se pudo actualizar: los datos pueden estar desfasados'
-              : assessment.updatedAt
-                ? `Actualizado ${formatAgo(assessment.updatedAt.toISOString(), serverNow())}`
-                : null}
-          </span>
-        </div>
+        {/* Título solo para lectores de pantalla; el estado general va en la barra lateral. */}
+        <div className="sr-only">{title}</div>
+        {/* Estado general: en la barra lateral (escritorio) y, en móvil, aquí arriba. */}
+        <SidebarPortal>{summary(true)}</SidebarPortal>
+        {summary(false)}
         {provisionalIds && provisionalIds.size > 0 && (
           <p className="rounded-lg border border-dashed border-env-border px-3 py-2 text-sm text-env-muted">
             <span aria-hidden>⇡ </span>
@@ -164,27 +183,44 @@ export default function Dashboard() {
         )}
       </header>
 
-      {env?.kind === 'space' && env.mission && (
-        <MissionPhaseBar mission={env.mission} now={serverNow()} canCheckIn={can('view:checkin')} />
-      )}
+      {/* Tres columnas en escritorio (≥ 1280 px): sistemas | cuerpo | indicadores, las laterales
+          centradas en vertical, y debajo las fases de la misión a todo el ancho. Más estrecho:
+          cuerpo e indicadores lado a lado y los sistemas debajo; en móvil, todo en columna. */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(240px,320px)_1fr] xl:grid-cols-[230px_minmax(240px,320px)_1fr]">
+        <div className="order-3 lg:col-span-2 xl:order-1 xl:col-span-1 xl:self-center">
+          <h2 className="mb-3 text-lg font-semibold">Sistemas</h2>
+          <BodyLegend
+            regions={regions}
+            stale={stale}
+            selectedSystemId={selected}
+            onSelectSystem={setSelected}
+            onHoverSystem={setHovered}
+            className="justify-start"
+            compact
+            vertical
+          />
+        </div>
 
-      <div className="grid gap-8 md:grid-cols-[minmax(240px,320px)_1fr]">
-        <div className="md:sticky md:top-4 md:self-start">
+        <div className="order-1 lg:sticky lg:top-4 lg:self-start xl:order-2">
           <BodyFigure
             regions={regions}
             liveness={a.liveness}
             staleLabel={formatSinceLabel(a.last_seen_at, serverNow())}
             selectedSystemId={selected}
             onSelectSystem={setSelected}
+            hoveredSystemId={hovered}
+            onHoverSystem={setHovered}
+            showLegend={false}
           />
         </div>
 
-        <div>
+        <div className="order-2 xl:order-3 xl:self-center">
           <h2 className="mb-3 text-lg font-semibold">Indicadores</h2>
           {cards.length === 0 ? (
             <p className="text-env-muted">Todavía no hay mediciones.</p>
           ) : (
-            <ul className="grid gap-3 sm:grid-cols-2">
+            // Lista fija: símbolo de estado, nombre y valor (el resto, en el detalle del sistema).
+            <ul className="flex flex-col gap-2">
               {cards.map(({ systemId, ind }) => (
                 <li key={`${systemId}-${ind.indicator_id}`}>
                   <IndicatorCard
@@ -194,12 +230,24 @@ export default function Dashboard() {
                     stale={stale}
                     provisional={provisionalIds?.has(ind.indicator_id)}
                     onClick={() => setSelected(systemId)}
+                    compact
                   />
                 </li>
               ))}
             </ul>
           )}
         </div>
+
+        {/* Fases de la misión debajo del cuerpo, a todo el ancho de las tres columnas. */}
+        {env?.kind === 'space' && env.mission && (
+          <div className="order-4 lg:col-span-2 lg:mt-8 xl:col-span-3">
+            <MissionPhaseBar
+              mission={env.mission}
+              now={serverNow()}
+              canCheckIn={can('view:checkin')}
+            />
+          </div>
+        )}
       </div>
 
       <AnimatePresence>
