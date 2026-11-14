@@ -321,7 +321,15 @@ function MeasureForm({
       )}
 
       <fieldset disabled={phase.kind === 'sending'} className="space-y-4">
-        <div className={`grid gap-4 ${fields.length > 1 ? 'md:grid-cols-2' : ''}`}>
+        <div
+          // También en móvil (< 768 px) van de dos en dos, con el contenido más compacto, para
+          // no tener que bajar con scroll.
+          className={`grid gap-4 ${
+            fields.length > 1
+              ? 'grid-cols-2 max-md:gap-2 [&_fieldset]:min-w-0 max-md:[&_fieldset]:p-2.5 max-md:[&_input]:min-w-0 max-md:[&_input]:px-2 max-md:[&_legend]:text-sm max-md:[&_ol]:text-xs'
+              : ''
+          }`}
+        >
           {fields.map((f) => (
             <IndicatorField
               key={f.id}
