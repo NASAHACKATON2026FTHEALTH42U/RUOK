@@ -19,6 +19,7 @@ import { getDevice } from './device'
  */
 
 export type MeasurementIn = Schema<'MeasurementIn'>
+export type AlertIn = Schema<'AlertIn'>
 
 // ── Estado visible (contador de la cabecera) ─────────────────
 
@@ -57,6 +58,16 @@ export type MeasurementBatchResult = NonNullable<
   Awaited<ReturnType<typeof postMeasurements>>['data']
 >
 
+/** Alerta creada (SOS / Pedir ayuda): estado, destino, modo de entrega y ETA. */
+export type AlertResult = NonNullable<Awaited<ReturnType<typeof postAlert>>['data']>
+
+function postAlert(memberId: number, alert: AlertIn) {
+  return api.POST('/api/v1/members/{member_id}/alerts', {
+    params: { path: { member_id: memberId } },
+    body: alert,
+  })
+}
+
 function postMeasurements(memberId: number, measurements: MeasurementIn[]) {
   return api.POST('/api/v1/members/{member_id}/measurements', {
     params: { path: { member_id: memberId } },
@@ -79,6 +90,14 @@ async function send(
           error: r.error ? JSON.stringify(r.error) : undefined,
         }
       }
+      case 'alert': {
+        const r = await postAlert(entry.member_id, entry.body as AlertIn)
+        return {
+          status: r.response.status,
+          data: r.data,
+          error: r.error ? JSON.stringify(r.error) : undefined,
+        }
+      }
       default:
         return { status: 400, error: `Tipo de entrada sin envío implementado: ${entry.kind}` }
     }
@@ -91,7 +110,7 @@ async function send(
 /** Efectos locales al confirmarse una entrada (mediciones sincronizadas, última evaluación). */
 async function onDone(entry: OutboxEntry, data: unknown) {
   const db = await getDb()
-  const tx = db.transaction(['outbox', 'measurements', 'assessments'], 'readwrite')
+  const tx = db.transaction(['outbox', 'measurements', 'assessments', 'alerts'], 'readwrite')
   if (entry.kind === 'measurement_batch') {
     for (const m of (entry.body as { measurements: MeasurementIn[] }).measurements) {
       const local = await tx.objectStore('measurements').get(m.id)
@@ -106,6 +125,14 @@ async function onDone(entry: OutboxEntry, data: unknown) {
         provisional: false,
       })
     }
+  }
+  if (entry.kind === 'alert' && data) {
+    await tx.objectStore('alerts').put({
+      id: entry.id,
+      member_id: entry.member_id,
+      alert: data,
+      pending: false,
+    })
   }
   await tx.objectStore('outbox').delete(entry.id)
   await tx.done
@@ -184,54 +211,96 @@ export function resumeSync(): Promise<void> {
 
 // ── Escritura ───────────────────────────────────────────────
 
-export type SubmitResult = { status: 'sent'; result: MeasurementBatchResult } | { status: 'queued' }
+export type SubmitResult<T> = { status: 'sent'; result: T } | { status: 'queued' }
+
+type RuokDb = Awaited<ReturnType<typeof getDb>>
 
 /**
- * Registra un lote de mediciones: lo guarda en el dispositivo, intenta enviarlo y devuelve si
- * ya llegó al servidor (`sent`) o queda pendiente (`queued`, se enviará solo). Nunca se pierde.
+ * Guarda una entrada en el outbox junto con sus escrituras locales (`local`, en la misma
+ * transacción), intenta enviarla y dice si ya llegó (`sent`) o queda pendiente (`queued`).
  */
-export async function sendMeasurements(
+async function submit<T>(
+  kind: OutboxEntry['kind'],
+  id: string,
   memberId: number,
-  measurements: MeasurementIn[],
-): Promise<SubmitResult> {
+  path: string,
+  body: unknown,
+  local: (db: RuokDb) => Promise<void>,
+): Promise<SubmitResult<T>> {
   const db = await getDb()
   const now = serverNow().toISOString()
-  const entry: OutboxEntry = {
-    id: newId(),
-    kind: 'measurement_batch',
+  await local(db)
+  await db.put('outbox', {
+    id,
+    kind,
     method: 'POST',
-    path: `/members/${memberId}/measurements`,
-    body: { measurements },
+    path,
+    body,
     member_id: memberId,
     created_at: now,
     attempts: 0,
     next_retry_at: now,
     status: 'pending',
     last_error: null,
-  }
-  const tx = db.transaction(['outbox', 'measurements'], 'readwrite')
-  for (const m of measurements) {
-    await tx.objectStore('measurements').put({
-      id: m.id,
-      member_id: memberId,
-      indicator_id: m.indicator_id,
-      value: m.value,
-      taken_at: m.taken_at,
-      source: m.source ?? 'manual',
-      synced: false,
-    })
-  }
-  await tx.objectStore('outbox').put(entry)
-  await tx.done
+  })
   await refreshCounts()
 
   await syncNow()
-  if (results.has(entry.id)) {
-    const result = results.get(entry.id) as MeasurementBatchResult
-    results.delete(entry.id)
+  if (results.has(id)) {
+    const result = results.get(id) as T
+    results.delete(id)
     return { status: 'sent', result }
   }
   return { status: 'queued' }
+}
+
+/**
+ * Registra un lote de mediciones: se guarda en el dispositivo (también en `measurements` con
+ * `synced=false`), se intenta enviar y, si no hay servidor, se envía solo después.
+ */
+export function sendMeasurements(
+  memberId: number,
+  measurements: MeasurementIn[],
+): Promise<SubmitResult<MeasurementBatchResult>> {
+  return submit<MeasurementBatchResult>(
+    'measurement_batch',
+    newId(),
+    memberId,
+    `/members/${memberId}/measurements`,
+    { measurements },
+    async (db) => {
+      const tx = db.transaction('measurements', 'readwrite')
+      for (const m of measurements) {
+        await tx.store.put({
+          id: m.id,
+          member_id: memberId,
+          indicator_id: m.indicator_id,
+          value: m.value,
+          taken_at: m.taken_at,
+          source: m.source ?? 'manual',
+          synced: false,
+        })
+      }
+      await tx.done
+    },
+  )
+}
+
+/**
+ * Pide ayuda (SOS): la alerta se guarda en el dispositivo (`alerts` con `pending=true`) con el
+ * mismo UUID que en el servidor, se intenta enviar y, sin conexión, queda en el outbox.
+ */
+export function sendAlert(memberId: number, alert: AlertIn): Promise<SubmitResult<AlertResult>> {
+  return submit<AlertResult>(
+    'alert',
+    alert.id,
+    memberId,
+    `/members/${memberId}/alerts`,
+    alert,
+    async (db) => {
+      await db.put('alerts', { id: alert.id, member_id: memberId, alert, pending: true })
+    },
+  )
 }
 
 // ── Arranque ────────────────────────────────────────────────

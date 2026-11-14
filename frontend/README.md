@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41); botón SOS / Pedir ayuda en **FE-13** (#43).
 
 ## Comandos
 
@@ -123,10 +123,12 @@ frontend/
     │   ├── useIndicators.ts   hook de GET /indicators (catálogo, una petición compartida)
     │   ├── useLoad.ts         carga genérica (loading / ready / error + retry, refresco en segundo plano)
     │   ├── useLink.ts         hook de GET /link?env= (estado del enlace)
+    │   ├── useInterventions.ts hook de GET /interventions (caché offline)
     │   ├── useMeasurements.ts hook de GET /members/{id}/measurements (serie de N días)
     │   ├── mocks/             API simulada: mode.ts, handlers.ts, mockFetch.ts, events.ts,
     │   │                      useMockStatus.ts, fixtures.gen.ts (GENERADO por npm run gen:mocks)
     │   └── *.test.ts          tests (Vitest)
+    ├── components/alerts/     SosButton, SosDialog + sos.ts (categorías, destinos, protocolo; + test)
     ├── components/body/       BodyFigure (SVG) + regions.ts (buildRegions, formatSinceLabel; + test)
     ├── components/dashboard/  SystemPanel, IndicatorCard, TrendChart, LinkChip + format.ts y trend.ts (+ tests)
     ├── components/measure/    IndicatorField + measureForm.ts (parseValue, emptyValue; + test)
@@ -143,7 +145,7 @@ frontend/
     └── pages/                 una página vacía por ruta
 ```
 
-Carpetas que aún no existen y que crean sus issues: `components/{alerts,behavioral,game}/`. `offline/` ya existe con `outbox.ts`; FE-11 y FE-30 añaden IndexedDB y la sincronización.
+Carpetas que aún no existen y que crean sus issues: `components/{behavioral,game}/`. `offline/` ya existe con `outbox.ts`; FE-11 y FE-30 añaden IndexedDB y la sincronización.
 
 ## Rutas
 
@@ -396,6 +398,24 @@ Cada dispositivo (o pestaña, en los ensayos) tiene su propia identidad, su base
 - Un 401 o un cierre de sesión **nunca** borran el outbox.
 
 **Probado** (criterio de aceptación): con el backend parado se registran 2 mediciones (temperatura y frecuencia cardiaca) → quedan en el outbox, sobreviven a una recarga y el panel se ve desde la caché → al arrancar el backend se sincronizan en 7 s; cada medición llega una sola vez (sin duplicados).
+
+## Pedir ayuda / SOS (FE-13)
+
+Botón rojo **"✚ Pedir ayuda"** fijo abajo a la derecha en todas las páginas (`SosButton` en `Layout`). Abre `SosDialog` (`role="dialog"`, Esc o clic fuera para cerrar):
+
+- **¿Qué pasa?** `symptom` (síntoma), `physical` (malestar físico), `psychological` (**"Necesito hablar"**, canal confidencial: lo dice el diálogo) o `emergency`.
+- **¿Cuánto urge?** `warning` (puede esperar), `critical` (urgente), `emergency`. Elegir "Emergencia" pone la severidad `emergency`.
+- **¿A quién avisar?** La escalera del entorno sin `self`, por defecto el siguiente nivel y **se pueden saltar niveles**. Las etiquetas salen del vocabulario (`roleLabel()`: `nurse`/`caregiver` → `medic`, `doctor` → `ground`, `family` → "familia").
+- **Mensaje** opcional (si no hay, se envía la categoría).
+
+Se envía **por el outbox** (`sendAlert()`, mismo UUID en el dispositivo y en el servidor; la alerta se guarda en el store `alerts` con `pending=true`):
+
+- **Con conexión:** "✓ Enviado a {destino}". Si el entorno tiene retardo: "le llegará en unos 14 min (hacia las HH:MM, hora del servidor)".
+- **Sin conexión:** "**No enviado. Avisa a {tripulación} de viva voz**", la petición queda guardada y se envía sola al volver la conexión. Debajo, **"Mientras tanto"**, el protocolo que hay en el dispositivo:
+  - los mensajes de escalado (`escalation.message`, primero los `autonomous`) de la **última evaluación guardada**; "Necesito hablar" solo muestra los del sistema neuro-conductual;
+  - las **intervenciones offline** (`offline: true`) del catálogo en caché; para "Necesito hablar", las del sistema neuro-conductual (p. ej. respiración en caja).
+- No hay textos clínicos en el código: todo el protocolo viene de la evaluación o del catálogo. **Falta un endpoint de protocolos** (`protocol_id` existe en la evaluación, pero no hay `GET /protocols`); cuando exista, se cachea con `withCatalogCache('protocols')`.
+- Sin member elegido, el diálogo pide elegirlo y recuerda avisar de viva voz.
 
 ### Pendiente
 
