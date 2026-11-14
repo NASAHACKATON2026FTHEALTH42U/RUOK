@@ -1,10 +1,12 @@
-import { useMemo, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Fragment, useMemo, useState } from 'react'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { serverNow } from '../api/client'
 import { newId } from '../api/newId'
 import { useEnvironments } from '../api/useEnvironments'
 import { useIndicators, type Indicator } from '../api/useIndicators'
 import { useSystems } from '../api/useSystems'
+import { CHECKIN_INDICATORS } from '../components/behavioral/checkin'
+import { PVT_INDICATORS } from '../components/behavioral/pvt'
 import { IndicatorField } from '../components/measure/IndicatorField'
 import { emptyValue, parseValue, type RawValue } from '../components/measure/measureForm'
 import { statusStyle } from '../components/ui/status'
@@ -12,7 +14,12 @@ import { StatusBadge } from '../components/ui/StatusBadge'
 import { useVocab } from '../environments/useVocab'
 import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox'
 import { useEnvironmentStore } from '../store/environment'
-import { useActiveMemberId } from '../auth/useAuth'
+import { useActiveMemberId, useAuth } from '../auth/useAuth'
+
+/** Sistema cuyas escalas (ánimo, estrés…) se registran con el check-in diario, no con este formulario. */
+const CHECKIN_SYSTEM = 'neuro_behavioral'
+/** Indicadores que tienen su propio test (check-in diario y PVT): no se piden en «Medir». */
+const OWN_TEST: readonly string[] = [...CHECKIN_INDICATORS, ...PVT_INDICATORS]
 
 type Phase =
   | { kind: 'editing' }
@@ -28,11 +35,17 @@ type Phase =
  * Se envía todo en UN lote (la tensión sistólica + diastólica van juntas), con un UUID por
  * medición. Pasa por el outbox (FE-11): se guarda primero en el dispositivo y, si no hay
  * conexión, se envía solo cuando vuelva, sin duplicados.
+ *
+ * El sistema neuro-conductual no se mide aquí: quien puede hacer el check-in diario va a
+ * `/checkin` (desde la tarjeta y desde `?system=neuro_behavioral`). Sus indicadores sin test
+ * propio (horas de sueño) tienen su tarjeta aparte.
  */
 export default function Measure() {
   const vocab = useVocab()
   // Un member, siempre los suyos; el resto de roles, el member elegido (FE-28).
   const memberId = useActiveMemberId()
+  const { can } = useAuth()
+  const toCheckin = can('view:checkin')
   const envId = useEnvironmentStore((s) => s.envId)
   const [params] = useSearchParams()
   const navigate = useNavigate()
@@ -81,6 +94,11 @@ export default function Measure() {
     )
   }
 
+  // Neuro-conductual → check-in diario (solo quien puede hacerlo; el resto ve el formulario).
+  if (toCheckin && systemParam === CHECKIN_SYSTEM && !indicatorParam) {
+    return <Navigate to="/checkin" replace />
+  }
+
   // Paso 1: elegir qué medir.
   if (fields.length === 0) {
     const sys = systems.state === 'ready' ? systems.data : []
@@ -92,19 +110,48 @@ export default function Measure() {
         {title}
         <p className="text-env-muted">¿Qué quieres medir?</p>
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {withIndicators.map(({ s, inds }) => (
-            <li key={s.id}>
-              <Link
-                to={`/measure?system=${encodeURIComponent(s.id)}`}
-                className="block h-full rounded-xl border border-env-border bg-env-surface p-4 hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary"
-              >
-                <span className="block font-semibold">{s.name}</span>
-                <span className="mt-1 block text-sm text-env-muted">
-                  {inds.map((i) => i.name).join(' · ')}
-                </span>
-              </Link>
-            </li>
-          ))}
+          {withIndicators.map(({ s, inds }) => {
+            const card =
+              'block h-full rounded-xl border border-env-border bg-env-surface p-4 hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary'
+            if (toCheckin && s.id === CHECKIN_SYSTEM) {
+              // Check-in diario en lugar del formulario, y una tarjeta por indicador sin test propio.
+              const rest = inds.filter((i) => !OWN_TEST.includes(i.id))
+              return (
+                <Fragment key={s.id}>
+                  <li>
+                    <Link to="/checkin" className={card}>
+                      <span className="block font-semibold">{s.name}</span>
+                      <span className="mt-1 block text-sm text-env-muted">
+                        Check-in diario «R U OK?»:{' '}
+                        {inds
+                          .filter((i) => (CHECKIN_INDICATORS as readonly string[]).includes(i.id))
+                          .map((i) => i.name)
+                          .join(' · ')}
+                      </span>
+                    </Link>
+                  </li>
+                  {rest.map((i) => (
+                    <li key={i.id}>
+                      <Link to={`/measure?indicator=${encodeURIComponent(i.id)}`} className={card}>
+                        <span className="block font-semibold">{i.name}</span>
+                        <span className="mt-1 block text-sm text-env-muted">{s.name}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </Fragment>
+              )
+            }
+            return (
+              <li key={s.id}>
+                <Link to={`/measure?system=${encodeURIComponent(s.id)}`} className={card}>
+                  <span className="block font-semibold">{s.name}</span>
+                  <span className="mt-1 block text-sm text-env-muted">
+                    {inds.map((i) => i.name).join(' · ')}
+                  </span>
+                </Link>
+              </li>
+            )
+          })}
         </ul>
       </section>
     )
