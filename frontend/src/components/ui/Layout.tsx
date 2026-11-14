@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { useVocab } from '../../environments/useVocab'
 import { EnvironmentSelector } from './EnvironmentSelector'
 import { MockBanner } from './MockBanner'
+import { SessionMenu } from '../auth/SessionMenu'
 import { PendingSyncChip } from './PendingSyncChip'
 import { ServerStatus } from './ServerStatus'
 import { getDevice } from '../../offline/device'
@@ -31,6 +32,7 @@ export function Layout() {
           </NavLink>
           <div className="flex items-center gap-3">
             <PendingSyncChip />
+            <SessionMenu />
             <ServerStatus />
             <EnvironmentSelector />
           </div>

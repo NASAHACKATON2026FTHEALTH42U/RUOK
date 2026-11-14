@@ -1,6 +1,6 @@
 # frontend/ — app del member y consola /ground (React + Vite + TS)
 
-Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41); botón SOS / Pedir ayuda en **FE-13** (#43).
+Dueños: **Front A** y **Front B**. Scaffolding hecho en **FE-01** (#4); temas, store del entorno y vocabulario en **FE-02** (#19); selección de entorno y member en **FE-03** (#20); semáforo `StatusBadge` en **FE-04** (#21); cuerpo SVG `BodyFigure` en **FE-05** (#22); detalle `SystemPanel` en **FE-06** (#23); layout del dashboard en **FE-07** (#24); `TrendChart` con bandas de umbral en **FE-08** (#25); historial en **FE-09** (#40); formularios de medición en **FE-10** (#26); identidad de dispositivo e IndexedDB en **FE-30** (#74); outbox offline y sincronización en **FE-11** (#41); botón SOS / Pedir ayuda en **FE-13** (#43); login y sesión en **FE-27** (#68).
 
 ## Comandos
 
@@ -128,6 +128,8 @@ frontend/
     │   ├── mocks/             API simulada: mode.ts, handlers.ts, mockFetch.ts, events.ts,
     │   │                      useMockStatus.ts, fixtures.gen.ts (GENERADO por npm run gen:mocks)
     │   └── *.test.ts          tests (Vitest)
+    ├── auth/                  session.ts (login, logout, kv.auth, 401) + roles.ts (homeFor; + test)
+    ├── components/auth/       RequireSession, SessionMenu
     ├── components/alerts/     SosButton, SosDialog + sos.ts (categorías, destinos, protocolo; + test)
     ├── components/body/       BodyFigure (SVG) + regions.ts (buildRegions, formatSinceLabel; + test)
     ├── components/dashboard/  SystemPanel, IndicatorCard, TrendChart, LinkChip + format.ts y trend.ts (+ tests)
@@ -416,6 +418,31 @@ Se envía **por el outbox** (`sendAlert()`, mismo UUID en el dispositivo y en el
   - las **intervenciones offline** (`offline: true`) del catálogo en caché; para "Necesito hablar", las del sistema neuro-conductual (p. ej. respiración en caja).
 - No hay textos clínicos en el código: todo el protocolo viene de la evaluación o del catálogo. **Falta un endpoint de protocolos** (`protocol_id` existe en la evaluación, pero no hay `GET /protocols`); cuando exista, se cachea con `withCatalogCache('protocols')`.
 - Sin member elegido, el diálogo pide elegirlo y recuerda avisar de viva voz.
+
+## Login y sesión (FE-27)
+
+Diseño completo en [`docs/auth-and-roles.md`](../docs/auth-and-roles.md).
+
+- **`/login`** (`src/pages/Login.tsx`), fuera del `Layout` pero **con el botón "Pedir ayuda"**:
+  - usuario + **contraseña** (`POST /auth/login`) o pestaña **PIN rápido** (`POST /auth/pin`);
+  - **usuarios demo** (`GET /auth/demo-users`) para entrar con un clic (PIN `1234`); la lista se reintenta cada 10 s si el servidor no responde;
+  - errores: credenciales incorrectas, sin servidor (recuerda el SOS) y bloqueo por intentos (429).
+- **Sesión** (`src/auth/session.ts`): `{token, user, exp}` en IndexedDB `kv.auth` y `kv.last_member_id` (para el SOS sin sesión). `initSession()` la recupera al arrancar y conecta el cliente: **`Authorization: Bearer`** en todas las peticiones.
+- **Tras el login** se fija el entorno del usuario (y su `member_id` si es member), se reanuda el outbox (`resumeSync()`) y cada rol va a su **vista inicial** (`homeFor()`):
+
+| Rol                  | Vista inicial                      |
+| -------------------- | ---------------------------------- |
+| `member`, `family`   | `/dashboard`                       |
+| `medic`, `commander` | `/members` (members de su entorno) |
+| `responder`, `psych` | `/ground`                          |
+| `admin`              | `/` (selector de entorno)          |
+
+- **Rutas protegidas:** `RequireSession` envuelve todo menos `/login`. Sin sesión → `/login?next=<ruta>`.
+- **401 o `exp` vencido:** la sesión pasa a "caducada" y se va a `/login?expired=1` ("Tu sesión ha caducado… no se ha perdido nada"); al volver a entrar se regresa a la página donde se estaba. El outbox se pausa solo con el 401 (FE-11) y se reanuda tras el login.
+- **"Salir"** (cabecera, `SessionMenu`) borra `kv.auth` pero **nunca el outbox**: lo pendiente se envía al volver a entrar.
+- **SOS sin sesión:** usa `kv.last_member_id` y solo permite la categoría _emergencia_ (lo único que el back acepta sin token). Si el dispositivo nunca tuvo sesión, pide iniciarla y recuerda avisar de viva voz.
+- Los permisos por rol (ocultar vistas y menús, "solo admin" en el selector de entorno) son de **FE-28**.
+- **Para FE-15:** el modal "R U OK?" debe montarse también en `/login` (fuera del `Layout`), como el SOS.
 
 ### Pendiente
 

@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { useEnvironments } from '../../api/useEnvironments'
 import { useInterventions } from '../../api/useInterventions'
 import { useVocab } from '../../environments/useVocab'
+import { useSession } from '../../auth/session'
 import { useEnvironmentStore } from '../../store/environment'
 import { SosDialog } from './SosDialog'
 
@@ -11,7 +12,11 @@ import { SosDialog } from './SosDialog'
  */
 export function SosButton() {
   const [open, setOpen] = useState(false)
-  const memberId = useEnvironmentStore((s) => s.memberId)
+  const authenticated = useSession((s) => s.status === 'authenticated')
+  const lastMemberId = useSession((s) => s.lastMemberId)
+  const selectedMemberId = useEnvironmentStore((s) => s.memberId)
+  // Sin sesión, el SOS usa el último member del dispositivo (kv.last_member_id).
+  const memberId = authenticated ? selectedMemberId : lastMemberId
   const envId = useEnvironmentStore((s) => s.envId)
   const vocabulary = useVocab()
   const envs = useEnvironments()
@@ -35,6 +40,7 @@ export function SosButton() {
       {open && (
         <SosDialog
           memberId={memberId}
+          anonymous={!authenticated}
           env={env}
           vocabulary={vocabulary}
           interventions={interventions.state === 'ready' ? interventions.data : []}
