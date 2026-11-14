@@ -175,7 +175,9 @@ export function BodyFigure({
           transformBox: 'fill-box',
           transformOrigin: 'center',
           transition: 'transform 150ms ease-out, filter 150ms ease-out, opacity 150ms ease-out',
-          transform: lit ? 'scale(1.08)' : undefined,
+          // Los huesos no crecen: son líneas repartidas por todo el cuerpo y, al escalarlas
+          // juntas, los brazos se abrían hacia fuera. Se resaltan engrosándose.
+          transform: lit && name !== 'bones' ? 'scale(1.08)' : undefined,
           filter: lit ? `url(#${glow})` : undefined,
           opacity: hovered !== null && !lit ? 0.4 : 1,
         }}
@@ -195,7 +197,7 @@ export function BodyFigure({
           {...shape(r)}
           fill="none"
           stroke={fillFor(r)}
-          strokeWidth={selectedSystemId === r.systemId ? 30 : 22}
+          strokeWidth={selectedSystemId === r.systemId || hovered === r.systemId ? 30 : 22}
           strokeOpacity={0.85}
           strokeLinecap="round"
         >
