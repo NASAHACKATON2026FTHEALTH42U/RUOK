@@ -17,7 +17,6 @@ import { TopBarPortal } from '../components/ui/TopBarPortal'
 import { bySeverity, livenessState, statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { capitalize, useVocab } from '../environments/useVocab'
-import { formatAgo } from '../lib/time'
 import { useEnvironmentStore } from '../store/environment'
 import { useActiveMemberId, useAuth } from '../auth/useAuth'
 import { useProvisionalAssessment } from '../offline/useProvisional'
@@ -175,11 +174,8 @@ export default function Dashboard() {
           className={`${desktop ? 'text-xs' : 'text-[11px]'} font-mono text-env-muted`}
           role={desktop ? 'status' : undefined}
         >
-          {assessment.refreshFailed
-            ? '⚠ No se pudo actualizar: los datos pueden estar desfasados'
-            : assessment.updatedAt
-              ? `Actualizado ${formatAgo(assessment.updatedAt.toISOString(), serverNow())}`
-              : null}
+          {/* Solo el aviso de fallo: los datos pueden estar desfasados. */}
+          {assessment.refreshFailed && '⚠ No se pudo actualizar: los datos pueden estar desfasados'}
         </span>
       </div>
     )
