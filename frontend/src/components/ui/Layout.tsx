@@ -22,6 +22,7 @@ const NAV_ITEMS = [
   { to: '/measure', label: 'Medir' },
   { to: '/checkin', label: 'Check-in' },
   { to: '/pvt', label: 'Test PVT' },
+  { to: '/earth', label: 'La Tierra' },
   { to: '/history', label: 'Historial' },
   { to: '/missions', label: 'Misiones' },
   { to: '/alerts', label: 'Alertas' },

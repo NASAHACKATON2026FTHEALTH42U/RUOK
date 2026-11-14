@@ -42,6 +42,7 @@ export const ROUTE_PERMISSIONS: Record<string, Permission> = {
   '/measure': 'view:measure',
   '/checkin': 'view:checkin',
   '/pvt': 'view:checkin', // el test PVT va con el check-in (docs/auth-and-roles.md)
+  '/earth': 'view:checkin', // Earth view (FE-25): bienestar del member, como el check-in
   '/history': 'view:history',
   '/missions': 'view:missions',
   '/alerts': 'view:alerts',
