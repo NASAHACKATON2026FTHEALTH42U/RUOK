@@ -18,6 +18,7 @@
 | BE-11 (#18) | Composición del `Assessment` completo (`services/member_assessment.py`) | **Parcial:** el servicio está hecho, pero `GET /members/{id}/assessment` sigue en stub |
 | FS-04 (#7) | `scripts/export_mocks.py`: mocks del front generados desde la API | Hecho |
 | BE-06 (#13) | `POST` de mediciones por lotes (idempotente por UUID, atómico, 409) y `GET` con filtros | Hecho |
+| BE-05 (#12) | Members de la BD: lista por entorno con resumen, detalle y privacidad guardada | Hecho (PR pendiente de merge) |
 
 Estado global y lista de inconsistencias pendientes: [status.md](status.md).
 
@@ -65,7 +66,7 @@ backend/
 │   │   ├── environments.py  carga y valida environments.json: list_environments(), get_environment()
 │   │   ├── measurements.py  lotes idempotentes (save_batch), series (list_series), validación (BE-06)
 │   │   ├── member_assessment.py  composición del Assessment completo de un member (BE-11; aún no lo usa el endpoint)
-│   │   ├── members.py       ensure_demo_members(): members de ejemplo en la BD (STUB → BE-07)
+│   │   ├── members.py       members de la BD: get, list_by_env, set_privacy, to_summary; ensure_demo_members (STUB → BE-07)
 │   │   └── trends.py        tendencia, línea base de 7 días y regla de 3 días a peor (BE-10)
 │   ├── stubs.py          STUB(FS-02): datos de ejemplo de los routers stub (se van retirando)
 │   ├── schemas/          modelos Pydantic del contrato, uno por dominio; se importan desde app.schemas
@@ -82,7 +83,7 @@ backend/
 │       ├── health.py     GET /health
 │       ├── auth.py       /auth/*, /users
 │       ├── catalog.py    /environments, /indicators, /systems (reales), /interventions (stub)
-│       ├── members.py    /members/{id}, privacy, measurements (real, BE-06), assessment, heartbeat, ruok (stub)
+│       ├── members.py    members y privacy (reales, BE-05), measurements (real, BE-06), assessment, heartbeat, ruok (stub)
 │       ├── alerts.py     alertas del member, acciones sobre alertas, consola ground
 │       ├── game.py       tareas, game, leaderboard
 │       └── realtime.py   events (SSE), devices, control, system, link, demo (stub salvo /demo/fast-forward)
@@ -101,7 +102,8 @@ backend/
     ├── test_member_assessment.py  composición del Assessment (BE-11)
     ├── test_environments.py perfiles vs docs/environments.md, JSON inválido, GET /environments y 404
     ├── test_catalog.py      indicadores y sistemas, coherencia, rangos con el motor, endpoints y 404
-    └── test_measurements.py idempotencia, 409, lote atómico, validación, filtros y orden del GET
+    ├── test_measurements.py idempotencia, 409, lote atómico, validación, filtros y orden del GET
+    └── test_members.py      lista por entorno, detalle, privacidad persistida, 404 y 422
 ```
 
 La estructura objetivo completa (services, data, seed…) está en [architecture.md](architecture.md#estructura-de-carpetas).
@@ -224,6 +226,26 @@ Implementa el principio **sin pérdida de datos** ([offline-and-liveness.md](off
 
 `GET /members/{id}/measurements?indicator_id=&from=&to=`: ordenado por `taken_at`; `from` y `to` son inclusivos; `from > to` → 422.
 
+### Members (`services/members.py`)
+
+| Endpoint | Qué devuelve |
+|---|---|
+| `GET /environments/{env_id}/members` | Los members del entorno (de la BD, por `id`) con su `MemberSummary`. 404 si el entorno no existe |
+| `GET /members/{id}` | El `Member`. 404 si no existe |
+| `PATCH /members/{id}/privacy` | Guarda `share_behavioral_details` y devuelve el member actualizado |
+
+Qué es real y qué sigue siendo stub en el resumen:
+
+| Campo | Origen | Lo sustituye |
+|---|---|---|
+| `id`, `env_id`, `name`, `position`, `share_behavioral_details`, `last_seen_at` | BD | — |
+| `last_measurement_at` | BD (`max(taken_at)` de sus mediciones) | — |
+| `liveness` | stub (`stubs.MEMBERS`; un member sin stub sale `stale`) | BE-12 |
+| `overall_status` | stub (`stubs.member_summary`) | BE-11 |
+| `open_alerts` | stub (`stubs.member_summary`) | BE-14 |
+
+Para sustituir un stub, cambia **solo** `to_schema()` / `to_summary()` en `services/members.py`: los endpoints no cambian. La consola ground (`routers/alerts.py`) y el centro de control (`routers/realtime.py`) siguen usando `stubs.member_summary` hasta BE-17 y BE-30. El permiso de la privacidad (solo el propio member) llega con BE-27.
+
 **Members de ejemplo (temporal):** las mediciones tienen FK a `member`, pero aún no hay seed. Al arrancar, `ensure_demo_members()` inserta los 3 members de `stubs.MEMBERS` si la tabla está vacía. Lo sustituye el seed de **BE-07**.
 
 ### Cabecera `X-Server-Time` y CORS (`app/main.py`)
@@ -253,7 +275,7 @@ Decisiones ya documentadas que todavía no están implementadas. Tenlas en cuent
 
 ## Routers stub (FS-02)
 
-Todos los endpoints del contrato existen. **Reales:** `/health`, `/environments*`, `/indicators*`, `/systems`, `POST`/`GET /members/{id}/measurements` (BE-06) y `/demo/fast-forward` (a medias). **El resto** devuelve datos de ejemplo de `app/stubs.py` e indica en `description` qué issue lo implementa (`STUB(FS-02) → BE-06`). Tabla completa en [status.md](status.md#endpoints-reales-y-stubs).
+Todos los endpoints del contrato existen. **Reales:** `/health`, `/environments*`, `/indicators*`, `/systems`, members y privacidad (BE-05), `POST`/`GET /members/{id}/measurements` (BE-06) y `/demo/fast-forward` (a medias). **El resto** devuelve datos de ejemplo de `app/stubs.py` e indica en `description` qué issue lo implementa (`STUB(FS-02) → BE-06`). Tabla completa en [status.md](status.md#endpoints-reales-y-stubs).
 
 > ⚠️ El stub de `GET /members/{id}/assessment` **no coincide con lo que calcula el motor** (por ejemplo, 142 mmHg en Marte sale `warning` y el motor diría `critical`). No uses sus valores como referencia de las reglas: la referencia es `services/assessment.py`. Se arregla al conectar el motor en BE-11, y entonces hay que actualizar `test_assessment_mode_depends_on_environment`.
 
