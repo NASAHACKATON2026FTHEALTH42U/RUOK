@@ -52,3 +52,17 @@
 | crew_relation | 1-5 | 3–5 | 2–2,9 | ≤ 1,5 | — | [S3] · provisional |
 | pvt_mean_rt_ms | ms | 100–350 | 351–499 | ≥ 500 | — | [S12] · provisional |
 | pvt_lapses | lapsos | 0–2 | 3–5 | ≥ 6 | — | [S12] · provisional |
+
+## Imágenes (Earth view, FE-25)
+Fotos de la NASA Image and Video Library (Johnson Space Center), **dominio público** (las imágenes de la NASA no tienen copyright en EE. UU. salvo indicación). Empaquetadas en `frontend/public/earth/` en tamaño medio.
+
+| ID NASA | Título | Fecha |
+|---|---|---|
+| AS17-148-22727 | View of the Earth seen by the Apollo 17 crew traveling toward the moon | 1972-12-07 |
+| AS08-14-2383 | Apollo 8 Mission image, Earth over the horizon of the moon | 1968-12-24 |
+| iss071e439624 | An orbital sunrise colorfully illuminates the Earth's atmosphere | 2024-08-06 |
+| iss071e364425 | Noctilucent clouds illuminated when the sun is below Earth's horizon | 2024-07-16 |
+| iss072e518202 | The city lights of Mexico's Yucatan peninsula | 2025-01-23 |
+| iss045e013851 | Earth Observation from the International Space Station | 2015-09-17 |
+
+Fuente: https://images.nasa.gov · Uso: https://www.nasa.gov/nasa-brand-center/images-and-media/

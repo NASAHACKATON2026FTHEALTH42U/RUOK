@@ -8,6 +8,7 @@ import Alerts from './pages/Alerts'
 import Control from './pages/Control'
 import CheckIn from './pages/CheckIn'
 import Dashboard from './pages/Dashboard'
+import Earth from './pages/Earth'
 import EnvironmentSelect from './pages/EnvironmentSelect'
 import Ground from './pages/Ground'
 import History from './pages/History'
@@ -39,6 +40,7 @@ const router = createBrowserRouter([
           { path: '/measure', element: guard('/measure', <Measure />) },
           { path: '/checkin', element: guard('/checkin', <CheckIn />) },
           { path: '/pvt', element: guard('/pvt', <Pvt />) },
+          { path: '/earth', element: guard('/earth', <Earth />) },
           { path: '/history', element: guard('/history', <History />) },
           { path: '/missions', element: guard('/missions', <Missions />) },
           { path: '/alerts', element: guard('/alerts', <Alerts />) },
