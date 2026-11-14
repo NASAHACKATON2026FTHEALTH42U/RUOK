@@ -35,11 +35,19 @@ export const CONTRACT_OPERATIONS = [
   ],
   [
     "GET",
+    "/environments/{env_id}/kudos"
+  ],
+  [
+    "GET",
     "/environments/{env_id}/leaderboard"
   ],
   [
     "GET",
     "/environments/{env_id}/members"
+  ],
+  [
+    "GET",
+    "/environments/{env_id}/missions"
   ],
   [
     "GET",
@@ -88,6 +96,10 @@ export const CONTRACT_OPERATIONS = [
   [
     "GET",
     "/members/{member_id}/game"
+  ],
+  [
+    "GET",
+    "/members/{member_id}/home-messages"
   ],
   [
     "GET",
@@ -171,7 +183,19 @@ export const CONTRACT_OPERATIONS = [
   ],
   [
     "POST",
+    "/members/{member_id}/home-messages"
+  ],
+  [
+    "POST",
+    "/members/{member_id}/kudos"
+  ],
+  [
+    "POST",
     "/members/{member_id}/measurements"
+  ],
+  [
+    "POST",
+    "/members/{member_id}/missions/{mission_id}/join"
   ],
   [
     "POST",
@@ -1574,6 +1598,29 @@ export const interventions: Schema<'Intervention'>[] = [
     "sources": [
       "S14"
     ]
+  },
+  {
+    "id": "int_bp_out_of_range",
+    "title": "Tensión fuera de rango: qué hacer mientras llega la respuesta",
+    "category": "protocol",
+    "system_id": "cardiovascular",
+    "duration_min": 20,
+    "steps": [
+      "Deja lo que estés haciendo y siéntate con la espalda apoyada",
+      "Respira despacio durante 5 minutos, sin hablar",
+      "Repite la medición con el brazo a la altura del corazón y registra el valor",
+      "Si notas dolor en el pecho, falta de aire, visión borrosa, debilidad o dificultad para hablar, pide ayuda de emergencia ahora con el botón SOS",
+      "No tomes medicación nueva sin que te lo indique el responsable médico",
+      "Si sigue fuera de rango, repite la medición cada 15 minutos y no te quedes a solas"
+    ],
+    "offline": true,
+    "indicator_ids": [
+      "bp_systolic",
+      "bp_diastolic"
+    ],
+    "sources": [
+      "S20"
+    ]
   }
 ]
 
@@ -1940,6 +1987,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             "text": "Anota si notas dolor en el pecho, mareo o falta de aire y cuéntaselo al responsable médico",
             "priority": 3,
             "intervention_id": null
+          },
+          {
+            "id": "rec_int_bp_out_of_range",
+            "text": "Tensión fuera de rango: qué hacer mientras llega la respuesta (20 min)",
+            "priority": 4,
+            "intervention_id": "int_bp_out_of_range"
           }
         ],
         "escalation": {
@@ -2403,6 +2456,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             "text": "Anota si notas dolor en el pecho, mareo o falta de aire y cuéntaselo al responsable médico",
             "priority": 3,
             "intervention_id": null
+          },
+          {
+            "id": "rec_int_bp_out_of_range",
+            "text": "Tensión fuera de rango: qué hacer mientras llega la respuesta (20 min)",
+            "priority": 4,
+            "intervention_id": "int_bp_out_of_range"
           }
         ],
         "escalation": {
@@ -2866,6 +2925,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             "text": "Repite la medición a los 5 minutos y registra el valor",
             "priority": 3,
             "intervention_id": null
+          },
+          {
+            "id": "rec_int_bp_out_of_range",
+            "text": "Tensión fuera de rango: qué hacer mientras llega la respuesta (20 min)",
+            "priority": 4,
+            "intervention_id": "int_bp_out_of_range"
           }
         ],
         "escalation": {
@@ -3329,6 +3394,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             "text": "Anota si notas dolor en el pecho, mareo o falta de aire y cuéntaselo al responsable médico",
             "priority": 3,
             "intervention_id": null
+          },
+          {
+            "id": "rec_int_bp_out_of_range",
+            "text": "Tensión fuera de rango: qué hacer mientras llega la respuesta (20 min)",
+            "priority": 4,
+            "intervention_id": "int_bp_out_of_range"
           }
         ],
         "escalation": {
@@ -3572,6 +3643,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             "text": "Anota si notas dolor en el pecho, mareo o falta de aire y cuéntaselo al responsable médico",
             "priority": 3,
             "intervention_id": null
+          },
+          {
+            "id": "rec_int_bp_out_of_range",
+            "text": "Tensión fuera de rango: qué hacer mientras llega la respuesta (20 min)",
+            "priority": 4,
+            "intervention_id": "int_bp_out_of_range"
           }
         ],
         "escalation": {
@@ -3815,6 +3892,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
             "text": "Anota si notas dolor en el pecho, mareo o falta de aire y cuéntaselo al responsable médico",
             "priority": 3,
             "intervention_id": null
+          },
+          {
+            "id": "rec_int_bp_out_of_range",
+            "text": "Tensión fuera de rango: qué hacer mientras llega la respuesta (20 min)",
+            "priority": 4,
+            "intervention_id": "int_bp_out_of_range"
           }
         ],
         "escalation": {

@@ -34,8 +34,8 @@ from sqlmodel import Session, col, select
 
 from app import clock, models
 from app.schemas import Badge, BadgeDef, GameState, Leaderboard, LeaderboardEntry, TaskType
+from app.services import crew, routine
 from app.services import members as members_service
-from app.services import routine
 
 BADGES_FILE = Path(__file__).resolve().parent.parent / "data" / "badges.json"
 
@@ -177,7 +177,7 @@ def crew_points(session: Session, env_id: str) -> int:
         .join(models.Member, col(models.Member.id) == col(models.Task.member_id))
         .where(models.Member.env_id == env_id)
     ).all()
-    return sum(rows)
+    return sum(rows) + crew.crew_extra_points(session, env_id)
 
 
 def game_state(session: Session, member: models.Member) -> GameState:
@@ -210,5 +210,7 @@ def leaderboard(session: Session, env_id: str) -> Leaderboard:
             )
         )
     return Leaderboard(
-        env_id=env_id, crew_points=sum(e.points for e in entries), members=entries
+        env_id=env_id,
+        crew_points=sum(e.points for e in entries) + crew.crew_extra_points(session, env_id),
+        members=entries,
     )

@@ -42,6 +42,9 @@ interface MockState {
   points: number
   links: Record<string, LinkStatus>
   privacy: Map<number, boolean>
+  homeMessages: Schema<'HomeMessage'>[]
+  kudos: Schema<'Kudos'>[]
+  missions: Map<string, number[]> // `${env}:${mission}` → member_id apuntados
 }
 
 const clone = <T>(v: T): T => structuredClone(v)
@@ -56,6 +59,9 @@ function initialState(): MockState {
     points: fx.game.points,
     links: clone(fx.linkByEnv),
     privacy: new Map(),
+    homeMessages: [],
+    kudos: [],
+    missions: new Map(),
   }
 }
 
@@ -145,6 +151,20 @@ function tokenFor(username: string) {
 
 const body = <T>(req: MockRequest) => (req.body ?? {}) as T
 const env = (req: MockRequest) => req.params.env_id ?? req.query.get('env') ?? 'mars'
+
+const MOCK_MISSIONS = [
+  { id: 'eat_together', title: 'Comer juntos', points: 30, min_participants: 2 },
+  { id: 'group_game', title: 'Juego de grupo', points: 40, min_participants: 3 },
+  { id: 'tend_plants', title: 'Cuidar las plantas', points: 25, min_participants: 2 },
+]
+
+function mockMissions(envId: string): Schema<'CrewMission'>[] {
+  const date = nowIso().slice(0, 10)
+  return MOCK_MISSIONS.map((m) => {
+    const participants = state.missions.get(`${envId}:${m.id}`) ?? []
+    return { ...m, date, participants, completed: participants.length >= m.min_participants }
+  })
+}
 
 // ── Handlers ─────────────────────────────────────────────────
 
@@ -346,6 +366,98 @@ export const handlers: Record<string, Handler> = {
   'GET /members/{member_id}/game': () => ({ ...fx.game, points: state.points }),
   'GET /environments/{env_id}/leaderboard': (req) =>
     fx.leaderboardByEnv[req.params.env_id] ?? notFound('Entorno desconocido'),
+
+  // Mensaje a casa (BE-22): en el mock el retardo es de 5 s y la respuesta llega 5 s después.
+  'GET /members/{member_id}/home-messages': (req) => {
+    const now = mockNow().getTime()
+    return state.homeMessages
+      .filter((m) => m.member_id === Number(req.params.member_id))
+      .filter((m) => m.direction === 'up' || new Date(m.eta).getTime() <= now)
+      .map((m) => {
+        const arrived = new Date(m.eta).getTime() <= now
+        return {
+          ...m,
+          state: arrived ? ('delivered' as const) : ('in_transit' as const),
+          delivered_at: arrived ? m.eta : null,
+        }
+      })
+  },
+  'POST /members/{member_id}/home-messages': (req) => {
+    const { id, text } = body<Schema<'HomeMessageIn'>>(req)
+    const memberId = Number(req.params.member_id)
+    const existing = state.homeMessages.find((m) => m.id === id)
+    if (existing) {
+      return existing.text === text
+        ? existing
+        : new MockResponse(409, { detail: 'Ese id ya se usó con otro mensaje (mock)' })
+    }
+    const sent = mockNow().getTime()
+    const up: Schema<'HomeMessage'> = {
+      id,
+      member_id: memberId,
+      direction: 'up',
+      text,
+      sender: null,
+      in_reply_to: null,
+      sent_at: new Date(sent).toISOString(),
+      eta: new Date(sent + 5000).toISOString(),
+      delivered_at: null,
+      state: 'in_transit',
+    }
+    const reply: Schema<'HomeMessage'> = {
+      id: crypto.getRandomValues(new Uint32Array(1))[0].toString(16).padStart(8, '0') + id.slice(8),
+      member_id: memberId,
+      direction: 'down',
+      text: 'Gracias por escribir. Te mandamos un abrazo enorme desde casa.',
+      sender: 'Casa',
+      in_reply_to: id,
+      sent_at: new Date(sent + 5000).toISOString(),
+      eta: new Date(sent + 10000).toISOString(),
+      delivered_at: null,
+      state: 'in_transit',
+    }
+    state.homeMessages.push(up, reply)
+    return up
+  },
+
+  // Kudos y misiones de tripulación (BE-23). Catálogo mínimo; en el backend va en crew_game.json.
+  'POST /members/{member_id}/kudos': (req) => {
+    const b = body<Schema<'KudosIn'>>(req)
+    const from = findMember(req.params.member_id)
+    const to = allMembers().find((m) => m.id === b.to_member_id)
+    if (!from || !to || to.env_id !== from.env_id || to.id === from.id)
+      return new MockResponse(422, { detail: 'Destinatario no válido (mock)' })
+    const existing = state.kudos.find((k) => k.id === b.id)
+    if (existing) return existing
+    const k: Schema<'Kudos'> = {
+      id: b.id,
+      env_id: from.env_id,
+      from_member_id: from.id,
+      to_member_id: to.id,
+      message: b.message,
+      created_at: nowIso(),
+    }
+    state.kudos.push(k)
+    return k
+  },
+  'GET /environments/{env_id}/kudos': (req) =>
+    fx.environments.some((e) => e.id === req.params.env_id)
+      ? state.kudos.filter((k) => k.env_id === req.params.env_id).reverse()
+      : notFound('Entorno desconocido'),
+  'GET /environments/{env_id}/missions': (req) =>
+    fx.environments.some((e) => e.id === req.params.env_id)
+      ? mockMissions(req.params.env_id)
+      : notFound('Entorno desconocido'),
+  'POST /members/{member_id}/missions/{mission_id}/join': (req) => {
+    const m = findMember(req.params.member_id)
+    if (!m) return notFound('Member desconocido')
+    const mission = mockMissions(m.env_id).find((x) => x.id === req.params.mission_id)
+    if (!mission) return notFound('Misión desconocida')
+    const key = `${m.env_id}:${mission.id}`
+    const list = state.missions.get(key) ?? []
+    if (!list.includes(m.id)) state.missions.set(key, [...list, m.id])
+    return mockMissions(m.env_id).find((x) => x.id === mission.id)
+  },
 
   // Tiempo real, dispositivos y control
   'GET /events/stream': () => fx.events, // mockFetch lo serializa como text/event-stream

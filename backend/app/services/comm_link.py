@@ -112,6 +112,8 @@ def send(
 
 def _member_of(session: Session, message: models.LinkMessage) -> int | None:
     """Member de la alerta a la que se refiere el mensaje (para el filtro del SSE)."""
+    if message.kind == "home_message":
+        return message.payload.get("member_id")
     alert_id = message.ref_id
     if message.kind == "alert_event" and message.ref_id:
         ev = None
@@ -151,6 +153,9 @@ def deliver_due(session: Session, env_id: str | None = None) -> list[models.Link
         from app.services.alerts import on_link_delivered  # evita el ciclo de imports
 
         on_link_delivered(session, delivered)
+        from app.services import home_messages  # evita el ciclo de imports
+
+        home_messages.on_link_delivered(session, delivered)
         for message in delivered:
             events.emit(
                 session, EventType.link_delivered, env_id=message.env_id,

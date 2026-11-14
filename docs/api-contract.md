@@ -131,6 +131,17 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 ```
 | GET | `/members/{member_id}/game` | `GameState` |
 | GET | `/environments/{env_id}/leaderboard` | Puntos de la tripulación (cooperativo): `crew_points` y la aportación de cada member, **en el orden de los members** (no es un ranking) |
+| POST | `/members/{member_id}/kudos` *(P2, BE-23)* | member | `{id: UUID, to_member_id, message}` → `Kudos`. Idempotente por `id` (mismo `id` con otro contenido → `409`). `422` = a uno mismo o a otro entorno; `409` también al pasar el límite diario. Suma puntos a `crew_points` |
+| GET | `/environments/{env_id}/kudos?limit=` *(P2, BE-23)* | ✅ | Kudos recientes del entorno, el más nuevo primero |
+| GET | `/environments/{env_id}/missions?date=` *(P2, BE-23)* | ✅ | Misiones de tripulación del día (`CrewMission`): quién participa y si está completada |
+| POST | `/members/{member_id}/missions/{mission_id}/join` *(P2, BE-23)* | member | `{id: UUID}` → `CrewMission` de hoy. Idempotente: apuntarse dos veces no duplica. Al llegar a `min_participants` la misión se completa y suma sus puntos a `crew_points` |
+
+```jsonc
+// Kudos = { id, env_id, from_member_id, to_member_id, message, created_at }
+// CrewMission = { id, title, points, min_participants, date, participants: [member_id],
+//                 completed: bool }   // catálogo, puntos y kudos: app/data/crew_game.json
+// crew_points = puntos de tareas + kudos × kudos.points + misiones completadas × points
+```
 
 ```jsonc
 // GameState — todo se calcula de task_completion; solo las insignias ganadas se guardan (se conservan)
@@ -164,7 +175,9 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | `/link?env=` | `{state: LinkState, delay_s, queued, since}` |
-| GET | `/link/messages?env=&direction=` | Mensajes pendientes o entregados (P2: "mensaje a casa") |
+| GET | `/link/messages?env=&direction=` | Mensajes pendientes o entregados. Los `home_message` (privados) solo los ve `admin` |
+| POST | `/members/{id}/home-messages` *(P2, BE-22)* | member | "Mensaje a casa": `{id: UUID, text}` → `HomeMessage`. Idempotente por `id` (mismo `id` con otro texto → `409`). Sale por el enlace (cola en LOS, retardo del entorno) |
+| GET | `/members/{id}/home-messages` *(P2, BE-22)* | member | Hilo: lo enviado y las respuestas simuladas **ya entregadas** a bordo, por orden de envío |
 | POST | `/demo/reset` | Reinicia la base de datos con el seed determinista |
 | POST | `/demo/scenarios/{name}` | Ejemplos: `mars_sleep_bp`, `eva_no_contact`, `geriatric_fall_risk` |
 | POST | `/demo/link` | `{env, state}`, para forzar `online`, `delayed` o `los` |
@@ -268,6 +281,11 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 // GameState
 { "points": 340, "streak_days": 5, "badges": [{ "id": "early_bird", "name": "...", "earned_at": "..." }],
   "crew_points": 1820 }
+
+// HomeMessage = { id: uuid, member_id, direction: up|down, text, sender: string|null,
+//                 in_reply_to: uuid|null, sent_at, eta, delivered_at, state: queued|in_transit|delivered }
+//   up = mensaje del member a casa; down = respuesta simulada de casa (llega tras: retardo de ida
+//   + tiempo de respuesta + retardo de vuelta; config en `home_message_replies.json`)
 
 // LeaderboardEntry / Leaderboard (cooperativo)
 { "env_id": "mars", "crew_points": 1820,

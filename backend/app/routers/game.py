@@ -1,8 +1,8 @@
-"""Rutina diaria (BE-18) y gamificación cooperativa (BE-19)."""
+"""Rutina diaria (BE-18), gamificación cooperativa (BE-19), kudos y misiones (BE-23)."""
 
 from datetime import date
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session
 
 from app import models
@@ -15,8 +15,18 @@ from app.routers.deps import (
     allow_env,
     allow_member,
 )
-from app.schemas import GameState, Leaderboard, Slug, Task, TaskCompleteIn
-from app.services import environments, gamification, members, routine
+from app.schemas import (
+    CrewMission,
+    GameState,
+    Kudos,
+    KudosIn,
+    Leaderboard,
+    MissionJoinIn,
+    Slug,
+    Task,
+    TaskCompleteIn,
+)
+from app.services import crew, environments, gamification, members, routine
 
 router = APIRouter(tags=["game"], dependencies=[AuthDep], responses={**ERRORS_AUTH, **ERRORS_404})
 
@@ -89,3 +99,74 @@ def leaderboard(env_id: Slug, session: SessionDep) -> Leaderboard:
     if environments.get_environment(env_id) is None:
         raise HTTPException(404, f"Entorno desconocido: {env_id}")
     return gamification.leaderboard(session, env_id)
+
+
+def _env(env_id: str) -> None:
+    if environments.get_environment(env_id) is None:
+        raise HTTPException(404, f"Entorno desconocido: {env_id}")
+
+
+@router.post(
+    "/members/{member_id}/kudos",
+    response_model=Kudos,
+    summary="Dar un kudos a un compañero (idempotente por UUID)",
+    description="Suma `kudos.points` a los `crew_points`. A uno mismo o a otro entorno → 422. "
+    "Mismo `id` con otro contenido, o pasar el límite diario → 409.",
+    responses={**ERRORS_409, 422: {"description": "Destinatario no válido"}},
+    dependencies=[Depends(allow_member("game:write"))],
+)
+def give_kudos(member_id: int, body: KudosIn, session: SessionDep) -> Kudos:
+    try:
+        return crew.give_kudos(
+            session, _member(session, member_id), body.id, body.to_member_id, body.message
+        )
+    except crew.InvalidKudos as exc:
+        raise HTTPException(422, str(exc)) from exc
+    except crew.Conflict as exc:
+        raise HTTPException(409, str(exc)) from exc
+
+
+@router.get(
+    "/environments/{env_id}/kudos",
+    response_model=list[Kudos],
+    summary="Kudos recientes del entorno",
+    dependencies=[Depends(allow_env("game:read"))],
+)
+def list_kudos(
+    env_id: Slug, session: SessionDep, limit: int = Query(50, ge=1, le=200)
+) -> list[Kudos]:
+    _env(env_id)
+    return crew.list_kudos(session, env_id, limit)
+
+
+@router.get(
+    "/environments/{env_id}/missions",
+    response_model=list[CrewMission],
+    summary="Misiones de tripulación del día",
+    description="Catálogo de `crew_game.json` para el entorno, con quién se ha apuntado y si "
+    "está completada. `date` por defecto: hoy.",
+    dependencies=[Depends(allow_env("game:read"))],
+)
+def list_missions(env_id: Slug, session: SessionDep, date: date | None = None) -> list[CrewMission]:  # noqa: A002
+    _env(env_id)
+    return crew.list_missions(session, env_id, date)
+
+
+@router.post(
+    "/members/{member_id}/missions/{mission_id}/join",
+    response_model=CrewMission,
+    summary="Apuntarse a una misión de hoy (idempotente)",
+    description="Al llegar a `min_participants` la misión se completa y suma sus puntos a "
+    "`crew_points`. Apuntarse dos veces no duplica.",
+    responses=ERRORS_409,
+    dependencies=[Depends(allow_member("game:write"))],
+)
+def join_mission(
+    member_id: int, mission_id: Slug, body: MissionJoinIn, session: SessionDep
+) -> CrewMission:
+    try:
+        return crew.join_mission(session, _member(session, member_id), mission_id, body.id)
+    except crew.UnknownMission as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except crew.Conflict as exc:
+        raise HTTPException(409, str(exc)) from exc

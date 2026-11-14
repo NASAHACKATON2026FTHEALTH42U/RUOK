@@ -184,6 +184,7 @@ _TABLES = [
     models.Task,
     models.BadgeAward,
     models.Kudos,
+    models.MissionParticipation,
     models.Measurement,
     models.EventLog,
     models.Device,

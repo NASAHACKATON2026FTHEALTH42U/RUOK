@@ -373,5 +373,21 @@
     "sources": [
       "S13"
     ]
+  },
+  {
+    "id": "proto_no_contact",
+    "alert_category": "no_contact",
+    "message": "Sin contacto: alguien tiene que ir a comprobar cómo está.",
+    "steps": [
+      "Llámale por voz, por radio o por teléfono",
+      "Ve a donde se le vio por última vez; si puedes, acompañado",
+      "Al encontrarle, comprueba si responde y si respira con normalidad",
+      "Si responde, pídele que confirme «Estoy bien» en su dispositivo",
+      "Si no responde o no respira con normalidad, pide ayuda de emergencia e inicia los primeros auxilios para los que estés formado",
+      "Anota en la alerta lo que has encontrado y resuélvela cuando esté a salvo"
+    ],
+    "sources": [
+      "S28"
+    ]
   }
 ]

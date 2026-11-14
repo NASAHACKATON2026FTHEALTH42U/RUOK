@@ -168,7 +168,7 @@ class BadgeAward(SQLModel, table=True):
 
 
 class Kudos(SQLModel, table=True):
-    """P2 (BE-23)."""
+    """Reconocimiento entre members (BE-23): suma a los `crew_points`."""
 
     __tablename__ = "kudos"
 
@@ -177,6 +177,23 @@ class Kudos(SQLModel, table=True):
     from_member_id: int = Field(foreign_key="member.id")
     to_member_id: int = Field(foreign_key="member.id")
     message: str
+    created_at: dt.datetime = Field(default_factory=_now, sa_type=UTCDateTime)
+
+
+class MissionParticipation(SQLModel, table=True):
+    """Un member se apunta a una misión de tripulación de un día (BE-23)."""
+
+    __tablename__ = "mission_participation"
+    __table_args__ = (
+        Index("ux_mission_part", "date", "mission_id", "member_id", unique=True),
+        Index("ix_mission_part_env", "env_id", "date"),
+    )
+
+    id: str = Field(primary_key=True)  # UUID del cliente
+    env_id: str
+    date: dt.date
+    mission_id: str  # slug -> crew_game.json
+    member_id: int = Field(foreign_key="member.id")
     created_at: dt.datetime = Field(default_factory=_now, sa_type=UTCDateTime)
 
 
