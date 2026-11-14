@@ -4,6 +4,8 @@ Prototipo para el **NASA Space Apps Challenge 2026**, reto *"Create Health Monit
 **R U OK? (Are You OK?)** es una herramienta de autoevaluación de salud que se adapta al entorno (ISS, Luna, Marte, Tierra, hospital, residencia geriátrica) y funciona **100 % en local**.
 Presentación: **domingo 16:00**. Freeze de funcionalidades: **domingo 11:00**.
 
+> Las reglas comunes a todos los agentes de IA (git, CI, alcance, principios) están en [`AGENTS.md`](AGENTS.md) y **también aplican a Claude**.
+
 Toda la documentación está en [`docs/`](docs/README.md). **Léela antes de diseñar o cambiar algo.** Lo más importante:
 - [`docs/api-contract.md`](docs/api-contract.md): **fuente de verdad** de la API.
 - [`docs/architecture.md`](docs/architecture.md): stack, estructura y decisiones.

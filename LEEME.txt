@@ -3,6 +3,7 @@
 ==============================================================================
 
 Lee esto antes de hacer tu primer commit. Son 2 minutos.
+Si usas un agente de IA (Claude, Codex, Copilot...): debe seguir AGENTS.md.
 Documentación completa: docs/README.md
 Backlog (GitHub Issues): docs/backlog.md
 

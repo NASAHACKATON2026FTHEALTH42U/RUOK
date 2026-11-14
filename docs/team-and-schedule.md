@@ -34,7 +34,7 @@
     - el force-push y el borrado de `main` están prohibidos;
     - excepción: los P0 urgentes de madrugada, con el visto bueno del supervisor y avisando en el canal.
   - Cuando el repo pase a **público** (lo exige el envío de Space Apps), se activará la protección automática con esta misma configuración. Ver la issue FS-05.
-  - Resumen para el equipo: [`LEEME.txt`](../LEEME.txt).
+  - Resumen para el equipo: [`LEEME.txt`](../LEEME.txt). Para agentes de IA: [`AGENTS.md`](../AGENTS.md).
 - **Contrato:** cualquier cambio de API se hace primero en [api-contract.md](api-contract.md), después se regeneran los tipos (`npm run gen:api`) y se avisa al equipo.
 - **Commits:** en imperativo y cortos, con el ID de la issue (`BE-08: umbrales por entorno`).
 - **Definición de hecho:**
