@@ -1,0 +1,65 @@
+# Módulo de aislamiento y confinamiento (salud conductual)
+
+Responde al peligro HRP **Isolation & Confinement**. Se apoya en la literatura de NASA BHP (Behavioral Health & Performance) y en los análogos Mars-500, HI-SEAS y HERA.
+
+## Medir (pocos segundos al día)
+- **Check-in diario "R U OK?":**
+  - escala 1–5 con emojis para ánimo, estrés, energía, **soledad** y calidad del sueño;
+  - una pregunta sobre la relación con la tripulación;
+  - una nota libre opcional.
+- **Test de vigilancia psicomotora (PVT, P2).** Dura 3 min y se hace en el navegador. Se inspira en el Reaction Self Test de la ISS:
+  - El estímulo aparece tras un intervalo aleatorio de 2–10 s.
+  - Se mide el tiempo de reacción.
+  - Un **lapso** es una respuesta de más de 500 ms.
+  - Es un marcador objetivo de fatiga y deterioro cognitivo.
+- **Señales pasivas:**
+  - tendencia de las horas de sueño;
+  - check-ins o tareas omitidas (la pérdida de implicación es una señal temprana);
+  - contacto social registrado.
+
+**Implementación:** todo se guarda como `measurements` normales, sin tablas nuevas. El `source` es `checkin` o `pvt`, y los indicadores son:
+`mood`, `stress`, `energy`, `loneliness`, `sleep_quality`, `crew_relation`, `pvt_mean_rt_ms` y `pvt_lapses`.
+
+## Analizar
+- Se compara con la **línea base personal** (media de los primeros 7 días), no con rangos poblacionales.
+- Reglas de tendencia:
+  - ánimo por debajo de la línea base menos 1 durante ≥ 5 días → `warning`;
+  - soledad en aumento durante 5 días → `warning`;
+  - PVT peor que la línea base (+20 %) **junto con** sueño < 6 h → `warning`;
+  - una combinación de dos `warning` → `critical`.
+- **Fase de misión:** barra de progreso y aviso proactivo del **"fenómeno del tercer cuarto"**, el bajón de moral que se observa en misiones largas.
+- **Índice de cohesión de la tripulación:** agregado y anónimo.
+
+## Actuar (contramedidas, todas offline)
+- **Tarjetas de intervención** (`interventions.json`): respiración guiada, módulos breves de terapia cognitivo-conductual, diario, higiene del sueño y de la luz circadiana, y ejercicio.
+- **Conexión con la Tierra (P2):**
+  - "Mensaje a casa", con mensajes asíncronos que van por el enlace con su retardo;
+  - galería Earth view (empaquetada).
+- **Gamificación cooperativa (P2):**
+  - misiones de tripulación (comer juntos, juego de grupo, cuidar plantas);
+  - **kudos** entre compañeros.
+- **Escalado:**
+  - "Necesito hablar" es la categoría `psychological` del SOS y va por un canal **confidencial** al psicólogo/BHP.
+  - Ante una tendencia sostenida, primero se sugiere a la propia persona que pida apoyo, y solo después escala.
+
+## Privacidad
+Es clave por el *under-reporting*: los astronautas tienden a ocultar síntomas por miedo a que los aparten de la misión.
+- Los datos conductuales son **privados por defecto** (`share_behavioral_details = false`).
+- El control externo ve solo un semáforo agregado, salvo que el member comparta los detalles o haya una alerta `emergency`.
+- El panel de la tripulación es solo agregado y anónimo.
+
+## Uso en la Tierra
+En la residencia geriátrica, la soledad es un problema de salud de primer orden. El módulo se reutiliza con contactos familiares, actividades sociales y aviso al cuidador.
+
+## Prioridades y estimación
+| Tarea | Estimación | Prioridad |
+|---|---|---|
+| Check-in diario (UI) | 2 h | P1 |
+| Indicadores conductuales y regla de línea base | 2–3 h | P1 |
+| Tarjetas de intervención | 1 h + contenido | P1 |
+| "Necesito hablar" y privacidad | 1,5 h | P1 |
+| Barra de fase de misión | 1 h | P1 |
+| Test PVT | 2–3 h | P2 (el primero de los P2) |
+| Mensaje a casa con retardo | 2 h | P2 |
+| Kudos y misiones de tripulación | 2 h | P2 |
+| Earth view | 1 h | P2 (se recorta lo primero) |

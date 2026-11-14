@@ -1,0 +1,856 @@
+# Backlog RUOK: fuente de verdad para create_issues.py
+# Orden = orden de creación = prioridad por dependencias (las bloqueantes primero).
+# area: backend | frontend | fullstack | content
+# priority: P0-blocker | P1 | P2
+# milestone: m0 | h1 | h2 | freeze
+
+milestones:
+  m0: { title: "M0 Setup (sáb +2h)", description: "Scaffolding, contrato v0, catálogos. Desbloquea a todo el equipo." }
+  h1: { title: "Hito 1 (sáb noche)", description: "Dashboard con cuerpo + semáforo con datos reales y cambio de entorno." }
+  h2: { title: "Hito 2 (dom 09:00)", description: "MVP integrado: alertas, offline, liveness, gamificación, consola ground." }
+  freeze: { title: "Freeze (dom 11:00)", description: "P2 y pulido. Lo no terminado a las 11:00 se corta." }
+
+labels:
+  "area:backend":     { color: "1d76db", description: "FastAPI / Python" }
+  "area:frontend":    { color: "0e8a16", description: "React / TS" }
+  "area:fullstack":   { color: "5319e7", description: "Integración front-back, tooling" }
+  "area:content":     { color: "fbca04", description: "Contenido HRP, textos, pitch (supervisor)" }
+  "P0-blocker":       { color: "b60205", description: "Genera dependencias: hacer primero" }
+  "P1":               { color: "d93f0b", description: "MVP" }
+  "P2":               { color: "c5def5", description: "Si da tiempo; se corta en el freeze" }
+  "module:alerts":    { color: "f9d0c4", description: "Alertas, escalado, enlace" }
+  "module:offline":   { color: "bfdadc", description: "Offline, sync, liveness" }
+  "module:behavioral": { color: "d4c5f9", description: "Aislamiento / salud conductual" }
+  "module:game":      { color: "fef2c0", description: "Rutina y gamificación" }
+
+issues:
+# ───────────────────────── M0 SETUP ─────────────────────────
+- id: FS-01
+  title: Scaffolding del monorepo
+  area: fullstack
+  priority: P0-blocker
+  milestone: m0
+  docs: architecture.md
+  tasks:
+    - Crear las carpetas `frontend/`, `backend/` y `presentation/`, según docs/architecture.md
+    - Crear `.gitignore` (node_modules, dist, .venv, __pycache__, *.db, .env) y `.editorconfig`
+    - Escribir en el README raíz cómo arrancar el front y el back
+  acceptance:
+    - La estructura coincide con docs/architecture.md
+    - El repo queda limpio tras instalar las dependencias (gitignore correcto)
+
+- id: BE-01
+  title: Scaffold de FastAPI con health, CORS y SQLite en WAL
+  area: backend
+  priority: P0-blocker
+  milestone: m0
+  depends: [FS-01]
+  docs: architecture.md
+  tasks:
+    - Crear `pyproject.toml` (fastapi, uvicorn, sqlmodel, pydantic, pytest, httpx)
+    - Crear `app/main.py` con el router `/api/v1` y `GET /health`
+    - Crear `app/db.py` con SQLite, `PRAGMA journal_mode=WAL` y una sesión por petición
+    - Crear `app/clock.py` con un reloj inyectable y offset para el fast-forward de la demo
+    - Configurar CORS abierto en desarrollo y la cabecera `X-Server-Time`
+    - Crear `tests/test_health.py`
+  acceptance:
+    - "`uvicorn app.main:app --reload` arranca y `/docs` carga"
+    - "`pytest` pasa"
+
+- id: FE-01
+  title: Scaffold de Vite + React + TS con Tailwind, Router y Zustand
+  area: frontend
+  priority: P0-blocker
+  milestone: m0
+  depends: [FS-01]
+  docs: architecture.md
+  tasks:
+    - Crear el proyecto con `npm create vite@latest` (react-ts)
+    - Añadir Tailwind, React Router, Zustand, Recharts, Framer Motion e idb
+    - Montar el layout base (cabecera con selector de entorno + zona de contenido) y las rutas vacías de las páginas
+    - Configurar ESLint y Prettier mínimos
+  acceptance:
+    - "`npm run dev` y `npm run build` funcionan sin errores"
+    - Las rutas vacías navegan
+
+- id: FS-02
+  title: Contrato de la API v0 y schemas Pydantic stub
+  area: fullstack
+  priority: P0-blocker
+  milestone: m0
+  depends: [BE-01]
+  docs: api-contract.md
+  tasks:
+    - Revisar y cerrar docs/api-contract.md con Back A y Back B
+    - Crear `app/schemas.py` con todos los modelos del contrato (Environment, Indicator, BodySystem, Member, Measurement, Assessment, Alert, Task, GameState, Intervention)
+    - Crear los routers stub que devuelven datos de ejemplo válidos, para que el OpenAPI esté completo
+  acceptance:
+    - "`/openapi.json` contiene todos los endpoints del contrato"
+    - Front y back confirman el contrato en el canal del equipo
+
+- id: FS-03
+  title: Tipos TS generados desde OpenAPI y cliente API
+  area: fullstack
+  priority: P0-blocker
+  milestone: m0
+  depends: [BE-01, FE-01, FS-02]
+  docs: api-contract.md
+  tasks:
+    - Crear el script `npm run gen:api` (openapi-typescript), que genera `src/api/types.gen.ts`
+    - Crear `src/api/client.ts` con fetch tipado, base URL configurable y manejo de errores
+    - Añadir un helper `newId()` (UUID v4) para los POST idempotentes
+  acceptance:
+    - Los tipos generados compilan
+    - Una llamada de ejemplo a `/health` funciona desde el front
+
+- id: FS-04
+  title: Mocks del front con la forma del contrato y conmutador mock/real
+  area: fullstack
+  priority: P0-blocker
+  milestone: m0
+  depends: [FS-03]
+  docs: api-contract.md
+  tasks:
+    - Crear fixtures JSON en `src/api/mocks/` para environments, indicators, systems, members, assessment, alerts, tasks y game
+    - Hacer que el cliente use los mocks si `VITE_USE_MOCKS=true`, o como fallback cuando el back no responde
+    - Incluir un assessment de ejemplo con estados mezclados (normal/warning/critical/unknown)
+  acceptance:
+    - El front funciona entero sin back
+    - Los mocks cumplen los tipos generados
+
+- id: BE-02
+  title: Modelos SQLModel del dominio
+  area: backend
+  priority: P0-blocker
+  milestone: m0
+  depends: [BE-01, FS-02]
+  docs: api-contract.md
+  tasks:
+    - Crear los modelos Member (con env_id, share_behavioral_details, last_seen_at, last_activity), Measurement (con id UUID, taken_at, received_at y source), Task, TaskCompletion (UUID), Alert, AlertEvent, LinkMessage y Badge
+    - Crear las tablas al arrancar
+  acceptance:
+    - Un test crea y lee cada modelo
+    - Las Measurement con el mismo id no se duplican (PK UUID)
+
+- id: BE-03
+  title: Perfiles de entorno (6) en JSON y GET /environments
+  area: backend
+  priority: P0-blocker
+  milestone: m0
+  depends: [BE-01]
+  docs: environments.md
+  tasks:
+    - Crear `app/data/environments.json` con iss, moon, mars, earth, hospital y geriatric
+    - Crear un loader validado con Pydantic y cacheado en memoria
+    - Crear `GET /environments` y `GET /environments/{env_id}`
+  acceptance:
+    - Los 6 perfiles validan
+    - Un id inexistente devuelve 404
+    - Los valores coinciden con la tabla de docs/environments.md
+
+- id: BE-04
+  title: Catálogo de indicadores y sistemas, con GET /indicators y /systems
+  area: backend
+  priority: P0-blocker
+  milestone: m0
+  depends: [BE-01]
+  docs: api-contract.md
+  tasks:
+    - Crear `app/data/indicators.json` con heart_rate, bp_systolic, bp_diastolic, spo2, glucose, temperature, sleep_hours, exercise_min, hydration_ml, weight_kg, radiation_dose y los conductuales (mood, stress, energy, loneliness, sleep_quality, crew_relation, pvt_mean_rt_ms, pvt_lapses)
+    - Crear `app/data/systems.json` con cardiovascular, musculoskeletal, immune, metabolic, neuro_behavioral, eyes y radiation, cada uno con su svg_region
+    - Crear `GET /indicators`, `GET /indicators/{id}` y `GET /systems`
+  acceptance:
+    - Cada indicador tiene ranges, max_age_s, input e instrucciones (provisionales hasta CNT-01 y CNT-02)
+
+- id: CNT-01
+  title: Tabla de umbrales HRP y fuentes
+  area: content
+  priority: P0-blocker
+  milestone: m0
+  docs: sources.md
+  tasks:
+    - Rellenar la tabla de umbrales en docs/sources.md (normal/warning/critical por indicador)
+    - Definir los ajustes por entorno (espacio, geriatría)
+    - Citar una fuente para cada fila
+  acceptance:
+    - Back A puede volcar los valores en indicators.json y environments.json
+
+# ───────────────────────── HITO 1 ─────────────────────────
+- id: BE-05
+  title: Endpoints de members
+  area: backend
+  priority: P0-blocker
+  milestone: h1
+  depends: [BE-02, BE-03]
+  docs: api-contract.md
+  tasks:
+    - Crear `GET /environments/{env_id}/members` con resumen (overall_status y liveness; stub hasta BE-11 y BE-12)
+    - Crear `GET /members/{id}`
+    - Crear `PATCH /members/{id}/privacy`
+  acceptance:
+    - Hay tests de API para cada endpoint
+
+- id: BE-06
+  title: POST de mediciones por lotes e idempotente, y GET con filtros
+  area: backend
+  priority: P0-blocker
+  milestone: h1
+  depends: [BE-02, BE-04]
+  docs: offline-and-liveness.md
+  modules: [offline]
+  tasks:
+    - Crear `POST /members/{id}/measurements` con `{measurements:[...]}`, validación contra el catálogo (indicador existente, rango de input) y upsert por UUID
+    - Devolver `{accepted, duplicates, assessment}` (assessment en stub hasta BE-11)
+    - Crear `GET /members/{id}/measurements?indicator_id=&from=&to=`, ordenado por taken_at
+    - Guardar `received_at` con el reloj del servidor
+  acceptance:
+    - Enviar el mismo lote 2 veces no crea duplicados (test)
+    - El mismo id con distinto contenido devuelve 409
+
+- id: BE-07
+  title: Seed de 30 días sintéticos y escenarios de demo
+  area: backend
+  priority: P0-blocker
+  milestone: h1
+  depends: [BE-05, BE-06]
+  docs: demo-script.md
+  tasks:
+    - Crear `app/seed.py` con 3–4 members por entorno, 30 días de datos con ruido realista y semilla fija
+    - Crear los escenarios `mars_sleep_bp`, `eva_no_contact` y `geriatric_fall_risk`
+    - Crear `POST /demo/reset` y `POST /demo/scenarios/{name}`
+  acceptance:
+    - El reset es determinista (dos ejecuciones dan los mismos datos)
+    - Cada escenario produce el estado esperado en el assessment
+
+- id: BE-08
+  title: Motor de evaluación por indicador con umbrales y ajustes de entorno
+  area: backend
+  priority: P0-blocker
+  milestone: h1
+  depends: [BE-03, BE-04, BE-06]
+  docs: api-contract.md
+  tasks:
+    - Crear `services/assessment.py` con la función pura `evaluate_indicator(value, indicator, env)`, que devuelve un Status
+    - Fusionar `threshold_overrides` del entorno con los rangos del catálogo
+    - Marcar como `unknown` los datos más antiguos que `max_age_s`
+  acceptance:
+    - Tests de tensión alta en Marte, el mismo valor con resultados distintos según el entorno, y un dato caducado que da unknown
+
+- id: BE-09
+  title: Evaluación agregada por sistema y global con recomendaciones
+  area: backend
+  priority: P0-blocker
+  milestone: h1
+  depends: [BE-08]
+  docs: api-contract.md
+  tasks:
+    - Calcular el estado del sistema como el peor de sus indicadores (unknown no cuenta como normal)
+    - Calcular overall_status
+    - Generar recomendaciones por sistema y estado, desde `data/protocols.json`
+    - Calcular el bloque `escalation` (level, mode según comm_delay_s, delay_s, protocol_id)
+  acceptance:
+    - En Marte, un critical tiene mode autonomous; en la ISS, realtime (test)
+
+- id: BE-10
+  title: Tendencias y línea base personal
+  area: backend
+  priority: P1
+  milestone: h1
+  depends: [BE-08]
+  docs: behavioral-health.md
+  tasks:
+    - Calcular la tendencia (rising/falling/stable/insufficient_data) en una ventana de 3 días
+    - Calcular la línea base personal como la media de los primeros 7 días
+    - Aplicar la regla "warning si empeora ≥ 3 días seguidos"
+  acceptance:
+    - Hay tests con series sintéticas
+
+- id: BE-11
+  title: GET /members/{id}/assessment?env=
+  area: backend
+  priority: P0-blocker
+  milestone: h1
+  depends: [BE-09]
+  docs: api-contract.md
+  tasks:
+    - Crear el endpoint que compone el Assessment completo
+    - Aceptar el parámetro `env` opcional para evaluar con otro perfil sin modificar datos
+    - Recalcular en el POST de mediciones y devolverlo
+  acceptance:
+    - La respuesta valida contra el schema
+    - Con `?env=geriatric`, los mismos datos dan otro resultado (test)
+
+- id: FE-02
+  title: Temas por entorno y store del entorno activo
+  area: frontend
+  priority: P0-blocker
+  milestone: h1
+  depends: [FE-01, FS-04]
+  docs: environments.md
+  tasks:
+    - Crear el store Zustand con envId, memberId y vocabulary
+    - Definir tokens CSS por entorno en `src/environments/*.ts` (colores, fondo) y aplicarlos en la raíz
+    - Crear el hook `useVocab()` para los textos (astronauta/residente…)
+  acceptance:
+    - Al cambiar de entorno cambian el tema y los textos sin recargar
+
+- id: FE-03
+  title: Página de selección de entorno con transición
+  area: frontend
+  priority: P1
+  milestone: h1
+  depends: [FE-02]
+  docs: environments.md
+  tasks:
+    - Crear una tarjeta por entorno (gravedad, retardo, tipo) y la animación de transición (Framer Motion)
+    - Elegir el member del entorno
+  acceptance:
+    - Se llega al dashboard del member elegido con el tema aplicado
+
+- id: FE-04
+  title: StatusBadge y paleta de semáforo con estado unknown/stale
+  area: frontend
+  priority: P0-blocker
+  milestone: h1
+  depends: [FE-01]
+  docs: offline-and-liveness.md
+  tasks:
+    - Definir la paleta de normal/warning/critical/unknown (unknown en gris con rayado) y comprobar su accesibilidad (contraste y no depender solo del color)
+    - Crear el componente `StatusBadge` y un helper `statusStyle(status)`
+  acceptance:
+    - Ningún estado unknown, stale o lost se pinta en verde
+    - Se usa en todas las vistas
+
+- id: FE-05
+  title: BodyFigure SVG clicable con color por sistema
+  area: frontend
+  priority: P0-blocker
+  milestone: h1
+  depends: [FE-04, FS-04]
+  docs: vision-and-scope.md
+  tasks:
+    - Dibujar un SVG de figura humana con regiones por `svg_region` (heart, bones, immune, metabolic, brain, eyes) y un halo de radiación
+    - Colorear las regiones según el estado del sistema en el assessment
+    - Añadir hover con tooltip y clic que emite `onSelectSystem`
+    - Estilo gris con rayado completo si el liveness es stale o lost
+  acceptance:
+    - Funciona con el assessment mock y es responsive
+
+- id: FE-06
+  title: SystemPanel con el detalle de cada sistema
+  area: frontend
+  priority: P1
+  milestone: h1
+  depends: [FE-05]
+  docs: api-contract.md
+  tasks:
+    - Mostrar la función del sistema, sus efectos en el espacio y los peligros (desde /systems)
+    - Mostrar los indicadores con valor, estado, tendencia y antigüedad, las recomendaciones y el botón "Medir ahora"
+  acceptance:
+    - Se abre al hacer clic en la figura y se cierra con Esc o clic fuera
+
+- id: FE-07
+  title: Layout del dashboard
+  area: frontend
+  priority: P1
+  milestone: h1
+  depends: [FE-05]
+  docs: architecture.md
+  tasks:
+    - Montar la página Dashboard con BodyFigure, la cuadrícula de IndicatorCard y la cabecera con overall_status, liveness, estado del enlace y pendientes de sincronizar
+    - Cargar el assessment del member activo y refrescarlo cada 15 s
+  acceptance:
+    - Funciona con mocks y con el back real
+
+- id: FE-08
+  title: IndicatorCard y TrendChart con bandas de umbral
+  area: frontend
+  priority: P1
+  milestone: h1
+  depends: [FE-04, FS-04]
+  docs: api-contract.md
+  tasks:
+    - Crear IndicatorCard con valor, unidad, estado, tendencia y "hace X"
+    - Crear TrendChart (Recharts) con serie temporal y bandas normal/warning sombreadas
+  acceptance:
+    - Las series de 7 y 30 días se ven correctamente con datos del seed
+
+- id: FE-10
+  title: Formularios guiados de medición multi-indicador
+  area: frontend
+  priority: P0-blocker
+  milestone: h1
+  depends: [FS-04]
+  docs: api-contract.md
+  tasks:
+    - Generar el formulario a partir de `indicator.input` (number, scale_1_5, duration)
+    - Mostrar paso a paso las `measurement_instructions`
+    - Enviar la tensión como lote (sistólica + diastólica) con UUID por medición
+  acceptance:
+    - Se envía un lote y el dashboard se actualiza
+    - Hay validación de rango
+
+- id: FE-19
+  title: Check-in diario conductual "R U OK?"
+  area: frontend
+  priority: P1
+  milestone: h1
+  depends: [FE-10]
+  docs: behavioral-health.md
+  modules: [behavioral]
+  tasks:
+    - Crear la pantalla de check-in con escalas 1–5 con emojis para mood, stress, energy, loneliness, sleep_quality y crew_relation, más una nota
+    - Enviarlo como lote de measurements con source=checkin
+  acceptance:
+    - Se completa en menos de 30 s y aparece en el historial
+
+- id: BE-20
+  title: Indicadores conductuales, regla de línea base y privacidad
+  area: backend
+  priority: P1
+  milestone: h1
+  depends: [BE-10, BE-04]
+  docs: behavioral-health.md
+  modules: [behavioral]
+  tasks:
+    - Implementar las reglas de docs/behavioral-health.md (ánimo bajo frente a la línea base durante 5 días, soledad en aumento, PVT junto con sueño)
+    - Añadir al assessment el bloque `behavioral` con `details_visible` según share_behavioral_details
+  acceptance:
+    - Hay tests de las reglas
+    - Si el member no comparte, los detalles se ocultan
+
+- id: CNT-02
+  title: Textos por sistema e indicador e instrucciones de medición
+  area: content
+  priority: P1
+  milestone: h1
+  depends: [CNT-01]
+  docs: sources.md
+  tasks:
+    - Redactar la función, los efectos en el espacio y los peligros de cada sistema
+    - Redactar why_it_matters y measurement_instructions de cada indicador
+    - Redactar las recomendaciones por sistema y estado (protocols.json)
+  acceptance:
+    - Back A lo vuelca en los JSON y todos los textos tienen fuente
+
+# ───────────────────────── HITO 2 ─────────────────────────
+- id: BE-13
+  title: Enlace simulado con la Tierra (outbox/inbox, retardo, LOS)
+  area: backend
+  priority: P0-blocker
+  milestone: h2
+  depends: [BE-02, BE-03]
+  docs: alerts-and-escalation.md
+  modules: [alerts, offline]
+  tasks:
+    - Crear `services/comm_link.py` con una cola LinkMessage persistida; `send()` calcula la ETA a partir de comm_delay_s y `deliver_due()` usa el reloj de la demo
+    - Gestionar los estados online/delayed/los por entorno; en los, los mensajes se encolan
+    - Crear `GET /link`, `POST /demo/link` y `POST /demo/fast-forward`
+  acceptance:
+    - Hay tests de entrega tras la ETA, de cola durante LOS y de entrega al volver el enlace
+    - Los mensajes sobreviven a un reinicio
+
+- id: BE-14
+  title: Alertas automáticas desde la evaluación con deduplicación y escalera
+  area: backend
+  priority: P0-blocker
+  milestone: h2
+  depends: [BE-11, BE-13]
+  docs: alerts-and-escalation.md
+  modules: [alerts]
+  tasks:
+    - Crear `services/alerts.py`; tras cada assessment, abrir o actualizar una alerta por member y sistema
+    - Escalar al siguiente nivel si el estado es critical o persiste; los niveles externos van por comm_link
+    - Registrar los AlertEvent
+  acceptance:
+    - No hay alertas duplicadas
+    - El escenario `mars_sleep_bp` llega a ground con ETA (test)
+
+- id: BE-15
+  title: Alertas manuales (crear, escalar, ack, resolve, mensajes)
+  area: backend
+  priority: P1
+  milestone: h2
+  depends: [BE-14]
+  docs: alerts-and-escalation.md
+  modules: [alerts]
+  tasks:
+    - Crear `POST /members/{id}/alerts` (idempotente por UUID) y `GET /members/{id}/alerts`
+    - Crear `POST /alerts/{id}/escalate` (permite saltar niveles), `/ack`, `/resolve` y `/messages`
+    - Hacer que los mensajes a o desde niveles externos pasen por comm_link
+  acceptance:
+    - Un test cubre el flujo SOS completo con su timeline
+
+- id: BE-12
+  title: Heartbeat y liveness combinados en el estado global
+  area: backend
+  priority: P0-blocker
+  milestone: h2
+  depends: [BE-02, BE-11]
+  docs: offline-and-liveness.md
+  modules: [offline]
+  tasks:
+    - Crear `POST /members/{id}/heartbeat` (con la actividad normal, eva o sleep)
+    - Crear `services/liveness.py` para calcular active/stale/lost con los umbrales del entorno y de la actividad
+    - Hacer overall_status igual al peor entre la salud y el liveness
+  acceptance:
+    - Un member sin heartbeat nunca da overall normal (test con fast-forward)
+
+- id: BE-16
+  title: Alerta no_contact y timeout del check-in "R U OK?"
+  area: backend
+  priority: P1
+  milestone: h2
+  depends: [BE-12, BE-14]
+  docs: offline-and-liveness.md
+  modules: [offline, alerts]
+  tasks:
+    - Crear una tarea periódica que revise el liveness
+    - Con stale, devolver checkin_required en el heartbeat; con timeout o lost, crear la alerta no_contact critical, primero a crew y después a ground
+    - Crear `POST /members/{id}/ruok`
+  acceptance:
+    - El escenario `eva_no_contact` genera la alerta a crew al instante y a ground tras la ETA
+
+- id: BE-17
+  title: Endpoint de la consola ground con estado as-of y filtro de privacidad
+  area: backend
+  priority: P1
+  milestone: h2
+  depends: [BE-15, BE-13]
+  docs: offline-and-liveness.md
+  modules: [alerts]
+  tasks:
+    - Crear `GET /environments/{env_id}/alerts?view=ground`, que solo devuelve lo entregado por el enlace
+    - Incluir el resumen de members con last_seen_at, as_of y el estado del enlace
+    - Ocultar los detalles conductuales según la privacidad
+  acceptance:
+    - Durante LOS, la vista no incluye mensajes nuevos y marca el estado como desconocido
+
+- id: BE-18
+  title: Rutina de tareas diarias desde el perfil del entorno
+  area: backend
+  priority: P1
+  milestone: h2
+  depends: [BE-02, BE-03]
+  docs: environments.md
+  modules: [game]
+  tasks:
+    - Crear `services/routine.py` para generar las tareas del día desde `environment.routine`
+    - Crear `GET /members/{id}/tasks?date=` y `POST .../complete` (idempotente por UUID)
+    - Autocompletar las tareas de tipo medición cuando llega la medición correspondiente
+  acceptance:
+    - Hay tests de generación y de completado idempotente
+
+- id: BE-19
+  title: Gamificación (puntos, rachas, insignias, leaderboard cooperativo)
+  area: backend
+  priority: P1
+  milestone: h2
+  depends: [BE-18]
+  docs: vision-and-scope.md
+  modules: [game]
+  tasks:
+    - Crear `services/gamification.py` con puntos por tarea, racha de días y 5–6 insignias
+    - Crear `GET /members/{id}/game` y `GET /environments/{env_id}/leaderboard` (puntos de tripulación)
+  acceptance:
+    - Completar tareas actualiza los puntos y la racha (test)
+
+- id: BE-21
+  title: Catálogo de intervenciones y GET /interventions
+  area: backend
+  priority: P1
+  milestone: h2
+  depends: [BE-04]
+  docs: behavioral-health.md
+  modules: [behavioral]
+  tasks:
+    - Crear `data/interventions.json` (respiración, TCC breve, diario, sueño/luz, ejercicio)
+    - Crear `GET /interventions?system_id=&category=`
+    - Enlazar las intervenciones desde las recomendaciones del assessment
+  acceptance:
+    - Cada sistema conductual en warning sugiere al menos una intervención
+
+- id: BE-24
+  title: FastAPI sirve el build del front y docker-compose
+  area: fullstack
+  priority: P1
+  milestone: h2
+  depends: [BE-01, FE-01]
+  docs: architecture.md
+  tasks:
+    - Montar `frontend/dist` como estáticos con fallback SPA en FastAPI
+    - Crear `docker-compose.yml` (back + front) y el script `make demo`
+  acceptance:
+    - Con un comando se levanta todo en local sin internet
+
+- id: FE-09
+  title: Página de historial (7/30 días)
+  area: frontend
+  priority: P1
+  milestone: h2
+  depends: [FE-08]
+  docs: api-contract.md
+  tasks:
+    - Añadir un selector de indicador y de rango, con TrendChart y una tabla de mediciones
+  acceptance:
+    - Muestra los datos del seed y las mediciones nuevas
+
+- id: FE-11
+  title: Outbox offline en IndexedDB y sincronización
+  area: frontend
+  priority: P0-blocker
+  milestone: h2
+  depends: [FE-10, BE-06]
+  docs: offline-and-liveness.md
+  modules: [offline]
+  tasks:
+    - Crear `src/offline/outbox.ts`; todos los POST de creación pasan por el outbox (guardar, enviar, marcar como enviado)
+    - Reintentar con backoff y al recibir el evento `online`; mostrar el contador de pendientes en la cabecera
+    - Cachear en IndexedDB el catálogo, los protocolos y el último assessment
+  acceptance:
+    - Con el back parado se registran 2 mediciones, se arranca el back y se sincronizan sin duplicados
+
+- id: FE-12
+  title: Semáforo provisional offline
+  area: frontend
+  priority: P1
+  milestone: h2
+  depends: [FE-11, FE-04]
+  docs: offline-and-liveness.md
+  modules: [offline]
+  tasks:
+    - Calcular el estado preliminar con los rangos cacheados y la etiqueta "provisional"
+    - Sustituirlo por el assessment del servidor al sincronizar
+  acceptance:
+    - Sin servidor, una medición alta pinta ámbar o rojo con la etiqueta "provisional"
+
+- id: FE-13
+  title: Botón SOS / Pedir ayuda
+  area: frontend
+  priority: P1
+  milestone: h2
+  depends: [FS-04, FE-11]
+  docs: alerts-and-escalation.md
+  modules: [alerts]
+  tasks:
+    - Botón fijo siempre visible que abre un modal con la categoría (incluida "Necesito hablar"), la severidad, el destino (permite saltar niveles) y el mensaje
+    - Enviarlo por el outbox; sin conexión, mostrar el aviso "No enviado. Avisa de viva voz" y el protocolo autónomo cacheado
+  acceptance:
+    - Funciona con y sin conexión
+
+- id: FE-14
+  title: Panel de alertas con timeline, escalado, ETA y protocolo autónomo
+  area: frontend
+  priority: P1
+  milestone: h2
+  depends: [FE-13, BE-15]
+  docs: alerts-and-escalation.md
+  modules: [alerts]
+  tasks:
+    - Lista de alertas del member con origen, severidad y estado
+    - Timeline de AlertEvent, botón "Escalar" y cuenta atrás de la ETA si es delayed
+    - Protocolo autónomo paso a paso si es autonomous
+  acceptance:
+    - El escenario `mars_sleep_bp` se ve completo
+
+- id: FE-15
+  title: Heartbeat del cliente y modal "R U OK?"
+  area: frontend
+  priority: P1
+  milestone: h2
+  depends: [BE-12]
+  docs: offline-and-liveness.md
+  modules: [offline]
+  tasks:
+    - Enviar el heartbeat cada 15 s con la actividad actual (con un selector de EVA o sueño)
+    - Mostrar el modal a pantalla completa si `checkin_required` (botones "Estoy bien" y "Necesito ayuda")
+  acceptance:
+    - Al pausar el heartbeat aparece el modal y la respuesta llega al back
+
+- id: FE-16
+  title: Consola /ground con estado as-of
+  area: frontend
+  priority: P1
+  milestone: h2
+  depends: [FE-14, BE-17]
+  docs: offline-and-liveness.md
+  modules: [alerts]
+  tasks:
+    - Vista de responder con members del entorno ("último dato hace X"), alertas entregadas, ack, respuesta y resolve
+    - Banner del estado del enlace; si es LOS, mostrar "Estado DESCONOCIDO" en gris
+  acceptance:
+    - A pantalla partida con la app del astronauta, se ve el retardo en vivo
+
+- id: FE-17
+  title: Indicador del estado del enlace y controles de demo
+  area: frontend
+  priority: P1
+  milestone: h2
+  depends: [BE-13]
+  docs: demo-script.md
+  modules: [alerts]
+  tasks:
+    - Chip en la cabecera con online/delayed/LOS, el retardo y los mensajes en cola
+    - Panel de demo oculto (atajo de teclado) con reset, escenarios, estado del enlace y fast-forward
+  acceptance:
+    - Todo el guion de demo se controla desde la UI
+
+- id: FE-18
+  title: UI de misiones diarias, puntos, racha e insignias
+  area: frontend
+  priority: P1
+  milestone: h2
+  depends: [BE-19]
+  docs: vision-and-scope.md
+  modules: [game]
+  tasks:
+    - Página Missions con las tareas del día, un checkbox animado y el toast de puntos
+    - Racha, insignias y tablero cooperativo de la tripulación
+  acceptance:
+    - Completar una tarea actualiza los puntos con una animación
+
+- id: FE-20
+  title: Tarjetas de intervención
+  area: frontend
+  priority: P1
+  milestone: h2
+  depends: [BE-21]
+  docs: behavioral-health.md
+  modules: [behavioral]
+  tasks:
+    - Crear InterventionCard con los pasos y un temporizador (por ejemplo, la respiración en caja animada)
+    - Enlazarla desde SystemPanel y desde el check-in
+  acceptance:
+    - Funciona offline con el catálogo cacheado
+
+- id: FE-21
+  title: Barra de fase de misión y aviso del tercer cuarto
+  area: frontend
+  priority: P1
+  milestone: h2
+  depends: [FE-02]
+  docs: behavioral-health.md
+  modules: [behavioral]
+  tasks:
+    - Barra de progreso a partir de `environment.mission`
+    - Aviso proactivo al entrar en el tercer cuarto
+  acceptance:
+    - Visible en el dashboard en los entornos espaciales
+
+- id: CNT-03
+  title: Contenido de las intervenciones y los protocolos autónomos
+  area: content
+  priority: P1
+  milestone: h2
+  depends: [CNT-01]
+  docs: behavioral-health.md
+  tasks:
+    - Redactar los pasos de cada intervención y los protocolos autónomos (tensión alta, no_contact, apoyo psicológico)
+  acceptance:
+    - Volcado en interventions.json y protocols.json, con fuentes
+
+# ───────────────────────── FREEZE / P2 ─────────────────────────
+- id: FE-22
+  title: Test de vigilancia psicomotora (PVT)
+  area: fullstack
+  priority: P2
+  milestone: freeze
+  depends: [FE-10]
+  docs: behavioral-health.md
+  modules: [behavioral]
+  tasks:
+    - Test de 3 min (versión demo de 30 s) con estímulo tras un intervalo aleatorio de 2–10 s y medición con performance.now()
+    - Calcular el tiempo de reacción medio y los lapsos (> 500 ms) y enviarlos como measurements con source=pvt
+  acceptance:
+    - Un juez puede hacerlo en la demo y el resultado aparece en el historial
+
+- id: BE-22
+  title: Backend de "Mensaje a casa" por el enlace
+  area: backend
+  priority: P2
+  milestone: freeze
+  depends: [BE-13]
+  docs: behavioral-health.md
+  modules: [behavioral]
+  tasks:
+    - Endpoints para enviar y listar mensajes personales vía comm_link, con respuestas simuladas desde la Tierra
+  acceptance:
+    - En Marte, el mensaje se entrega tras la ETA
+
+- id: FE-23
+  title: UI de "Mensaje a casa"
+  area: frontend
+  priority: P2
+  milestone: freeze
+  depends: [BE-22]
+  docs: behavioral-health.md
+  modules: [behavioral]
+  tasks:
+    - Bandeja tipo chat asíncrono con el estado de cada mensaje (en cola, en tránsito con ETA, entregado)
+  acceptance:
+    - Funciona con LOS y con fast-forward
+
+- id: BE-23
+  title: Backend de kudos y misiones de tripulación
+  area: backend
+  priority: P2
+  milestone: freeze
+  depends: [BE-19]
+  docs: behavioral-health.md
+  modules: [game, behavioral]
+  tasks:
+    - Kudos entre members (suman puntos de tripulación)
+    - Misiones grupales en la rutina del entorno
+  acceptance:
+    - Un kudo incrementa crew_points
+
+- id: FE-24
+  title: UI de kudos y misiones de tripulación
+  area: frontend
+  priority: P2
+  milestone: freeze
+  depends: [BE-23]
+  docs: behavioral-health.md
+  modules: [game, behavioral]
+  tasks:
+    - Botón para dar kudos a un compañero y lista de misiones de grupo en Missions
+  acceptance:
+    - Visible en el tablero de la tripulación
+
+- id: FE-25
+  title: Galería Earth view
+  area: frontend
+  priority: P2
+  milestone: freeze
+  docs: behavioral-health.md
+  modules: [behavioral]
+  tasks:
+    - Galería de fotos de la Tierra empaquetadas (NASA, dominio público) con sonido ambiente opcional
+  acceptance:
+    - Funciona offline
+
+- id: FE-26
+  title: Pulido de animaciones, responsive y disclaimer médico
+  area: frontend
+  priority: P1
+  milestone: freeze
+  depends: [FE-07]
+  docs: demo-script.md
+  tasks:
+    - Pulir las transiciones, la responsividad en tablet y el disclaimer "no es un dispositivo médico"
+    - Repasar la accesibilidad (contraste y que el estado no dependa solo del color)
+  acceptance:
+    - Se completa el guion de demo sin glitches visuales
+
+- id: CNT-04
+  title: Guion, slides, vídeo y envío a Space Apps
+  area: content
+  priority: P1
+  milestone: freeze
+  docs: demo-script.md
+  tasks:
+    - Preparar las slides, grabar el vídeo de la demo (plan B) y rellenar la página de envío de Space Apps
+    - Hacer 2–3 ensayos cronometrados
+  acceptance:
+    - Envío hecho antes del deadline
+    - El vídeo está en presentation/
