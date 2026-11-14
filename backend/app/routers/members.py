@@ -27,7 +27,7 @@ from app.schemas import (
     RuokResult,
     Slug,
 )
-from app.services import alerts, environments, liveness, liveness_watch, measurements, members
+from app.services import alerts, environments, liveness, measurements, members
 from app.services.member_assessment import UnknownEnvironment, assess_member
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -166,5 +166,8 @@ def heartbeat(member_id: int, body: HeartbeatIn, session: SessionDep) -> Heartbe
     "alerta no_contact abierta.",
 )
 def ruok(member_id: int, body: RuokIn, session: SessionDep) -> RuokResult:
+    # Import local: así esta PR no toca la línea de imports que también cambia BE-20 (#152).
+    from app.services.liveness_watch import answer_ruok
+
     m = _member(session, member_id)
-    return liveness_watch.answer_ruok(session, m, body.ok, body.note)
+    return answer_ruok(session, m, body.ok, body.note)
