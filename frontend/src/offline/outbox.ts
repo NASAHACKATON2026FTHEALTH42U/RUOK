@@ -24,6 +24,9 @@ export type TaskCompleteIn = Schema<'TaskCompleteIn'>
 export type GameState = Schema<'GameState'>
 export type HomeMessageIn = Schema<'HomeMessageIn'>
 export type HomeMessage = Schema<'HomeMessage'>
+export type KudosIn = Schema<'KudosIn'>
+export type Kudos = Schema<'Kudos'>
+export type CrewMission = Schema<'CrewMission'>
 
 // ── Estado visible (contador de la cabecera) ─────────────────
 
@@ -86,6 +89,20 @@ function postHomeMessage(memberId: number, message: HomeMessageIn) {
   })
 }
 
+function postKudos(memberId: number, kudos: KudosIn) {
+  return api.POST('/api/v1/members/{member_id}/kudos', {
+    params: { path: { member_id: memberId } },
+    body: kudos,
+  })
+}
+
+function postMissionJoin(memberId: number, missionId: string, id: string) {
+  return api.POST('/api/v1/members/{member_id}/missions/{mission_id}/join', {
+    params: { path: { member_id: memberId, mission_id: missionId } },
+    body: { id },
+  })
+}
+
 function postMeasurements(memberId: number, measurements: MeasurementIn[]) {
   return api.POST('/api/v1/members/{member_id}/measurements', {
     params: { path: { member_id: memberId } },
@@ -127,6 +144,23 @@ async function send(
       }
       case 'home_message': {
         const r = await postHomeMessage(entry.member_id, entry.body as HomeMessageIn)
+        return {
+          status: r.response.status,
+          data: r.data,
+          error: r.error ? JSON.stringify(r.error) : undefined,
+        }
+      }
+      case 'kudos': {
+        const r = await postKudos(entry.member_id, entry.body as KudosIn)
+        return {
+          status: r.response.status,
+          data: r.data,
+          error: r.error ? JSON.stringify(r.error) : undefined,
+        }
+      }
+      case 'mission_join': {
+        const body = entry.body as { mission_id: string; id: string }
+        const r = await postMissionJoin(entry.member_id, body.mission_id, body.id)
         return {
           status: r.response.status,
           data: r.data,
@@ -420,6 +454,67 @@ export async function pendingHomeMessages(
       created_at: e.created_at,
       failed: e.status === 'failed',
     }))
+}
+
+/**
+ * Si el servidor ha rechazado la entrada (4xx), la quita del outbox y lanza el motivo: un
+ * kudos o un «me apunto» rechazado no se reintenta ni se queda como pendiente para siempre.
+ */
+async function throwIfRejected(id: string): Promise<void> {
+  const db = await getDb()
+  const entry = await db.get('outbox', id)
+  if (entry?.status !== 'failed') return
+  await db.delete('outbox', id)
+  await refreshCounts()
+  let detail = entry.last_error ?? 'El servidor lo ha rechazado'
+  try {
+    const parsed = JSON.parse(detail) as { detail?: unknown }
+    if (typeof parsed.detail === 'string') detail = parsed.detail
+  } catch {
+    // no era JSON: se muestra tal cual
+  }
+  throw new Error(detail)
+}
+
+/**
+ * Da kudos a un compañero (FE-24): UUID de cliente (idempotente). Sin conexión queda en el
+ * outbox y sale después. Si el servidor lo rechaza (a uno mismo, límite diario…), lanza el
+ * motivo.
+ */
+export async function sendKudos(
+  memberId: number,
+  toMemberId: number,
+  message: string,
+): Promise<SubmitResult<Kudos>> {
+  const kudos: KudosIn = { id: newId(), to_member_id: toMemberId, message }
+  const r = await submit<Kudos>(
+    'kudos',
+    kudos.id,
+    memberId,
+    `/members/${memberId}/kudos`,
+    kudos,
+    async () => {},
+  )
+  if (r.status === 'queued') await throwIfRejected(kudos.id)
+  return r
+}
+
+/** Se apunta a una misión de tripulación de hoy (FE-24). Apuntarse dos veces no duplica. */
+export async function joinMission(
+  memberId: number,
+  missionId: string,
+): Promise<SubmitResult<CrewMission>> {
+  const id = newId()
+  const r = await submit<CrewMission>(
+    'mission_join',
+    id,
+    memberId,
+    `/members/${memberId}/missions/${missionId}/join`,
+    { mission_id: missionId, id },
+    async () => {},
+  )
+  if (r.status === 'queued') await throwIfRejected(id)
+  return r
 }
 
 // ── Arranque ────────────────────────────────────────────────
