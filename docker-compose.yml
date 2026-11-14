@@ -1,0 +1,21 @@
+# R U OK? en un comando (BE-24):  docker compose up --build
+# Un solo servicio: FastAPI sirve la API (/api/v1) y el build del front en el puerto 8000,
+# escuchando en 0.0.0.0 para los móviles de la red local (http://<ip-del-servidor>:8000).
+services:
+  ruok:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DEMO_MODE: "true"
+    volumes:
+      - ruok-data:/data   # la BD SQLite sobrevive a los reinicios
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  ruok-data:
