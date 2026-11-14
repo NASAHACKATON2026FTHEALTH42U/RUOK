@@ -65,6 +65,7 @@ export function BodyFigure({
   const uid = useId().replace(/:/g, '')
   const stripes = `stripes-${uid}`
   const glow = `glow-${uid}`
+  const critical = `critical-${uid}`
   const boxRef = useRef<HTMLDivElement>(null)
   const [tooltip, setTooltip] = useState<Tooltip | null>(null)
   // Zona señalada (ratón, foco de teclado o su botón de la leyenda): se ilumina y el resto se atenúa.
@@ -92,7 +93,11 @@ export function BodyFigure({
 
   /** Relleno de una región: color del estado, o rayado gris si no hay datos fiables. */
   const fillFor = (r: RegionState) =>
-    stale || statusStyle(r.status).striped ? `url(#${stripes})` : STATUS_COLORS[r.status]
+    stale || statusStyle(r.status).striped
+      ? `url(#${stripes})`
+      : r.status === 'critical'
+        ? `url(#${critical})` // degradado radial que late (centro siempre con color)
+        : STATUS_COLORS[r.status]
 
   const regionProps = (region: BodyRegion) => {
     const r = byRegion.get(region)
@@ -142,7 +147,7 @@ export function BodyFigure({
     return {
       fill: fillFor(r),
       // Más opaco al señalarlo; el crítico, algo más (sin llegar a sólido) y además parpadea.
-      fillOpacity: hovered === r.systemId ? 0.85 : r.status === 'critical' && !stale ? 0.7 : 0.55,
+      fillOpacity: hovered === r.systemId || (r.status === 'critical' && !stale) ? 0.85 : 0.55,
       stroke: selected
         ? '#ffffff'
         : stale || statusStyle(r.status).striped
@@ -320,6 +325,35 @@ export function BodyFigure({
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+            {/* Crítico: el centro mantiene siempre el rojo y el color se expande y se contrae hacia
+                los bordes (que nunca quedan del todo transparentes). Fijo con "reducir movimiento". */}
+            <radialGradient id={critical} cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0" stopColor={STATUS_COLORS.critical} stopOpacity="1" />
+              <stop offset="0.35" stopColor={STATUS_COLORS.critical} stopOpacity="0.95">
+                {!reducedMotion && (
+                  <animate
+                    attributeName="offset"
+                    values="0.35;0.85;0.35"
+                    dur="1.8s"
+                    calcMode="spline"
+                    keySplines="0.4 0 0.6 1;0.4 0 0.6 1"
+                    repeatCount="indefinite"
+                  />
+                )}
+              </stop>
+              <stop offset="1" stopColor={STATUS_COLORS.critical} stopOpacity="0.45">
+                {!reducedMotion && (
+                  <animate
+                    attributeName="stop-opacity"
+                    values="0.45;0.85;0.45"
+                    dur="1.8s"
+                    calcMode="spline"
+                    keySplines="0.4 0 0.6 1;0.4 0 0.6 1"
+                    repeatCount="indefinite"
+                  />
+                )}
+              </stop>
+            </radialGradient>
             <pattern
               id={stripes}
               width="24"

@@ -90,16 +90,15 @@ html[data-theme-ready] :is(body, header, footer, nav a, select) {
   }
 }
 
-/* Órgano en estado crítico (BodyFigure): rojo más intenso que parpadea con resplandor. */
+/* Órgano en estado crítico (BodyFigure): el latido del color va en un degradado radial del
+   SVG; aquí solo un resplandor rojo que acompaña (sin cambiar la opacidad del órgano). */
 @keyframes critical-blink {
   0%,
   100% {
-    opacity: 0.8;
-    filter: brightness(1.15) drop-shadow(0 0 6px rgb(208 59 59 / 0.9));
+    filter: drop-shadow(0 0 0 rgb(208 59 59 / 0));
   }
   50% {
-    opacity: 0.4;
-    filter: brightness(1) drop-shadow(0 0 0 rgb(208 59 59 / 0));
+    filter: drop-shadow(0 0 7px rgb(208 59 59 / 0.85));
   }
 }
 .critical-blink {
@@ -108,7 +107,6 @@ html[data-theme-ready] :is(body, header, footer, nav a, select) {
 @media (prefers-reduced-motion: reduce) {
   .critical-blink {
     animation: none;
-    opacity: 0.8;
-    filter: brightness(1.15) drop-shadow(0 0 6px rgb(208 59 59 / 0.9));
+    filter: drop-shadow(0 0 5px rgb(208 59 59 / 0.7));
   }
 }
