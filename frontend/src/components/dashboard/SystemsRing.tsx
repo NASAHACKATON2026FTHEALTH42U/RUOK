@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, useState } from 'react'
 import { bySeverity, statusStyle, type Status } from '../ui/status'
 import type { RegionState } from '../body/regions'
 
@@ -33,6 +34,40 @@ const ST_STROKE: Record<Status, string> = {
 /** Relleno de la barra: cuanto peor el estado, menos "salud" (decorativo; el texto manda). */
 const BAR: Record<Status, number> = { normal: 90, warning: 60, critical: 30, unknown: 0 }
 
+/** Estilo de `hud-label` para los textos del SVG. */
+const LABEL = { fontSize: 9, letterSpacing: 1.26, fill: 'var(--env-muted)' } as const
+
+/** Alto del anillo: el de la maqueta, o menos si hace falta para que el panel quepa sin scroll. */
+const RING_MAX = 222
+const RING_MIN = 150
+
+/**
+ * Ajusta el alto de un bloque para que el contenido de `<main>` quepa sin scroll
+ * (docs/design/hud-style.md §5), entre RING_MIN y RING_MAX. Se recalcula al cambiar el tamaño
+ * de la pantalla o del contenido (p. ej. al aparecer un aviso).
+ */
+function useFitHeight(ref: React.RefObject<HTMLElement | null>) {
+  const [height, setHeight] = useState(RING_MAX)
+  useLayoutEffect(() => {
+    const el = ref.current
+    const main = el?.closest('main')
+    const content = main?.firstElementChild
+    if (!el || !main || !content) return
+    const fit = () => {
+      if (el.offsetParent === null) return // oculto (escritorio)
+      const over = content.getBoundingClientRect().height - main.clientHeight
+      const next = Math.round(el.offsetHeight - over)
+      setHeight(Math.max(RING_MIN, Math.min(RING_MAX, next)))
+    }
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(main)
+    ro.observe(content)
+    return () => ro.disconnect()
+  }, [ref])
+  return height
+}
+
 function greeting(now: Date) {
   const h = now.getHours()
   return h >= 6 && h < 13 ? 'Buenos días' : h >= 13 && h < 20 ? 'Buenas tardes' : 'Buenas noches'
@@ -61,6 +96,8 @@ function delayLabel(s: number) {
 }
 
 export function SystemsRing({ regions, stale, name, env, now, onSelectSystem }: SystemsRingProps) {
+  const ringRef = useRef<HTMLElement>(null)
+  const ringHeight = useFitHeight(ringRef)
   const items = regions.map((r) => ({ ...r, status: stale ? ('unknown' as Status) : r.status }))
   const sorted = [...items].sort((a, b) => bySeverity(a.status, b.status))
   const statuses = items.map((r) => r.status)
@@ -97,9 +134,16 @@ export function SystemsRing({ regions, stale, name, env, now, onSelectSystem }: 
       </div>
 
       <section
+        ref={ringRef}
         aria-label="Estado global"
-        className="relative mx-auto h-[222px] w-full max-w-[390px]"
+        className="relative mx-auto w-full max-w-[390px]"
+        style={{ height: ringHeight }}
       >
+        <p className="sr-only">
+          {nominal} de {items.length} sistemas nominales.
+        </p>
+        {/* Todo dentro del SVG (también los textos), para que escale junto. El centro del anillo
+            es el centro del viewBox, así que queda centrado con cualquier ancho o alto. */}
         <svg viewBox="0 0 390 222" className="absolute inset-0 h-full w-full" aria-hidden="true">
           <path d="M22 44 L74 44 L112 76" fill="none" stroke="#1F4450" />
           <rect x="110" y="74" width="5" height="5" fill="var(--env-primary)" />
@@ -158,25 +202,29 @@ export function SystemsRing({ regions, stale, name, env, now, onSelectSystem }: 
             strokeDasharray="12 7"
           />
           <circle cx="195" cy="111" r="58" fill="#0B1B21" stroke="var(--env-border)" />
+          <g fontFamily="var(--font-mono)" textAnchor="middle" dominantBaseline="central">
+            <text x="195" y="84" {...LABEL}>
+              SISTEMAS
+            </text>
+            <text x="195" y="112" fontSize="34" fontWeight="300" fill="var(--env-text)">
+              {nominal}
+              <tspan fill="var(--env-muted)">/{items.length}</tspan>
+            </text>
+            <text x="195" y="139" {...LABEL}>
+              NOMINALES
+            </text>
+          </g>
+          {env && (
+            <g fontFamily="var(--font-mono)" {...LABEL}>
+              <text x="22" y="34">
+                ENL / {delayLabel(env.comm_delay_s).toUpperCase()}
+              </text>
+              <text x="368" y="194" textAnchor="end">
+                G / {env.gravity_g}
+              </text>
+            </g>
+          )}
         </svg>
-        {env && (
-          <>
-            <span className="hud-label absolute top-7 left-[22px] text-[9px]">
-              Enl / {delayLabel(env.comm_delay_s)}
-            </span>
-            <span className="hud-label absolute top-[184px] right-[22px] text-[9px]">
-              G / {env.gravity_g}
-            </span>
-          </>
-        )}
-        <div className="absolute top-16 left-1/2 flex w-[116px] -translate-x-1/2 flex-col items-center text-center">
-          <span className="hud-label text-[9px]">Sistemas</span>
-          <span className="font-mono text-[34px] leading-[1.15] font-light">
-            {nominal}
-            <span className="text-env-muted">/{items.length}</span>
-          </span>
-          <span className="hud-label text-[9px]">Nominales</span>
-        </div>
       </section>
 
       <section className="hud-panel" aria-label="Sistemas del cuerpo">
