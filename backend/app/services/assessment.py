@@ -61,7 +61,9 @@ def merge_ranges(indicator: Any, env: Any = None) -> dict[str, Any]:
     indicator, env = _as_dict(indicator), _as_dict(env)
     ranges = _as_dict(indicator.get("ranges"))
     overrides = _as_dict((env.get("threshold_overrides") or {}).get(indicator["id"]))
-    ranges.update(overrides)
+    # Un override solo cambia las claves que define: `RangeOverride.model_dump()`
+    # trae el resto a None y no debe borrar los rangos del catálogo.
+    ranges.update({k: v for k, v in overrides.items() if v is not None})
     return ranges
 
 

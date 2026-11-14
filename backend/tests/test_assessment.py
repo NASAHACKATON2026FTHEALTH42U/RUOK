@@ -107,3 +107,16 @@ def test_accepts_pydantic_models():
     )
     assert evaluate_indicator(150, model, MARS) == Status.critical
     assert evaluate_indicator(150, model, EARTH) == Status.warning
+
+
+def test_none_fields_in_override_do_not_erase_catalog_ranges():
+    # Así llega un Environment real tras model_dump(): RangeOverride con None.
+    from app.services.environments import get_environment
+
+    mars = get_environment("mars")
+    for env in (mars, mars.model_dump()):
+        merged = merge_ranges(BP_SYSTOLIC, env)
+        assert merged["normal"] == [90, 129]
+        assert merged["critical_high"] == 160
+        assert tuple(merged["warning"]) == (130, 140)
+        assert evaluate_indicator(150, BP_SYSTOLIC, env) == Status.critical
