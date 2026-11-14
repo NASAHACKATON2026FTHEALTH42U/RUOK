@@ -1,11 +1,14 @@
-"""Catálogos de solo lectura. STUB(FS-02) → BE-03 (entornos), BE-04 (indicadores y sistemas)
-y BE-21 (intervenciones), que leen app/data/*.json."""
+"""Catálogos de solo lectura, leídos de app/data/*.json.
+
+Entornos: reales (BE-03). STUB(FS-02) → BE-04 (indicadores y sistemas) y BE-21 (intervenciones).
+"""
 
 from fastapi import APIRouter, HTTPException
 
 from app import stubs
 from app.routers.deps import ERRORS_404, ERRORS_AUTH, AuthDep
 from app.schemas import BodySystem, Environment, Indicator, Intervention, Slug
+from app.services import environments
 
 router = APIRouter(dependencies=[AuthDep], responses=ERRORS_AUTH)
 
@@ -15,10 +18,10 @@ router = APIRouter(dependencies=[AuthDep], responses=ERRORS_AUTH)
     response_model=list[Environment],
     tags=["environments"],
     summary="Perfiles de entorno",
-    description="STUB(FS-02) → BE-03",
+    description="Los 6 perfiles de app/data/environments.json (docs/environments.md).",
 )
 def list_environments() -> list[Environment]:
-    return stubs.ENVIRONMENTS
+    return environments.list_environments()
 
 
 @router.get(
@@ -27,10 +30,10 @@ def list_environments() -> list[Environment]:
     responses=ERRORS_404,
     tags=["environments"],
     summary="Un perfil de entorno",
-    description="STUB(FS-02) → BE-03",
+    description="Un perfil de app/data/environments.json. 404 si el id no existe.",
 )
 def get_environment(env_id: Slug) -> Environment:
-    env = stubs.ENV_BY_ID.get(env_id)
+    env = environments.get_environment(env_id)
     if env is None:
         raise HTTPException(404, f"Entorno desconocido: {env_id}")
     return env
