@@ -409,3 +409,29 @@ export function demoFastForward(seconds: number) {
 export function pauseLiveness(envId: string, paused: boolean) {
   return unwrap(api.POST('/api/v1/control/liveness/pause', { body: { env_id: envId, paused } }))
 }
+
+// ── Señales en tiempo real (FE-15): NO se encolan ────────────
+// El heartbeat y la respuesta al "R U OK?" solo tienen sentido en el momento: un heartbeat
+// guardado y enviado más tarde haría creer al servidor que el member seguía vivo. Si no hay
+// conexión, se pierden a propósito (el servidor marcará `stale`, que es lo correcto) y lanzan
+// NetworkError. Lo que el member necesite pedir sin conexión va por el SOS, que sí se encola.
+
+/** `POST /members/{id}/heartbeat`: señal de vida del dispositivo. */
+export function sendHeartbeat(memberId: number, body: Schema<'HeartbeatIn'>) {
+  return unwrap(
+    api.POST('/api/v1/members/{member_id}/heartbeat', {
+      params: { path: { member_id: memberId } },
+      body,
+    }),
+  )
+}
+
+/** `POST /members/{id}/ruok`: respuesta al check-in "R U OK?". Con `ok: false` el servidor crea la alerta. */
+export function answerRuok(memberId: number, ok: boolean, note?: string) {
+  return unwrap(
+    api.POST('/api/v1/members/{member_id}/ruok', {
+      params: { path: { member_id: memberId } },
+      body: { ok, note: note ?? null },
+    }),
+  )
+}
