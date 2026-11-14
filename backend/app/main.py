@@ -16,6 +16,7 @@ from app.seed import ensure_seeded
 from app.services import catalog as catalog_service
 from app.services import environments, events, gamification, liveness_watch, routine
 from app.services.app_state import restore_clock
+from app.static_front import mount_frontend
 
 
 @asynccontextmanager
@@ -77,3 +78,7 @@ api.include_router(game.router)
 api.include_router(realtime.router)
 api.include_router(realtime.public)
 app.include_router(api)
+
+# Modo "a bordo": si hay build del front, se sirve desde aquí (BE-24). Va al final para
+# que las rutas de la API tengan prioridad sobre el fallback SPA.
+mount_frontend(app)
