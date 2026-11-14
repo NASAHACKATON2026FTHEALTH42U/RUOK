@@ -23,7 +23,7 @@ import { TOPBAR_SLOT_ID } from './TopBarPortal'
 
 /**
  * Estructura de la app con el estilo HUD (docs/design/hud-style.md §6).
- * - **Móvil:** cabecera (R U OK, nodo, reloj y `SOS`), contenido y 4 pestañas abajo según el
+ * - **Móvil:** cabecera (R U OK, reloj y `SOS`), contenido y 4 pestañas abajo según el
  *   rol (3 + «Más»). Sin cajón: lo secundario está en la pantalla «Más».
  * - **Escritorio (≥ md):** barra superior (identidad, reloj, sesión, resumen de la página y SOS)
  *   y barra lateral con las secciones, estados y controles.
@@ -53,18 +53,14 @@ export function Layout() {
       R U OK
     </NavLink>
   )
-  const node = env ? `Nodo.${env.id} / ${env.name}` : 'Sin entorno'
 
   return (
     <div className="flex h-dvh flex-col">
       <MockBanner />
 
-      {/* Cabecera móvil: logo + nodo, reloj y SOS siempre visible */}
+      {/* Cabecera móvil: logo, reloj y SOS siempre visible */}
       <header className="flex shrink-0 items-center justify-between gap-3 border-b border-hud-line px-[18px] pt-3.5 pb-3 md:hidden">
-        <div className="min-w-0">
-          {logo}
-          <div className="hud-label mt-0.5 truncate text-[9px]">{node}</div>
-        </div>
+        {logo}
         <div className="flex items-center gap-2.5">
           <HudClock env={env} />
           <SosButton variant="header" />
@@ -104,9 +100,10 @@ export function Layout() {
             className="mt-auto flex w-full flex-col items-start gap-1.5 pt-2 text-xs [&_label]:flex-wrap [&_select]:max-w-full"
           >
             <MemberActivitySelector compact />
-            <LinkStatusChip />
+            {/* Enlace y servidor: solo si hay algo que avisar (retardo, sin enlace, sin conexión). */}
+            <LinkStatusChip quiet />
             <PendingSyncChip />
-            <ServerStatus />
+            <ServerStatus quiet />
             {can('action:change-environment') && <EnvironmentSelector />}
             {/* Aviso siempre visible en escritorio; en móvil va en «Más» y en el login. */}
             <p className="mt-2 text-[11px] leading-snug text-env-muted">
@@ -122,24 +119,23 @@ export function Layout() {
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          {/* Barra superior de escritorio, con el estilo de la de fase de misión: identidad, reloj,
-              sesión, el resumen de la página (TopBarPortal: estado general, avisos…) y SOS. Fuera
+          {/* Barra superior de escritorio, con el estilo de la de fase de misión: identidad,
+              usuario y el resumen de la página (TopBarPortal: estado general, avisos…) a la
+              izquierda; reloj, SOS y «Salir» pegados a la derecha. Fuera
               del área con scroll, para que el SOS esté siempre a la vista. */}
           <div className="hidden shrink-0 px-6 pt-4 md:block">
             <div
               className={`mx-auto flex w-full flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-env-border bg-env-surface px-4 py-2.5 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
             >
-              <div className="min-w-0">
-                {logo}
-                <div className="hud-label mt-0.5 truncate text-[9px]">{node}</div>
-              </div>
-              <HudClock env={env} />
-              <SessionMenu />
+              {logo}
+              <SessionMenu part="user" />
               <div
                 id={TOPBAR_SLOT_ID}
                 className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
               />
+              <HudClock env={env} />
               <SosButton variant="header" />
+              <SessionMenu part="logout" />
             </div>
           </div>
 
