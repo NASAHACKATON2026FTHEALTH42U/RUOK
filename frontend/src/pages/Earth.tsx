@@ -55,18 +55,20 @@ export default function Earth() {
   }
 
   const btn =
-    'rounded-lg border border-env-border px-3 py-1.5 text-sm hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary'
+    'rounded-lg border border-env-border px-2.5 py-1 text-xs hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary'
 
   return (
     <MotionConfig reducedMotion="user">
-      <section className="space-y-4">
-        <header>
-          <h1 className="text-2xl font-semibold">La Tierra</h1>
-          <p className="text-env-muted">Un momento para mirar casa.</p>
+      {/* Ocupa el alto disponible (Layout `fill`): la foto se queda con el espacio que sobra y
+          todo cabe en la pantalla sin scroll. */}
+      <section className="flex min-h-0 flex-1 flex-col gap-2.5 md:gap-3">
+        <header className="flex shrink-0 flex-wrap items-baseline gap-x-3">
+          <h1 className="text-xl font-semibold md:text-2xl">La Tierra</h1>
+          <p className="text-sm text-env-muted">Un momento para mirar casa.</p>
         </header>
 
-        <figure className="overflow-hidden rounded-2xl border border-env-border bg-black">
-          <div className="relative aspect-[4/3] w-full sm:aspect-[16/10]">
+        <figure className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-env-border bg-black">
+          <div className="relative min-h-32 w-full flex-1">
             <AnimatePresence initial={false} mode="wait">
               <motion.img
                 key={photo.id}
@@ -80,16 +82,18 @@ export default function Earth() {
               />
             </AnimatePresence>
           </div>
-          <figcaption className="bg-env-surface px-4 py-3" aria-live="polite">
-            <p className="font-semibold">{photo.title}</p>
-            <p className="text-sm">{photo.caption}</p>
-            <p className="mt-1 text-xs text-env-muted">
+          <figcaption className="shrink-0 bg-env-surface px-3 py-2" aria-live="polite">
+            <p className="text-sm font-semibold">{photo.title}</p>
+            <p className="line-clamp-2 text-xs" title={photo.caption}>
+              {photo.caption}
+            </p>
+            <p className="mt-0.5 text-[11px] text-env-muted">
               {photo.date} · {PHOTO_CREDIT}
             </p>
           </figcaption>
         </figure>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center gap-1.5">
           <button type="button" className={btn} onClick={() => go(-1)} aria-label="Foto anterior">
             ← Anterior
           </button>
@@ -107,12 +111,12 @@ export default function Earth() {
           <button type="button" className={btn} onClick={toggleSound} aria-pressed={sound}>
             {sound ? '🔊 Sonido ambiente' : '🔇 Sonido ambiente'}
           </button>
-          <span className="ml-auto text-sm text-env-muted tabular-nums">
+          <span className="ml-auto text-xs text-env-muted tabular-nums">
             {index + 1} / {EARTH_PHOTOS.length}
           </span>
         </div>
 
-        <ul className="grid grid-cols-3 gap-2 sm:grid-cols-6" aria-label="Fotos">
+        <ul className="grid shrink-0 grid-flow-col auto-cols-fr gap-1.5" aria-label="Fotos">
           {EARTH_PHOTOS.map((p, i) => (
             <li key={p.id}>
               <button
@@ -120,7 +124,7 @@ export default function Earth() {
                 onClick={() => setIndex(i)}
                 aria-current={i === index}
                 aria-label={p.title}
-                className={`block aspect-square w-full overflow-hidden rounded-lg border-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
+                className={`block h-11 w-full overflow-hidden rounded-lg border-2 md:h-14 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
                   i === index
                     ? 'border-env-text'
                     : 'border-transparent opacity-70 hover:opacity-100'

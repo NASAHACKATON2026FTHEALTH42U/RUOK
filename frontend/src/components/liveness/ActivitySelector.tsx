@@ -5,7 +5,7 @@ import { activityOptions, type Activity } from './heartbeat'
  * Selector de actividad (FE-15), con el estilo HUD de «Más» (panel `ACT.01`). Va en cada
  * heartbeat: en EVA los umbrales de "sin contacto" son mucho más estrictos y en sueño, más
  * relajados (los aplica el servidor). Marcar "Sueño" evita falsas alarmas cuando se bloquea
- * la pantalla del móvil.
+ * la pantalla del móvil. Las opciones son botones con `aria-pressed`: se recorren con Tab.
  */
 export function ActivitySelector({
   isSpace,
@@ -28,10 +28,14 @@ export function ActivitySelector({
         {activityOptions(isSpace).map((o) => {
           const on = o.id === activity
           return (
-            <label
+            // Botones (no radios): cada opción se alcanza con el tabulador y se elige con Intro o espacio.
+            <button
+              type="button"
+              aria-pressed={on}
+              onClick={() => setActivity(o.id as Activity)}
               key={o.id}
               // En la barra lateral (compact), letra más pequeña: «Actividad de riesgo» cabe mejor.
-              className={`relative flex min-h-11 min-w-0 cursor-pointer items-center justify-center border px-1 text-center font-mono uppercase focus-within:outline-2 focus-within:outline-offset-1 focus-within:outline-env-primary ${
+              className={`relative flex min-h-11 min-w-0 cursor-pointer items-center justify-center border px-1 text-center font-mono uppercase focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-env-primary ${
                 compact
                   ? 'text-[9px] leading-tight tracking-[0.06em]'
                   : 'text-[11px] tracking-[0.1em]'
@@ -41,16 +45,8 @@ export function ActivitySelector({
                   : 'border-env-border text-env-muted hover:text-env-text'
               }`}
             >
-              <input
-                type="radio"
-                name="activity"
-                value={o.id}
-                checked={on}
-                onChange={() => setActivity(o.id as Activity)}
-                className="sr-only"
-              />
               {o.label}
-            </label>
+            </button>
           )
         })}
       </div>
