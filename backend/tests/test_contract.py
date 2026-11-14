@@ -167,6 +167,7 @@ CALLS = [
         {"id": str(uuid.uuid4()), "category": "emergency", "severity": "emergency"},
         200,
     ),
+    # Las acciones (BE-15) son reales: actúan sobre ALERT_ID, que se crea antes (ver abajo).
     ("post", f"/alerts/{ALERT_ID}/escalate", {"target_role": "ground"}, 200),
     ("post", f"/alerts/{ALERT_ID}/ack", {"actor": "responder"}, 200),
     ("post", f"/alerts/{ALERT_ID}/resolve", {"actor": "responder"}, 200),
@@ -195,8 +196,14 @@ CALLS = [
 ]
 
 
+# SOS de ejemplo sobre el que actúan escalate/ack/resolve/messages (warning → crew).
+ALERT_BODY = {"id": ALERT_ID, "category": "symptom", "severity": "warning", "message": "mareo"}
+
+
 @pytest.mark.parametrize(("method", "path", "body", "status"), CALLS)
 def test_stub_responds(client, method, path, body, status):
+    if ALERT_ID in path:  # idempotente: la crea si no existe (o un reset la ha borrado)
+        assert client.post(API + "/members/1/alerts", json=ALERT_BODY).status_code == 200
     resp = client.request(method, API + path, json=body)
     assert resp.status_code == status, resp.text
 
@@ -244,10 +251,29 @@ def test_assessment_mode_depends_on_environment(client):
             return next(s for s in a["systems"] if s["system_id"] == "neuro_behavioral")
 
         assert neuro(mars)["status"] == "critical"
-        assert neuro(mars)["escalation"]["mode"] == "autonomous"  # 840 s de retardo
+        # El escalado de un critical va a `crew` (a bordo): realtime y sin retardo (BE-31).
+        esc = neuro(mars)["escalation"]
+        assert (esc["target_role"], esc["mode"], esc["delay_s"]) == ("crew", "realtime", 0)
         assert neuro(iss)["escalation"]["mode"] == "realtime"  # mismos datos, ISS
     finally:
         client.post(API + "/demo/reset")  # no dejar el escenario a los demás tests
+
+
+def test_assessment_escalation_follows_contract(client):
+    """Regla del contrato (docs/alerts-and-escalation.md), no valores concretos del seed:
+    - `autonomous` solo con estado `critical` (y retardo >= 60 s);
+    - sin retardo (ISS), todo es `realtime` con delay 0;
+    - el mismo member evaluado con otro perfil (`?env=`) usa el retardo de ese perfil.
+    """
+    mars = client.get(API + "/members/1/assessment?env=mars").json()
+    iss = client.get(API + "/members/1/assessment?env=iss").json()
+    assert mars["env_id"] == "mars" and iss["env_id"] == "iss"
+    for system in mars["systems"] + iss["systems"]:
+        if system["escalation"]["mode"] == "autonomous":
+            assert system["status"] == "critical", system
+    for system in iss["systems"]:
+        assert system["escalation"]["mode"] == "realtime", system
+        assert system["escalation"]["delay_s"] == 0, system
 
 
 def test_events_stream_is_sse(client):

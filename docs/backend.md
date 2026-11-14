@@ -57,7 +57,7 @@ backend/
 │   ├── models.py         tablas SQLModel (15) e índices de data-model.md; tipo UTCDateTime
 │   ├── data/
 │   │   ├── environments.json  los 6 perfiles de entorno (BE-03)
-│   │   ├── indicators.json    20 indicadores con rangos provisionales (BE-04)
+│   │   ├── indicators.json    20 indicadores con rangos revisados en CNT-01 (BE-04)
 │   │   └── systems.json       7 sistemas del cuerpo con su región del SVG (BE-04)
 │   ├── services/
 │   │   ├── app_state.py     clave-valor de app_state: get_value/set_value, save_clock/restore_clock
@@ -196,7 +196,7 @@ Cómo funciona `services/environments.py` (patrón que ya sigue `catalog.py`, de
 - un indicador no aparece en la lista de ningún sistema;
 - un entorno de `environments.json` usa un indicador que no está en el catálogo.
 
-Los **rangos son provisionales** hasta CNT-01. Todos están en la tabla de umbrales de [sources.md](sources.md), con las reglas del motor (un valor más allá de la banda `warning` ya es `critical`).
+Los **rangos están revisados en CNT-01**, con una fuente por fila en la tabla de umbrales de [sources.md](sources.md#tabla-de-umbrales-cnt-01). Regla: el borde exterior de la banda `warning` coincide con el umbral crítico, para que no haya huecos; lo comprueba `test_no_gap_between_warning_and_critical`. Algunos valores son *diseño* (sin umbral clínico publicado) y están marcados así.
 
 Si cambias `indicators.json` o `systems.json`, regenera los mocks del front (`cd frontend && npm run gen:mocks`) además de los tipos.
 
@@ -277,7 +277,7 @@ Decisiones ya documentadas que todavía no están implementadas. Tenlas en cuent
 
 Todos los endpoints del contrato existen. **Reales:** `/health`, `/environments*`, `/indicators*`, `/systems`, members y privacidad (BE-05), `POST`/`GET /members/{id}/measurements` (BE-06) y `/demo/fast-forward` (a medias). **El resto** devuelve datos de ejemplo de `app/stubs.py` e indica en `description` qué issue lo implementa (`STUB(FS-02) → BE-06`). Tabla completa en [status.md](status.md#endpoints-reales-y-stubs).
 
-> ⚠️ El stub de `GET /members/{id}/assessment` **no coincide con lo que calcula el motor** (por ejemplo, 142 mmHg en Marte sale `warning` y el motor diría `critical`). No uses sus valores como referencia de las reglas: la referencia es `services/assessment.py`. Se arregla al conectar el motor en BE-11, y entonces hay que actualizar `test_assessment_mode_depends_on_environment`.
+> El assessment ya sale del motor real (BE-11). Los tests de escalado de `tests/test_contract.py` comprueban la regla del contrato. ⚠️ `test_assessment_mode_depends_on_environment` tiene un `TODO(BE-31)`: hoy acepta `autonomous` con 840 s para un escalado a `crew` (a bordo), que es el bug de BE-31 (#111). Hay que cambiarlo al arreglarlo.
 
 **Al implementar tu issue:**
 1. Sustituye el cuerpo del endpoint por la llamada a tu servicio (`app/services/…`). **No cambies la firma ni el `response_model`** sin cambiar antes el contrato.
@@ -291,7 +291,7 @@ Todos los endpoints del contrato existen. **Reales:** `/health`, `/environments*
 
 ## Exportar mocks para el front (FS-04)
 
-`uv run python scripts/export_mocks.py` (o `npm run gen:mocks` desde `frontend/`) llama a cada endpoint con el `TestClient` y genera `frontend/src/api/mocks/fixtures.gen.ts`. Hoy los datos salen de `app/stubs.py`. Cuando los endpoints sean reales, ejecútalo tras el seed (BE-07) para tener mocks con datos realistas. **Si añades un endpoint, el test de mocks del front exige un handler para él** (`frontend/src/api/mocks/handlers.ts`).
+`uv run python scripts/export_mocks.py` (o `npm run gen:mocks` desde `frontend/`) llama a cada endpoint con el `TestClient` y genera `frontend/src/api/mocks/fixtures.gen.ts`. **Es determinista:** el reloj se congela en `FROZEN_NOW` (14/11 10:00 UTC), así que dos ejecuciones dan el mismo fichero y solo cambia cuando cambian los datos. Si una PR muestra cambios en `fixtures.gen.ts` sin haber tocado datos, algo usa la hora real en lugar de `clock.now()`. Hoy los datos salen de `app/stubs.py`. Cuando los endpoints sean reales, ejecútalo tras el seed (BE-07) para tener mocks con datos realistas. **Si añades un endpoint, el test de mocks del front exige un handler para él** (`frontend/src/api/mocks/handlers.ts`).
 
 ## Cómo añadir un endpoint
 

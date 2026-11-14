@@ -31,6 +31,7 @@ __all__ = [
     "Status",
     "build_escalation",
     "classify",
+    "escalation_for_level",
     "escalation_mode",
     "evaluate_indicator",
     "find_protocol",
@@ -194,27 +195,46 @@ def recommendations_for(protocol: Mapping[str, Any] | None) -> list[Recommendati
     return sorted(recs, key=lambda r: r.priority)
 
 
-def build_escalation(
-    status: Status | str, env: Any, protocol: Mapping[str, Any] | None = None
+def escalation_for_level(
+    level: int, status: Status | str, env: Any, protocol: Mapping[str, Any] | None = None
 ) -> Escalation:
-    """Bloque ``escalation`` de un sistema.
+    """Bloque ``escalation`` para un nivel concreto de ``escalation_ladder`` (BE-31).
 
-    - ``critical`` sube al siguiente nivel de ``escalation_ladder`` (1);
-      el resto se queda en ``self`` (0).
-    - ``mode`` sale de ``comm_delay_s`` y del estado.
-    - ``delay_s`` es el retardo del entorno (ETA si sale por el enlace).
-    - ``protocol_id`` y ``message`` vienen del protocolo, si lo hay.
+    - Niveles **de a bordo** (``level < external_from_level``: self, crew…): se
+      resuelven sin enlace → ``realtime`` y ``delay_s = 0``, sea cual sea el retardo.
+    - Niveles **externos** (ground, doctor…): salen por el enlace con
+      ``comm_delay_s`` → ``realtime`` (< 5 s), ``delayed`` o ``autonomous``
+      (>= 60 s y ``critical``).
+
+    BE-14/BE-15 la usan al escalar una alerta a un nivel concreto.
     """
     env = _as_dict(env)
-    status = Status(status)
     ladder = env.get("escalation_ladder") or ["self"]
-    level = min(1, len(ladder) - 1) if status == Status.critical else 0
-    delay_s = int(env.get("comm_delay_s", 0))
+    level = max(0, min(level, len(ladder) - 1))
+    onboard = level < env["external_from_level"]
+    delay_s = 0 if onboard else int(env.get("comm_delay_s", 0))
     return Escalation(
         level=level,
         target_role=ladder[level],
-        mode=escalation_mode(delay_s, status),
+        mode=EscalationMode.realtime if onboard else escalation_mode(delay_s, status),
         delay_s=delay_s,
         message=(protocol or {}).get("message", ""),
         protocol_id=(protocol or {}).get("id"),
     )
+
+
+def build_escalation(
+    status: Status | str, env: Any, protocol: Mapping[str, Any] | None = None
+) -> Escalation:
+    """Bloque ``escalation`` de un sistema en el assessment.
+
+    - ``critical`` sube al siguiente nivel de ``escalation_ladder`` (1, la
+      tripulación: de a bordo, así que ``realtime`` y sin retardo); el resto se
+      queda en ``self`` (0).
+    - El modo y el retardo de cada nivel los decide ``escalation_for_level``.
+    - ``protocol_id`` y ``message`` vienen del protocolo, si lo hay.
+    """
+    status = Status(status)
+    ladder = _as_dict(env).get("escalation_ladder") or ["self"]
+    level = min(1, len(ladder) - 1) if status == Status.critical else 0
+    return escalation_for_level(level, status, env, protocol)

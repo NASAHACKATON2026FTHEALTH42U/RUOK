@@ -26,7 +26,6 @@ from app.schemas import (
     Intervention,
     Leaderboard,
     LeaderboardEntry,
-    LinkStatus,
     Measurement,
     Member,
     MemberSummary,
@@ -308,17 +307,6 @@ def alert(member_id: int = 1) -> Alert:
             AlertEvent(type="created", actor="member", at=T0),
             AlertEvent(type="queued", actor="system", at=T0, payload={"eta_s": 840}),
         ],
-    )
-
-
-def link_status(env_id: str = "mars") -> LinkStatus:
-    env = ENV_BY_ID.get(env_id, ENV_BY_ID["mars"])
-    return LinkStatus(
-        env_id=env.id,
-        state="delayed" if env.comm_delay_s >= 5 else "online",
-        delay_s=env.comm_delay_s,
-        queued=1 if env.id == "mars" else 0,
-        since=T0,
     )
 
 

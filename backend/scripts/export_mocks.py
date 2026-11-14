@@ -4,7 +4,8 @@ Uso (desde frontend/):  npm run gen:mocks
 Directo:                cd backend && uv run python scripts/export_mocks.py
 
 Llama a cada endpoint con el TestClient de FastAPI (sin arrancar servidor, con una BD
-temporal) y escribe los datos como constantes TypeScript tipadas (`: Schema<...>`):
+temporal y el reloj congelado en FROZEN_NOW, así que la salida es determinista)
+y escribe los datos como constantes TypeScript tipadas (`: Schema<...>`):
 si el contrato cambia y los mocks dejan de encajar, `npm run build` falla.
 
 Hoy los datos salen de app/stubs.py. Cuando los endpoints sean reales, ejecútalo
@@ -15,19 +16,75 @@ import json
 import os
 import sys
 import tempfile
+import uuid
+from datetime import UTC, datetime
 from pathlib import Path
 
 os.environ["DATABASE_URL"] = f"sqlite:///{tempfile.mkdtemp(prefix='ruok-mocks-')}/mocks.db"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fastapi.testclient import TestClient  # noqa: E402
+from sqlmodel import Session, delete  # noqa: E402
 
-from app import stubs  # noqa: E402
+from app import clock, models, stubs  # noqa: E402
+from app.db import engine  # noqa: E402
 from app.main import app  # noqa: E402
+
+# Reloj congelado: el mismo instante en cada ejecución, para que fixtures.gen.ts solo cambie
+# cuando cambian los datos (y no dé conflictos de git por las marcas de tiempo). Se sustituye
+# `datetime` dentro de app.clock (y no clock.now) porque los modelos guardan una referencia a
+# clock.now en sus valores por defecto. Es el mismo instante que stubs.T0.
+FROZEN_NOW = datetime(2026, 11, 14, 10, 0, tzinfo=UTC)
+
+
+class _FrozenDatetime(datetime):
+    @classmethod
+    def now(cls, tz=None):
+        return FROZEN_NOW if tz is not None else FROZEN_NOW.replace(tzinfo=None)
+
+
+clock.datetime = _FrozenDatetime
 
 API = "/api/v1"
 OUT = Path(__file__).resolve().parents[2] / "frontend/src/api/mocks/fixtures.gen.ts"
 NOW = "2026-11-14T10:00:00Z"
+
+
+def _demo_state(post) -> None:
+    """Deja a Cmdr. Vega (member 1) con un assessment de demo que mezcla los 4 estados.
+
+    Desde BE-11 el assessment es real y el seed (BE-07) da datos normales, así que
+    los mocks del front se quedarían todo en verde. En Marte:
+    - cardiovascular `critical` (tensión 145 > warning 130–140) → escalado `autonomous`;
+    - neuro-conductual `critical` (escenario `mars_sleep_bp`, sueño 3,5 h);
+    - musculoesquelético `warning` (90 min de ejercicio);
+    - radiación `unknown` (se borran sus mediciones: sin datos = desconocido);
+    - inmune `normal`.
+    """
+    post("/demo/scenarios/mars_sleep_bp")
+    now = clock.now().isoformat().replace("+00:00", "Z")
+    post(
+        "/members/1/measurements",
+        {
+            "measurements": [
+                {
+                    "id": str(uuid.uuid5(uuid.NAMESPACE_URL, f"mocks:{ind}")),
+                    "indicator_id": ind,
+                    "value": value,
+                    "taken_at": now,
+                }
+                for ind, value in (("bp_systolic", 145), ("exercise_min", 90))
+            ]
+        },
+    )
+    with Session(engine) as s:
+        s.exec(
+            delete(models.Measurement).where(
+                models.Measurement.member_id == 1,
+                models.Measurement.indicator_id == "radiation_dose",
+            )
+        )
+        s.commit()
 
 
 def main() -> None:
@@ -48,10 +105,16 @@ def main() -> None:
         sample = stubs.measurement(1)
         post(
             "/members/1/measurements",
-            {"measurements": [sample.model_dump(
-                mode="json", include={"id", "indicator_id", "value", "taken_at", "source"}
-            )]},
+            {
+                "measurements": [
+                    sample.model_dump(
+                        mode="json", include={"id", "indicator_id", "value", "taken_at", "source"}
+                    )
+                ]
+            },
         )
+
+        _demo_state(post)
 
         envs = get("/environments")
         env_ids = [e["id"] for e in envs]

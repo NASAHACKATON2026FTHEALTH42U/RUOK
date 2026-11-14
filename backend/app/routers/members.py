@@ -1,7 +1,7 @@
 """Members, mediciones, evaluación y liveness.
 
-Reales: members (BE-05), mediciones (BE-06) y assessment (BE-11).
-STUB(FS-02) → BE-12 (heartbeat y liveness) y BE-16 (R U OK?).
+Reales: members (BE-05), mediciones (BE-06), assessment (BE-11) y heartbeat (BE-12).
+STUB(FS-02) → BE-16 (R U OK?).
 """
 
 from datetime import datetime
@@ -10,7 +10,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session
 
-from app import models, stubs
+from app import models
 from app.db import get_session
 from app.routers.deps import ERRORS_404, ERRORS_409, ERRORS_AUTH, AuthDep
 from app.schemas import (
@@ -27,7 +27,7 @@ from app.schemas import (
     RuokResult,
     Slug,
 )
-from app.services import environments, measurements, members
+from app.services import alerts, behavioral, environments, liveness, measurements, members
 from app.services.member_assessment import UnknownEnvironment, assess_member
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -48,7 +48,7 @@ def _member(session: Session, member_id: int) -> models.Member:
     tags=["members"],
     summary="Members del entorno con su resumen",
     description="Members de la BD con `last_measurement_at` real. "
-    "`liveness`, `overall_status` y `open_alerts`: STUB(FS-02) → BE-12, BE-11 y BE-14.",
+    "`liveness`, `overall_status` y `open_alerts` reales (BE-12, BE-11, BE-14).",
 )
 def list_members(env_id: Slug, session: SessionDep) -> list[MemberSummary]:
     if environments.get_environment(env_id) is None:
@@ -100,10 +100,10 @@ def post_measurements(
         raise HTTPException(422, str(exc)) from exc
     except measurements.MeasurementConflict as exc:
         raise HTTPException(409, str(exc)) from exc
+    assessment = assess_member(session, m)
+    alerts.evaluate(session, m, assessment)  # abre, actualiza o escala alertas (BE-14)
     return MeasurementBatchResult(
-        accepted=accepted,
-        duplicates=duplicates,
-        assessment=assess_member(session, m),
+        accepted=accepted, duplicates=duplicates, assessment=behavioral.redact(assessment)
     )
 
 
@@ -135,12 +135,14 @@ def list_measurements(
     tags=["assessment"],
     summary="Evaluación del member",
     description="Con `env` se evalúa con otro perfil sin modificar datos; "
-    "un `env` inexistente → 404. El liveness es STUB hasta BE-12.",
+    "un `env` inexistente → 404. Si `behavioral.details_visible` es false, los "
+    "indicadores conductuales no aparecen en `systems[].indicators` (solo el estado agregado).",
 )
 def get_assessment(member_id: int, session: SessionDep, env: Slug | None = None) -> Assessment:
     m = _member(session, member_id)
     try:
-        return assess_member(session, m, env)
+        # Detalles conductuales ocultos salvo `details_visible` (BE-20).
+        return behavioral.redact(assess_member(session, m, env))
     except UnknownEnvironment as exc:
         raise HTTPException(404, f"Entorno desconocido: {exc}") from exc
 
@@ -150,11 +152,12 @@ def get_assessment(member_id: int, session: SessionDep, env: Slug | None = None)
     response_model=HeartbeatResult,
     tags=["liveness"],
     summary="Señal de vida del dispositivo del member",
-    description="Actualiza también el registro del dispositivo. STUB(FS-02) → BE-12/BE-29",
+    description="Actualiza `last_seen_at` y la actividad del member y el registro del "
+    "dispositivo. `checkin_required` es true si el member venía de `stale` o `lost`.",
 )
 def heartbeat(member_id: int, body: HeartbeatIn, session: SessionDep) -> HeartbeatResult:
-    _member(session, member_id)
-    return HeartbeatResult(liveness="active", checkin_required=False)
+    m = _member(session, member_id)
+    return liveness.record_heartbeat(session, m, body)
 
 
 @router.post(
@@ -162,8 +165,13 @@ def heartbeat(member_id: int, body: HeartbeatIn, session: SessionDep) -> Heartbe
     response_model=RuokResult,
     tags=["liveness"],
     summary="Respuesta al check-in 'R U OK?'",
-    description="STUB(FS-02) → BE-16",
+    description="Cierra el check-in pendiente y cuenta como señal de vida. ok=false "
+    "('Necesito ayuda') crea una alerta critical y devuelve su id; ok=true resuelve la "
+    "alerta no_contact abierta.",
 )
 def ruok(member_id: int, body: RuokIn, session: SessionDep) -> RuokResult:
-    _member(session, member_id)
-    return RuokResult(liveness="active", alert_id=None if body.ok else stubs.ALERT_ID)
+    # Import local: así esta PR no toca la línea de imports que también cambia BE-20 (#152).
+    from app.services.liveness_watch import answer_ruok
+
+    m = _member(session, member_id)
+    return answer_ruok(session, m, body.ok, body.note)

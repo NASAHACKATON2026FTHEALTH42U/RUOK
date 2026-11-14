@@ -254,7 +254,7 @@ export interface paths {
         };
         /**
          * Members del entorno con su resumen
-         * @description Members de la BD con `last_measurement_at` real. `liveness`, `overall_status` y `open_alerts`: STUB(FS-02) → BE-12, BE-11 y BE-14.
+         * @description Members de la BD con `last_measurement_at` real. `liveness`, `overall_status` y `open_alerts` reales (BE-12, BE-11, BE-14).
          */
         get: operations["list_members_api_v1_environments__env_id__members_get"];
         put?: never;
@@ -338,7 +338,7 @@ export interface paths {
         };
         /**
          * Evaluación del member
-         * @description Con `env` se evalúa con otro perfil sin modificar datos; un `env` inexistente → 404. El liveness es STUB hasta BE-12.
+         * @description Con `env` se evalúa con otro perfil sin modificar datos; un `env` inexistente → 404. Si `behavioral.details_visible` es false, los indicadores conductuales no aparecen en `systems[].indicators` (solo el estado agregado).
          */
         get: operations["get_assessment_api_v1_members__member_id__assessment_get"];
         put?: never;
@@ -360,7 +360,7 @@ export interface paths {
         put?: never;
         /**
          * Señal de vida del dispositivo del member
-         * @description Actualiza también el registro del dispositivo. STUB(FS-02) → BE-12/BE-29
+         * @description Actualiza `last_seen_at` y la actividad del member y el registro del dispositivo. `checkin_required` es true si el member venía de `stale` o `lost`.
          */
         post: operations["heartbeat_api_v1_members__member_id__heartbeat_post"];
         delete?: never;
@@ -380,7 +380,7 @@ export interface paths {
         put?: never;
         /**
          * Respuesta al check-in 'R U OK?'
-         * @description STUB(FS-02) → BE-16
+         * @description Cierra el check-in pendiente y cuenta como señal de vida. ok=false ('Necesito ayuda') crea una alerta critical y devuelve su id; ok=true resuelve la alerta no_contact abierta.
          */
         post: operations["ruok_api_v1_members__member_id__ruok_post"];
         delete?: never;
@@ -398,13 +398,13 @@ export interface paths {
         };
         /**
          * Alertas del member
-         * @description STUB(FS-02) → BE-15
+         * @description Alertas del member (las más recientes primero) con su timeline. Las automáticas son reales (BE-14); las manuales llegan con BE-15.
          */
         get: operations["list_member_alerts_api_v1_members__member_id__alerts_get"];
         put?: never;
         /**
          * Pedir ayuda / SOS (idempotente por UUID)
-         * @description Con `category=emergency` se acepta SIN token y la alerta queda con `authenticated=false`. STUB(FS-02) → BE-15/BE-27
+         * @description Idempotente por el UUID del cliente (mismo id y contenido → la misma alerta; contenido distinto → 409). Destino: `target_role` (se pueden saltar niveles); si no, emergency/critical suben hasta el primer nivel externo (a bordo al instante, tierra por el enlace) y warning va a la tripulación. El SOS sin token llega con BE-27.
          */
         post: operations["create_alert_api_v1_members__member_id__alerts_post"];
         delete?: never;
@@ -424,7 +424,7 @@ export interface paths {
         put?: never;
         /**
          * Escalar (por defecto al siguiente nivel; permite saltar niveles)
-         * @description STUB(FS-02) → BE-15
+         * @description Los niveles externos salen por el enlace con su ETA. 422 si el destino no está en la escalera o ya está en el último nivel; 409 si está resuelta.
          */
         post: operations["escalate_api_v1_alerts__alert_id__escalate_post"];
         delete?: never;
@@ -442,10 +442,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Reconocer la alerta
-         * @description STUB(FS-02) → BE-15
-         */
+        /** Reconocer la alerta */
         post: operations["ack_api_v1_alerts__alert_id__ack_post"];
         delete?: never;
         options?: never;
@@ -462,10 +459,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Resolver la alerta
-         * @description STUB(FS-02) → BE-15
-         */
+        /** Resolver la alerta */
         post: operations["resolve_api_v1_alerts__alert_id__resolve_post"];
         delete?: never;
         options?: never;
@@ -484,7 +478,7 @@ export interface paths {
         put?: never;
         /**
          * Mensaje en la alerta (viaja por el enlace si va a tierra)
-         * @description STUB(FS-02) → BE-15
+         * @description Si la alerta está en un nivel externo, el mensaje viaja por el enlace (member → tierra, responder → a bordo) y el evento lleva su ETA.
          */
         post: operations["add_message_api_v1_alerts__alert_id__messages_post"];
         delete?: never;
@@ -702,7 +696,7 @@ export interface paths {
         };
         /**
          * Estado del enlace con tierra
-         * @description STUB(FS-02) → BE-13
+         * @description Estado (online | delayed | los), retardo de ida y mensajes pendientes. Entrega antes los mensajes cuya ETA ya ha pasado (reloj de la demo).
          */
         get: operations["get_link_api_v1_link_get"];
         put?: never;
@@ -722,7 +716,7 @@ export interface paths {
         };
         /**
          * Mensajes del enlace (pendientes o entregados)
-         * @description STUB(FS-02) → BE-13/BE-22
+         * @description Por orden de envío; `direction` = up (a tierra) | down (a bordo).
          */
         get: operations["list_link_messages_api_v1_link_messages_get"];
         put?: never;
@@ -784,7 +778,7 @@ export interface paths {
         put?: never;
         /**
          * Forzar el estado del enlace
-         * @description STUB(FS-02) → BE-13
+         * @description Al pasar a `los` todo lo que se envía queda en cola; al salir de `los` la cola se envía con el retardo del entorno.
          */
         post: operations["demo_link_api_v1_demo_link_post"];
         delete?: never;
@@ -804,7 +798,7 @@ export interface paths {
         put?: never;
         /**
          * Avanzar el reloj de la demo
-         * @description Real: usa app/clock.py
+         * @description Avanza el reloj de la demo (app/clock.py), entrega los mensajes del enlace cuya ETA ya ha pasado y reevalúa las alertas abiertas.
          */
         post: operations["demo_fast_forward_api_v1_demo_fast_forward_post"];
         delete?: never;
@@ -1198,6 +1192,12 @@ export interface components {
              *     ]
              */
             escalation_ladder: string[];
+            /**
+             * External From Level
+             * @description Índice del primer nivel externo de escalation_ladder. Los anteriores son de a bordo (realtime, sin retardo); los externos salen por el enlace con comm_delay_s
+             * @example 2
+             */
+            external_from_level: number;
             liveness: components["schemas"]["LivenessThresholds"];
             /**
              * Vocabulary
@@ -1646,7 +1646,10 @@ export interface components {
             /** Paused */
             paused: boolean;
         };
-        /** LivenessThresholds */
+        /**
+         * LivenessThresholds
+         * @description Umbrales de liveness y escalado del entorno (docs/offline-and-liveness.md).
+         */
         LivenessThresholds: {
             /**
              * Stale After S
@@ -1664,10 +1667,34 @@ export interface components {
              */
             eva_stale_after_s: number;
             /**
+             * Eva Lost After S
+             * @description En EVA, sin señal → lost
+             * @example 120
+             */
+            eva_lost_after_s: number;
+            /**
+             * Sleep Factor
+             * @description Durante el sueño programado los umbrales se multiplican
+             * @example 3
+             */
+            sleep_factor: number;
+            /**
              * Ruok Timeout S
              * @example 120
              */
             ruok_timeout_s: number;
+            /**
+             * Morning Checkin By
+             * @description Hora local HH:MM; sin check-in matinal antes de esa hora → stale (geriatría)
+             * @example 10:00
+             */
+            morning_checkin_by: string | null;
+            /**
+             * Warning Escalate After S
+             * @description Un warning que persiste este tiempo escala al siguiente nivel
+             * @example 21600
+             */
+            warning_escalate_after_s: number;
         };
         /** LoginIn */
         LoginIn: {
@@ -3383,6 +3410,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description Mismo id con otro contenido, o alerta resuelta */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3441,6 +3477,15 @@ export interface operations {
             };
             /** @description Recurso inexistente */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Mismo id con otro contenido, o alerta resuelta */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3513,6 +3558,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description Mismo id con otro contenido, o alerta resuelta */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -3571,6 +3625,15 @@ export interface operations {
             };
             /** @description Recurso inexistente */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Mismo id con otro contenido, o alerta resuelta */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4336,6 +4399,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description Recurso inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4494,6 +4566,15 @@ export interface operations {
             };
             /** @description Rol sin permiso o dato ajeno */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

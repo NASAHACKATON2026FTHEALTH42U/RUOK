@@ -26,7 +26,7 @@ from sqlmodel import Session, col, delete, select
 
 from app import clock, models
 from app.schemas import Indicator
-from app.services import app_state, catalog, environments
+from app.services import accounts, app_state, catalog, environments
 
 SEED = 2026
 DAYS = 30
@@ -37,6 +37,12 @@ NAMESPACE = uuid.UUID("5d0c7a52-8a43-4f0e-9a5e-2b6f1c3d4e5f")
 WEEKLY = {"weight_kg", "radiation_dose", "vision_changes"}
 # Indicadores que se registran en el check-in diario (source = "checkin").
 CHECKIN = {"mood", "stress", "energy", "loneliness", "sleep_quality", "crew_relation"}
+
+
+def _source(indicator_id: str) -> str:
+    if indicator_id in CHECKIN:
+        return "checkin"
+    return "pvt" if indicator_id.startswith("pvt_") else "manual"
 
 
 @dataclass(frozen=True)
@@ -128,16 +134,16 @@ def _series(member_id: int, indicator: Indicator, anchor: datetime) -> list[mode
                 unit=indicator.unit,
                 taken_at=taken_at,
                 received_at=taken_at + timedelta(seconds=rng.randint(2, 90)),
-                source="checkin" if indicator.id in CHECKIN else "manual",
+                source=_source(indicator.id),
             )
         )
     return rows
 
 
 def seed(session: Session) -> tuple[int, int]:
-    """Inserta los members y sus mediciones. Devuelve (members, mediciones)."""
+    """Inserta los members, sus cuentas (BE-25) y sus mediciones. Devuelve (members, mediciones)."""
     anchor = _anchor()
-    session.add_all(
+    members = [
         models.Member(
             id=m.id,
             env_id=m.env_id,
@@ -148,10 +154,12 @@ def seed(session: Session) -> tuple[int, int]:
             created_at=anchor - timedelta(days=DAYS),
         )
         for m in MEMBERS
-    )
+    ]
+    session.add_all(members)
     # Los modelos no declaran relationship(): sin este flush, SQLAlchemy podría
-    # insertar las mediciones antes que los members y fallaría la FK.
+    # insertar las mediciones (y las cuentas) antes que los members y fallaría la FK.
     session.flush()
+    accounts.seed_users(session, members)  # BE-25: solo con DEMO_MODE=true hay demo
 
     total = 0
     for m in MEMBERS:
@@ -257,6 +265,8 @@ def scenario_eva_no_contact(session: Session) -> str:
     member = session.get(models.Member, VEGA)
     member.last_activity = "eva"
     member.last_seen_at = clock.now() - timedelta(minutes=3)
+    # Solo se vigila a quien ha conectado un dispositivo (BE-16): el móvil de la demo.
+    member.device_id = member.device_id or _uuid("device", "movil-vega")
     session.add(member)
     return "Cmdr. Vega en EVA sin contacto desde hace 3 min"
 
@@ -265,7 +275,7 @@ def scenario_geriatric_fall_risk(session: Session) -> str:
     """Rosa bebe poco, duerme mal, pierde peso y tiene la tensión baja (paso 8)."""
     s, r = "geriatric_fall_risk", FALL_RISK_RESIDENT
     added = _add_points(session, s, r, "hydration_ml", [1300, 1100, 1000, 900])
-    added += _add_points(session, s, r, "sleep_hours", [6, 5.5, 5, 4.5])
+    added += _add_points(session, s, r, "sleep_hours", [6, 5.5, 5, 4])
     added += _add_points(session, s, r, "bp_systolic", [96, 93, 90, 88])
     added += _add_points(session, s, r, "weight_kg", [62, 61, 59.5, 58])
     return f"{added} mediciones nuevas para Rosa Martí"
@@ -278,9 +288,26 @@ SCENARIOS: dict[str, Callable[[Session], str]] = {
 }
 
 
+SCENARIO_MEMBER = {
+    "mars_sleep_bp": VEGA,
+    "eva_no_contact": VEGA,
+    "geriatric_fall_risk": FALL_RISK_RESIDENT,
+}
+
+
 def apply_scenario(session: Session, name: str) -> str:
-    """Aplica un escenario sobre los datos actuales. KeyError si no existe."""
+    """Aplica un escenario sobre los datos actuales. KeyError si no existe.
+
+    Después evalúa al member afectado, como haría un POST de mediciones: así se
+    abren o escalan sus alertas automáticas (BE-14).
+    """
+    from app.services import liveness_watch  # evita el ciclo de imports
+    from app.services.alerts import evaluate_member
+
     detail = SCENARIOS[name](session)
     session.commit()
     app_state.set_value(session, "scenario", name)
+    member = session.get(models.Member, SCENARIO_MEMBER[name])
+    evaluate_member(session, member)
+    liveness_watch.check_member(session, member)  # R U OK? / no_contact (BE-16)
     return detail
