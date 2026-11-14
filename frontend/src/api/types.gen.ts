@@ -320,7 +320,7 @@ export interface paths {
         put?: never;
         /**
          * Registrar un lote de mediciones (idempotente por UUID)
-         * @description Repetir un id con el mismo contenido cuenta como `duplicates`; con contenido distinto → 409. El lote es atómico: si una medición es inválida (indicador desconocido o valor fuera del rango del input → 422) o está en conflicto, no se guarda ninguna. `assessment`: STUB(FS-02) → BE-11
+         * @description Repetir un id con el mismo contenido cuenta como `duplicates`; con contenido distinto → 409. El lote es atómico: si una medición es inválida (indicador desconocido o valor fuera del rango del input → 422) o está en conflicto, no se guarda ninguna. Devuelve el `assessment` recalculado con el lote ya guardado.
          */
         post: operations["post_measurements_api_v1_members__member_id__measurements_post"];
         delete?: never;
@@ -338,7 +338,7 @@ export interface paths {
         };
         /**
          * Evaluación del member
-         * @description Con `env` se evalúa con otro perfil sin modificar datos. STUB(FS-02) → BE-11
+         * @description Con `env` se evalúa con otro perfil sin modificar datos; un `env` inexistente → 404. El liveness es STUB hasta BE-12.
          */
         get: operations["get_assessment_api_v1_members__member_id__assessment_get"];
         put?: never;

@@ -11,10 +11,16 @@ pasar otro ``env``: las series y el member no cambian.
 
 from __future__ import annotations
 
+import json
+from collections import defaultdict
 from collections.abc import Iterable, Mapping
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
+from sqlmodel import Session
+
+from app import clock, models
 from app.schemas.common import Liveness, Status
 from app.schemas.members import (
     Assessment,
@@ -22,6 +28,7 @@ from app.schemas.members import (
     IndicatorAssessment,
     SystemAssessment,
 )
+from app.services import catalog, environments, measurements, members
 from app.services.assessment import (
     _as_dict,
     build_escalation,
@@ -32,9 +39,19 @@ from app.services.assessment import (
     recommendations_for,
     system_status,
 )
+from app.services.liveness import combine_overall
 from app.services.trends import _points, apply_worsening_rule, baseline, trend
 
-__all__ = ["BEHAVIORAL_SYSTEM_ID", "build_assessment", "build_indicator_assessment"]
+__all__ = [
+    "BEHAVIORAL_SYSTEM_ID",
+    "UnknownEnvironment",
+    "assess_member",
+    "build_assessment",
+    "build_indicator_assessment",
+    "load_protocols",
+]
+
+PROTOCOLS_FILE = Path(__file__).resolve().parent.parent / "data" / "protocols.json"
 
 # Sistema cuyo estado se resume en `Assessment.behavioral` (ver BE-20).
 BEHAVIORAL_SYSTEM_ID = "neuro_behavioral"
@@ -133,3 +150,54 @@ def build_assessment(
             status=behavioral_status, details_visible=behavioral_details_visible
         ),
     )
+
+
+# --------------------------------------------------------------------------
+# BE-11 (parte 2): evaluación de un member de la BD
+# --------------------------------------------------------------------------
+
+
+class UnknownEnvironment(LookupError):
+    """``env`` no existe en environments.json (el router responde 404)."""
+
+
+def load_protocols(path: Path = PROTOCOLS_FILE) -> list[dict]:
+    """Protocolos de ``data/protocols.json`` (CNT-03). Sin fichero, lista vacía."""
+    if not path.exists():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def assess_member(
+    session: Session, member: models.Member, env_id: str | None = None
+) -> Assessment:
+    """``Assessment`` real de un member con sus mediciones de la BD.
+
+    Con ``env_id`` se evalúa con otro perfil sin modificar nada (``?env=``).
+    El liveness sigue siendo el stub de members hasta BE-12 (parte 2), pero
+    ``overall_status`` ya es el peor entre la salud y el liveness.
+    """
+    env = environments.get_environment(env_id or member.env_id)
+    if env is None:
+        raise UnknownEnvironment(env_id or member.env_id)
+
+    series: dict[str, list[Any]] = defaultdict(list)
+    for row in measurements.list_series(session, member.id):
+        series[row.indicator_id].append(row)
+
+    liveness = members.stub_liveness(member.id)  # STUB → BE-12 (parte 2)
+    assessment = build_assessment(
+        member_id=member.id,
+        env=env,
+        indicators=catalog.list_indicators(),
+        systems=catalog.list_systems(),
+        series=series,
+        protocols=load_protocols(),
+        now=clock.now(),
+        liveness=liveness,
+        last_seen_at=member.last_seen_at,
+        # Sin datos de quién consulta, se respeta la preferencia del member (BE-20/BE-27).
+        behavioral_details_visible=member.share_behavioral_details,
+    )
+    assessment.overall_status = combine_overall(assessment.overall_status, liveness)
+    return assessment

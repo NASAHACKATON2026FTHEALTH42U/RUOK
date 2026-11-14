@@ -58,9 +58,10 @@ def test_unknown_environment_is_404(client):
 
 
 def test_summary_stub_fields(client):
-    """liveness, overall_status y open_alerts siguen siendo stub (BE-12, BE-11, BE-14)."""
+    """liveness y open_alerts siguen siendo stub (BE-12, BE-14); overall_status es real (BE-11)."""
     by_id = {m["id"]: m for m in client.get(f"{API}/environments/mars/members").json()}
-    assert (by_id[1]["liveness"], by_id[1]["overall_status"]) == ("active", "warning")
+    # Sin mediciones, la salud es unknown (sin datos = desconocido, nunca verde).
+    assert (by_id[1]["liveness"], by_id[1]["overall_status"]) == ("active", "unknown")
     assert (by_id[2]["liveness"], by_id[2]["overall_status"]) == ("stale", "unknown")
 
 

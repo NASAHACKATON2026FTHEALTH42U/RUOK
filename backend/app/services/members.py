@@ -1,9 +1,9 @@
 """Members en la base de datos (BE-05).
 
-Real: los datos del member, su privacidad y la fecha de su última medición.
+Real: los datos del member, su privacidad, la fecha de su última medición y
+el `overall_status` del resumen (BE-11).
 STUB hasta su issue (ver docs/backend.md, sección "Members"):
 - `liveness` → BE-12 (heartbeat);
-- `overall_status` → BE-11 (evaluación);
 - `open_alerts` → BE-14 (alertas).
 
 STUB → BE-07 (seed): mientras no exista el seed, la app inserta al arrancar los
@@ -91,11 +91,14 @@ def to_schema(row: models.Member) -> Member:
 
 
 def to_summary(session: Session, row: models.Member) -> MemberSummary:
+    # Import local: member_assessment importa este módulo (evita el ciclo).
+    from app.services.member_assessment import assess_member
+
     member = to_schema(row)
-    stub = stubs.member_summary(member)  # STUB → BE-11 (estado) y BE-14 (alertas)
+    stub = stubs.member_summary(member)  # STUB → BE-14 (alertas)
     return MemberSummary(
         **member.model_dump(),
-        overall_status=stub.overall_status,
+        overall_status=assess_member(session, row).overall_status,
         open_alerts=stub.open_alerts,
         last_measurement_at=last_measurement_at(session, row.id),
     )
