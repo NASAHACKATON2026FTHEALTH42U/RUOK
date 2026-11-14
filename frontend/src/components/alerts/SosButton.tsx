@@ -1,4 +1,3 @@
-import { STATUS_COLORS } from '../ui/status'
 import { useCallback, useState } from 'react'
 import { useEnvironments } from '../../api/useEnvironments'
 import { useInterventions } from '../../api/useInterventions'
@@ -37,8 +36,10 @@ export function SosButton() {
         type="button"
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
-        className="fixed right-4 bottom-4 z-40 flex items-center gap-2 rounded-full px-5 py-3 font-semibold text-white shadow-lg ring-2 ring-white/70 hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
-        style={{ background: STATUS_COLORS.critical }}
+        // Rojo carmesí profundo, a juego con las superficies oscuras de la web: degradado, borde
+        // fino y halo rojo suave (sin el anillo blanco). Blanco sobre #7f1d1d–#b91c1c: AA de sobra.
+        className="fixed right-4 bottom-4 z-40 flex items-center gap-2 rounded-xl border border-red-400/50 px-5 py-3 text-sm font-semibold tracking-wider text-white uppercase shadow-[0_10px_28px_-8px_rgb(185_28_28/0.75)] transition hover:border-red-300/80 hover:brightness-115 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
+        style={{ background: 'linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%)' }}
       >
         <span aria-hidden className="text-lg leading-none">
           ✚
