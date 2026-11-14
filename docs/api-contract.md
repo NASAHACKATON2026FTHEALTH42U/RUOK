@@ -128,7 +128,15 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 // (una medición completa una tarea). Título, momento del día e indicador: app/data/task_types.json
 ```
 | GET | `/members/{member_id}/game` | `GameState` |
-| GET | `/environments/{env_id}/leaderboard` | Puntos de la tripulación (cooperativo) |
+| GET | `/environments/{env_id}/leaderboard` | Puntos de la tripulación (cooperativo): `crew_points` y la aportación de cada member, **en el orden de los members** (no es un ranking) |
+
+```jsonc
+// GameState — todo se calcula de task_completion; solo las insignias ganadas se guardan (se conservan)
+{ "points": 60, "streak_days": 3, "crew_points": 140,
+  "badges": [{ "id": "streak_3", "name": "Constancia", "earned_at": "..." }] }
+// streak_days = días seguidos (UTC, reloj del servidor) con al menos una tarea completada,
+// contando desde hoy, o desde ayer si hoy aún no hay ninguna. Insignias: app/data/badges.json
+```
 
 ### Tiempo real, dispositivos y centro de control
 | Método | Ruta | Rol | Descripción |

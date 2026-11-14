@@ -1,11 +1,11 @@
-"""Rutina diaria (BE-18) y gamificación. STUB(FS-02) → BE-19 (racha, insignias y leaderboard)."""
+"""Rutina diaria (BE-18) y gamificación cooperativa (BE-19)."""
 
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 
-from app import models, stubs
+from app import models
 from app.routers.deps import (
     ERRORS_404,
     ERRORS_409,
@@ -16,7 +16,7 @@ from app.routers.deps import (
     allow_member,
 )
 from app.schemas import GameState, Leaderboard, Slug, Task, TaskCompleteIn
-from app.services import members, routine
+from app.services import environments, gamification, members, routine
 
 router = APIRouter(tags=["game"], dependencies=[AuthDep], responses={**ERRORS_AUTH, **ERRORS_404})
 
@@ -47,7 +47,7 @@ def list_tasks(member_id: int, session: SessionDep, date: date | None = None) ->
     summary="Completar una tarea (idempotente por UUID)",
     description="Reenviar el mismo `id` no suma dos veces; una tarea ya completada (con otro "
     "UUID o por una medición) tampoco. El mismo `id` para otra tarea → 409. Emite "
-    "`task.completed`. Devuelve los puntos; racha e insignias: STUB(FS-02) → BE-19.",
+    "`task.completed`. Devuelve el `GameState` actualizado (puntos, racha e insignias).",
     responses=ERRORS_409,
     dependencies=[Depends(allow_member("game:write"))],
 )
@@ -61,28 +61,31 @@ def complete_task(
         raise HTTPException(404, str(exc)) from exc
     except routine.CompletionConflict as exc:
         raise HTTPException(409, str(exc)) from exc
-    return routine.game_state(session, member)
+    return gamification.game_state(session, member)
 
 
 @router.get(
     "/members/{member_id}/game",
     response_model=GameState,
     summary="Puntos, racha e insignias",
-    description="STUB(FS-02) → BE-19",
+    description="Calculado de las tareas completadas. Racha: días seguidos con alguna tarea "
+    "completada (hoy, o hasta ayer si hoy aún no). Insignias de `badges.json`; una vez "
+    "ganadas se conservan. `crew_points`: la suma de toda la tripulación.",
     dependencies=[Depends(allow_member("game:read"))],
 )
-def game_state(member_id: int) -> GameState:
-    return stubs.GAME
+def game_state(member_id: int, session: SessionDep) -> GameState:
+    return gamification.game_state(session, _member(session, member_id))
 
 
 @router.get(
     "/environments/{env_id}/leaderboard",
     response_model=Leaderboard,
     summary="Puntos de la tripulación (cooperativo)",
-    description="STUB(FS-02) → BE-19",
+    description="`crew_points` y la aportación de cada member, en el orden de los members "
+    "(no es un ranking).",
     dependencies=[Depends(allow_env("game:read"))],
 )
-def leaderboard(env_id: Slug) -> Leaderboard:
-    if env_id not in stubs.ENV_BY_ID:
+def leaderboard(env_id: Slug, session: SessionDep) -> Leaderboard:
+    if environments.get_environment(env_id) is None:
         raise HTTPException(404, f"Entorno desconocido: {env_id}")
-    return stubs.leaderboard(env_id)
+    return gamification.leaderboard(session, env_id)

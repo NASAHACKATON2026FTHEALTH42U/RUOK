@@ -8975,124 +8975,172 @@ export const tasks: Schema<'Task'>[] = [
 ]
 
 export const game: Schema<'GameState'> = {
-  "points": 340,
-  "streak_days": 5,
+  "points": 20,
+  "streak_days": 1,
   "badges": [
     {
-      "id": "early_bird",
-      "name": "Madrugador",
+      "id": "first_step",
+      "name": "Primer paso",
       "earned_at": "2026-11-14T10:00:00Z"
     }
   ],
-  "crew_points": 1820
+  "crew_points": 20
 }
 
 export const leaderboardByEnv: Record<string, Schema<'Leaderboard'>> = {
   "iss": {
     "env_id": "iss",
-    "crew_points": 1820,
+    "crew_points": 60,
     "members": [
       {
-        "member_id": 1,
-        "name": "Cmdr. Vega",
-        "points": 340,
-        "streak_days": 5
+        "member_id": 3,
+        "name": "Dra. Lindqvist",
+        "points": 20,
+        "streak_days": 1
       },
       {
-        "member_id": 2,
-        "name": "Ing. Okafor",
-        "points": 290,
-        "streak_days": 3
+        "member_id": 6,
+        "name": "Cmdte. Moreau",
+        "points": 20,
+        "streak_days": 1
+      },
+      {
+        "member_id": 7,
+        "name": "Esp. Rao",
+        "points": 20,
+        "streak_days": 1
       }
     ]
   },
   "moon": {
     "env_id": "moon",
-    "crew_points": 1820,
+    "crew_points": 60,
     "members": [
       {
-        "member_id": 1,
-        "name": "Cmdr. Vega",
-        "points": 340,
-        "streak_days": 5
+        "member_id": 8,
+        "name": "Cmdr. Ito",
+        "points": 20,
+        "streak_days": 1
       },
       {
-        "member_id": 2,
-        "name": "Ing. Okafor",
-        "points": 290,
-        "streak_days": 3
+        "member_id": 9,
+        "name": "Ing. Silva",
+        "points": 20,
+        "streak_days": 1
+      },
+      {
+        "member_id": 10,
+        "name": "Dra. Weber",
+        "points": 20,
+        "streak_days": 1
       }
     ]
   },
   "mars": {
     "env_id": "mars",
-    "crew_points": 1820,
+    "crew_points": 80,
     "members": [
       {
         "member_id": 1,
         "name": "Cmdr. Vega",
-        "points": 340,
-        "streak_days": 5
+        "points": 20,
+        "streak_days": 1
       },
       {
         "member_id": 2,
         "name": "Ing. Okafor",
-        "points": 290,
-        "streak_days": 3
+        "points": 20,
+        "streak_days": 1
+      },
+      {
+        "member_id": 4,
+        "name": "Dra. Haddad",
+        "points": 20,
+        "streak_days": 1
+      },
+      {
+        "member_id": 5,
+        "name": "Esp. Tanaka",
+        "points": 20,
+        "streak_days": 1
       }
     ]
   },
   "earth": {
     "env_id": "earth",
-    "crew_points": 1820,
+    "crew_points": 30,
     "members": [
       {
-        "member_id": 1,
-        "name": "Cmdr. Vega",
-        "points": 340,
-        "streak_days": 5
+        "member_id": 11,
+        "name": "Ana Ruiz",
+        "points": 10,
+        "streak_days": 1
       },
       {
-        "member_id": 2,
-        "name": "Ing. Okafor",
-        "points": 290,
-        "streak_days": 3
+        "member_id": 12,
+        "name": "Leo Park",
+        "points": 10,
+        "streak_days": 1
+      },
+      {
+        "member_id": 13,
+        "name": "Marta Gil",
+        "points": 10,
+        "streak_days": 1
       }
     ]
   },
   "hospital": {
     "env_id": "hospital",
-    "crew_points": 1820,
+    "crew_points": 30,
     "members": [
       {
-        "member_id": 1,
-        "name": "Cmdr. Vega",
-        "points": 340,
-        "streak_days": 5
+        "member_id": 14,
+        "name": "Joan Puig",
+        "points": 10,
+        "streak_days": 1
       },
       {
-        "member_id": 2,
-        "name": "Ing. Okafor",
-        "points": 290,
-        "streak_days": 3
+        "member_id": 15,
+        "name": "Laura Sanz",
+        "points": 10,
+        "streak_days": 1
+      },
+      {
+        "member_id": 16,
+        "name": "Pedro Díaz",
+        "points": 10,
+        "streak_days": 1
       }
     ]
   },
   "geriatric": {
     "env_id": "geriatric",
-    "crew_points": 1820,
+    "crew_points": 60,
     "members": [
       {
-        "member_id": 1,
-        "name": "Cmdr. Vega",
-        "points": 340,
-        "streak_days": 5
+        "member_id": 17,
+        "name": "Rosa Martí",
+        "points": 15,
+        "streak_days": 1
       },
       {
-        "member_id": 2,
-        "name": "Ing. Okafor",
-        "points": 290,
-        "streak_days": 3
+        "member_id": 18,
+        "name": "Josep Vidal",
+        "points": 15,
+        "streak_days": 1
+      },
+      {
+        "member_id": 19,
+        "name": "Carmen López",
+        "points": 15,
+        "streak_days": 1
+      },
+      {
+        "member_id": 20,
+        "name": "Antonio Ferrer",
+        "points": 15,
+        "streak_days": 1
       }
     ]
   }
@@ -9413,6 +9461,582 @@ export const events: Schema<'Event'>[] = [
       "severity": "warning",
       "level": 0,
       "target_role": "self"
+    }
+  },
+  {
+    "id": 17,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "iss",
+    "member_id": 3,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_3_checkin",
+    "summary": "Dra. Lindqvist completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_3_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 18,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "iss",
+    "member_id": 3,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_3_measure_bp",
+    "summary": "Dra. Lindqvist completó «Mide tu tensión» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_3_measure_bp",
+      "task_type": "measure_bp",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 19,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "iss",
+    "member_id": 6,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_6_measure_bp",
+    "summary": "Cmdte. Moreau completó «Mide tu tensión» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_6_measure_bp",
+      "task_type": "measure_bp",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 20,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "iss",
+    "member_id": 6,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_6_checkin",
+    "summary": "Cmdte. Moreau completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_6_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 21,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "iss",
+    "member_id": 7,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_7_measure_bp",
+    "summary": "Esp. Rao completó «Mide tu tensión» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_7_measure_bp",
+      "task_type": "measure_bp",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 22,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "iss",
+    "member_id": 7,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_7_checkin",
+    "summary": "Esp. Rao completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_7_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 23,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "moon",
+    "member_id": 8,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_8_checkin",
+    "summary": "Cmdr. Ito completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_8_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 24,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "moon",
+    "member_id": 8,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_8_measure_bp",
+    "summary": "Cmdr. Ito completó «Mide tu tensión» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_8_measure_bp",
+      "task_type": "measure_bp",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 25,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "moon",
+    "member_id": 9,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_9_measure_bp",
+    "summary": "Ing. Silva completó «Mide tu tensión» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_9_measure_bp",
+      "task_type": "measure_bp",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 26,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "moon",
+    "member_id": 9,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_9_checkin",
+    "summary": "Ing. Silva completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_9_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 27,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "moon",
+    "member_id": 10,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_10_checkin",
+    "summary": "Dra. Weber completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_10_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 28,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "moon",
+    "member_id": 10,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_10_measure_bp",
+    "summary": "Dra. Weber completó «Mide tu tensión» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_10_measure_bp",
+      "task_type": "measure_bp",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 29,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 2,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_2_measure_bp",
+    "summary": "Ing. Okafor completó «Mide tu tensión» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_2_measure_bp",
+      "task_type": "measure_bp",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 30,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 2,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_2_checkin",
+    "summary": "Ing. Okafor completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_2_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 31,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 4,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_4_measure_bp",
+    "summary": "Dra. Haddad completó «Mide tu tensión» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_4_measure_bp",
+      "task_type": "measure_bp",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 32,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 4,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_4_checkin",
+    "summary": "Dra. Haddad completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_4_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 33,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 5,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_5_measure_bp",
+    "summary": "Esp. Tanaka completó «Mide tu tensión» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_5_measure_bp",
+      "task_type": "measure_bp",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 34,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 5,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_5_checkin",
+    "summary": "Esp. Tanaka completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_5_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 35,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "earth",
+    "member_id": 11,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_11_checkin",
+    "summary": "Ana Ruiz completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_11_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 36,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "earth",
+    "member_id": 12,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_12_checkin",
+    "summary": "Leo Park completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_12_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 37,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "earth",
+    "member_id": 13,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_13_checkin",
+    "summary": "Marta Gil completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_13_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 38,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "hospital",
+    "member_id": 14,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_14_checkin",
+    "summary": "Joan Puig completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_14_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 39,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "hospital",
+    "member_id": 15,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_15_checkin",
+    "summary": "Laura Sanz completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_15_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 40,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "hospital",
+    "member_id": 16,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_16_checkin",
+    "summary": "Pedro Díaz completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_16_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 41,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "geriatric",
+    "member_id": 17,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_17_hydration_1",
+    "summary": "Rosa Martí completó «Bebe agua (1/3)» (+5)",
+    "payload": {
+      "task_id": "t_2026-11-14_17_hydration_1",
+      "task_type": "hydration",
+      "points": 5,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 42,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "geriatric",
+    "member_id": 17,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_17_checkin",
+    "summary": "Rosa Martí completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_17_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 43,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "geriatric",
+    "member_id": 18,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_18_hydration_1",
+    "summary": "Josep Vidal completó «Bebe agua (1/3)» (+5)",
+    "payload": {
+      "task_id": "t_2026-11-14_18_hydration_1",
+      "task_type": "hydration",
+      "points": 5,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 44,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "geriatric",
+    "member_id": 18,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_18_checkin",
+    "summary": "Josep Vidal completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_18_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 45,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "geriatric",
+    "member_id": 19,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_19_checkin",
+    "summary": "Carmen López completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_19_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 46,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "geriatric",
+    "member_id": 19,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_19_hydration_1",
+    "summary": "Carmen López completó «Bebe agua (1/3)» (+5)",
+    "payload": {
+      "task_id": "t_2026-11-14_19_hydration_1",
+      "task_type": "hydration",
+      "points": 5,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 47,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "geriatric",
+    "member_id": 20,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_20_checkin",
+    "summary": "Antonio Ferrer completó «Check-in diario R U OK?» (+10)",
+    "payload": {
+      "task_id": "t_2026-11-14_20_checkin",
+      "task_type": "checkin",
+      "points": 10,
+      "date": "2026-11-14",
+      "auto": true
+    }
+  },
+  {
+    "id": 48,
+    "type": "task.completed",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "geriatric",
+    "member_id": 20,
+    "user_id": null,
+    "device_id": null,
+    "ref_id": "t_2026-11-14_20_hydration_1",
+    "summary": "Antonio Ferrer completó «Bebe agua (1/3)» (+5)",
+    "payload": {
+      "task_id": "t_2026-11-14_20_hydration_1",
+      "task_type": "hydration",
+      "points": 5,
+      "date": "2026-11-14",
+      "auto": true
     }
   }
 ]
