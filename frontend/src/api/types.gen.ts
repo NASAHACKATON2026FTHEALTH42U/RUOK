@@ -338,7 +338,7 @@ export interface paths {
         };
         /**
          * Evaluación del member
-         * @description Con `env` se evalúa con otro perfil sin modificar datos; un `env` inexistente → 404.
+         * @description Con `env` se evalúa con otro perfil sin modificar datos; un `env` inexistente → 404. Si `behavioral.details_visible` es false, los indicadores conductuales no aparecen en `systems[].indicators` (solo el estado agregado).
          */
         get: operations["get_assessment_api_v1_members__member_id__assessment_get"];
         put?: never;

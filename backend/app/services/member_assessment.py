@@ -18,7 +18,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app import clock, models
 from app.schemas.common import Liveness, Status
@@ -28,7 +28,7 @@ from app.schemas.members import (
     IndicatorAssessment,
     SystemAssessment,
 )
-from app.services import catalog, environments, measurements
+from app.services import behavioral, catalog, environments, measurements
 from app.services.assessment import (
     _as_dict,
     build_escalation,
@@ -38,6 +38,7 @@ from app.services.assessment import (
     overall_status,
     recommendations_for,
     system_status,
+    worst_status,
 )
 from app.services.liveness import combine_overall, member_liveness
 from app.services.trends import _points, apply_worsening_rule, baseline, trend
@@ -85,6 +86,29 @@ def build_indicator_assessment(
     )
 
 
+def _apply_behavioral_rules(
+    ind_results: list[IndicatorAssessment],
+    status: Status,
+    by_id: Mapping[str, dict],
+    ids: list[str],
+    series: Mapping[str, Iterable[Any]],
+    now: datetime,
+) -> Status:
+    """Reglas de BE-20: suben a ``warning`` sus indicadores y, con varias, el sistema a critical."""
+    # sleep_hours entra en la regla del PVT aunque no sea conductual: está en el mismo sistema.
+    fired = behavioral.evaluate_rules(series, {i: by_id[i] for i in ids}, now)
+    if not fired:
+        return status
+    flagged = {f.indicator_id for f in fired}
+    for result in ind_results:
+        if result.indicator_id in flagged and result.status == Status.normal:
+            result.status = Status.warning
+    status = system_status(r.status for r in ind_results)
+    if len(fired) >= behavioral.load_rules()["critical_when_rules"]:
+        status = worst_status([status, Status.critical])
+    return status
+
+
 def build_assessment(
     *,
     member_id: int,
@@ -105,8 +129,10 @@ def build_assessment(
     - ``series`` va por ``indicator_id``; un indicador sin serie sale ``unknown``.
     - ``overall_status`` cubre la salud. Combinarlo con el liveness es BE-12;
       aquí ``liveness`` y ``last_seen_at`` solo se copian.
+    - En el sistema neuro-conductual se aplican las reglas frente a la línea
+      base (``services/behavioral.py``, BE-20).
     - ``behavioral_details_visible`` es ``False`` por defecto (privacidad
-      conductual); BE-20 decide cuándo es ``True``.
+      conductual). Ocultar los detalles en la respuesta es ``behavioral.redact``.
     """
     env_d = _as_dict(env)
     active = set(env_d.get("indicators") or [])
@@ -123,6 +149,8 @@ def build_assessment(
             build_indicator_assessment(by_id[i], env_d, series.get(i, ()), now) for i in ids
         ]
         status = system_status(r.status for r in ind_results)
+        if sys_d["id"] == BEHAVIORAL_SYSTEM_ID:
+            status = _apply_behavioral_rules(ind_results, status, by_id, ids, series, now)
         protocol = find_protocol(sys_d["id"], status, protocols)
         system_results.append(
             SystemAssessment(
@@ -185,6 +213,13 @@ def assess_member(
         series[row.indicator_id].append(row)
 
     liveness = member_liveness(member)
+    emergency_open = session.exec(
+        select(models.Alert.id).where(
+            models.Alert.member_id == member.id,
+            models.Alert.severity == "emergency",
+            models.Alert.status != "resolved",
+        )
+    ).first() is not None
     assessment = build_assessment(
         member_id=member.id,
         env=env,
@@ -195,8 +230,12 @@ def assess_member(
         now=clock.now(),
         liveness=liveness,
         last_seen_at=member.last_seen_at,
-        # Sin datos de quién consulta, se respeta la preferencia del member (BE-20/BE-27).
-        behavioral_details_visible=member.share_behavioral_details,
+        # Sin saber quién consulta (llega con BE-26/BE-27): privado salvo que el
+        # member comparta o haya una emergencia abierta (BE-20).
+        behavioral_details_visible=behavioral.details_visible(
+            share_behavioral_details=member.share_behavioral_details,
+            emergency_open=emergency_open,
+        ),
     )
     assessment.overall_status = combine_overall(assessment.overall_status, liveness)
     return assessment
