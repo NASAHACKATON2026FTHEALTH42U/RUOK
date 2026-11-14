@@ -11,6 +11,8 @@ import { PendingSyncChip } from './PendingSyncChip'
 import { ServerStatus } from './ServerStatus'
 import { getDevice } from '../../offline/device'
 import { SosButton } from '../alerts/SosButton'
+import { LiveAlertToast } from '../alerts/LiveAlertToast'
+import { RealtimeConnector } from '../../realtime/RealtimeConnector'
 import { LivenessGuard } from '../liveness/LivenessGuard'
 
 const NAV_ITEMS = [
@@ -88,6 +90,8 @@ export function Layout() {
         )}
       </footer>
       <SosButton />
+      <RealtimeConnector />
+      <LiveAlertToast />
     </div>
   )
 }

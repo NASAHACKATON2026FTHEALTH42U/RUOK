@@ -16,6 +16,8 @@ interface LoadOptions<T> {
 
 export type LoadResult<T> = Loadable<T> & {
   retry: () => void
+  /** Recarga en segundo plano, sin volver a "loading" (p. ej. al llegar un evento, FE-29). */
+  refresh: () => void
   /** Hora local de la última carga correcta. */
   updatedAt: Date | null
   /** La última recarga en segundo plano falló: los datos mostrados pueden estar desfasados. */
@@ -40,6 +42,7 @@ export function useLoad<T>(
   loadRef.current = load
   const fallbackRef = useRef(fallback)
   fallbackRef.current = fallback
+  const runRef = useRef<((background: boolean) => void) | null>(null)
 
   useEffect(() => {
     if (!enabled) return
@@ -68,10 +71,12 @@ export function useLoad<T>(
         },
       )
     }
+    runRef.current = run
     run(false)
     const id = refreshMs ? setInterval(() => run(true), refreshMs) : undefined
     return () => {
       cancelled = true
+      runRef.current = null
       clearInterval(id)
     }
     // Las dependencias reales son `deps`; `load` se lee siempre de la ref.
@@ -79,5 +84,6 @@ export function useLoad<T>(
   }, [...deps, attempt, enabled, refreshMs])
 
   const retry = useCallback(() => setAttempt((n) => n + 1), [])
-  return { ...status, retry, updatedAt, refreshFailed }
+  const refresh = useCallback(() => runRef.current?.(true), [])
+  return { ...status, retry, refresh, updatedAt, refreshFailed }
 }

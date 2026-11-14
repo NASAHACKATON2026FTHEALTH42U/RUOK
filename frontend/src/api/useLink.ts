@@ -1,4 +1,5 @@
 import { api, unwrap } from './client'
+import { useLiveRefresh } from '../realtime/events'
 import { useLoad } from './useLoad'
 
 const getLink = (envId: string) =>
@@ -7,5 +8,8 @@ export type LinkStatus = Awaited<ReturnType<typeof getLink>>
 
 /** Estado del enlace simulado con tierra / control externo (`GET /link?env=`). */
 export function useLink(envId: string | null, refreshMs?: number) {
-  return useLoad(() => getLink(envId!), [envId], { enabled: envId !== null, refreshMs })
+  const r = useLoad(() => getLink(envId!), [envId], { enabled: envId !== null, refreshMs })
+  // Al instante con los eventos del enlace (FE-29).
+  useLiveRefresh({ types: ['link.*'], envId }, r.refresh)
+  return r
 }
