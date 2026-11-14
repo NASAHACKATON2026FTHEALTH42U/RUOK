@@ -33,6 +33,12 @@
   - Las issues nuevas creadas con `create_issues.py` hay que añadirlas también al Project (`gh project item-add 1 --owner NASAHACKATON2026FTHEALTH42U --url <issue>`).
 - **Ramas:** `feat/<area>-<id>-<slug>`, por ejemplo `feat/be-08-assessment-engine`. Para fixes, `fix/<slug>`.
 - **PR pequeñas** a `main`. En la descripción va `Closes #n`. Basta 1 review del mismo área o del full-stack. Los P0 se mergean en cuanto estén verdes.
+- **Evitar conflictos** (lecciones de las PRs #64, #88 y #89; detalle en [`LEEME.txt`](../LEEME.txt)):
+  - Ramas de **vida corta** (3–4 h como máximo) y sincronizadas con `main` a menudo: `git fetch origin && git merge origin/main`. **Siempre** antes de abrir la PR y antes de mergear.
+  - **No se suben commits a una PR ya mergeada**; lo siguiente va en una rama nueva.
+  - **No se apilan PRs.** Si es inevitable, se mergea primero la de abajo.
+  - Los **ficheros generados** en conflicto (`types.gen.ts`, `fixtures.gen.ts`, `package-lock.json`, `uv.lock`) no se resuelven a mano: se regeneran.
+  - Tras resolver un conflicto, se pasan **todos** los tests. Si la rama es de otra persona, se le deja un comentario en su PR.
 - **🚫 Push directo a `main` prohibido. Protección por convención.**
   - El repo es privado en una organización Free, y GitHub no permite proteger ramas ni crear *rulesets* en ese plan (la API devuelve HTTP 403). Por tanto, **la regla depende de que el equipo la cumpla**:
     - todo cambio entra por PR;
