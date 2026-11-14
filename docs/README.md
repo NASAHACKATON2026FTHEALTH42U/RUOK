@@ -13,6 +13,7 @@ Presentación: **domingo 16:00**.
 | [architecture.md](architecture.md) | Dev | Stack, estructura de carpetas, principio local-first y despliegue |
 | [api-contract.md](api-contract.md) | Front + Back | **Fuente de verdad** de la API v0: convenciones, endpoints y esquemas |
 | [data-model.md](data-model.md) | Back, Front B | **UML de SQLite e IndexedDB**: tablas, índices, stores y flujo de sincronización |
+| [auth-and-roles.md](auth-and-roles.md) | Todos los dev | **Login local y roles**: matriz de acceso por vistas, JWT, PIN, SOS sin sesión |
 | [environments.md](environments.md) | Back A, Front A | Perfiles de entorno (ISS, Luna, Marte, Tierra, Hospital, Geriatría) |
 | [alerts-and-escalation.md](alerts-and-escalation.md) | Back B, Front B | Alertas automáticas y manuales, escalera de escalado y enlace simulado |
 | [offline-and-liveness.md](offline-and-liveness.md) | Todos los dev | Sin pérdida de datos, heartbeat, check-in "R U OK?" y consola as-of |

@@ -3,6 +3,7 @@
 # area: backend | frontend | fullstack | content
 # priority: P0-blocker | P1 | P2
 # milestone: m0 | h1 | h2 | freeze
+# comp: clave de `components` (qué parte del sistema resuelve la issue)
 
 milestones:
   m0: { title: "M0 Setup (sáb +2h)", description: "Scaffolding, contrato v0, catálogos. Desbloquea a todo el equipo." }
@@ -18,16 +19,33 @@ labels:
   "P0-blocker":       { color: "b60205", description: "Genera dependencias: hacer primero" }
   "P1":               { color: "d93f0b", description: "MVP" }
   "P2":               { color: "bfbfbf", description: "Si da tiempo; se corta en el freeze" }
-  "module:alerts":    { color: "f9d0c4", description: "Alertas, escalado, enlace" }
-  "module:offline":   { color: "bfdadc", description: "Offline, sync, liveness" }
-  "module:behavioral": { color: "d4c5f9", description: "Aislamiento / salud conductual" }
-  "module:game":      { color: "fef2c0", description: "Rutina y gamificación" }
+
+components:
+  # key: { short: prefijo del título, emoji, name: nombre largo, color: label hex, project: color del Kanban }
+  setup:      { short: "Setup",       emoji: "⚙️",  name: "Setup / Infra (scaffolding, CI, docker)",          color: "6e7781", project: GRAY }
+  contract:   { short: "Contrato",    emoji: "📜", name: "Contrato API (schemas, tipos TS, mocks)",           color: "8250df", project: PURPLE }
+  db:         { short: "BD",          emoji: "🗄️",  name: "Base de datos (modelos SQLModel, tablas, seed)",   color: "0969da", project: BLUE }
+  config:     { short: "Config",      emoji: "📚", name: "Catálogos y configuración JSON (entornos, indicadores, textos)", color: "bf8700", project: YELLOW }
+  api:        { short: "API",         emoji: "🌐", name: "Endpoints REST",                                    color: "54aeff", project: BLUE }
+  engine:     { short: "Motor",       emoji: "🧠", name: "Motor de evaluación (umbrales, tendencias)",        color: "cf222e", project: RED }
+  alerts:     { short: "Alertas",     emoji: "🚨", name: "Alertas y escalado (SOS, consola ground)",          color: "fa4549", project: RED }
+  link:       { short: "Enlace",      emoji: "📡", name: "Enlace simulado con Tierra (retardo, LOS)",         color: "1f6feb", project: BLUE }
+  liveness:   { short: "Liveness",    emoji: "💓", name: "Liveness (heartbeat, R U OK?)",                     color: "e85aad", project: PINK }
+  offline:    { short: "Offline",     emoji: "📴", name: "Offline y sincronización (IndexedDB, outbox)",      color: "57606a", project: GRAY }
+  ui:         { short: "UI",          emoji: "🎨", name: "UI base, temas y pulido",                           color: "2da44e", project: GREEN }
+  dashboard:  { short: "Dashboard",   emoji: "🫀", name: "Dashboard, cuerpo SVG y gráficas",                  color: "1a7f37", project: GREEN }
+  forms:      { short: "Formularios", emoji: "📝", name: "Formularios de medición",                           color: "4ac26b", project: GREEN }
+  game:       { short: "Juego",       emoji: "🎮", name: "Rutina y gamificación",                             color: "fb8f44", project: ORANGE }
+  behavioral: { short: "Conductual",  emoji: "🧘", name: "Salud conductual / aislamiento",                    color: "a475f9", project: PURPLE }
+  auth:       { short: "Auth",        emoji: "🔐", name: "Login y roles (acceso por vistas)",                 color: "b60205", project: RED }
+  pitch:      { short: "Pitch",       emoji: "🎤", name: "Pitch, demo y envío",                               color: "d4a72c", project: YELLOW }
 
 issues:
 # ───────────────────────── M0 SETUP ─────────────────────────
 - id: FS-01
   title: Scaffolding del monorepo
   area: fullstack
+  comp: setup
   priority: P0-blocker
   milestone: m0
   docs: architecture.md
@@ -42,6 +60,7 @@ issues:
 - id: FS-05
   title: CI con GitHub Actions (pytest, lint/build y contrato) y protección de main
   area: fullstack
+  comp: setup
   priority: P0-blocker
   milestone: m0
   depends: [FS-01]
@@ -57,6 +76,7 @@ issues:
 - id: BE-01
   title: Scaffold de FastAPI con health, CORS y SQLite en WAL
   area: backend
+  comp: setup
   priority: P0-blocker
   milestone: m0
   depends: [FS-01]
@@ -75,6 +95,7 @@ issues:
 - id: FE-01
   title: Scaffold de Vite + React + TS con Tailwind, Router y Zustand
   area: frontend
+  comp: setup
   priority: P0-blocker
   milestone: m0
   depends: [FS-01]
@@ -91,6 +112,7 @@ issues:
 - id: FS-02
   title: Contrato de la API v0 y schemas Pydantic stub
   area: fullstack
+  comp: contract
   priority: P0-blocker
   milestone: m0
   depends: [BE-01]
@@ -106,6 +128,7 @@ issues:
 - id: FS-03
   title: Tipos TS generados desde OpenAPI y cliente API
   area: fullstack
+  comp: contract
   priority: P0-blocker
   milestone: m0
   depends: [BE-01, FE-01, FS-02]
@@ -121,6 +144,7 @@ issues:
 - id: FS-04
   title: Mocks del front con la forma del contrato y conmutador mock/real
   area: fullstack
+  comp: contract
   priority: P0-blocker
   milestone: m0
   depends: [FS-03]
@@ -129,6 +153,7 @@ issues:
     - Crear fixtures JSON en `src/api/mocks/` para environments, indicators, systems, members, assessment, alerts, tasks y game
     - Hacer que el cliente use los mocks si `VITE_USE_MOCKS=true`, o como fallback cuando el back no responde
     - Incluir un assessment de ejemplo con estados mezclados (normal/warning/critical/unknown)
+    - Incluir mocks de `/auth/login`, `/auth/me` y `/auth/demo-users` (FS-06)
   acceptance:
     - El front funciona entero sin back
     - Los mocks cumplen los tipos generados
@@ -136,6 +161,7 @@ issues:
 - id: BE-02
   title: Modelos SQLModel del dominio
   area: backend
+  comp: db
   priority: P0-blocker
   milestone: m0
   depends: [BE-01, FS-02]
@@ -150,6 +176,7 @@ issues:
 - id: BE-03
   title: Perfiles de entorno (6) en JSON y GET /environments
   area: backend
+  comp: config
   priority: P0-blocker
   milestone: m0
   depends: [BE-01]
@@ -166,6 +193,7 @@ issues:
 - id: BE-04
   title: Catálogo de indicadores y sistemas, con GET /indicators y /systems
   area: backend
+  comp: config
   priority: P0-blocker
   milestone: m0
   depends: [BE-01]
@@ -180,6 +208,7 @@ issues:
 - id: CNT-01
   title: Tabla de umbrales HRP y fuentes
   area: content
+  comp: config
   priority: P0-blocker
   milestone: m0
   docs: sources.md
@@ -190,10 +219,26 @@ issues:
   acceptance:
     - Back A puede volcar los valores en indicators.json y environments.json
 
+- id: FS-06
+  title: Validar el diseño de login y roles con el equipo
+  area: fullstack
+  comp: auth
+  priority: P0-blocker
+  milestone: m0
+  docs: auth-and-roles.md
+  tasks:
+    - Revisar con front y back docs/auth-and-roles.md (roles, matriz de vistas, JWT, PIN, SOS sin sesión)
+    - Cerrar en docs/api-contract.md los endpoints `/auth/*` y el schema `User`
+    - Mock de `/auth/login` y `/auth/me` en el front (FS-04)
+  acceptance:
+    - Matriz de acceso aprobada por el supervisor
+    - El contrato de auth está en el OpenAPI stub
+
 # ───────────────────────── HITO 1 ─────────────────────────
 - id: BE-05
   title: Endpoints de members
   area: backend
+  comp: api
   priority: P0-blocker
   milestone: h1
   depends: [BE-02, BE-03]
@@ -208,11 +253,11 @@ issues:
 - id: BE-06
   title: POST de mediciones por lotes e idempotente, y GET con filtros
   area: backend
+  comp: api
   priority: P0-blocker
   milestone: h1
   depends: [BE-02, BE-04]
   docs: offline-and-liveness.md
-  modules: [offline]
   tasks:
     - Crear `POST /members/{id}/measurements` con `{measurements:[...]}`, validación contra el catálogo (indicador existente, rango de input) y upsert por UUID
     - Devolver `{accepted, duplicates, assessment}` (assessment en stub hasta BE-11)
@@ -225,6 +270,7 @@ issues:
 - id: BE-07
   title: Seed de 30 días sintéticos y escenarios de demo
   area: backend
+  comp: db
   priority: P0-blocker
   milestone: h1
   depends: [BE-05, BE-06]
@@ -240,6 +286,7 @@ issues:
 - id: BE-08
   title: Motor de evaluación por indicador con umbrales y ajustes de entorno
   area: backend
+  comp: engine
   priority: P0-blocker
   milestone: h1
   depends: [BE-03, BE-04, BE-06]
@@ -254,6 +301,7 @@ issues:
 - id: BE-09
   title: Evaluación agregada por sistema y global con recomendaciones
   area: backend
+  comp: engine
   priority: P0-blocker
   milestone: h1
   depends: [BE-08]
@@ -269,6 +317,7 @@ issues:
 - id: BE-10
   title: Tendencias y línea base personal
   area: backend
+  comp: engine
   priority: P1
   milestone: h1
   depends: [BE-08]
@@ -283,6 +332,7 @@ issues:
 - id: BE-11
   title: GET /members/{id}/assessment?env=
   area: backend
+  comp: engine
   priority: P0-blocker
   milestone: h1
   depends: [BE-09]
@@ -298,6 +348,7 @@ issues:
 - id: FE-02
   title: Temas por entorno y store del entorno activo
   area: frontend
+  comp: ui
   priority: P0-blocker
   milestone: h1
   depends: [FE-01, FS-04]
@@ -312,6 +363,7 @@ issues:
 - id: FE-03
   title: Página de selección de entorno con transición
   area: frontend
+  comp: ui
   priority: P1
   milestone: h1
   depends: [FE-02]
@@ -319,12 +371,14 @@ issues:
   tasks:
     - Crear una tarjeta por entorno (gravedad, retardo, tipo) y la animación de transición (Framer Motion)
     - Elegir el member del entorno
+    - Solo accesible para el rol admin; el resto entra directamente en su entorno (FE-28)
   acceptance:
     - Se llega al dashboard del member elegido con el tema aplicado
 
 - id: FE-04
   title: StatusBadge y paleta de semáforo con estado unknown/stale
   area: frontend
+  comp: ui
   priority: P0-blocker
   milestone: h1
   depends: [FE-01]
@@ -339,6 +393,7 @@ issues:
 - id: FE-05
   title: BodyFigure SVG clicable con color por sistema
   area: frontend
+  comp: dashboard
   priority: P0-blocker
   milestone: h1
   depends: [FE-04, FS-04]
@@ -354,6 +409,7 @@ issues:
 - id: FE-06
   title: SystemPanel con el detalle de cada sistema
   area: frontend
+  comp: dashboard
   priority: P1
   milestone: h1
   depends: [FE-05]
@@ -367,6 +423,7 @@ issues:
 - id: FE-07
   title: Layout del dashboard
   area: frontend
+  comp: dashboard
   priority: P1
   milestone: h1
   depends: [FE-05]
@@ -380,6 +437,7 @@ issues:
 - id: FE-08
   title: IndicatorCard y TrendChart con bandas de umbral
   area: frontend
+  comp: dashboard
   priority: P1
   milestone: h1
   depends: [FE-04, FS-04]
@@ -393,6 +451,7 @@ issues:
 - id: FE-10
   title: Formularios guiados de medición multi-indicador
   area: frontend
+  comp: forms
   priority: P0-blocker
   milestone: h1
   depends: [FS-04]
@@ -408,11 +467,11 @@ issues:
 - id: FE-19
   title: Check-in diario conductual "R U OK?"
   area: frontend
+  comp: behavioral
   priority: P1
   milestone: h1
   depends: [FE-10]
   docs: behavioral-health.md
-  modules: [behavioral]
   tasks:
     - Crear la pantalla de check-in con escalas 1–5 con emojis para mood, stress, energy, loneliness, sleep_quality y crew_relation, más una nota
     - Enviarlo como lote de measurements con source=checkin
@@ -422,11 +481,11 @@ issues:
 - id: BE-20
   title: Indicadores conductuales, regla de línea base y privacidad
   area: backend
+  comp: behavioral
   priority: P1
   milestone: h1
   depends: [BE-10, BE-04]
   docs: behavioral-health.md
-  modules: [behavioral]
   tasks:
     - Implementar las reglas de docs/behavioral-health.md (ánimo bajo frente a la línea base durante 5 días, soledad en aumento, PVT junto con sueño)
     - Añadir al assessment el bloque `behavioral` con `details_visible` según share_behavioral_details
@@ -437,6 +496,7 @@ issues:
 - id: CNT-02
   title: Textos por sistema e indicador e instrucciones de medición
   area: content
+  comp: config
   priority: P1
   milestone: h1
   depends: [CNT-01]
@@ -448,15 +508,63 @@ issues:
   acceptance:
     - Back A lo vuelca en los JSON y todos los textos tienen fuente
 
+- id: BE-25
+  title: Tabla user_account, hash de contraseñas/PIN y usuarios demo
+  area: backend
+  comp: auth
+  priority: P0-blocker
+  milestone: h1
+  depends: [BE-02, BE-07]
+  docs: auth-and-roles.md
+  tasks:
+    - Modelo `UserAccount` (ver docs/data-model.md) con `UNIQUE(username)` y `UNIQUE(member_id)`
+    - Hash bcrypt de contraseña y PIN; bloqueo tras 5 fallos (`failed_attempts`, `locked_until`)
+    - En el seed, por entorno, crear members, 1 medic, 1 commander, 1 responder, 1 psych y un admin global (solo con `DEMO_MODE=true`)
+  acceptance:
+    - Tests de hash/verificación y bloqueo
+    - Con `DEMO_MODE=false` no se crean contraseñas conocidas
+
+- id: BE-26
+  title: Endpoints /auth (login, PIN, me) con JWT local
+  area: backend
+  comp: auth
+  priority: P0-blocker
+  milestone: h1
+  depends: [BE-25]
+  docs: auth-and-roles.md
+  tasks:
+    - Crear `POST /auth/login`, `POST /auth/pin`, `GET /auth/me` y `GET /auth/demo-users` (solo en DEMO_MODE)
+    - JWT HS256 con clave local (generada en `app_state` o en `RUOK_JWT_SECRET`), caducidad de 12 h y payload `{sub, role, env_id, member_id}`
+    - Dependencia `get_current_user` (401 si falta o caduca) y `require_roles(...)`
+  acceptance:
+    - Tests de login correcto, contraseña incorrecta (401), token caducado (401) y PIN bloqueado
+
+- id: FE-27
+  title: Pantalla de login, sesión y cliente con token
+  area: frontend
+  comp: auth
+  priority: P0-blocker
+  milestone: h1
+  depends: [FS-04, FE-02]
+  docs: auth-and-roles.md
+  tasks:
+    - Página Login con usuario y contraseña, pestaña PIN y selector de usuarios demo
+    - Guardar `{token, user, exp}` en IndexedDB `kv.auth`, junto con `last_member_id`
+    - "`client.ts` añade `Authorization: Bearer`. Un 401 lleva al login **sin borrar el outbox** y reintenta después"
+    - El botón SOS y el modal "R U OK?" se ven también en la pantalla de login
+  acceptance:
+    - Tras el login, cada rol llega a su vista inicial (member → dashboard, medic → lista de members, responder/psych → /ground, admin → selector de entorno)
+    - El cierre de sesión conserva los pendientes del outbox
+
 # ───────────────────────── HITO 2 ─────────────────────────
 - id: BE-13
   title: Enlace simulado con la Tierra (outbox/inbox, retardo, LOS)
   area: backend
+  comp: link
   priority: P0-blocker
   milestone: h2
   depends: [BE-02, BE-03]
   docs: data-model.md
-  modules: [alerts, offline]
   tasks:
     - Crear `services/comm_link.py` con una cola LinkMessage persistida; `send()` calcula la ETA a partir de comm_delay_s y `deliver_due()` usa el reloj de la demo
     - Gestionar los estados online/delayed/los por entorno; en los, los mensajes se encolan
@@ -468,11 +576,11 @@ issues:
 - id: BE-14
   title: Alertas automáticas desde la evaluación con deduplicación y escalera
   area: backend
+  comp: alerts
   priority: P0-blocker
   milestone: h2
   depends: [BE-11, BE-13]
   docs: alerts-and-escalation.md
-  modules: [alerts]
   tasks:
     - Crear `services/alerts.py`; tras cada assessment, abrir o actualizar una alerta por member y sistema
     - Escalar al siguiente nivel si el estado es critical o persiste; los niveles externos van por comm_link
@@ -484,11 +592,11 @@ issues:
 - id: BE-15
   title: Alertas manuales (crear, escalar, ack, resolve, mensajes)
   area: backend
+  comp: alerts
   priority: P1
   milestone: h2
   depends: [BE-14]
   docs: alerts-and-escalation.md
-  modules: [alerts]
   tasks:
     - Crear `POST /members/{id}/alerts` (idempotente por UUID) y `GET /members/{id}/alerts`
     - Crear `POST /alerts/{id}/escalate` (permite saltar niveles), `/ack`, `/resolve` y `/messages`
@@ -499,11 +607,11 @@ issues:
 - id: BE-12
   title: Heartbeat y liveness combinados en el estado global
   area: backend
+  comp: liveness
   priority: P0-blocker
   milestone: h2
   depends: [BE-02, BE-11]
   docs: offline-and-liveness.md
-  modules: [offline]
   tasks:
     - Crear `POST /members/{id}/heartbeat` (con la actividad normal, eva o sleep)
     - Crear `services/liveness.py` para calcular active/stale/lost con los umbrales del entorno y de la actividad
@@ -514,11 +622,11 @@ issues:
 - id: BE-16
   title: Alerta no_contact y timeout del check-in "R U OK?"
   area: backend
+  comp: liveness
   priority: P1
   milestone: h2
   depends: [BE-12, BE-14]
   docs: offline-and-liveness.md
-  modules: [offline, alerts]
   tasks:
     - Crear una tarea periódica que revise el liveness
     - Con stale, devolver checkin_required en el heartbeat; con timeout o lost, crear la alerta no_contact critical, primero a crew y después a ground
@@ -529,11 +637,11 @@ issues:
 - id: BE-17
   title: Endpoint de la consola ground con estado as-of y filtro de privacidad
   area: backend
+  comp: alerts
   priority: P1
   milestone: h2
   depends: [BE-15, BE-13]
   docs: offline-and-liveness.md
-  modules: [alerts]
   tasks:
     - Crear `GET /environments/{env_id}/alerts?view=ground`, que solo devuelve lo entregado por el enlace
     - Incluir el resumen de members con last_seen_at, as_of y el estado del enlace
@@ -544,11 +652,11 @@ issues:
 - id: BE-18
   title: Rutina de tareas diarias desde el perfil del entorno
   area: backend
+  comp: game
   priority: P1
   milestone: h2
   depends: [BE-02, BE-03]
   docs: environments.md
-  modules: [game]
   tasks:
     - Crear `services/routine.py` para generar las tareas del día desde `environment.routine`
     - Crear `GET /members/{id}/tasks?date=` y `POST .../complete` (idempotente por UUID)
@@ -559,11 +667,11 @@ issues:
 - id: BE-19
   title: Gamificación (puntos, rachas, insignias, leaderboard cooperativo)
   area: backend
+  comp: game
   priority: P1
   milestone: h2
   depends: [BE-18]
   docs: vision-and-scope.md
-  modules: [game]
   tasks:
     - Crear `services/gamification.py` con puntos por tarea, racha de días y 5–6 insignias
     - Crear `GET /members/{id}/game` y `GET /environments/{env_id}/leaderboard` (puntos de tripulación)
@@ -573,11 +681,11 @@ issues:
 - id: BE-21
   title: Catálogo de intervenciones y GET /interventions
   area: backend
+  comp: behavioral
   priority: P1
   milestone: h2
   depends: [BE-04]
   docs: behavioral-health.md
-  modules: [behavioral]
   tasks:
     - Crear `data/interventions.json` (respiración, TCC breve, diario, sueño/luz, ejercicio)
     - Crear `GET /interventions?system_id=&category=`
@@ -588,6 +696,7 @@ issues:
 - id: BE-24
   title: FastAPI sirve el build del front y docker-compose
   area: fullstack
+  comp: setup
   priority: P1
   milestone: h2
   depends: [BE-01, FE-01]
@@ -601,6 +710,7 @@ issues:
 - id: FE-09
   title: Página de historial (7/30 días)
   area: frontend
+  comp: dashboard
   priority: P1
   milestone: h2
   depends: [FE-08]
@@ -613,26 +723,27 @@ issues:
 - id: FE-11
   title: Outbox offline en IndexedDB y sincronización
   area: frontend
+  comp: offline
   priority: P0-blocker
   milestone: h2
   depends: [FE-10, BE-06]
   docs: data-model.md
-  modules: [offline]
   tasks:
     - Crear `src/offline/outbox.ts`; todos los POST de creación pasan por el outbox (guardar, enviar, marcar como enviado)
     - Reintentar con backoff y al recibir el evento `online`; mostrar el contador de pendientes en la cabecera
     - Cachear en IndexedDB el catálogo, los protocolos y el último assessment
+    - Un 401 nunca borra el outbox: se pausa la sincronización, se pide el login y se reanuda (FE-27)
   acceptance:
     - Con el back parado se registran 2 mediciones, se arranca el back y se sincronizan sin duplicados
 
 - id: FE-12
   title: Semáforo provisional offline
   area: frontend
+  comp: offline
   priority: P1
   milestone: h2
   depends: [FE-11, FE-04]
   docs: offline-and-liveness.md
-  modules: [offline]
   tasks:
     - Calcular el estado preliminar con los rangos cacheados y la etiqueta "provisional"
     - Sustituirlo por el assessment del servidor al sincronizar
@@ -642,11 +753,11 @@ issues:
 - id: FE-13
   title: Botón SOS / Pedir ayuda
   area: frontend
+  comp: alerts
   priority: P1
   milestone: h2
   depends: [FS-04, FE-11]
   docs: alerts-and-escalation.md
-  modules: [alerts]
   tasks:
     - Botón fijo siempre visible que abre un modal con la categoría (incluida "Necesito hablar"), la severidad, el destino (permite saltar niveles) y el mensaje
     - Enviarlo por el outbox; sin conexión, mostrar el aviso "No enviado. Avisa de viva voz" y el protocolo autónomo cacheado
@@ -656,11 +767,11 @@ issues:
 - id: FE-14
   title: Panel de alertas con timeline, escalado, ETA y protocolo autónomo
   area: frontend
+  comp: alerts
   priority: P1
   milestone: h2
   depends: [FE-13, BE-15]
   docs: alerts-and-escalation.md
-  modules: [alerts]
   tasks:
     - Lista de alertas del member con origen, severidad y estado
     - Timeline de AlertEvent, botón "Escalar" y cuenta atrás de la ETA si es delayed
@@ -671,11 +782,11 @@ issues:
 - id: FE-15
   title: Heartbeat del cliente y modal "R U OK?"
   area: frontend
+  comp: liveness
   priority: P1
   milestone: h2
   depends: [BE-12]
   docs: offline-and-liveness.md
-  modules: [offline]
   tasks:
     - Enviar el heartbeat cada 15 s con la actividad actual (con un selector de EVA o sueño)
     - Mostrar el modal a pantalla completa si `checkin_required` (botones "Estoy bien" y "Necesito ayuda")
@@ -685,11 +796,11 @@ issues:
 - id: FE-16
   title: Consola /ground con estado as-of
   area: frontend
+  comp: alerts
   priority: P1
   milestone: h2
-  depends: [FE-14, BE-17]
+  depends: [FE-28, FE-14, BE-17]
   docs: offline-and-liveness.md
-  modules: [alerts]
   tasks:
     - Vista de responder con members del entorno ("último dato hace X"), alertas entregadas, ack, respuesta y resolve
     - Banner del estado del enlace; si es LOS, mostrar "Estado DESCONOCIDO" en gris
@@ -699,11 +810,11 @@ issues:
 - id: FE-17
   title: Indicador del estado del enlace y controles de demo
   area: frontend
+  comp: link
   priority: P1
   milestone: h2
-  depends: [BE-13]
+  depends: [FE-28, BE-13]
   docs: demo-script.md
-  modules: [alerts]
   tasks:
     - Chip en la cabecera con online/delayed/LOS, el retardo y los mensajes en cola
     - Panel de demo oculto (atajo de teclado) con reset, escenarios, estado del enlace y fast-forward
@@ -713,11 +824,11 @@ issues:
 - id: FE-18
   title: UI de misiones diarias, puntos, racha e insignias
   area: frontend
+  comp: game
   priority: P1
   milestone: h2
   depends: [BE-19]
   docs: vision-and-scope.md
-  modules: [game]
   tasks:
     - Página Missions con las tareas del día, un checkbox animado y el toast de puntos
     - Racha, insignias y tablero cooperativo de la tripulación
@@ -727,11 +838,11 @@ issues:
 - id: FE-20
   title: Tarjetas de intervención
   area: frontend
+  comp: behavioral
   priority: P1
   milestone: h2
   depends: [BE-21]
   docs: behavioral-health.md
-  modules: [behavioral]
   tasks:
     - Crear InterventionCard con los pasos y un temporizador (por ejemplo, la respiración en caja animada)
     - Enlazarla desde SystemPanel y desde el check-in
@@ -741,11 +852,11 @@ issues:
 - id: FE-21
   title: Barra de fase de misión y aviso del tercer cuarto
   area: frontend
+  comp: behavioral
   priority: P1
   milestone: h2
   depends: [FE-02]
   docs: behavioral-health.md
-  modules: [behavioral]
   tasks:
     - Barra de progreso a partir de `environment.mission`
     - Aviso proactivo al entrar en el tercer cuarto
@@ -755,6 +866,7 @@ issues:
 - id: CNT-03
   title: Contenido de las intervenciones y los protocolos autónomos
   area: content
+  comp: config
   priority: P1
   milestone: h2
   depends: [CNT-01]
@@ -764,15 +876,48 @@ issues:
   acceptance:
     - Volcado en interventions.json y protocols.json, con fuentes
 
+- id: BE-27
+  title: Autorización por rol y propiedad en todos los endpoints
+  area: backend
+  comp: auth
+  priority: P1
+  milestone: h2
+  depends: [BE-26, BE-05, BE-06, BE-15, BE-17]
+  docs: auth-and-roles.md
+  tasks:
+    - Crear `app/auth/permissions.py` con la matriz de docs/auth-and-roles.md
+    - Aplicarla en todos los routers (rol, `env_id` y propiedad del member); `/demo/*` solo admin
+    - Aceptar el SOS de emergencia sin token, marcado con `authenticated=false`
+    - Filtro conductual por rol (psych ve los detalles)
+  acceptance:
+    - Test parametrizado que recorre la matriz (rol × endpoint → 200/403)
+    - Un member no puede leer los datos de otro (403)
+
+- id: FE-28
+  title: Guards de rutas y menús según el rol
+  area: frontend
+  comp: auth
+  priority: P1
+  milestone: h2
+  depends: [FE-27, FE-07]
+  docs: auth-and-roles.md
+  tasks:
+    - Crear `src/auth/permissions.ts` (espejo de la matriz), el hook `useAuth()` y el componente `<RequireRole>`
+    - Ocultar vistas, menús y botones según el rol (medir para otro solo medic; panel de demo solo admin; /ground solo responder/psych/admin)
+    - Mostrar en la cabecera el usuario y el rol con el vocabulario del entorno
+  acceptance:
+    - Navegar a una ruta prohibida redirige a la vista inicial del rol
+    - El SOS sigue accesible sin sesión
+
 # ───────────────────────── FREEZE / P2 ─────────────────────────
 - id: FE-22
   title: Test de vigilancia psicomotora (PVT)
   area: fullstack
+  comp: behavioral
   priority: P2
   milestone: freeze
   depends: [FE-10]
   docs: behavioral-health.md
-  modules: [behavioral]
   tasks:
     - Test de 3 min (versión demo de 30 s) con estímulo tras un intervalo aleatorio de 2–10 s y medición con performance.now()
     - Calcular el tiempo de reacción medio y los lapsos (> 500 ms) y enviarlos como measurements con source=pvt
@@ -782,11 +927,11 @@ issues:
 - id: BE-22
   title: Backend de "Mensaje a casa" por el enlace
   area: backend
+  comp: behavioral
   priority: P2
   milestone: freeze
   depends: [BE-13]
   docs: behavioral-health.md
-  modules: [behavioral]
   tasks:
     - Endpoints para enviar y listar mensajes personales vía comm_link, con respuestas simuladas desde la Tierra
   acceptance:
@@ -795,11 +940,11 @@ issues:
 - id: FE-23
   title: UI de "Mensaje a casa"
   area: frontend
+  comp: behavioral
   priority: P2
   milestone: freeze
   depends: [BE-22]
   docs: behavioral-health.md
-  modules: [behavioral]
   tasks:
     - Bandeja tipo chat asíncrono con el estado de cada mensaje (en cola, en tránsito con ETA, entregado)
   acceptance:
@@ -808,11 +953,11 @@ issues:
 - id: BE-23
   title: Backend de kudos y misiones de tripulación
   area: backend
+  comp: game
   priority: P2
   milestone: freeze
   depends: [BE-19]
   docs: behavioral-health.md
-  modules: [game, behavioral]
   tasks:
     - Kudos entre members (suman puntos de tripulación)
     - Misiones grupales en la rutina del entorno
@@ -822,11 +967,11 @@ issues:
 - id: FE-24
   title: UI de kudos y misiones de tripulación
   area: frontend
+  comp: game
   priority: P2
   milestone: freeze
   depends: [BE-23]
   docs: behavioral-health.md
-  modules: [game, behavioral]
   tasks:
     - Botón para dar kudos a un compañero y lista de misiones de grupo en Missions
   acceptance:
@@ -835,10 +980,10 @@ issues:
 - id: FE-25
   title: Galería Earth view
   area: frontend
+  comp: behavioral
   priority: P2
   milestone: freeze
   docs: behavioral-health.md
-  modules: [behavioral]
   tasks:
     - Galería de fotos de la Tierra empaquetadas (NASA, dominio público) con sonido ambiente opcional
   acceptance:
@@ -847,6 +992,7 @@ issues:
 - id: FE-26
   title: Pulido de animaciones, responsive y disclaimer médico
   area: frontend
+  comp: ui
   priority: P1
   milestone: freeze
   depends: [FE-07]
@@ -860,6 +1006,7 @@ issues:
 - id: CNT-04
   title: Guion, slides, vídeo y envío a Space Apps
   area: content
+  comp: pitch
   priority: P1
   milestone: freeze
   docs: demo-script.md
@@ -869,3 +1016,17 @@ issues:
   acceptance:
     - Envío hecho antes del deadline
     - El vídeo está en presentation/
+
+- id: FS-07
+  title: Gestión de usuarios (admin) y rol family
+  area: fullstack
+  comp: auth
+  priority: P2
+  milestone: freeze
+  depends: [BE-27, FE-28]
+  docs: auth-and-roles.md
+  tasks:
+    - Crear `GET /users` y `POST /users` (solo admin) y su pantalla de gestión
+    - Rol `family`, con estado agregado de un member y mensajes, en hospital y geriatría
+  acceptance:
+    - El admin crea un usuario y este puede iniciar sesión

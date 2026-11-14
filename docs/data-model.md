@@ -34,6 +34,8 @@ Hay tres capas de datos:
 
 ```mermaid
 erDiagram
+  USER_ACCOUNT |o--o| MEMBER : "es (si role=member)"
+  USER_ACCOUNT ||--o{ ALERT : "crea / reconoce"
   MEMBER ||--o{ MEASUREMENT : registra
   MEMBER ||--o{ TASK : "tiene asignadas"
   TASK ||--o| TASK_COMPLETION : "se completa con"
@@ -46,6 +48,22 @@ erDiagram
   ALERT ||--o{ LINK_MESSAGE : "viaja por el enlace"
   ALERT_EVENT |o--o| LINK_MESSAGE : "mensaje de respuesta"
   LINK_STATE ||--o{ LINK_MESSAGE : "estado por entorno"
+
+  USER_ACCOUNT {
+    int id PK
+    text username "UNIQUE"
+    text display_name
+    text role "member | medic | commander | responder | psych | family | admin"
+    text env_id "slug; null solo para admin"
+    int member_id FK "UNIQUE, si role=member"
+    text password_hash "bcrypt"
+    text pin_hash "bcrypt, nullable"
+    int failed_attempts
+    datetime locked_until
+    bool active
+    datetime last_login_at
+    datetime created_at
+  }
 
   MEMBER {
     int id PK
@@ -95,6 +113,8 @@ erDiagram
     int member_id FK
     text env_id
     text origin "auto | manual"
+    bool authenticated "false = SOS de emergencia sin sesión"
+    int created_by_user_id FK "nullable"
     text category "symptom | physical | psychological | emergency | no_contact | indicator"
     text severity "warning | critical | emergency"
     text system_id "nullable"
@@ -174,6 +194,7 @@ Hay además una tabla técnica, fuera del diagrama: **`app_state`** (`key TEXT P
 
 | Tabla | Notas clave | Issue |
 |---|---|---|
+| `user_account` | Login local. `UNIQUE(username)` y `UNIQUE(member_id)`. Bloqueo de PIN con `failed_attempts`/`locked_until`. Ver [auth-and-roles.md](auth-and-roles.md). | BE-25, BE-26 |
 | `member` | Cada entorno tiene sus members (`env_id`). `last_seen_at` lo actualiza el heartbeat y de él se deriva el liveness (no se guarda). | BE-02, BE-05, BE-12 |
 | `measurement` | **Solo se añade, nunca se edita.** La PK es el UUID del cliente: un reintento con el mismo `id` y el mismo contenido devuelve 200, y con contenido distinto, 409. El check-in y el PVT también son measurements (`source`). | BE-06, BE-20 |
 | `task` | Se genera cada día desde `environment.routine`. El `id` determinista evita duplicados si la generación se repite. | BE-18 |
@@ -192,6 +213,8 @@ Hay además una tabla técnica, fuera del diagrama: **`app_state`** (`key TEXT P
 PRAGMA journal_mode = WAL;
 PRAGMA foreign_keys = ON;
 
+CREATE UNIQUE INDEX ux_user_username     ON user_account(username);
+CREATE UNIQUE INDEX ux_user_member       ON user_account(member_id) WHERE member_id IS NOT NULL;
 CREATE INDEX ix_member_env              ON member(env_id);
 CREATE INDEX ix_measurement_series      ON measurement(member_id, indicator_id, taken_at);
 CREATE INDEX ix_task_member_date        ON task(member_id, date);
@@ -330,7 +353,7 @@ classDiagram
   }
   class kv {
     <<object store · keyPath key>>
-    +string key — device_id | env_id | member_id | last_heartbeat_at
+    +string key — device_id | auth | last_member_id | env_id | last_heartbeat_at
     +any value
   }
   outbox ..> measurements : mismo id
@@ -348,7 +371,7 @@ classDiagram
 | `catalog` | Al arrancar con conexión | Formularios, rangos, protocolos e intervenciones offline | Se sobrescribe |
 | `alerts` | SOS local (`pending=true`) y alertas del servidor | Panel de alertas y aviso "No enviado" | Las resueltas, a los 7 días |
 | `tasks` | Tareas del día y completados locales | Misiones offline | Se conservan los días anteriores al de hoy menos 2 |
-| `kv` | Sesión y `device_id` (UUID generado una vez) | Toda la app | Nunca |
+| `kv` | `device_id` (UUID generado una vez), `auth` = `{token, user, exp}` y `last_member_id` (para el SOS sin sesión) | Toda la app | `auth` se borra al cerrar sesión. El outbox **nunca** se borra por un logout o un 401 |
 
 ### Flujo de sincronización
 
