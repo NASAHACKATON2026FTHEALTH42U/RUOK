@@ -1,16 +1,18 @@
 """Alertas, escalado y consola ground.
 
 STUB(FS-02) → BE-14 (automáticas), BE-15 (manuales y acciones), BE-17 (consola ground)
-y BE-27 (SOS de emergencia sin token).
+y BE-27 (SOS de emergencia sin token). En la consola ground el `link` ya es real (BE-13).
 """
 
 from datetime import timedelta
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session
 
 from app import clock, stubs
+from app.db import get_session
 from app.routers.deps import ERRORS_404, ERRORS_AUTH, AuthDep
 from app.schemas import (
     AckIn,
@@ -24,6 +26,7 @@ from app.schemas import (
     ResolveIn,
     Slug,
 )
+from app.services import comm_link
 
 router = APIRouter(tags=["alerts"], dependencies=[AuthDep], responses={**ERRORS_AUTH, **ERRORS_404})
 
@@ -130,14 +133,18 @@ def add_message(alert_id: UUID, body: AlertMessageIn) -> Alert:
     summary="Consola /ground: solo lo ENTREGADO por el enlace, con estado as-of",
     description="STUB(FS-02) → BE-17",
 )
-def ground_view(env_id: Slug, view: Literal["ground"] = "ground") -> GroundView:
+def ground_view(
+    env_id: Slug,
+    session: Annotated[Session, Depends(get_session)],
+    view: Literal["ground"] = "ground",
+) -> GroundView:
     env = stubs.ENV_BY_ID.get(env_id)
     if env is None:
         raise HTTPException(404, f"Entorno desconocido: {env_id}")
     return GroundView(
         env_id=env_id,
         as_of=clock.now() - timedelta(seconds=env.comm_delay_s),
-        link=stubs.link_status(env_id),
+        link=comm_link.status(session, env_id),  # real (BE-13)
         members=[stubs.member_summary(m) for m in stubs.MEMBERS if m.env_id == env_id],
         alerts=[],  # la alerta de ejemplo sigue en cola (ETA 14 min): aún no entregada
     )

@@ -1,7 +1,8 @@
 """Tiempo real, dispositivos, centro de control, enlace, sistema y demo.
 
-STUB(FS-02) → BE-28 (eventos/SSE), BE-29 (dispositivos), BE-30 (control y network-info),
-BE-13 (enlace) y BE-07 (demo). `/demo/fast-forward` ya es real: usa app/clock.py.
+Reales: enlace (BE-13), demo (BE-07) y fast-forward (app/clock.py).
+STUB(FS-02) → BE-28 (eventos/SSE), BE-29 (dispositivos) y BE-30 (control y network-info);
+en /control/overview el `link` ya es real.
 """
 
 import json
@@ -32,6 +33,9 @@ from app.schemas import (
     Slug,
 )
 from app.schemas.realtime import AlertCounts, ControlMetrics, EnvironmentOverview, EnvironmentRef
+from app.services import comm_link
+
+SessionDep = Annotated[Session, Depends(get_session)]
 
 router = APIRouter(dependencies=[AuthDep], responses=ERRORS_AUTH)
 public = APIRouter()
@@ -116,11 +120,11 @@ def list_devices(env_id: Slug | None = None) -> list[Device]:
     summary="Vista global del centro de control (admin, sin retardo)",
     description="STUB(FS-02) → BE-30",
 )
-def control_overview() -> ControlOverview:
+def control_overview(session: SessionDep) -> ControlOverview:
     envs = [
         EnvironmentOverview(
             environment=EnvironmentRef(id=e.id, name=e.name, kind=e.kind),
-            link=stubs.link_status(e.id),
+            link=comm_link.status(session, e.id),  # real (BE-13)
             members=[stubs.member_summary(m) for m in stubs.MEMBERS if m.env_id == e.id],
             open_alerts=AlertCounts(warning=1) if e.id == "mars" else AlertCounts(),
         )
@@ -166,23 +170,32 @@ def network_info() -> NetworkInfo:
     responses=ERRORS_404,
     tags=["link"],
     summary="Estado del enlace con tierra",
-    description="STUB(FS-02) → BE-13",
+    description="Estado (online | delayed | los), retardo de ida y mensajes pendientes. "
+    "Entrega antes los mensajes cuya ETA ya ha pasado (reloj de la demo).",
 )
-def get_link(env: Slug) -> LinkStatus:
-    if env not in stubs.ENV_BY_ID:
-        raise HTTPException(404, f"Entorno desconocido: {env}")
-    return stubs.link_status(env)
+def get_link(env: Slug, session: SessionDep) -> LinkStatus:
+    try:
+        return comm_link.status(session, env)
+    except comm_link.UnknownEnvironment as exc:
+        raise HTTPException(404, str(exc)) from exc
 
 
 @router.get(
     "/link/messages",
     response_model=list[LinkMessage],
+    responses=ERRORS_404,
     tags=["link"],
     summary="Mensajes del enlace (pendientes o entregados)",
-    description="STUB(FS-02) → BE-13/BE-22",
+    description="Por orden de envío; `direction` = up (a tierra) | down (a bordo).",
 )
-def list_link_messages(env: Slug, direction: LinkDirection | None = None) -> list[LinkMessage]:
-    return []
+def list_link_messages(
+    env: Slug, session: SessionDep, direction: LinkDirection | None = None
+) -> list[LinkMessage]:
+    try:
+        rows = comm_link.list_messages(session, env, direction)
+    except comm_link.UnknownEnvironment as exc:
+        raise HTTPException(404, str(exc)) from exc
+    return [comm_link.to_schema(r) for r in rows]
 
 
 # ── Demo (admin) ────────────────────────────────────────────
@@ -221,14 +234,18 @@ def demo_scenario(name: str, session: Annotated[Session, Depends(get_session)]) 
 @router.post(
     "/demo/link",
     response_model=LinkStatus,
+    responses=ERRORS_404,
     tags=["demo"],
     summary="Forzar el estado del enlace",
-    description="STUB(FS-02) → BE-13",
+    description="Al pasar a `los` todo lo que se envía queda en cola; al salir de `los` "
+    "la cola se envía con el retardo del entorno.",
 )
-def demo_link(body: DemoLinkIn) -> LinkStatus:
-    return stubs.link_status(body.env).model_copy(
-        update={"state": body.state, "since": clock.now()}
-    )
+def demo_link(body: DemoLinkIn, session: SessionDep) -> LinkStatus:
+    try:
+        comm_link.set_state(session, body.env, body.state)
+        return comm_link.status(session, body.env)
+    except comm_link.UnknownEnvironment as exc:
+        raise HTTPException(404, str(exc)) from exc
 
 
 @router.post(
@@ -236,8 +253,10 @@ def demo_link(body: DemoLinkIn) -> LinkStatus:
     response_model=DemoClock,
     tags=["demo"],
     summary="Avanzar el reloj de la demo",
-    description="Real: usa app/clock.py",
+    description="Avanza el reloj de la demo (app/clock.py) y entrega los mensajes del enlace "
+    "cuya ETA ya ha pasado.",
 )
-def demo_fast_forward(body: FastForwardIn) -> DemoClock:
+def demo_fast_forward(body: FastForwardIn, session: SessionDep) -> DemoClock:
     clock.advance(body.seconds)
+    comm_link.deliver_due(session)
     return DemoClock(server_time=clock.now(), offset_s=clock.get_offset())

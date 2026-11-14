@@ -702,7 +702,7 @@ export interface paths {
         };
         /**
          * Estado del enlace con tierra
-         * @description STUB(FS-02) → BE-13
+         * @description Estado (online | delayed | los), retardo de ida y mensajes pendientes. Entrega antes los mensajes cuya ETA ya ha pasado (reloj de la demo).
          */
         get: operations["get_link_api_v1_link_get"];
         put?: never;
@@ -722,7 +722,7 @@ export interface paths {
         };
         /**
          * Mensajes del enlace (pendientes o entregados)
-         * @description STUB(FS-02) → BE-13/BE-22
+         * @description Por orden de envío; `direction` = up (a tierra) | down (a bordo).
          */
         get: operations["list_link_messages_api_v1_link_messages_get"];
         put?: never;
@@ -784,7 +784,7 @@ export interface paths {
         put?: never;
         /**
          * Forzar el estado del enlace
-         * @description STUB(FS-02) → BE-13
+         * @description Al pasar a `los` todo lo que se envía queda en cola; al salir de `los` la cola se envía con el retardo del entorno.
          */
         post: operations["demo_link_api_v1_demo_link_post"];
         delete?: never;
@@ -804,7 +804,7 @@ export interface paths {
         put?: never;
         /**
          * Avanzar el reloj de la demo
-         * @description Real: usa app/clock.py
+         * @description Avanza el reloj de la demo (app/clock.py) y entrega los mensajes del enlace cuya ETA ya ha pasado.
          */
         post: operations["demo_fast_forward_api_v1_demo_fast_forward_post"];
         delete?: never;
@@ -4363,6 +4363,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description Recurso inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -4521,6 +4530,15 @@ export interface operations {
             };
             /** @description Rol sin permiso o dato ajeno */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
