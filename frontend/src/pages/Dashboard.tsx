@@ -219,9 +219,8 @@ export default function Dashboard() {
           {cards.length === 0 ? (
             <p className="text-env-muted">Todavía no hay mediciones.</p>
           ) : (
-            // Baraja (≥ lg): cartas plegadas que muestran su cabecera; al pasar el ratón o
-            // enfocarla, la carta se despliega hacia abajo. En móvil, lista normal.
-            <ul className="card-deck flex flex-col gap-3">
+            // Lista fija: símbolo de estado, nombre y valor (el resto, en el detalle del sistema).
+            <ul className="flex flex-col gap-2">
               {cards.map(({ systemId, ind }) => (
                 <li key={`${systemId}-${ind.indicator_id}`}>
                   <IndicatorCard
@@ -231,6 +230,7 @@ export default function Dashboard() {
                     stale={stale}
                     provisional={provisionalIds?.has(ind.indicator_id)}
                     onClick={() => setSelected(systemId)}
+                    compact
                   />
                 </li>
               ))}

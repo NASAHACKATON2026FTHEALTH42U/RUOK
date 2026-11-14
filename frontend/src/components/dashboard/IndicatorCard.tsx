@@ -2,7 +2,7 @@ import { serverNow } from '../../api/client'
 import type { Assessment } from '../../api/useAssessment'
 import { formatAgo } from '../../lib/time'
 import { statusStyle } from '../ui/status'
-import { StatusBadge } from '../ui/StatusBadge'
+import { StatusBadge, StatusIcon } from '../ui/StatusBadge'
 import { formatTrend, formatValue } from './format'
 import { TrendChart } from './TrendChart'
 
@@ -22,6 +22,11 @@ interface IndicatorCardProps {
   showTrend?: boolean
   /** Estado calculado en el dispositivo con una medición aún sin sincronizar (FE-12). */
   provisional?: boolean
+  /**
+   * Versión mínima (columna de indicadores del panel): símbolo de estado junto al nombre y el
+   * valor; sin sistema, tendencia ni antigüedad (están en el detalle del sistema).
+   */
+  compact?: boolean
 }
 
 /**
@@ -36,8 +41,29 @@ export function IndicatorCard({
   onClick,
   showTrend,
   provisional,
+  compact = false,
 }: IndicatorCardProps) {
   const trend = formatTrend(indicator.trend)
+  const st = statusStyle(stale ? 'stale' : indicator.status)
+  const stateLabel = provisional && !stale ? `${st.label} · provisional` : st.label
+  const compactBody = (
+    <span className="flex items-center justify-between gap-3" title={stateLabel}>
+      <span className="flex min-w-0 items-center gap-2">
+        {/* Símbolo de estado (forma, no solo color) y su texto para lectores de pantalla. */}
+        <StatusIcon glyph={st.glyph} color={st.color} size={18} />
+        <span className="sr-only">{stateLabel}:</span>
+        <span className="truncate font-medium">{name ?? indicator.indicator_id}</span>
+        {provisional && !stale && (
+          <span aria-hidden className="text-xs text-env-muted">
+            ⇡
+          </span>
+        )}
+      </span>
+      <span className="shrink-0 text-lg font-semibold tabular-nums">
+        {formatValue(indicator.last_value, indicator.unit)}
+      </span>
+    </span>
+  )
   const body = (
     <>
       <span className="flex items-start justify-between gap-2">
@@ -68,7 +94,9 @@ export function IndicatorCard({
       </span>
     </>
   )
-  const cls = 'block w-full rounded-lg border border-env-border bg-env-surface p-3 text-left'
+  const cls = `block w-full rounded-lg border border-env-border bg-env-surface text-left ${
+    compact ? 'px-3 py-2' : 'p-3'
+  }`
 
   return onClick ? (
     <button
@@ -76,11 +104,11 @@ export function IndicatorCard({
       onClick={onClick}
       className={`${cls} hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary`}
     >
-      {body}
+      {compact ? compactBody : body}
     </button>
   ) : (
     <div className={cls}>
-      {body}
+      {compact ? compactBody : body}
       {showTrend && (
         <TrendChart
           indicatorId={indicator.indicator_id}

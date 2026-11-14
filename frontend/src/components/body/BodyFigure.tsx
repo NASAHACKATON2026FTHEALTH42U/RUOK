@@ -33,6 +33,8 @@ interface Tooltip {
   region: RegionState
   x: number
   y: number
+  /** Dónde va el cartel respecto a la zona: encima (por defecto) o a su derecha. */
+  side: 'top' | 'right'
 }
 
 /**
@@ -92,7 +94,16 @@ export function BodyFigure({
     const box = boxRef.current?.getBoundingClientRect()
     const el = target.getBoundingClientRect()
     if (!box) return
-    setTooltip({ region, x: el.left + el.width / 2 - box.left, y: el.top - box.top })
+    // Inmune (ganglios repartidos por el cuerpo): el cartel va a la derecha, no encima.
+    if (region.region === 'immune')
+      setTooltip({
+        region,
+        x: el.right - box.left + 10,
+        y: el.top + el.height / 2 - box.top,
+        side: 'right',
+      })
+    else
+      setTooltip({ region, x: el.left + el.width / 2 - box.left, y: el.top - box.top, side: 'top' })
   }
 
   /** Relleno de una región: color del estado, o rayado gris si no hay datos fiables. */
@@ -449,8 +460,10 @@ export function BodyFigure({
         {tooltip && (
           <div
             role="tooltip"
-            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-lg border border-env-border bg-env-bg px-3 py-2 text-sm shadow-lg"
-            style={{ left: tooltip.x, top: tooltip.y - 6 }}
+            className={`pointer-events-none absolute z-10 rounded-lg border border-env-border bg-env-bg px-3 py-2 text-sm whitespace-nowrap shadow-lg ${
+              tooltip.side === 'right' ? '-translate-y-1/2' : '-translate-x-1/2 -translate-y-full'
+            }`}
+            style={{ left: tooltip.x, top: tooltip.side === 'right' ? tooltip.y : tooltip.y - 6 }}
           >
             <p className="font-medium whitespace-nowrap">{tooltip.region.name}</p>
             <StatusBadge
