@@ -11,7 +11,9 @@
 | FS-02 (#5) | Schemas Pydantic completos del contrato, routers stub de todos los endpoints, test de cobertura del contrato | Hecho |
 | BE-02 (#8) | Modelos SQLModel de **todas** las tablas de [data-model.md](data-model.md) con sus índices, `app_state` y persistencia del reloj | Hecho |
 | BE-08 (#15) | Motor de evaluación por indicador (`services/assessment.py`) | Hecho |
-| BE-03 (#9) | Perfiles de entorno en `app/data/environments.json`, loader validado y `GET /environments` reales | Hecho (PR pendiente de merge) |
+| BE-09 (#16) | Evaluación agregada por sistema y global (`services/assessment.py`) | Hecho |
+| BE-03 (#9) | Perfiles de entorno en `app/data/environments.json`, loader validado y `GET /environments` reales | Hecho |
+| BE-04 (#10) | Catálogo de 20 indicadores y 7 sistemas en JSON, validación cruzada y `GET /indicators`, `/systems` reales | Hecho (PR pendiente de merge) |
 
 ## Arrancar
 
@@ -47,10 +49,13 @@ backend/
 │   ├── clock.py          reloj inyectable: now(), advance(), set_offset(), get_offset(), reset()
 │   ├── models.py         tablas SQLModel (15) e índices de data-model.md; tipo UTCDateTime
 │   ├── data/
-│   │   └── environments.json  los 6 perfiles de entorno (BE-03)
+│   │   ├── environments.json  los 6 perfiles de entorno (BE-03)
+│   │   ├── indicators.json    20 indicadores con rangos provisionales (BE-04)
+│   │   └── systems.json       7 sistemas del cuerpo con su región del SVG (BE-04)
 │   ├── services/
 │   │   ├── app_state.py     clave-valor de app_state: get_value/set_value, save_clock/restore_clock
-│   │   ├── assessment.py    motor de evaluación por indicador (BE-08)
+│   │   ├── assessment.py    motor de evaluación por indicador y por sistema (BE-08, BE-09)
+│   │   ├── catalog.py       indicadores y sistemas: list_indicators(), get_indicator(), list_systems()
 │   │   └── environments.py  carga y valida environments.json: list_environments(), get_environment()
 │   ├── stubs.py          STUB(FS-02): datos de ejemplo de los routers stub (se van retirando)
 │   ├── schemas/          modelos Pydantic del contrato, uno por dominio; se importan desde app.schemas
@@ -66,7 +71,7 @@ backend/
 │       ├── deps.py       Bearer opcional (stub de auth), cabecera X-Device-Id, respuestas de error
 │       ├── health.py     GET /health
 │       ├── auth.py       /auth/*, /users
-│       ├── catalog.py    /environments (real), /indicators, /systems, /interventions (stub)
+│       ├── catalog.py    /environments, /indicators, /systems (reales), /interventions (stub)
 │       ├── members.py    /members/{id}, privacy, measurements, assessment, heartbeat, ruok
 │       ├── alerts.py     alertas del member, acciones sobre alertas, consola ground
 │       ├── game.py       tareas, game, leaderboard
@@ -79,7 +84,8 @@ backend/
     ├── test_db.py        WAL, foreign_keys y sesión
     ├── test_models.py    tablas, índices, crear/leer cada modelo, restricciones, fechas UTC, app_state
     ├── test_assessment.py   motor de evaluación (BE-08)
-    └── test_environments.py perfiles vs docs/environments.md, JSON inválido, GET /environments y 404
+    ├── test_environments.py perfiles vs docs/environments.md, JSON inválido, GET /environments y 404
+    └── test_catalog.py      indicadores y sistemas, coherencia, rangos con el motor, endpoints y 404
 ```
 
 La estructura objetivo completa (services, data, seed…) está en [architecture.md](architecture.md#estructura-de-carpetas).
@@ -157,7 +163,7 @@ La configuración de dominio (entornos, indicadores, sistemas, intervenciones…
 | Fichero | Servicio | Issue |
 |---|---|---|
 | `environments.json` | `services/environments.py` | BE-03 |
-| `indicators.json`, `systems.json` | — | BE-04 |
+| `indicators.json`, `systems.json` | `services/catalog.py` | BE-04 |
 | `interventions.json` | — | BE-21 |
 
 Cómo funciona `services/environments.py` (patrón a seguir en BE-04 y BE-21):
@@ -165,6 +171,18 @@ Cómo funciona `services/environments.py` (patrón a seguir en BE-04 y BE-21):
 - `list_environments()` y `get_environment(env_id)` usan una caché en memoria (`lru_cache`): el fichero se lee una sola vez.
 - El `lifespan` lo carga al arrancar: **si el JSON es inválido, el servidor no arranca** (mejor que fallar en mitad de la demo).
 - Cambiar el JSON requiere reiniciar el servidor (`--reload` solo vigila los `.py`).
+
+`services/catalog.py` sigue el mismo patrón y además hace una **validación cruzada** (`check_consistency`) al cargar. Falla si:
+- el `system_id` de un indicador no existe en `systems.json`;
+- un sistema lista un indicador que no existe o que pertenece a otro sistema;
+- un indicador no aparece en la lista de ningún sistema;
+- un entorno de `environments.json` usa un indicador que no está en el catálogo.
+
+Los **rangos son provisionales** hasta CNT-01. Todos están en la tabla de umbrales de [sources.md](sources.md), con las reglas del motor (un valor más allá de la banda `warning` ya es `critical`).
+
+Si cambias `indicators.json` o `systems.json`, regenera los mocks del front (`cd frontend && npm run gen:mocks`) además de los tipos.
+
+**Añadir o cambiar un indicador:** añádelo a `indicators.json` **y** a la lista `indicators` de su sistema en `systems.json`, actualiza la tabla de [sources.md](sources.md) y `EXPECTED_INDICATORS` en `tests/test_catalog.py`. Si es para un entorno, añádelo a su `indicators` en `environments.json`. Las regiones SVG (`svg_region`) tienen que coincidir con las de `BodyFigure` en el front.
 
 **Añadir o cambiar un entorno:** edita `environments.json` siguiendo [environments.md](environments.md), actualiza la tabla de ese documento y `DOC_TABLE` en `tests/test_environments.py`, y pasa los tests. Los valores clínicos (`threshold_overrides`) se citan en [sources.md](sources.md).
 
