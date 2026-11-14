@@ -259,6 +259,8 @@ def scenario_eva_no_contact(session: Session) -> str:
     member = session.get(models.Member, VEGA)
     member.last_activity = "eva"
     member.last_seen_at = clock.now() - timedelta(minutes=3)
+    # Solo se vigila a quien ha conectado un dispositivo (BE-16): el móvil de la demo.
+    member.device_id = member.device_id or _uuid("device", "movil-vega")
     session.add(member)
     return "Cmdr. Vega en EVA sin contacto desde hace 3 min"
 
@@ -293,10 +295,13 @@ def apply_scenario(session: Session, name: str) -> str:
     Después evalúa al member afectado, como haría un POST de mediciones: así se
     abren o escalan sus alertas automáticas (BE-14).
     """
-    from app.services.alerts import evaluate_member  # evita el ciclo de imports
+    from app.services import liveness_watch  # evita el ciclo de imports
+    from app.services.alerts import evaluate_member
 
     detail = SCENARIOS[name](session)
     session.commit()
     app_state.set_value(session, "scenario", name)
-    evaluate_member(session, session.get(models.Member, SCENARIO_MEMBER[name]))
+    member = session.get(models.Member, SCENARIO_MEMBER[name])
+    evaluate_member(session, member)
+    liveness_watch.check_member(session, member)  # R U OK? / no_contact (BE-16)
     return detail

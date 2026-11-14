@@ -10,7 +10,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session
 
-from app import models, stubs
+from app import models
 from app.db import get_session
 from app.routers.deps import ERRORS_404, ERRORS_409, ERRORS_AUTH, AuthDep
 from app.schemas import (
@@ -27,7 +27,7 @@ from app.schemas import (
     RuokResult,
     Slug,
 )
-from app.services import alerts, environments, liveness, measurements, members
+from app.services import alerts, environments, liveness, liveness_watch, measurements, members
 from app.services.member_assessment import UnknownEnvironment, assess_member
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -161,8 +161,10 @@ def heartbeat(member_id: int, body: HeartbeatIn, session: SessionDep) -> Heartbe
     response_model=RuokResult,
     tags=["liveness"],
     summary="Respuesta al check-in 'R U OK?'",
-    description="STUB(FS-02) → BE-16",
+    description="Cierra el check-in pendiente y cuenta como señal de vida. ok=false "
+    "('Necesito ayuda') crea una alerta critical y devuelve su id; ok=true resuelve la "
+    "alerta no_contact abierta.",
 )
 def ruok(member_id: int, body: RuokIn, session: SessionDep) -> RuokResult:
-    _member(session, member_id)
-    return RuokResult(liveness="active", alert_id=None if body.ok else stubs.ALERT_ID)
+    m = _member(session, member_id)
+    return liveness_watch.answer_ruok(session, m, body.ok, body.note)
