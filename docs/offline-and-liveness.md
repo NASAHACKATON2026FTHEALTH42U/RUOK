@@ -18,6 +18,8 @@ No se pierde nada. Los mensajes (alertas, escalados, respuestas) quedan en el ou
 > Si un astronauta colapsa y su dispositivo deja de enviar, el sistema **no puede** seguir mostrando su último estado verde.
 
 ### Heartbeat y liveness
+> **Móviles:** al bloquear la pantalla, el navegador suspende el heartbeat y el estado pasa a `stale`. Es lo correcto. Para no generar falsas alarmas en la presentación, el member puede marcar la actividad `sleep` o el admin puede pausar las alertas de liveness en `/control` (`POST /control/liveness/pause`).
+
 - El dispositivo envía `POST /members/{id}/heartbeat` cada **15 s**, con `activity` igual a `normal`, `eva` o `sleep`.
 - El servidor calcula el liveness con los umbrales de `environment.liveness`:
 
@@ -55,7 +57,8 @@ Con solo una app no se puede distinguir entre "colapsó" y "se le acabó la bate
 - Solo se ve lo que el enlace ya ha entregado.
 
 ## Pruebas obligatorias antes de la congelación
-- [ ] Con el wifi apagado, se completa el guion de demo entero.
+- [ ] **Sin internet** (router sin WAN), se completa el guion de demo entero con 2 o más móviles en la red local.
+- [ ] Al apagar el wifi **de un móvil**: el dispositivo pasa a sin contacto en `/control`, sus mediciones quedan en el outbox y se sincronizan al volver (`sync.batch`).
 - [ ] Con la tablet desconectada del servidor, se registran 2 mediciones, se reconecta y se comprueba que se sincronizan sin duplicados.
 - [ ] Se detiene el heartbeat de un member en EVA: pasa a gris, aparece "R U OK?", hay timeout y la alerta `no_contact` llega a la tripulación y, después de la ETA, a tierra.
 - [ ] Con el enlace en `los`, un SOS queda en cola y se entrega al volver el enlace.

@@ -7,7 +7,7 @@ Responde al peligro HRP **Isolation & Confinement**. Se apoya en la literatura d
   - escala 1–5 con emojis para ánimo, estrés, energía, **soledad** y calidad del sueño;
   - una pregunta sobre la relación con la tripulación;
   - una nota libre opcional.
-- **Test de vigilancia psicomotora (PVT, P2).** Dura 3 min y se hace en el navegador. Se inspira en el Reaction Self Test de la ISS:
+- **Test de vigilancia psicomotora (PVT, P1).** Dura 3 min (30 s en la demo, desde el móvil del juez) y se hace en el navegador. Se inspira en el Reaction Self Test de la ISS:
   - El estímulo aparece tras un intervalo aleatorio de 2–10 s.
   - Se mide el tiempo de reacción.
   - Un **lapso** es una respuesta de más de 500 ms.
@@ -59,7 +59,7 @@ En la residencia geriátrica, la soledad es un problema de salud de primer orden
 | Tarjetas de intervención | 1 h + contenido | P1 |
 | "Necesito hablar" y privacidad | 1,5 h | P1 |
 | Barra de fase de misión | 1 h | P1 |
-| Test PVT | 2–3 h | P2 (el primero de los P2) |
+| Test PVT (móvil) | 2–3 h | P1 (lo usa la demo) |
 | Mensaje a casa con retardo | 2 h | P2 |
 | Kudos y misiones de tripulación | 2 h | P2 |
 | Earth view | 1 h | P2 (se recorta lo primero) |

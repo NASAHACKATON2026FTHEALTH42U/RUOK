@@ -14,8 +14,10 @@
   - `409`: el mismo `id` llega con un contenido distinto.
   - `422`: error de validación.
 - **Idempotencia.** Repetir un `POST` con el mismo `id` devuelve `200` con el recurso existente y no lo duplica.
+- **Dispositivo.** Todas las peticiones llevan la cabecera `X-Device-Id: <uuid>` (ver [control-center-and-devices.md](control-center-and-devices.md#4-identidad-de-dispositivo-y-aislamiento)).
 - **Hora del servidor.** Las respuestas llevan la cabecera `X-Server-Time`, que es el reloj de la demo (puede ir acelerado).
 - **CORS** abierto en desarrollo.
+- **Autenticación:** `Authorization: Bearer <jwt>` en todos los endpoints salvo `/health`, `/auth/*` y el SOS de emergencia. `401` = sin sesión válida; `403` = rol sin permiso o dato ajeno. Ver [auth-and-roles.md](auth-and-roles.md).
 
 ## Enumeraciones
 ```
@@ -39,6 +41,24 @@ Source         = manual | device | camera | checkin | pvt
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | `/health` | `{status:"ok", server_time}` |
+
+### Autenticación y roles
+| Método | Ruta | Auth | Descripción |
+|---|---|---|---|
+| POST | `/auth/login` | — | `{username, password}` → `{access_token, expires_at, user: User}` |
+| POST | `/auth/pin` | — | `{username, pin}` → igual que login (PIN rápido en tablets) |
+| GET | `/auth/me` | ✅ | `User` actual |
+| GET | `/auth/demo-users` | — | Solo con `DEMO_MODE=true`: usuarios sembrados para el selector de la demo |
+| GET | `/users?env_id=` *(P2)* | admin | Listado de usuarios |
+| POST | `/users` *(P2)* | admin | Crear usuario |
+
+**Permisos por endpoint:** los define la matriz de [auth-and-roles.md](auth-and-roles.md#matriz-de-acceso-a-vistas). Reglas generales:
+- un `member` solo accede a `/members/{su_member_id}/…`;
+- `medic` y `commander` acceden a los members de su `env_id`;
+- `responder` y `psych` acceden solo a `/environments/{su_env}/alerts?view=ground` y a las acciones sobre alertas entregadas;
+- `/demo/*` es solo para `admin`.
+
+**Excepción de seguridad:** `POST /members/{id}/alerts` con `category: "emergency"` se acepta **sin token**, y la alerta queda marcada con `authenticated: false`.
 
 ### Configuración (solo lectura)
 | Método | Ruta | Descripción |
@@ -71,7 +91,7 @@ Source         = manual | device | camera | checkin | pvt
 ### Liveness
 | Método | Ruta | Descripción |
 |---|---|---|
-| POST | `/members/{member_id}/heartbeat` | `{device_id, activity?: "normal"\|"eva"\|"sleep"}`. Devuelve `{liveness, checkin_required: bool}` |
+| POST | `/members/{member_id}/heartbeat` | `{device_id, activity?: "normal"\|"eva"\|"sleep", pending_outbox: int, last_sync_at?, device_kind?: "mobile"\|"tablet"\|"desktop"}`. Devuelve `{liveness, checkin_required: bool}`. También actualiza el registro del dispositivo |
 | POST | `/members/{member_id}/ruok` | Respuesta al check-in "R U OK?": `{ok: bool, note?}` |
 
 ### Alertas
@@ -92,6 +112,26 @@ Source         = manual | device | camera | checkin | pvt
 | POST | `/members/{member_id}/tasks/{task_id}/complete` | `{id: uuid, completed_at}`, idempotente. Devuelve `GameState` |
 | GET | `/members/{member_id}/game` | `GameState` |
 | GET | `/environments/{env_id}/leaderboard` | Puntos de la tripulación (cooperativo) |
+
+### Tiempo real, dispositivos y centro de control
+| Método | Ruta | Rol | Descripción |
+|---|---|---|---|
+| GET | `/events/stream?token=&types=&env_id=` | todos (filtrado por rol) | **SSE**. Cada mensaje es un `Event`. Admite `Last-Event-ID` para reanudar |
+| GET | `/events?since_id=&env_id=&type=&limit=` | admin | Historial de `event_log` (y fallback de polling) |
+| GET | `/devices?env_id=` | admin | Dispositivos registrados con `last_seen_at`, `pending_outbox`, `last_sync_at` e IP |
+| GET | `/control/overview` | admin | Todos los entornos: members con `overall_status`, `liveness`, alertas abiertas, enlace y métricas |
+| POST | `/control/liveness/pause` | admin | `{env_id, paused: bool}`: pausa las alertas de liveness durante la presentación |
+| GET | `/system/network-info` | — | `{lan_urls: ["http://192.168.8.10:8000"], hostname}` para el QR de conexión |
+
+```jsonc
+// Event (SSE / event_log)
+{ "id": 1234, "type": "alert.created", "at": "...", "env_id": "mars",
+  "member_id": 1, "user_id": 7, "device_id": "uuid", "ref_id": "alert-uuid",
+  "summary": "SOS emergency de Cmdr. Vega", "payload": {} }
+// type = measurement.created | heartbeat | liveness.changed | alert.created | alert.escalated |
+//        alert.acknowledged | alert.resolved | link.queued | link.delivered | link.state_changed |
+//        sync.batch | auth.login | auth.failed | task.completed | device.registered
+```
 
 ### Enlace con tierra y demo
 | Método | Ruta | Descripción |
@@ -135,6 +175,10 @@ Source         = manual | device | camera | checkin | pvt
   "indicators": ["heart_rate", "bp_systolic", "bp_diastolic", "spo2"],
   "function": "...", "space_effects": "...", "hazards": ["gravity", "radiation"] }
 
+// User (sesión)
+{ "id": 7, "username": "vega", "display_name": "Cmdr. Vega", "role": "member",   // member | medic | commander | responder | psych | family | admin
+  "env_id": "mars", "member_id": 1, "role_label": "astronauta" }                   // role_label sale de environment.vocabulary
+
 // Member
 { "id": 1, "env_id": "mars", "name": "Cmdr. Vega", "role": "commander",
   "share_behavioral_details": false, "last_seen_at": "...", "liveness": "active" }
@@ -166,7 +210,7 @@ Source         = manual | device | camera | checkin | pvt
   "message": "Necesito hablar", "system_id": null, "target_role": "ground" }
 
 // Alert
-{ "id": "uuid", "member_id": 1, "env_id": "mars", "origin": "manual",
+{ "id": "uuid", "member_id": 1, "env_id": "mars", "origin": "manual", "authenticated": true, "created_by_user_id": 7,
   "category": "psychological", "severity": "warning", "system_id": null, "indicator_ids": [],
   "message": "...", "level": 2, "target_role": "ground",
   "delivery_mode": "delayed", "delay_s": 840, "eta": "...", "delivered_at": null,
@@ -188,6 +232,7 @@ Source         = manual | device | camera | checkin | pvt
 ```
 
 ## Reglas que el front debe respetar
+0. Ocultar vistas por rol es UX y no seguridad. El backend valida siempre. Un `401` nunca borra el outbox: se pide login y se reintenta.
 1. **Nunca pintar en verde** `unknown`, `stale` ni `lost`. Para esos casos se usa el estilo gris con rayado.
 2. Cada `POST` que crea datos lleva un `id` UUID generado en el cliente. Si falla, se guarda en el outbox y se reintenta.
 3. La consola `/ground` muestra siempre la antigüedad del dato (`last_seen_at`, `delivered_at`) y el estado del enlace.
