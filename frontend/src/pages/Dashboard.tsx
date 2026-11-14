@@ -11,6 +11,7 @@ import { MissionPhaseBar } from '../components/behavioral/MissionPhaseBar'
 import { buildRegions, formatSinceLabel, isFigureStale } from '../components/body/regions'
 import { IndicatorCard } from '../components/dashboard/IndicatorCard'
 import { SystemPanel } from '../components/dashboard/SystemPanel'
+import { SystemsRing } from '../components/dashboard/SystemsRing'
 import { BodyLegend } from '../components/body/BodyLegend'
 import { SidebarPortal } from '../components/ui/SidebarPortal'
 import { bySeverity, livenessState, statusStyle } from '../components/ui/status'
@@ -140,8 +141,9 @@ export default function Dashboard() {
           : 'flex flex-wrap items-center gap-2 md:hidden'
       }
     >
-      {/* Si el "sin datos" se debe a un liveness stale, basta el badge de liveness (FE-34). */}
-      {!(live === 'stale' && a.overall_status === 'unknown') && (
+      {/* Si el "sin datos" se debe a un liveness stale, basta el badge de liveness (FE-34).
+          En móvil el estado general ya lo cuenta el anillo (SystemsRing). */}
+      {sidebar && !(live === 'stale' && a.overall_status === 'unknown') && (
         <StatusBadge
           status={a.overall_status}
           label={`Estado general: ${statusStyle(a.overall_status).label}`}
@@ -150,7 +152,7 @@ export default function Dashboard() {
       )}
       {live && <StatusBadge status={live} label={formatSinceLabel(a.last_seen_at, serverNow())} />}
       <span
-        className={`${sidebar ? 'text-xs' : 'text-sm'} font-mono text-env-muted`}
+        className={`${sidebar ? 'text-xs' : 'text-[11px]'} font-mono text-env-muted`}
         role={sidebar ? 'status' : undefined}
       >
         {assessment.refreshFailed
@@ -186,7 +188,17 @@ export default function Dashboard() {
       {/* Tres columnas en escritorio (≥ 1280 px): sistemas | cuerpo | indicadores, las laterales
           centradas en vertical, y debajo las fases de la misión a todo el ancho. Más estrecho:
           cuerpo e indicadores lado a lado y los sistemas debajo; en móvil, todo en columna. */}
-      <div className="grid gap-6 lg:grid-cols-[minmax(240px,320px)_1fr] xl:grid-cols-[230px_minmax(240px,320px)_1fr]">
+      {/* Móvil: anillo de sistemas y lista SYS.01 (estilo HUD, maqueta Main). */}
+      <SystemsRing
+        regions={regions}
+        stale={stale}
+        name={user?.member_id === memberId ? user?.display_name.split(' ').pop() : undefined}
+        env={env}
+        now={serverNow()}
+        onSelectSystem={setSelected}
+      />
+
+      <div className="hidden gap-6 md:grid lg:grid-cols-[minmax(240px,320px)_1fr] xl:grid-cols-[230px_minmax(240px,320px)_1fr]">
         <div className="order-3 lg:col-span-2 xl:order-1 xl:col-span-1 xl:self-center">
           <h2 className="mb-3 text-lg font-semibold">Sistemas</h2>
           <BodyLegend

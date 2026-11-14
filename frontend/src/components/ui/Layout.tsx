@@ -1,145 +1,109 @@
 import { motion, useReducedMotion } from 'framer-motion'
-import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { ROUTE_PERMISSIONS } from '../../auth/permissions'
+import { useEnvironments } from '../../api/useEnvironments'
 import { homeFor } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
-import { capitalize, useVocab } from '../../environments/useVocab'
+import { useVocab } from '../../environments/useVocab'
 import { getDevice } from '../../offline/device'
 import { RealtimeConnector } from '../../realtime/RealtimeConnector'
+import { useEnvironmentStore } from '../../store/environment'
 import { LiveAlertToast } from '../alerts/LiveAlertToast'
 import { SosButton } from '../alerts/SosButton'
 import { SessionMenu } from '../auth/SessionMenu'
-import { LivenessGuard } from '../liveness/LivenessGuard'
+import { LivenessGuard, MemberActivitySelector } from '../liveness/LivenessGuard'
 import { EnvironmentSelector } from './EnvironmentSelector'
+import { HudClock } from './HudClock'
 import { LinkStatusChip } from './LinkStatusChip'
 import { MockBanner } from './MockBanner'
+import { NavIcon } from './NavIcon'
+import { allowedItems, MORE, navItems, tabsFor } from './navigation'
 import { PendingSyncChip } from './PendingSyncChip'
 import { ServerStatus } from './ServerStatus'
 import { SIDEBAR_SLOT_ID } from './SidebarPortal'
 
-const NAV_ITEMS = [
-  { to: '/', label: 'Entornos' },
-  { to: '/members', label: '' }, // etiqueta con el vocabulario (tripulación, planta…)
-  { to: '/dashboard', label: 'Panel' },
-  { to: '/measure', label: 'Medir' },
-  { to: '/checkin', label: 'Check-in' },
-  { to: '/pvt', label: 'Test PVT' },
-  { to: '/earth', label: 'La Tierra' },
-  { to: '/history', label: 'Historial' },
-  { to: '/missions', label: 'Misiones' },
-  { to: '/alerts', label: 'Alertas' },
-]
-
 /**
- * Estructura de la app con una barra lateral en columna (logo, usuario, navegación y estados).
- * En escritorio (≥ md) está fija a la izquierda; en móvil es un cajón que se abre con "Menú" y
- * se cierra al navegar, con Esc o tocando fuera. Es UN solo <aside>: lo que monta (heartbeat,
- * modal "R U OK?") existe una vez. Compacta para que quepa sin scroll (12 secciones del admin
- * en 720 px de alto o en un móvil de 375×667); la barra de scroll queda oculta por si acaso.
+ * Estructura de la app con el estilo HUD (docs/design/hud-style.md §6).
+ * - **Móvil:** cabecera (R U OK, nodo, reloj y `SOS`), contenido y 4 pestañas abajo según el
+ *   rol (3 + «Más»). Sin cajón: lo secundario está en la pantalla «Más».
+ * - **Escritorio (≥ md):** barra lateral con todas las secciones, estados y controles.
+ * `LivenessGuard` (heartbeat y modal "R U OK?"), el SSE y los avisos en vivo se montan UNA vez.
  */
 export function Layout() {
   const device = getDevice()
-  const { ground, crew } = useVocab()
+  const vocab = useVocab()
   const { role, can } = useAuth()
   const { pathname } = useLocation()
   const wide = pathname.startsWith('/control')
-  const [open, setOpen] = useState(false)
   const reducedMotion = useReducedMotion()
+  const envId = useEnvironmentStore((s) => s.envId)
+  const envs = useEnvironments()
+  const env = envs.state === 'ready' ? envs.data.find((e) => e.id === envId) : undefined
 
   // Solo las vistas que permite el rol (FE-28, src/auth/permissions.ts).
-  const navItems = [
-    ...NAV_ITEMS,
-    { to: '/ground', label: `Consola de ${ground}` },
-    { to: '/control', label: 'Centro de control' },
-  ]
-    .map((i) => (i.to === '/members' ? { ...i, label: capitalize(crew) } : i))
-    .filter((i) => can(ROUTE_PERMISSIONS[i.to]))
-
-  // El cajón móvil se cierra al navegar y con Esc.
-  useEffect(() => setOpen(false), [pathname])
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [open])
+  const allowed = allowedItems(navItems(vocab), can)
+  const tabs = tabsFor(role, allowed)
 
   const logo = (
-    <NavLink to={role ? homeFor(role) : '/'} className="text-lg font-bold tracking-tight">
-      R U OK<span className="text-env-primary">?</span>
+    <NavLink
+      to={role ? homeFor(role) : '/'}
+      className="font-mono text-[13px] tracking-[0.24em] text-env-text"
+      aria-label="R U OK: inicio"
+    >
+      R U OK
     </NavLink>
   )
+  const node = env ? `Nodo.${env.id} / ${env.name}` : 'Sin entorno'
 
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="flex h-dvh flex-col">
       <MockBanner />
 
-      {/* Barra superior mínima, solo en móvil */}
-      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-env-border bg-env-surface px-4 py-3 md:hidden">
-        {logo}
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          aria-expanded={open}
-          aria-controls="sidebar"
-          className="rounded-md border border-env-border px-3 py-1.5 text-sm hover:border-env-text"
-        >
-          ☰ Menú
-        </button>
-      </div>
+      {/* Cabecera móvil: logo + nodo, reloj y SOS siempre visible */}
+      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-hud-line px-[18px] pt-3.5 pb-3 md:hidden">
+        <div className="min-w-0">
+          {logo}
+          <div className="hud-label mt-0.5 truncate text-[9px]">{node}</div>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <HudClock env={env} />
+          <SosButton variant="header" />
+        </div>
+      </header>
 
-      <div className="flex flex-1">
-        {/* Fondo del cajón móvil (tocar fuera = cerrar) */}
-        {open && (
-          <button
-            type="button"
-            aria-label="Cerrar el menú"
-            tabIndex={-1}
-            onClick={() => setOpen(false)}
-            className="fixed inset-0 z-40 bg-black/50 md:hidden"
-          />
-        )}
-
+      <div className="flex min-h-0 flex-1">
+        {/* Barra lateral de escritorio */}
         <aside
-          id="sidebar"
           aria-label="Menú principal"
-          className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col gap-3 overflow-y-auto border-r border-env-border bg-env-surface px-4 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden transition-transform duration-200 md:sticky md:top-0 md:z-auto md:h-screen md:translate-x-0 ${
-            open ? 'translate-x-0' : '-translate-x-full'
-          }`}
+          className="hidden w-64 shrink-0 flex-col gap-3 overflow-y-auto border-r border-hud-line px-4 py-4 [scrollbar-width:none] md:flex [&::-webkit-scrollbar]:hidden"
         >
-          <div className="flex items-center justify-between">
-            {logo}
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Cerrar el menú"
-              className="rounded-md px-2 py-1 text-env-muted hover:text-env-text md:hidden"
-            >
-              ✕
-            </button>
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              {logo}
+              <div className="hud-label mt-0.5 truncate text-[9px]">{node}</div>
+            </div>
+            <SosButton variant="header" />
           </div>
-
+          <HudClock env={env} />
           <SessionMenu />
 
-          {/* Resumen de la página actual (p. ej. estado general del panel), vía SidebarPortal */}
+          {/* Resumen de la página actual (p. ej. estado general del panel), vía SidebarPortal (FE-26) */}
           <div id={SIDEBAR_SLOT_ID} className="empty:hidden" />
 
-          <nav aria-label="Secciones">
-            <ul className="flex flex-col gap-0.5 text-sm">
-              {navItems.map((item) => (
+          <nav aria-label="Secciones" className="hud-panel">
+            <div className="hud-panel-head">
+              <b>NAV.01</b>Secciones
+            </div>
+            <ul>
+              {[...allowed, MORE].map((item) => (
                 <li key={item.to}>
                   <NavLink
                     to={item.to}
                     end
                     className={({ isActive }) =>
-                      `block rounded-md px-3 py-1.5 ${
-                        isActive
-                          ? 'bg-env-primary text-env-primary-text'
-                          : 'text-env-muted hover:bg-env-border/50 hover:text-env-text'
-                      }`
+                      `hud-row !min-h-10 !text-sm ${isActive ? 'is-active' : 'hover:text-env-text'}`
                     }
                   >
+                    <span className="w-8 font-mono text-[10px] text-env-muted">{item.code}</span>
                     {item.label}
                   </NavLink>
                 </li>
@@ -147,32 +111,35 @@ export function Layout() {
             </ul>
           </nav>
 
-          {/* Estados y controles: en columna, al fondo de la barra */}
           <section
             aria-label="Estado"
-            className="mt-auto flex flex-col items-start gap-1.5 border-t border-env-border pt-3 text-xs [&_label]:flex-wrap [&_select]:max-w-full"
+            className="mt-auto flex w-full flex-col items-start gap-1.5 pt-2 text-xs [&_label]:flex-wrap [&_select]:max-w-full"
           >
+            <MemberActivitySelector compact />
             <LinkStatusChip />
             <PendingSyncChip />
             <ServerStatus />
-            <LivenessGuard />
             {can('action:change-environment') && <EnvironmentSelector />}
+            {/* Aviso siempre visible en escritorio; en móvil va en «Más» y en el login. */}
+            <p className="mt-2 text-[11px] leading-snug text-env-muted">
+              Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
+              el criterio de un profesional sanitario.
+              {device.mode === 'tab' && (
+                <span className="mt-1 block" title={device.id}>
+                  Dispositivo: {device.name ?? `pestaña ${device.id.slice(0, 8)}`}
+                </span>
+              )}
+            </p>
           </section>
-
-          {/* Aviso siempre visible en escritorio (en móvil va en el pie de página). */}
-          <p className="hidden text-[11px] leading-snug text-env-muted md:block">
-            Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
-            el criterio de un profesional sanitario.
-          </p>
         </aside>
 
-        <div className="bg-grid flex min-w-0 flex-1 flex-col overflow-x-clip">
-          {/* El centro de control usa todo el ancho (proyector o pantalla grande). */}
-          <main
-            className={`mx-auto w-full flex-1 px-4 py-4 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
+        {/* Contenido. En móvil, cada pantalla debería caber sin scroll (hud-style.md §5). */}
+        <main className="bg-grid min-w-0 flex-1 overflow-x-clip overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
+          <div
+            className={`mx-auto w-full px-3.5 py-3.5 md:px-6 md:py-6 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
           >
-            {/* Fundido corto al cambiar de página. Solo opacidad: un transform crearía un bloque
-                contenedor y descolocaría las modales `fixed` de las páginas. */}
+            {/* Fundido corto al cambiar de página (FE-26). Solo opacidad: un transform crearía un
+                bloque contenedor y descolocaría las modales `fixed` de las páginas. */}
             <motion.div
               key={pathname}
               initial={reducedMotion ? false : { opacity: 0 }}
@@ -181,22 +148,26 @@ export function Layout() {
             >
               <Outlet />
             </motion.div>
-          </main>
-
-          <footer className="border-t border-env-border px-4 pt-3 pb-20 text-center text-xs text-env-muted md:pb-6">
-            <span className="md:hidden">
-              Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
-              el criterio de un profesional sanitario.
-            </span>
-            {device.mode === 'tab' && (
-              <span className="mt-1 block md:mt-0" title={device.id}>
-                Dispositivo: {device.name ?? `pestaña ${device.id.slice(0, 8)}`}
-              </span>
-            )}
-          </footer>
-        </div>
+          </div>
+        </main>
       </div>
-      <SosButton />
+
+      {/* Pestañas móviles: 3 del rol + «Más» */}
+      <nav aria-label="Principal" className="hud-tabs shrink-0 md:hidden">
+        {tabs.map((t) => (
+          <NavLink
+            key={t.to}
+            to={t.to}
+            end
+            className="hud-tab focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary"
+          >
+            <NavIcon name={t.icon} />
+            {t.to === '/members' ? t.label.slice(0, 11) : t.label}
+          </NavLink>
+        ))}
+      </nav>
+
+      <LivenessGuard />
       <RealtimeConnector />
       <LiveAlertToast />
     </div>
