@@ -12,6 +12,7 @@ import xrayHuman from '../../assets/xray-human.webp'
 import { STATUS_COLORS, statusStyle, type Liveness } from '../ui/status'
 import { StatusBadge } from '../ui/StatusBadge'
 import { BodyLegend } from './BodyLegend'
+import { BRAIN, HEART, STOMACH, type OrganIcon } from './organIcons'
 import { isFigureStale, type BodyRegion, type RegionState } from './regions'
 
 interface BodyFigureProps {
@@ -194,6 +195,37 @@ export function BodyFigure({
     )
   }
 
+  /**
+   * Icono de órgano (viewBox 512) colocado en (x, y) con ancho `w` y alto `h`, en coordenadas de la
+   * figura. Silueta con el estilo del estado (shape) y, si lo tiene, detalle oscuro encima. El
+   * contorno al señalarlo se compensa por la escala para que se vea igual que en las demás zonas.
+   */
+  const organ = (
+    r: RegionState,
+    icon: OrganIcon,
+    x: number,
+    y: number,
+    w: number,
+    h: number = w,
+  ) => {
+    const kx = w / 512
+    const ky = h / 512
+    const k = (kx + ky) / 2
+    const style = shape(r)
+    return (
+      <g transform={`translate(${x} ${y}) scale(${kx} ${ky})`}>
+        {/* Zona sensible invisible que cubre el icono (los iconos tienen huecos). */}
+        <ellipse cx="256" cy="256" rx="256" ry="256" fill="transparent" stroke="none" />
+        {icon.shape.map((d, i) => (
+          <path key={i} d={d} {...style} strokeWidth={style.strokeWidth / k} />
+        ))}
+        {icon.detail?.map((d, i) => (
+          <path key={`d${i}`} d={d} fill="#000000" fillOpacity={0.3} stroke="none" />
+        ))}
+      </g>
+    )
+  }
+
   /** Zonas del cuerpo, en coordenadas de la imagen original (887 × 1774). */
   const zones: [BodyRegion, (r: RegionState) => ReactNode][] = [
     // Huesos (musculoesquelético): húmero, antebrazo, fémur y tibia
@@ -215,18 +247,10 @@ export function BodyFigure({
         </g>
       ),
     ],
-    // Metabólico: hígado y estómago
-    ['metabolic', (r) => <ellipse cx="445" cy="590" rx="140" ry="62" {...shape(r)} />],
-    // Corazón
-    [
-      'heart',
-      (r) => (
-        <path
-          d="M455 535 C385 495 385 425 425 428 C443 429 452 442 455 452 C458 442 467 429 485 428 C525 425 525 495 455 535 Z"
-          {...shape(r)}
-        />
-      ),
-    ],
+    // Metabólico: estómago (icono), en la parte alta del abdomen
+    ['metabolic', (r) => organ(r, STOMACH, 365, 575, 200)],
+    // Corazón (icono)
+    ['heart', (r) => organ(r, HEART, 380, 400, 154)],
     // Inmune: ganglios linfáticos (cuello, axilas, ingles)
     [
       'immune',
@@ -262,7 +286,7 @@ export function BodyFigure({
       ),
     ],
     // Cerebro (neuro-conductual). Termina por encima de los ojos para no robarles el clic.
-    ['brain', (r) => <ellipse cx="443" cy="76" rx="82" ry="46" {...shape(r)} />],
+    ['brain', (r) => organ(r, BRAIN, 366, 22, 154, 104)],
     // Ojos (SANS). Zona sensible (rect invisible) más alta que los ojos: es fácil pulsarlos.
     [
       'eyes',
