@@ -260,3 +260,45 @@ def test_list_systems_endpoint(client):
     r = client.get("/api/v1/systems")
     assert r.status_code == 200
     assert {s["id"]: s["svg_region"] for s in r.json()} == EXPECTED_SYSTEMS
+
+
+# ── BE-34: overrides y vocabulario de la escalera ────────────────────
+
+
+def _mars(**update):
+    return environments.get_environment("mars").model_copy(update=update)
+
+
+def test_override_of_unknown_indicator_is_rejected():
+    env = _mars(threshold_overrides={"bp_sistolic": {"warning": (130, 140)}})  # errata
+    with pytest.raises(ValueError, match="bp_sistolic"):
+        check_consistency(load_indicators(), load_systems(), [env])
+
+
+def test_override_of_inactive_indicator_is_rejected():
+    env = _mars(threshold_overrides={"hydration_ml": {"warning": (1000, 1400)}})
+    assert "hydration_ml" not in env.indicators
+    with pytest.raises(ValueError, match="no está en sus indicators"):
+        check_consistency(load_indicators(), load_systems(), [env])
+
+
+@pytest.mark.parametrize("vocabulary", [{"member": "astronauta", "crew": "tripulación"},
+                                        {"member": "a", "crew": "b", "ground": ""}])
+def test_ladder_role_without_vocabulary_is_rejected(vocabulary):
+    env = _mars(vocabulary=vocabulary)
+    with pytest.raises(ValueError, match="'ground'"):
+        check_consistency(load_indicators(), load_systems(), [env])
+
+
+def test_every_ladder_role_has_a_name():
+    """El front puede nombrar cualquier nivel de la escalera con useVocab()."""
+    for env in environments.list_environments():
+        for role in env.escalation_ladder:
+            assert role == "self" or env.vocabulary[role], (env.id, role)
+
+
+def test_vocabulary_added_for_earth_environments():
+    vocab = {e.id: e.vocabulary for e in environments.list_environments()}
+    assert {"nurse", "doctor"} <= set(vocab["hospital"])
+    assert {"caregiver", "doctor", "family"} <= set(vocab["geriatric"])
+    assert {"medic", "commander", "psych"} <= set(vocab["earth"])
