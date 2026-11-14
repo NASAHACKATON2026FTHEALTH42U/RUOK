@@ -125,7 +125,10 @@
       "sleep_factor": 3, "ruok_timeout_s": 120,
       "morning_checkin_by": null, "warning_escalate_after_s": 43200
     },
-    "vocabulary": { "member": "participante", "crew": "equipo", "ground": "médico" },
+    "vocabulary": {
+      "member": "participante", "crew": "equipo", "ground": "médico",
+      "medic": "sanitario del equipo", "commander": "responsable del equipo", "psych": "psicólogo"
+    },
     "theme": { "primary": "#2bb3c9" },
     "threshold_overrides": {},
     "indicators": [
@@ -148,7 +151,10 @@
       "sleep_factor": 3, "ruok_timeout_s": 120,
       "morning_checkin_by": null, "warning_escalate_after_s": 7200
     },
-    "vocabulary": { "member": "paciente", "crew": "planta", "ground": "médico", "medic": "enfermería" },
+    "vocabulary": {
+      "member": "paciente", "crew": "planta", "ground": "médico", "medic": "enfermería",
+      "nurse": "enfermería", "doctor": "médico"
+    },
     "theme": { "primary": "#0b5a96" },
     "threshold_overrides": {},
     "indicators": [
@@ -171,7 +177,10 @@
       "sleep_factor": 3, "ruok_timeout_s": 120,
       "morning_checkin_by": "10:00", "warning_escalate_after_s": 14400
     },
-    "vocabulary": { "member": "residente", "crew": "residencia", "ground": "médico", "medic": "cuidador" },
+    "vocabulary": {
+      "member": "residente", "crew": "residencia", "ground": "médico", "medic": "cuidador",
+      "caregiver": "cuidador", "doctor": "médico", "family": "familia"
+    },
     "theme": { "primary": "#6a429e" },
     "threshold_overrides": { "temperature": { "normal": [36.0, 37.7], "warning": [37.8, 39.5] } },
     "indicators": [

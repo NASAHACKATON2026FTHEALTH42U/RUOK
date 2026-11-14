@@ -76,6 +76,24 @@ def check_consistency(
         for ind_id in env.indicators:
             if ind_id not in ind_by_id:
                 errors.append(f"entorno {env.id}: el indicador '{ind_id}' no existe")
+        # BE-34: un override con una errata se ignoraría en silencio (el motor no lo aplicaría).
+        for ind_id in env.threshold_overrides:
+            if ind_id not in ind_by_id:
+                errors.append(
+                    f"entorno {env.id}: threshold_overrides de '{ind_id}', que no existe"
+                )
+            elif ind_id not in env.indicators:
+                errors.append(
+                    f"entorno {env.id}: threshold_overrides de '{ind_id}', "
+                    "que no está en sus indicators"
+                )
+        # BE-34: el front muestra el nombre de cada nivel con el vocabulario del entorno.
+        for role in env.escalation_ladder:
+            if role != "self" and not env.vocabulary.get(role):
+                errors.append(
+                    f"entorno {env.id}: el rol '{role}' de escalation_ladder no tiene "
+                    "texto en vocabulary"
+                )
 
     if errors:
         raise ValueError("Catálogo incoherente:\n- " + "\n- ".join(errors))
