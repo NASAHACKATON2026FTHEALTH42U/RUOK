@@ -19,7 +19,7 @@ from app import clock, models
 from app.schemas import Indicator, MeasurementIn
 from app.schemas import Measurement as MeasurementOut
 from app.schemas.common import EventType
-from app.services import catalog, events
+from app.services import catalog, events, routine
 
 # Un lote con mediciones tomadas hace más de esto viene del outbox (estaba sin conexión).
 SYNC_AGE = timedelta(minutes=10)
@@ -137,6 +137,7 @@ def _save_batch(
 
     session.add_all(pending.values())
     _emit_batch(session, member_id, list(pending.values()))
+    routine.on_measurements(session, member_id, list(pending.values()))  # BE-18
     session.commit()
     return accepted, duplicates
 

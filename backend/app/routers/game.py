@@ -1,39 +1,67 @@
-"""Rutina diaria y gamificación. STUB(FS-02) → BE-18 (tareas) y BE-19 (puntos y leaderboard)."""
+"""Rutina diaria (BE-18) y gamificación. STUB(FS-02) → BE-19 (racha, insignias y leaderboard)."""
 
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session
 
-from app import stubs
-from app.routers.deps import ERRORS_404, ERRORS_AUTH, AuthDep, allow_env, allow_member
+from app import models, stubs
+from app.routers.deps import (
+    ERRORS_404,
+    ERRORS_409,
+    ERRORS_AUTH,
+    AuthDep,
+    SessionDep,
+    allow_env,
+    allow_member,
+)
 from app.schemas import GameState, Leaderboard, Slug, Task, TaskCompleteIn
+from app.services import members, routine
 
 router = APIRouter(tags=["game"], dependencies=[AuthDep], responses={**ERRORS_AUTH, **ERRORS_404})
+
+
+def _member(session: Session, member_id: int) -> models.Member:
+    m = members.get_member(session, member_id)
+    if m is None:
+        raise HTTPException(404, f"Member desconocido: {member_id}")
+    return m
 
 
 @router.get(
     "/members/{member_id}/tasks",
     response_model=list[Task],
     summary="Tareas del día",
-    description="STUB(FS-02) → BE-18",
+    description="Se generan desde `environment.routine` la primera vez que se piden (o al medir). "
+    "`date` por defecto: hoy (UTC, reloj del servidor). Las tareas con `indicator_id` se "
+    "autocompletan con las mediciones de ese indicador del mismo día.",
     dependencies=[Depends(allow_member("game:read"))],
 )
-def list_tasks(member_id: int, date: date | None = None) -> list[Task]:  # noqa: A002
-    return stubs.TASKS
+def list_tasks(member_id: int, session: SessionDep, date: date | None = None) -> list[Task]:  # noqa: A002
+    return routine.list_tasks(session, _member(session, member_id), date)
 
 
 @router.post(
     "/members/{member_id}/tasks/{task_id}/complete",
     response_model=GameState,
     summary="Completar una tarea (idempotente por UUID)",
-    description="STUB(FS-02) → BE-18/BE-19",
+    description="Reenviar el mismo `id` no suma dos veces; una tarea ya completada (con otro "
+    "UUID o por una medición) tampoco. El mismo `id` para otra tarea → 409. Emite "
+    "`task.completed`. Devuelve los puntos; racha e insignias: STUB(FS-02) → BE-19.",
+    responses=ERRORS_409,
     dependencies=[Depends(allow_member("game:write"))],
 )
-def complete_task(member_id: int, task_id: str, body: TaskCompleteIn) -> GameState:
-    task = next((t for t in stubs.TASKS if t.id == task_id), None)
-    if task is None:
-        raise HTTPException(404, f"Tarea desconocida: {task_id}")
-    return stubs.GAME.model_copy(update={"points": stubs.GAME.points + task.points})
+def complete_task(
+    member_id: int, task_id: str, body: TaskCompleteIn, session: SessionDep
+) -> GameState:
+    member = _member(session, member_id)
+    try:
+        routine.complete(session, member, task_id, body)
+    except routine.TaskNotFound as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except routine.CompletionConflict as exc:
+        raise HTTPException(409, str(exc)) from exc
+    return routine.game_state(session, member)
 
 
 @router.get(
