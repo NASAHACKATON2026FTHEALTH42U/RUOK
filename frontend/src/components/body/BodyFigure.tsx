@@ -8,7 +8,7 @@ import {
   type PointerEvent,
   type ReactNode,
 } from 'react'
-import holographicHuman from '../../assets/holographic-human.webp'
+import humanSilhouette from '../../assets/human-silhouette.webp'
 import { STATUS_COLORS, statusStyle, type Liveness } from '../ui/status'
 import { StatusBadge } from '../ui/StatusBadge'
 import { BodyLegend } from './BodyLegend'
@@ -208,10 +208,10 @@ export function BodyFigure({
           strokeOpacity={0.85}
           strokeLinecap="round"
         >
-          <polyline points="262,385 215,620 145,850" />
-          <polyline points="625,385 672,620 742,850" />
-          <polyline points="362,905 376,1190 392,1555" />
-          <polyline points="525,905 511,1190 497,1555" />
+          <polyline points="240,375 186,667 85,901" />
+          <polyline points="648,375 708,667 816,901" />
+          <polyline points="350,1040 323,1370 300,1660" />
+          <polyline points="541,1040 575,1370 588,1660" />
         </g>
       ),
     ],
@@ -380,15 +380,17 @@ export function BodyFigure({
           >
             {/* Cuerpo holográfico. Los órganos se desaturan un poco para que no se confundan con el
               semáforo; sin datos fiables (stale/lost), toda la figura en gris. */}
+            {/* Silueta (384 × 688) escalada ×3,35 y colocada para que cabeza (y 30) y pies
+                (y 1720) caigan donde estaban: las zonas mantienen sus coordenadas. */}
             <image
-              href={holographicHuman}
-              x="0"
-              y="0"
-              width="887"
-              height="1774"
-              preserveAspectRatio="xMidYMid meet"
+              href={humanSilhouette}
+              x="-196"
+              y="-241"
+              width="1286"
+              height="2305"
+              preserveAspectRatio="none"
               style={{
-                filter: stale ? 'grayscale(1) brightness(0.75)' : 'saturate(0.55) brightness(0.9)',
+                filter: stale ? 'grayscale(1) brightness(0.6)' : 'brightness(0.85)',
               }}
               aria-hidden="true"
             />
