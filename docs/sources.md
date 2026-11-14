@@ -30,6 +30,7 @@
 | S25 | American Diabetes Association, niveles de hipoglucemia. [PDF (ADA, 2025)](https://professional.diabetes.org/sites/dpro/files/2025-05/hypoglycemia-hcp-5-27-25.pdf) | Nivel 1: < 70 mg/dL; **nivel 2: < 54 mg/dL** (acción inmediata) |
 | S26 | AASM / SRS (2015), *Recommended amount of sleep for a healthy adult*. [PDF](https://www.aasm.org/resources/pdf/adultsleepdurationconsensus.pdf) · [PMC4434546](https://pmc.ncbi.nlm.nih.gov/articles/PMC4434546/) | **≥ 7 h** por noche de forma regular (18–60 años) |
 | S27 | EFSA (2010), valores dietéticos de referencia de agua. [Nota de prensa](https://www.efsa.europa.eu/fi/press/news/nda100326) | Ingesta adecuada total: 2,0 L/día (mujeres) y 2,5 L/día (hombres), incluida el agua de los alimentos; igual en mayores de 65 |
+| S28 | European Resuscitation Council Guidelines 2021: *Basic Life Support* (Olasveengen T. M. et al., Resuscitation 161:98–114). *Cita de memoria: verificar antes de la presentación.* | Ante alguien que no responde: comprobar respuesta y respiración, pedir ayuda e iniciar primeros auxilios (protocolo `no_contact`) |
 
 ## Tabla de umbrales (CNT-01)
 
@@ -125,6 +126,14 @@ Los `hazards` son los 5 peligros del vuelo espacial de [S1]. Las **instrucciones
 | `eyes` | Anotar los síntomas, repetir mañana, comentarlo | Avisar ya y evitar tareas de vista fina | [S2] SANS |
 | `radiation` | Revisar las salidas al exterior; refugio en tormenta solar | Replanificar la exposición y evitar la adicional | [S13] 600 mSv; [S1] |
 
+**Protocolos autónomos (CNT-03).** Son los pasos a seguir mientras no llega respuesta del exterior:
+
+| Protocolo | Dónde está | Para quién | Fuente |
+|---|---|---|---|
+| Tensión fuera de rango | Tarjeta `int_bp_out_of_range` de `interventions.json` (se ve en el protocolo autónomo de la alerta cardiovascular y en el panel del sistema) | La propia persona | [S20]; pasos: diseño |
+| Apoyo psicológico | Tarjeta `int_reach_out` y el resto de tarjetas neuro-conductuales (se ven al pedir «Necesito hablar» sin conexión) | La propia persona | [S3]; [S11] |
+| Sin contacto (`no_contact`) | `proto_no_contact` de `protocols.json` (`alert_category`), con `steps` | Quien atiende la alerta | [S28]; pasos: diseño |
+
 ## Intervenciones (BE-21)
 Tarjetas de `backend/app/data/interventions.json`. Cada una lleva en `sources` los IDs de esta página (el back comprueba al arrancar que existen). **Los textos son de diseño**, inspirados en las contramedidas de las fuentes; hay que revisarlos con un profesional antes de usarlos fuera de la demo.
 
@@ -138,6 +147,7 @@ Tarjetas de `backend/app/data/interventions.json`. Cada una lleva en `sources` l
 | `int_sleep_light` Higiene del sueño y luz | sleep_hours, sleep_quality, energy, PVT | [S26] ≥ 7 h; [S10] sueño en Mars-500; [S12] PVT y fatiga |
 | `int_movement_break` Pausa activa | energy, mood, stress | [S3] BHP; [S14] ejercicio |
 | `int_exercise_session` Sesión de ejercicio de resistencia | exercise_min | [S14] unas 2 h de ejercicio al día en la ISS |
+| `int_bp_out_of_range` Tensión fuera de rango: qué hacer mientras llega la respuesta (CNT-03) | bp_systolic, bp_diastolic | [S20] medir en reposo y con el brazo a la altura del corazón; síntomas de alarma de la crisis hipertensiva. *Pasos y tiempos: diseño* |
 
 ## Imágenes (Earth view, FE-25)
 Fotos de la NASA Image and Video Library (Johnson Space Center), **dominio público** (las imágenes de la NASA no tienen copyright en EE. UU. salvo indicación). Empaquetadas en `frontend/public/earth/` en tamaño medio.

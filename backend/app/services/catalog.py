@@ -214,19 +214,23 @@ def check_protocols(
     source_ids: set[str] | None = None,
 ) -> None:
     """Lanza ValueError si un protocolo apunta a un sistema o fuente que no existe, si dos
-    cubren el mismo sistema y estado (solo se usaría el primero) o si se repite el id de
-    una recomendación. ``source_ids=None`` no comprueba fuentes."""
+    cubren el mismo sistema y estado (solo se usaría el primero) o la misma categoría de
+    alerta, o si se repite el id de una recomendación. ``source_ids=None`` no comprueba
+    fuentes."""
     sys_ids = {s.id for s in systems}
     errors: list[str] = []
     covered: dict[tuple[str, str], str] = {}
     rec_ids: list[str] = []
     for item in protocols:
-        if item.system_id not in sys_ids:
+        if item.system_id is not None and item.system_id not in sys_ids:
             errors.append(f"{item.id}: system_id '{item.system_id}' no existe")
-        for status in item.statuses:
-            other = covered.setdefault((item.system_id, status), item.id)
+        # Un protocolo de categoría cuenta como (categoría, "") para detectar repetidos.
+        scope = item.system_id or f"alerta {item.alert_category}"
+        for status in item.statuses or [""]:
+            other = covered.setdefault((scope, status), item.id)
             if other != item.id:
-                errors.append(f"{item.id}: {item.system_id}/{status} ya lo cubre '{other}'")
+                where = f"{scope}/{status}" if status else scope
+                errors.append(f"{item.id}: {where} ya lo cubre '{other}'")
         rec_ids += [r.id for r in item.recommendations]
         if source_ids is not None:
             for src in item.sources:
@@ -248,3 +252,8 @@ def _protocols() -> tuple[Protocol, ...]:
 def list_protocols() -> list[Protocol]:
     """Los protocolos, en el orden del JSON (valida el fichero)."""
     return list(_protocols())
+
+
+def protocol_for_alert(category: str) -> Protocol | None:
+    """El protocolo de una categoría de alerta (p. ej. ``no_contact``), o None."""
+    return next((p for p in _protocols() if p.alert_category == category), None)
