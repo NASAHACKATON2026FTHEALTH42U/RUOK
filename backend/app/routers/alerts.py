@@ -11,7 +11,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 
-from app import clock, stubs
+from app import clock, models, stubs
 from app.db import get_session
 from app.routers.deps import ERRORS_404, ERRORS_AUTH, AuthDep
 from app.schemas import (
@@ -26,6 +26,7 @@ from app.schemas import (
     ResolveIn,
     Slug,
 )
+from app.services import alerts as alerts_service
 from app.services import comm_link
 
 router = APIRouter(tags=["alerts"], dependencies=[AuthDep], responses={**ERRORS_AUTH, **ERRORS_404})
@@ -51,10 +52,20 @@ def _with_event(
     "/members/{member_id}/alerts",
     response_model=list[Alert],
     summary="Alertas del member",
-    description="STUB(FS-02) → BE-15",
+    description="Alertas del member (las más recientes primero) con su timeline. Las automáticas "
+    "son reales (BE-14); las manuales llegan con BE-15.",
 )
-def list_member_alerts(member_id: int, status: AlertStatus | None = None) -> list[Alert]:
-    return [a for a in [stubs.alert(member_id)] if status is None or a.status == status]
+def list_member_alerts(
+    member_id: int,
+    session: Annotated[Session, Depends(get_session)],
+    status: AlertStatus | None = None,
+) -> list[Alert]:
+    member = session.get(models.Member, member_id)
+    if member is None:
+        raise HTTPException(404, f"Member desconocido: {member_id}")
+    comm_link.deliver_due(session, member.env_id)  # marca las que ya han llegado a tierra
+    rows = alerts_service.list_for_member(session, member_id, status)
+    return [alerts_service.to_schema(session, a) for a in rows]
 
 
 @router.post(

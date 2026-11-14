@@ -3,7 +3,7 @@
 Real: los datos del member, su privacidad, la fecha de su última medición y
 el `overall_status` del resumen (BE-11) y el `liveness` (BE-12).
 STUB hasta su issue (ver docs/backend.md, sección "Members"):
-- `open_alerts` → BE-14 (alertas).
+- `open_alerts`: alertas no resueltas (BE-14).
 
 Los members los crea el seed (app/seed.py, BE-07).
 """
@@ -13,7 +13,7 @@ from datetime import datetime
 from sqlalchemy import func
 from sqlmodel import Session, col, select
 
-from app import models, stubs
+from app import models
 from app.schemas import Member, MemberSummary
 from app.services.liveness import member_liveness
 
@@ -60,13 +60,13 @@ def to_schema(row: models.Member) -> Member:
 
 def to_summary(session: Session, row: models.Member) -> MemberSummary:
     # Import local: member_assessment importa este módulo (evita el ciclo).
+    from app.services.alerts import count_open
     from app.services.member_assessment import assess_member
 
     member = to_schema(row)
-    stub = stubs.member_summary(member)  # STUB → BE-14 (alertas)
     return MemberSummary(
         **member.model_dump(),
         overall_status=assess_member(session, row).overall_status,
-        open_alerts=stub.open_alerts,
+        open_alerts=count_open(session, row.id),
         last_measurement_at=last_measurement_at(session, row.id),
     )

@@ -27,7 +27,7 @@ from app.schemas import (
     RuokResult,
     Slug,
 )
-from app.services import environments, liveness, measurements, members
+from app.services import alerts, environments, liveness, measurements, members
 from app.services.member_assessment import UnknownEnvironment, assess_member
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -48,7 +48,7 @@ def _member(session: Session, member_id: int) -> models.Member:
     tags=["members"],
     summary="Members del entorno con su resumen",
     description="Members de la BD con `last_measurement_at` real. "
-    "`liveness`, `overall_status` y `open_alerts`: STUB(FS-02) → BE-12, BE-11 y BE-14.",
+    "`liveness`, `overall_status` y `open_alerts` reales (BE-12, BE-11, BE-14).",
 )
 def list_members(env_id: Slug, session: SessionDep) -> list[MemberSummary]:
     if environments.get_environment(env_id) is None:
@@ -100,11 +100,9 @@ def post_measurements(
         raise HTTPException(422, str(exc)) from exc
     except measurements.MeasurementConflict as exc:
         raise HTTPException(409, str(exc)) from exc
-    return MeasurementBatchResult(
-        accepted=accepted,
-        duplicates=duplicates,
-        assessment=assess_member(session, m),
-    )
+    assessment = assess_member(session, m)
+    alerts.evaluate(session, m, assessment)  # abre, actualiza o escala alertas (BE-14)
+    return MeasurementBatchResult(accepted=accepted, duplicates=duplicates, assessment=assessment)
 
 
 @router.get(

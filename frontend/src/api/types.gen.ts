@@ -245,7 +245,7 @@ export interface paths {
         };
         /**
          * Members del entorno con su resumen
-         * @description Members de la BD con `last_measurement_at` real. `liveness`, `overall_status` y `open_alerts`: STUB(FS-02) → BE-12, BE-11 y BE-14.
+         * @description Members de la BD con `last_measurement_at` real. `liveness`, `overall_status` y `open_alerts` reales (BE-12, BE-11, BE-14).
          */
         get: operations["list_members_api_v1_environments__env_id__members_get"];
         put?: never;
@@ -389,7 +389,7 @@ export interface paths {
         };
         /**
          * Alertas del member
-         * @description STUB(FS-02) → BE-15
+         * @description Alertas del member (las más recientes primero) con su timeline. Las automáticas son reales (BE-14); las manuales llegan con BE-15.
          */
         get: operations["list_member_alerts_api_v1_members__member_id__alerts_get"];
         put?: never;
@@ -795,7 +795,7 @@ export interface paths {
         put?: never;
         /**
          * Avanzar el reloj de la demo
-         * @description Avanza el reloj de la demo (app/clock.py) y entrega los mensajes del enlace cuya ETA ya ha pasado.
+         * @description Avanza el reloj de la demo (app/clock.py), entrega los mensajes del enlace cuya ETA ya ha pasado y reevalúa las alertas abiertas.
          */
         post: operations["demo_fast_forward_api_v1_demo_fast_forward_post"];
         delete?: never;
