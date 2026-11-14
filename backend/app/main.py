@@ -29,6 +29,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     environments.list_environments()  # valida app/data/environments.json al arrancar
     catalog_service.list_indicators()  # valida indicators.json y systems.json (y su coherencia)
     catalog_service.list_interventions()  # valida interventions.json (BE-21)
+    catalog_service.list_protocols()  # valida protocols.json (CNT-02)
     routine.list_task_types()  # valida task_types.json y la rutina de los entornos (BE-18)
     gamification.list_badges()  # valida badges.json (BE-19)
     watcher = None

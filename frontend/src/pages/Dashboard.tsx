@@ -198,9 +198,9 @@ export default function Dashboard() {
       </header>
 
       {/* Tres columnas en escritorio (≥ 1280 px): sistemas | cuerpo | indicadores, las laterales
-          centradas en vertical, y debajo las fases de la misión a todo el ancho. Entre 1024 y
-          1280 px: el cuerpo a la izquierda y, a la derecha, indicadores y sistemas en dos columnas
-          cada uno (menos scroll vertical). Más estrecho: cuerpo, indicadores y sistemas apilados. */}
+          centradas en vertical, y debajo las fases de la misión a todo el ancho. Entre 768 y
+          1280 px: el cuerpo a la izquierda y, a la derecha, los indicadores y debajo los
+          sistemas, en tantas columnas como quepan (menos scroll vertical). En móvil, el anillo. */}
       {/* Móvil: anillo de sistemas y lista SYS.01 (estilo HUD, maqueta Main). */}
       <SystemsRing
         regions={regions}
@@ -211,22 +211,24 @@ export default function Dashboard() {
         onSelectSystem={setSelected}
       />
 
-      <div className="hidden gap-6 md:grid lg:max-xl:gap-4 lg:grid-cols-[minmax(180px,230px)_1fr] xl:grid-cols-[230px_minmax(240px,320px)_1fr]">
-        <div className="order-3 xl:order-1 xl:self-center">
-          <h2 className="mb-3 text-lg font-semibold">Sistemas</h2>
+      <div className="hidden gap-6 md:grid md:max-lg:grid-cols-[150px_1fr] md:max-xl:grid-rows-[auto_1fr] lg:max-xl:grid-cols-[210px_1fr] md:max-xl:gap-x-4 md:max-xl:gap-y-3 xl:grid-cols-[230px_minmax(240px,320px)_1fr]">
+        <div className="order-3 md:max-xl:col-start-2 md:max-xl:row-start-2 xl:order-1 xl:self-center">
+          <h2 className="mb-3 text-lg font-semibold md:max-xl:mb-2 md:max-xl:text-base">
+            Sistemas
+          </h2>
           <BodyLegend
             regions={regions}
             stale={stale}
             selectedSystemId={selected}
             onSelectSystem={setSelected}
             onHoverSystem={setHovered}
-            className="justify-start lg:max-xl:grid lg:max-xl:grid-cols-2"
+            className="justify-start md:max-xl:grid md:max-xl:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] md:max-xl:[&_button]:[overflow-wrap:anywhere] md:max-xl:[&_li]:min-w-0"
             compact
             vertical
           />
         </div>
 
-        <div className="order-1 lg:sticky lg:top-4 lg:row-span-2 lg:self-start xl:order-2 xl:row-span-1">
+        <div className="order-1 md:max-xl:col-start-1 md:max-xl:row-span-2 md:max-xl:row-start-1 md:max-[890px]:self-center min-[891px]:max-xl:sticky min-[891px]:max-xl:top-2 min-[891px]:max-xl:self-start xl:sticky xl:top-4 xl:order-2 xl:self-start">
           <BodyFigure
             regions={regions}
             liveness={a.liveness}
@@ -239,13 +241,18 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="order-2 xl:order-3 xl:self-center">
-          <h2 className="mb-3 text-lg font-semibold">Indicadores</h2>
+        <div className="order-2 md:max-xl:col-start-2 md:max-xl:row-start-1 xl:order-3 xl:self-center">
+          <h2 className="mb-3 text-lg font-semibold md:max-xl:mb-2 md:max-xl:text-base">
+            Indicadores
+          </h2>
           {cards.length === 0 ? (
             <p className="text-env-muted">Todavía no hay mediciones.</p>
           ) : (
             // Lista fija: símbolo de estado, nombre y valor (el resto, en el detalle del sistema).
-            <ul className="flex flex-col gap-2 lg:max-xl:grid lg:max-xl:grid-cols-2">
+            <ul
+              // Tableta y portátil pequeño: tantas columnas como quepan y tarjetas más bajas.
+              className="flex flex-col gap-2 md:max-xl:grid md:max-xl:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] md:max-xl:content-start md:max-xl:gap-1.5 md:max-xl:[&_.text-lg]:text-base md:max-xl:[&_button]:py-1.5 md:max-xl:[&_button]:text-sm"
+            >
               {cards.map(({ systemId, ind }) => (
                 <li key={`${systemId}-${ind.indicator_id}`}>
                   <IndicatorCard
@@ -265,7 +272,7 @@ export default function Dashboard() {
 
         {/* Fases de la misión debajo del cuerpo, a todo el ancho de las tres columnas. */}
         {env?.kind === 'space' && env.mission && (
-          <div className="order-4 lg:col-span-2 lg:mt-8 xl:col-span-3">
+          <div className="order-4 md:col-span-2 xl:col-span-3 xl:mt-8">
             <MissionPhaseBar
               mission={env.mission}
               now={serverNow()}

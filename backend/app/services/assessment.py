@@ -171,12 +171,11 @@ def escalation_mode(comm_delay_s: int, status: Status | str) -> EscalationMode:
 def find_protocol(system_id: str, status: Status | str, protocols: Iterable[Any]) -> dict | None:
     """Primer protocolo de ``protocols.json`` para ese sistema y estado.
 
-    Formato propuesto de cada entrada (ver la PR de BE-09)::
+    Formato de cada entrada (schema ``Protocol``, CNT-02; lo valida ``services/catalog``)::
 
-        {"id": "proto_bp_high", "system_id": "cardiovascular",
-         "statuses": ["warning", "critical"], "message": "...",
-         "steps": ["..."],
-         "recommendations": [{"id": "rec_bp_repeat", "text": "...", "priority": 1}]}
+        {"id": "proto_cardiovascular_critical", "system_id": "cardiovascular",
+         "statuses": ["critical"], "message": "...", "sources": ["S20"],
+         "recommendations": [{"id": "rec_...", "text": "...", "priority": 1}]}
     """
     status = Status(status)
     for raw in protocols or []:

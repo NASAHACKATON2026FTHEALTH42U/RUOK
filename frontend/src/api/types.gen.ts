@@ -99,17 +99,45 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Listar usuarios (admin)
-         * @description STUB(FS-02) → FS-07
-         */
+        /** Listar usuarios (admin) */
         get: operations["list_users_api_v1_users_get"];
         put?: never;
-        /**
-         * Crear usuario (admin)
-         * @description STUB(FS-02) → FS-07
-         */
+        /** Crear usuario (admin) */
         post: operations["create_user_api_v1_users_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Activar o desactivar un usuario (admin) */
+        patch: operations["update_user_api_v1_users__user_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/users/{user_id}/pin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Restablecer el PIN de un usuario (admin) */
+        put: operations["reset_user_pin_api_v1_users__user_id__pin_put"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1957,6 +1985,14 @@ export interface components {
             /** Pin */
             pin: string;
         };
+        /**
+         * PinReset
+         * @description Nuevo PIN de una cuenta member/medic (FS-07).
+         */
+        PinReset: {
+            /** Pin */
+            pin: string;
+        };
         /** PrivacyIn */
         PrivacyIn: {
             /** Share Behavioral Details */
@@ -2171,10 +2207,16 @@ export interface components {
              * @description Nombre del rol con el vocabulario del entorno
              */
             role_label: string;
+            /**
+             * Active
+             * @description false = desactivada: no puede iniciar sesión
+             * @default true
+             */
+            active: boolean;
         };
         /**
          * UserCreate
-         * @description P2 (FS-07): alta de usuario desde /control.
+         * @description Alta de usuario desde /control (FS-07, solo admin).
          */
         UserCreate: {
             /** Username */
@@ -2182,14 +2224,31 @@ export interface components {
             /** Display Name */
             display_name: string;
             role: components["schemas"]["Role"];
-            /** Env Id */
+            /**
+             * Env Id
+             * @description Obligatorio salvo para admin
+             */
             env_id?: string | null;
-            /** Member Id */
+            /**
+             * Member Id
+             * @description Obligatorio solo si role=member
+             */
             member_id?: number | null;
             /** Password */
             password: string;
-            /** Pin */
+            /**
+             * Pin
+             * @description Solo member/medic
+             */
             pin?: string | null;
+        };
+        /**
+         * UserUpdate
+         * @description Activar o desactivar una cuenta (FS-07).
+         */
+        UserUpdate: {
+            /** Active */
+            active: boolean;
         };
         /** ValidationError */
         ValidationError: {
@@ -2532,6 +2591,154 @@ export interface operations {
             };
             /** @description Rol sin permiso o dato ajeno */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Choca con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_user_api_v1_users__user_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
+                "x-device-id"?: string | null;
+            };
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            /** @description Sin sesión válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rol sin permiso o dato ajeno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Choca con el estado actual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reset_user_pin_api_v1_users__user_id__pin_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
+                "x-device-id"?: string | null;
+            };
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PinReset"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            /** @description Sin sesión válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rol sin permiso o dato ajeno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

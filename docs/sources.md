@@ -69,8 +69,61 @@
 
 **Pendiente:**
 - Confirmar el enlace de S22 y la cita de S24.
-- Revisar con un profesional sanitario los valores marcados como *diseño*.
+- Revisar con un profesional sanitario los valores marcados como *diseño* y los textos de los protocolos (CNT-02).
 - Un indicador de **riesgo de caídas** para geriatría (no existe en el catálogo).
+
+## Textos por sistema e indicador (CNT-02)
+Textos de `backend/app/data/systems.json` (`function`, `space_effects`, `hazards`) y de `backend/app/data/indicators.json` (`why_it_matters`, `measurement_instructions`). `tests/test_protocols.py` comprueba que **todos** los sistemas e indicadores del catálogo están en estas tablas y que citan una fuente de esta página.
+
+Los `hazards` son los 5 peligros del vuelo espacial de [S1]. Las **instrucciones de medición** son de *diseño* (cómo usar el aparato en la demo) salvo donde se indica; no sustituyen a las instrucciones del fabricante.
+
+| Sistema | Qué se afirma | Fuente |
+|---|---|---|
+| `cardiovascular` | Redistribución de fluidos hacia la cabeza y desacondicionamiento cardiaco | [S1] gravedad; [S2] riesgo cardiovascular |
+| `musculoskeletal` | Pérdida del 1–1,5 % de densidad ósea al mes y de masa muscular sin gravedad | [S1]; [S2] fractura ósea; contramedida [S14] |
+| `immune` | El estrés y el confinamiento alteran la respuesta inmune | [S1] entorno hostil y cerrado; [S2] |
+| `metabolic` | Dieta limitada y cambios hormonales | [S1] distancia a la Tierra; [S2] nutrición |
+| `neuro_behavioral` | Aislamiento, confinamiento y sueño alterado afectan al ánimo | [S1] aislamiento; [S3] BHP; [S10] Mars-500 |
+| `eyes` | SANS: los fluidos hacia la cabeza pueden deformar el globo ocular | [S2] SANS |
+| `radiation` | Fuera de la magnetosfera la dosis aumenta mucho | [S1] radiación; [S13] límite de carrera |
+
+| Indicador | Por qué importa | Instrucciones |
+|---|---|---|
+| `heart_rate` | [S1] redistribución de fluidos | Reposo previo: [S22]; resto: diseño |
+| `bp_systolic` | [S1] regulación de la tensión con los cambios de gravedad | Reposo de 5 min y brazo a la altura del corazón: [S20] |
+| `bp_diastolic` | [S20] la lectura de tensión son dos valores | [S20] |
+| `spo2` | [S1] hábitat cerrado; [S21] | [S21] pulsioxímetro en el dedo |
+| `temperature` | [S23] fiebre como señal de infección; [S1] | Diseño |
+| `glucose` | [S2] nutrición en misión; [S25] | Diseño |
+| `exercise_min` | [S1] pérdida de hueso y músculo; [S14] el ejercicio como contramedida | Diseño |
+| `sleep_hours` | [S10] sueño en Mars-500; [S26] | Diseño |
+| `vision_changes` | [S2] SANS en misiones largas | Escala 1–5: diseño |
+| `radiation_dose` | [S1] riesgo de cáncer; [S13] | Diseño (lectura del dosímetro) |
+| `hydration_ml` | [S27] ingesta de agua de referencia | Diseño |
+| `weight_kg` | [S2] nutrición y pérdida muscular | Diseño |
+| `mood` | [S3] BHP; [S10] | Escala 1–5: diseño |
+| `stress` | [S3] BHP; [S10] | Escala 1–5: diseño |
+| `energy` | [S3] BHP; [S26] fatiga por falta de sueño | Escala 1–5: diseño |
+| `loneliness` | [S3] BHP; [S11] análogos | Escala 1–5: diseño |
+| `sleep_quality` | [S10]; [S12] atención y sueño | Escala 1–5: diseño |
+| `crew_relation` | [S11] cohesión del equipo; [S3] | Escala 1–5: diseño |
+| `pvt_mean_rt_ms` | [S12] tiempo de reacción como marcador de fatiga | [S12] (lo calcula el test) |
+| `pvt_lapses` | [S12] lapsos y falta de sueño | [S12] lapso = respuesta ≥ 500 ms |
+
+## Protocolos por sistema y estado (CNT-02)
+`backend/app/data/protocols.json`: un protocolo por sistema y estado (`warning`, `critical`) con el **mensaje** de la alerta y del escalado y las **recomendaciones** que ve la persona en el panel del sistema. Cada protocolo lleva en `sources` los IDs de esta página (el back comprueba al arrancar que existen).
+
+**Los textos son de diseño**: pasos prudentes de autocuidado y de pedir ayuda, apoyados en los umbrales de las fuentes. **No son indicaciones médicas**; hay que revisarlos con un profesional sanitario antes de usarlos fuera de la demo. Hablan del «responsable médico» para valer en todos los entornos.
+
+| Sistema | Aviso (`warning`) | Crítico (`critical`) | Fuente |
+|---|---|---|---|
+| `cardiovascular` | Repetir en reposo, evitar esfuerzos, anotar síntomas | Avisar ya (SOS), sentarse, repetir a los 5 min | [S20] crisis > 180/120; [S21] SpO₂ baja; [S22] |
+| `musculoskeletal` | Completar la sesión de ejercicio (o repartirla) | Retomar el ejercicio; si hay dolor, avisar | [S1]; [S14] unas 2 h al día |
+| `immune` | Repetir la temperatura, líquidos y descanso, limitar el contacto | Avisar ya y repetir a los 15 min | [S23] fiebre ≥ 38 °C; [S24] geriatría. *Limitar el contacto: diseño* |
+| `metabolic` | Repetir, beber agua, no saltarse comidas; azúcar si hay síntomas | Avisar ya; azúcar de absorción rápida y repetir a los 15 min | [S25] hipoglucemia; [S27] agua. *Verificar el paso del azúcar con [S25] antes de la presentación* |
+| `neuro_behavioral` | Dormir ≥ 7 h, evitar tareas de riesgo, hablar con alguien | Pedir apoyo hoy, no hacer tareas críticas a solas, «Necesito hablar» | [S26] ≥ 7 h; [S12] fatiga y atención; [S3] BHP; [S10] |
+| `eyes` | Anotar los síntomas, repetir mañana, comentarlo | Avisar ya y evitar tareas de vista fina | [S2] SANS |
+| `radiation` | Revisar las salidas al exterior; refugio en tormenta solar | Replanificar la exposición y evitar la adicional | [S13] 600 mSv; [S1] |
 
 ## Intervenciones (BE-21)
 Tarjetas de `backend/app/data/interventions.json`. Cada una lleva en `sources` los IDs de esta página (el back comprueba al arrancar que existen). **Los textos son de diseño**, inspirados en las contramedidas de las fuentes; hay que revisarlos con un profesional antes de usarlos fuera de la demo.

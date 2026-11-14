@@ -58,8 +58,10 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 | POST | `/auth/pin` | — | `{username, pin}` → igual que login, también `429` si está bloqueada (PIN rápido en tablets) |
 | GET | `/auth/me` | ✅ | `User` actual |
 | GET | `/auth/demo-users` | — | Solo con `DEMO_MODE=true`: usuarios sembrados para el selector de la demo |
-| GET | `/users?env_id=` *(P1, FS-07)* | admin | Listado de usuarios (pestaña Usuarios de `/control`) |
-| POST | `/users` *(P1, FS-07)* | admin | Crear usuario |
+| GET | `/users?env_id=` *(FS-07)* | admin | Listado de usuarios, activos o no (pestaña Usuarios de `/control`) |
+| POST | `/users` *(FS-07)* | admin | Crear usuario: `{username, display_name, role, env_id, member_id?, password, pin?}` → `201 User`. `409` = usuario ya existente o member ya con cuenta; `422` = rol/entorno/member incoherentes |
+| PATCH | `/users/{id}` *(FS-07)* | admin | `{active}` → `User`. Desactivar impide el login. `409` si es tu propia cuenta o el último admin activo |
+| PUT | `/users/{id}/pin` *(FS-07)* | admin | `{pin}` → `User`. Restablece el PIN y desbloquea la cuenta. Solo roles `member`/`medic` (`422` si no) |
 
 **Permisos por endpoint:** los define la matriz de [auth-and-roles.md](auth-and-roles.md#matriz-de-acceso-a-vistas). Reglas generales:
 - un `member` solo accede a `/members/{su_member_id}/…`;
@@ -238,7 +240,7 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
     "escalation": { "level": 0, "target_role": "self", "mode": "realtime",     // level = índice en escalation_ladder.
                     // self/crew (a bordo) → realtime, delay_s 0. Externos: realtime <5 s, delayed,
                     // autonomous si retardo ≥ 60 s Y critical (ver alerts-and-escalation.md)
-                    "delay_s": 0, "message": "...", "protocol_id": "proto_bp_high" }
+                    "delay_s": 0, "message": "...", "protocol_id": "proto_cardiovascular_critical" }
   }],
   "behavioral": { "status": "normal", "details_visible": true },  // privacidad: con false, los indicadores
                   // conductuales (mood, stress, energy, loneliness, sleep_quality, crew_relation, pvt_*)

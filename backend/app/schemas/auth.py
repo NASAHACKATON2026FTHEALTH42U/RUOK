@@ -15,6 +15,7 @@ class User(ApiModel):
     env_id: Slug | None = Field(default=None, description="null solo para admin (global)")
     member_id: int | None = Field(default=None, description="Solo si role=member")
     role_label: str = Field(description="Nombre del rol con el vocabulario del entorno")
+    active: bool = Field(default=True, description="false = desactivada: no puede iniciar sesión")
 
 
 class LoginIn(ApiModel):
@@ -45,12 +46,24 @@ class DemoUser(ApiModel):
 
 
 class UserCreate(ApiModel):
-    """P2 (FS-07): alta de usuario desde /control."""
+    """Alta de usuario desde /control (FS-07, solo admin)."""
 
-    username: str
-    display_name: str
+    username: str = Field(pattern=r"^[a-z0-9][a-z0-9._-]{1,31}$")
+    display_name: str = Field(min_length=1, max_length=80)
     role: Role
-    env_id: Slug | None = None
-    member_id: int | None = None
-    password: str
-    pin: str | None = Field(default=None, pattern=r"^\d{4,6}$")
+    env_id: Slug | None = Field(default=None, description="Obligatorio salvo para admin")
+    member_id: int | None = Field(default=None, description="Obligatorio solo si role=member")
+    password: str = Field(min_length=8, max_length=72)
+    pin: str | None = Field(default=None, pattern=r"^\d{4,6}$", description="Solo member/medic")
+
+
+class UserUpdate(ApiModel):
+    """Activar o desactivar una cuenta (FS-07)."""
+
+    active: bool
+
+
+class PinReset(ApiModel):
+    """Nuevo PIN de una cuenta member/medic (FS-07)."""
+
+    pin: str = Field(pattern=r"^\d{4,6}$")

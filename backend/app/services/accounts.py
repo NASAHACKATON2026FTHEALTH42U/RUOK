@@ -33,13 +33,18 @@ __all__ = [
     "LOCK_SECONDS",
     "MAX_FAILED_ATTEMPTS",
     "AccountLocked",
+    "UserConflict",
+    "UserInvalid",
     "check_password",
     "check_pin",
+    "create_user",
     "demo_mode",
     "hash_secret",
     "is_locked",
+    "reset_pin",
     "role_label",
     "seed_users",
+    "set_active",
     "verify_secret",
 ]
 
@@ -58,6 +63,14 @@ class AccountLocked(Exception):
     def __init__(self, locked_until: datetime):
         super().__init__(f"Cuenta bloqueada hasta {locked_until.isoformat()}")
         self.locked_until = locked_until
+
+
+class UserInvalid(ValueError):
+    """Los datos de la cuenta son incoherentes (→ 422)."""
+
+
+class UserConflict(ValueError):
+    """La operación choca con el estado actual (→ 409)."""
 
 
 # ── Hash ─────────────────────────────────────────────────────────────
@@ -229,3 +242,99 @@ def seed_users(
     add("admin", "admin", None, "Operador")
     session.add_all(accounts)
     return len(accounts)
+
+
+# ── Gestión de usuarios (FS-07) ──────────────────────────────────────
+
+
+def create_user(
+    session: Session,
+    *,
+    username: str,
+    display_name: str,
+    role: str,
+    env_id: str | None,
+    member_id: int | None,
+    password: str,
+    pin: str | None,
+) -> models.UserAccount:
+    """Crea una cuenta y hace commit. ``UserInvalid`` (422) o ``UserConflict`` (409)."""
+    if role == "admin":
+        if env_id is not None or member_id is not None:
+            raise UserInvalid("El admin es global: sin entorno ni member")
+    else:
+        if env_id is None:
+            raise UserInvalid("Falta el entorno (solo el admin es global)")
+        if environments.get_environment(env_id) is None:
+            raise UserInvalid(f"Entorno desconocido: {env_id}")
+    if role == "member":
+        member = session.get(models.Member, member_id) if member_id is not None else None
+        if member is None or member.env_id != env_id:
+            raise UserInvalid("Un member necesita un member_id existente de su entorno")
+    elif member_id is not None:
+        raise UserInvalid("Solo el rol member lleva member_id")
+    if pin is not None and role not in PIN_ROLES:
+        raise UserInvalid("Solo member y medic usan PIN")
+
+    if session.exec(
+        select(models.UserAccount).where(models.UserAccount.username == username)
+    ).first():
+        raise UserConflict(f"El usuario «{username}» ya existe")
+    if (
+        member_id is not None
+        and session.exec(
+            select(models.UserAccount).where(models.UserAccount.member_id == member_id)
+        ).first()
+    ):
+        raise UserConflict("Ese member ya tiene una cuenta")
+
+    account = models.UserAccount(
+        username=username,
+        display_name=display_name,
+        role=role,
+        env_id=env_id,
+        member_id=member_id,
+        password_hash=hash_secret(password),
+        pin_hash=hash_secret(pin) if pin else None,
+    )
+    session.add(account)
+    session.commit()
+    session.refresh(account)
+    return account
+
+
+def set_active(
+    session: Session, account: models.UserAccount, active: bool, *, acting: models.UserAccount
+) -> models.UserAccount:
+    """Activa o desactiva una cuenta. No puedes desactivarte ni dejar el sistema sin admin."""
+    if not active and account.active:
+        if account.id == acting.id:
+            raise UserConflict("No puedes desactivar tu propia cuenta")
+        if account.role == "admin":
+            others = session.exec(
+                select(models.UserAccount).where(
+                    models.UserAccount.role == "admin",
+                    models.UserAccount.active == True,  # noqa: E712
+                    models.UserAccount.id != account.id,
+                )
+            ).first()
+            if others is None:
+                raise UserConflict("Tiene que quedar al menos un admin activo")
+    account.active = active
+    session.add(account)
+    session.commit()
+    session.refresh(account)
+    return account
+
+
+def reset_pin(session: Session, account: models.UserAccount, pin: str) -> models.UserAccount:
+    """Restablece el PIN y desbloquea la cuenta."""
+    if account.role not in PIN_ROLES:
+        raise UserInvalid("Solo member y medic usan PIN")
+    account.pin_hash = hash_secret(pin)
+    account.failed_attempts = 0
+    account.locked_until = None
+    session.add(account)
+    session.commit()
+    session.refresh(account)
+    return account

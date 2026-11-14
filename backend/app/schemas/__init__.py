@@ -20,7 +20,16 @@ from app.schemas.alerts import (
     GroundView,
     ResolveIn,
 )
-from app.schemas.auth import DemoUser, LoginIn, PinLoginIn, TokenResponse, User, UserCreate
+from app.schemas.auth import (
+    DemoUser,
+    LoginIn,
+    PinLoginIn,
+    PinReset,
+    TokenResponse,
+    User,
+    UserCreate,
+    UserUpdate,
+)
 from app.schemas.common import (
     Activity,
     Actor,
@@ -51,6 +60,8 @@ from app.schemas.config import (
     Environment,
     Indicator,
     Intervention,
+    Protocol,
+    ProtocolRecommendation,
     TaskType,
 )
 from app.schemas.game import Badge, GameState, Leaderboard, LeaderboardEntry, Task, TaskCompleteIn
@@ -118,6 +129,7 @@ __all__ = [
     "DemoUser",
     "HomeMessage",
     "HomeMessageIn",
+    "PinReset",
     "Device",
     "DeviceKind",
     "Environment",
@@ -157,6 +169,8 @@ __all__ = [
     "OkResponse",
     "PinLoginIn",
     "PrivacyIn",
+    "Protocol",
+    "ProtocolRecommendation",
     "Recommendation",
     "ResolveIn",
     "Role",
@@ -173,4 +187,5 @@ __all__ = [
     "Trend",
     "User",
     "UserCreate",
+    "UserUpdate",
 ]
