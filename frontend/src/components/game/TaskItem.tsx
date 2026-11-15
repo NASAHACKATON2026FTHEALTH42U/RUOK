@@ -34,7 +34,7 @@ export function TaskItem({ task, pending, onComplete, busy }: TaskItemProps) {
         aria-label={done ? `${task.title}: hecha` : `Marcar como hecha: ${task.title}`}
         disabled={done || busy}
         onClick={() => onComplete(task)}
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
+        className={`relative before:absolute before:-inset-1.5 before:content-[''] flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
           done ? 'border-env-primary bg-env-primary text-env-primary-text' : 'border-env-border'
         }`}
       >

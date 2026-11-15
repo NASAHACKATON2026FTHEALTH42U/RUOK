@@ -55,7 +55,7 @@ export default function Earth() {
   }
 
   const btn =
-    'rounded-lg border border-env-border px-2.5 py-1 text-xs hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary'
+    'min-h-11 rounded-lg border border-env-border px-3 py-1 text-xs hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary'
 
   return (
     <MotionConfig reducedMotion="user">

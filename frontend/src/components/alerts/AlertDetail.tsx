@@ -179,7 +179,7 @@ export function AlertDetail({
                   const key = `${i.id}:${n}`
                   return (
                     <li key={key}>
-                      <label className="flex items-start gap-2 text-sm">
+                      <label className="flex min-h-11 items-center gap-2 text-sm">
                         <input
                           type="checkbox"
                           checked={done.has(key)}
@@ -246,7 +246,7 @@ export function AlertDetail({
               type="button"
               disabled={busy}
               onClick={() => act(() => ackAlert(alert.id, actor))}
-              className="rounded-lg border border-env-border px-4 py-2 hover:border-env-text disabled:opacity-60"
+              className="min-h-11 rounded-lg border border-env-border px-4 py-2 hover:border-env-text disabled:opacity-60"
             >
               Marcar como recibida
             </button>
@@ -256,7 +256,7 @@ export function AlertDetail({
               type="button"
               disabled={busy}
               onClick={() => act(() => resolveAlert(alert.id, actor))}
-              className="rounded-lg border border-env-border px-4 py-2 hover:border-env-text disabled:opacity-60"
+              className="min-h-11 rounded-lg border border-env-border px-4 py-2 hover:border-env-text disabled:opacity-60"
             >
               Resolver
             </button>
