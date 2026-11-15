@@ -45,68 +45,71 @@ export function CrewKudos({ kudos, members, memberId, canSend, onSend }: CrewKud
   }
 
   return (
-    <section className="rounded-xl border border-env-border bg-env-surface p-4">
-      <h2 className="font-semibold">Kudos</h2>
-
-      {canSend && mates.length > 0 && (
-        <form
-          className="mt-2 flex flex-col gap-2"
-          onSubmit={(e) => {
-            e.preventDefault()
-            void submit()
-          }}
-        >
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="text-env-muted">Para</span>
-            <select
-              value={to}
-              onChange={(e) => setTo(e.target.value === '' ? '' : Number(e.target.value))}
-              className={field}
-            >
-              <option value="">Elige a alguien…</option>
-              {mates.map((m) => (
-                <option key={m.member_id} value={m.member_id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="text-env-muted">Qué le agradeces</span>
-            <input
-              type="text"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              maxLength={KUDOS_MAX}
-              placeholder="Gracias por…"
-              className={field}
-            />
-          </label>
-          <button
-            type="submit"
-            disabled={to === '' || !text || busy}
-            className="min-h-11 rounded-lg bg-env-primary px-4 text-sm font-semibold text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary disabled:opacity-60"
+    <section className="hud-panel shrink-0">
+      <h2 className="hud-panel-head">Kudos</h2>
+      <div className="px-4 py-3">
+        {canSend && mates.length > 0 && (
+          <form
+            className="mt-2 flex flex-col gap-2"
+            onSubmit={(e) => {
+              e.preventDefault()
+              void submit()
+            }}
           >
-            {busy ? 'Enviando…' : 'Dar kudos'}
-          </button>
-        </form>
-      )}
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="text-env-muted">Para</span>
+              <select
+                value={to}
+                onChange={(e) => setTo(e.target.value === '' ? '' : Number(e.target.value))}
+                className={field}
+              >
+                <option value="">Elige a alguien…</option>
+                {mates.map((m) => (
+                  <option key={m.member_id} value={m.member_id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="text-env-muted">Qué le agradeces</span>
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                maxLength={KUDOS_MAX}
+                placeholder="Gracias por…"
+                className={field}
+              />
+            </label>
+            <button
+              type="submit"
+              disabled={to === '' || !text || busy}
+              className="min-h-11 rounded-lg bg-env-primary px-4 text-sm font-semibold text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary disabled:opacity-60"
+            >
+              {busy ? 'Enviando…' : 'Dar kudos'}
+            </button>
+          </form>
+        )}
 
-      {kudos.length === 0 ? (
-        <p className="mt-3 text-sm text-env-muted">Todavía no hay kudos. Estrena tú el tablero.</p>
-      ) : (
-        <ul className="mt-3 space-y-2" aria-label="Kudos recientes">
-          {kudos.slice(0, SHOWN).map((k) => (
-            <li key={k.id} className="text-sm">
-              <p className="text-xs text-env-muted">
-                {memberName(k.from_member_id, names, memberId)} →{' '}
-                {memberName(k.to_member_id, names, memberId)}
-              </p>
-              <p className="break-words">«{k.message}»</p>
-            </li>
-          ))}
-        </ul>
-      )}
+        {kudos.length === 0 ? (
+          <p className="mt-3 text-sm text-env-muted">
+            Todavía no hay kudos. Estrena tú el tablero.
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-2" aria-label="Kudos recientes">
+            {kudos.slice(0, SHOWN).map((k) => (
+              <li key={k.id} className="text-sm">
+                <p className="text-xs text-env-muted">
+                  {memberName(k.from_member_id, names, memberId)} →{' '}
+                  {memberName(k.to_member_id, names, memberId)}
+                </p>
+                <p className="break-words">«{k.message}»</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </section>
   )
 }

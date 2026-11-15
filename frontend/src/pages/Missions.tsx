@@ -158,102 +158,123 @@ export default function Missions() {
     }
   }
 
+  // Un solo elemento, colocado en una columna u otra según el ancho (en la que no toca, oculto).
+  const kudosPanel = kudos.state === 'ready' && board.state === 'ready' && (
+    <CrewKudos
+      kudos={kudos.data}
+      members={board.data.members}
+      memberId={memberId}
+      canSend={canAct}
+      onSend={onKudos}
+    />
+  )
+
   return (
-    // Ocupa el alto disponible (Layout `fill`): las tareas y la columna de la tripulación
-    // tienen cada una su scroll.
-    <section className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col gap-3 md:gap-4 lg:max-w-5xl">
+    // Estética de los paneles HUD: franja de indicadores y paneles con título. En escritorio
+    // ocupa todo el hueco (Layout `fill`) y cada columna tiene su scroll: tareas e insignias |
+    // tripulación y misiones de grupo (y kudos debajo); desde 1536 px, kudos aparte. En móvil,
+    // los paneles uno debajo de otro y la página hace scroll.
+    <section className="flex min-h-0 w-full flex-1 flex-col gap-3 md:gap-4">
       {title}
 
-      <div className="grid shrink-0 grid-cols-3 gap-2 sm:gap-3">
-        <div className="rounded-xl border border-env-border bg-env-surface p-2.5 sm:p-4">
-          <p className="text-sm text-env-muted">Tus puntos</p>
-          {current ? (
-            <p className="mt-1 text-2xl font-bold sm:text-3xl">
-              <AnimatedNumber value={current.points + pendingPoints} />
-              {pendingPoints > 0 && (
-                <span className="ml-2 align-middle text-xs font-normal text-env-muted">
-                  ⇡ {pendingPoints} sin sincronizar
-                </span>
+      {/* Tu día en tres cifras, como las celdas del panel. */}
+      <section aria-label="Tu progreso" className="hud-panel shrink-0">
+        <ul className="-mr-px -mb-px grid grid-cols-3">
+          <li className="border-r border-b border-env-border/60 px-3 py-2.5 sm:px-5 sm:py-4">
+            <p className="text-sm text-env-muted">Tus puntos</p>
+            {current ? (
+              <p className="mt-1 font-display text-2xl font-semibold tabular-nums sm:text-3xl">
+                <AnimatedNumber value={current.points + pendingPoints} />
+                {pendingPoints > 0 && (
+                  <span className="ml-2 align-middle font-sans text-xs font-normal text-env-muted">
+                    ⇡ {pendingPoints} sin sincronizar
+                  </span>
+                )}
+              </p>
+            ) : (
+              <div className="mt-2 h-8 animate-pulse rounded bg-env-bg" aria-busy="true" />
+            )}
+          </li>
+          <li className="border-r border-b border-env-border/60 px-3 py-2.5 sm:px-5 sm:py-4">
+            <p className="text-sm text-env-muted">Racha</p>
+            <p className="mt-1 font-display text-2xl font-semibold sm:text-3xl">
+              {current ? (
+                <>
+                  <span aria-hidden>🔥 </span>
+                  {current.streak_days}{' '}
+                  <span className="font-sans text-base font-normal text-env-muted">
+                    {current.streak_days === 1 ? 'día' : 'días'}
+                  </span>
+                </>
+              ) : (
+                '—'
               )}
             </p>
-          ) : (
-            <div className="mt-2 h-8 animate-pulse rounded bg-env-bg" aria-busy="true" />
-          )}
-        </div>
-        <div className="rounded-xl border border-env-border bg-env-surface p-2.5 sm:p-4">
-          <p className="text-sm text-env-muted">Racha</p>
-          <p className="mt-1 text-2xl font-bold sm:text-3xl">
-            {current ? (
-              <>
-                <span aria-hidden>🔥 </span>
-                {current.streak_days}{' '}
-                <span className="text-base font-normal text-env-muted">
-                  {current.streak_days === 1 ? 'día' : 'días'}
-                </span>
-              </>
-            ) : (
-              '—'
-            )}
-          </p>
-        </div>
-        <div className="rounded-xl border border-env-border bg-env-surface p-2.5 sm:p-4">
-          <p className="text-sm text-env-muted">Hoy</p>
-          <p className="mt-1 text-2xl font-bold sm:text-3xl tabular-nums">
-            {progress.done} / {progress.total}
-          </p>
-          <p className="text-xs text-env-muted">
-            {progress.points} de {progress.totalPoints} puntos del día
-          </p>
-        </div>
-      </div>
-
-      {/* Escritorio (≥ lg): tareas a la izquierda y, a la derecha, insignias y tripulación. */}
-      <div className="flex min-h-0 flex-1 flex-col gap-3 md:gap-4 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6">
-        <section className="flex min-h-28 flex-1 flex-col lg:min-h-0">
-          <h2 className="mb-2 shrink-0 font-semibold">Tareas de hoy</h2>
-          {tasks.state === 'loading' ? (
-            <div className="h-32 animate-pulse rounded-xl bg-env-surface" aria-busy="true" />
-          ) : tasks.state === 'error' ? (
-            <p
-              className="rounded-lg border border-env-border bg-env-surface p-3 text-sm"
-              role="alert"
-            >
-              <span aria-hidden>⚠ </span>No se pudieron cargar las tareas.{' '}
-              <button type="button" onClick={tasks.retry} className="underline">
-                Reintentar
-              </button>
+          </li>
+          <li className="border-r border-b border-env-border/60 px-3 py-2.5 sm:px-5 sm:py-4">
+            <p className="text-sm text-env-muted">Hoy</p>
+            <p className="mt-1 font-display text-2xl font-semibold tabular-nums sm:text-3xl">
+              {progress.done} / {progress.total}
             </p>
-          ) : list.length === 0 ? (
-            <p className="text-env-muted">No hay tareas para hoy.</p>
-          ) : (
-            <ul
-              className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 [scrollbar-color:var(--env-border)_transparent]"
-              tabIndex={0}
-              aria-label="Tareas de hoy"
-            >
-              {list.map((t) => (
-                <li key={t.id}>
-                  <TaskItem
-                    task={t}
-                    pending={queued.has(t.id) && !serverTasks.find((s) => s.id === t.id)?.completed}
-                    busy={busy !== null}
-                    onComplete={(task) => void onComplete(task)}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+            <p className="text-xs text-env-muted">
+              {progress.points} de {progress.totalPoints} puntos del día
+            </p>
+          </li>
+        </ul>
+      </section>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1 [scrollbar-color:var(--env-border)_transparent] md:gap-4">
+      <div className="flex flex-col gap-3 md:gap-4 lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:gap-5 2xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)]">
+        <div className="flex flex-col gap-3 md:gap-4 lg:min-h-0 lg:flex-1">
+          <section
+            aria-labelledby="tasks-title"
+            className="hud-panel flex flex-col lg:min-h-0 lg:flex-1"
+          >
+            <h2 id="tasks-title" className="hud-panel-head">
+              Tareas de hoy
+            </h2>
+            {tasks.state === 'loading' ? (
+              <div className="m-4 h-32 animate-pulse rounded-lg bg-env-bg" aria-busy="true" />
+            ) : tasks.state === 'error' ? (
+              <p className="p-4 text-sm" role="alert">
+                <span aria-hidden>⚠ </span>No se pudieron cargar las tareas.{' '}
+                <button type="button" onClick={tasks.retry} className="underline">
+                  Reintentar
+                </button>
+              </p>
+            ) : list.length === 0 ? (
+              <p className="p-4 text-env-muted">No hay tareas para hoy.</p>
+            ) : (
+              <ul
+                className="divide-y divide-env-border/60 [scrollbar-color:var(--env-border)_transparent] lg:min-h-0 lg:flex-1 lg:overflow-y-auto"
+                tabIndex={0}
+                aria-label="Tareas de hoy"
+              >
+                {list.map((t) => (
+                  <li key={t.id}>
+                    <TaskItem
+                      task={t}
+                      pending={
+                        queued.has(t.id) && !serverTasks.find((s) => s.id === t.id)?.completed
+                      }
+                      busy={busy !== null}
+                      onComplete={(task) => void onComplete(task)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
           {current && current.badges.length > 0 && (
-            <section>
-              <h2 className="mb-2 font-semibold">Insignias</h2>
-              <ul className="flex flex-wrap gap-2">
+            <section aria-labelledby="badges-title" className="hud-panel shrink-0">
+              <h2 id="badges-title" className="hud-panel-head">
+                Insignias
+              </h2>
+              <ul className="flex flex-wrap gap-2 px-4 py-3">
                 {current.badges.map((b) => (
                   <li
                     key={b.id}
-                    className="rounded-full border border-env-border bg-env-surface px-3 py-1 text-sm"
+                    className="border border-env-primary/50 bg-env-primary/10 px-3 py-1 text-sm"
                     title={`Conseguida el ${new Date(b.earned_at).toLocaleDateString('es-ES')}`}
                   >
                     <span aria-hidden>🏅 </span>
@@ -263,7 +284,9 @@ export default function Missions() {
               </ul>
             </section>
           )}
+        </div>
 
+        <div className="flex flex-col gap-3 [scrollbar-color:var(--env-border)_transparent] md:gap-4 lg:min-h-0 lg:overflow-y-auto">
           {board.state === 'ready' && (
             <CrewBoard board={board.data} crewWord={vocab.crew} memberId={memberId} />
           )}
@@ -278,15 +301,12 @@ export default function Missions() {
             />
           )}
 
-          {kudos.state === 'ready' && board.state === 'ready' && (
-            <CrewKudos
-              kudos={kudos.data}
-              members={board.data.members}
-              memberId={memberId}
-              canSend={canAct}
-              onSend={onKudos}
-            />
-          )}
+          {/* Hasta 1536 px, los kudos van debajo; desde ahí, en su propia columna. */}
+          <div className="2xl:hidden">{kudosPanel}</div>
+        </div>
+
+        <div className="hidden min-h-0 flex-col overflow-y-auto [scrollbar-color:var(--env-border)_transparent] 2xl:flex">
+          {kudosPanel}
         </div>
       </div>
 

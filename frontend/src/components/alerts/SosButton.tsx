@@ -66,7 +66,7 @@ export function SosButton({
         <button
           {...common}
           // 1,5 rem hasta el menú: el hueco de la barra (0,75 rem; 0,5 en pantallas bajas) + este margen.
-          className="hud-btn hud-btn-danger-solid mb-3 !h-16 w-full shrink-0 !text-2xl !font-semibold !tracking-[0.35em] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text [@media(max-height:800px)]:mb-4 [@media(max-height:800px)]:!h-14"
+          className="sos-font hud-btn hud-btn-danger-solid mb-3 !h-16 w-full shrink-0 !text-2xl !font-semibold !tracking-[0.35em] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text [@media(max-height:800px)]:mb-4 [@media(max-height:800px)]:!h-14"
         >
           SOS
         </button>
@@ -75,7 +75,7 @@ export function SosButton({
         <div className="flex items-start justify-center">
           <button
             {...common}
-            className="-mt-6 flex size-[4.75rem] items-center justify-center rounded-full border-4 border-env-bg bg-st-crit font-mono text-lg font-semibold tracking-[0.12em] text-[#1a0606] shadow-lg transition-[transform,box-shadow,filter] duration-150 hover:shadow-[0_0_0_3px_#ffffff,0_0_28px_rgba(255,107,107,0.85)] hover:brightness-110 motion-safe:hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
+            className="sos-font -mt-6 flex size-[4.75rem] items-center justify-center rounded-full border-4 border-env-bg bg-st-crit text-lg font-semibold tracking-[0.12em] text-[#1a0606] shadow-lg transition-[transform,box-shadow,filter] duration-150 hover:bg-[#ff2a2a] hover:shadow-[0_0_0_3px_#ffffff,0_0_28px_rgba(255,42,42,0.85)] motion-safe:hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
           >
             SOS
           </button>
@@ -85,8 +85,8 @@ export function SosButton({
           {...common}
           className={
             variant === 'inline'
-              ? 'hud-btn hud-btn-danger w-full !text-base !font-semibold !tracking-[0.3em] focus-visible:outline-2 focus-visible:outline-env-text'
-              : 'hud-btn hud-btn-danger-solid fixed right-4 bottom-4 z-40 !text-base !tracking-[0.3em] focus-visible:outline-2 focus-visible:outline-env-text'
+              ? 'sos-font hud-btn hud-btn-danger w-full !text-base !font-semibold !tracking-[0.3em] focus-visible:outline-2 focus-visible:outline-env-text'
+              : 'sos-font hud-btn hud-btn-danger-solid fixed right-4 bottom-4 z-40 !text-base !tracking-[0.3em] focus-visible:outline-2 focus-visible:outline-env-text'
           }
         >
           SOS

@@ -437,7 +437,7 @@ html[data-hud] body {
   }
   /* El SOS con borde (login) se rellena entero al pasar por encima. */
   .hud-btn-danger:hover {
-    background: var(--color-st-crit);
+    background: #ff2a2a;
     color: #1a0606;
   }
   /* Temas claros (hospital, residencia): el rojo claro del HUD no llega a 2:1 sobre fondo claro.
@@ -450,7 +450,7 @@ html[data-hud] body {
     font-weight: 600;
   }
   html[data-scheme='light'] .hud-btn-danger:hover {
-    background: #a61b12;
+    background: #d10f1b;
     color: #fff;
   }
   .hud-btn-danger-solid {
@@ -463,10 +463,10 @@ html[data-hud] body {
       box-shadow 150ms ease-out;
   }
 
-  /* Hover del SOS bien visible: más claro y con un anillo blanco por dentro (un brillo por fuera
+  /* Hover del SOS bien visible: rojo intenso y con un anillo blanco por dentro (un brillo por fuera
      lo cortaría el recorte de la esquina). Sin depender de `@media (hover)`. */
   .hud-btn-danger-solid:hover {
-    background: #ff9a9a;
+    background: #ff2a2a;
     box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.9);
   }
 
@@ -700,5 +700,12 @@ html[data-hud] body {
       animation: none;
       transform: scaleY(0.7);
     }
+  }
+}
+
+/* Texto del botón SOS: Orbitron, la tipografía más llamativa del proyecto (empaquetada). */
+@layer components {
+  .sos-font {
+    font-family: Orbitron, 'Exo 2', system-ui, sans-serif;
   }
 }

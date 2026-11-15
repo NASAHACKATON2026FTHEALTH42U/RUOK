@@ -18,13 +18,13 @@ interface CrewMissionsProps {
  */
 export function CrewMissions({ missions, memberId, canJoin, busyId, onJoin }: CrewMissionsProps) {
   return (
-    <section className="rounded-xl border border-env-border bg-env-surface p-4">
-      <h2 className="font-semibold">Misiones de grupo</h2>
-      <ul className="mt-2 divide-y divide-env-border">
+    <section className="hud-panel shrink-0">
+      <h2 className="hud-panel-head">Misiones de grupo</h2>
+      <ul className="divide-y divide-env-border/60">
         {missions.map((m) => {
           const s = missionStatus(m, memberId)
           return (
-            <li key={m.id} className="flex items-center gap-3 py-2 first:pt-0 last:pb-0">
+            <li key={m.id} className="flex items-center gap-3 px-4 py-3">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium">
                   {m.title} <span className="font-normal text-env-muted">· {m.points} pts</span>

@@ -22,11 +22,8 @@ export function TaskItem({ task, pending, onComplete, busy }: TaskItemProps) {
   const done = task.completed
 
   return (
-    <div
-      className={`flex items-center gap-3 rounded-lg border border-env-border p-3 ${
-        done ? 'bg-env-bg' : 'bg-env-surface'
-      }`}
-    >
+    // Fila del panel «Tareas de hoy» (las líneas las pone la lista).
+    <div className={`flex items-center gap-3 px-4 py-3 ${done ? 'bg-env-bg/40' : ''}`}>
       <button
         type="button"
         role="checkbox"

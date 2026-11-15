@@ -22,33 +22,35 @@ export function CrewBoard({ board, crewWord, memberId }: CrewBoardProps) {
   )
 
   return (
-    <section className="rounded-xl border border-env-border bg-env-surface p-4">
-      <h2 className="font-semibold">{capitalize(crewWord)}: entre todos</h2>
-      <p className="mt-1 text-3xl font-bold">
-        <AnimatedNumber value={board.crew_points} />{' '}
-        <span className="text-base font-normal text-env-muted">puntos</span>
-      </p>
-      <ul className="mt-3 space-y-2">
-        {members.map((m) => (
-          <li key={m.member_id} className="text-sm">
-            <div className="flex items-baseline justify-between gap-2">
-              <span className={m.member_id === memberId ? 'font-semibold' : ''}>
-                {m.name}
-                {m.member_id === memberId && <span className="text-env-muted"> (tú)</span>}
-              </span>
-              <span className="text-env-muted tabular-nums">
-                {m.points} pts · {m.streak_days} {m.streak_days === 1 ? 'día' : 'días'} de racha
-              </span>
-            </div>
-            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-env-bg" aria-hidden>
-              <div
-                className="h-full rounded-full bg-env-primary"
-                style={{ width: `${(m.points / total) * 100}%` }}
-              />
-            </div>
-          </li>
-        ))}
-      </ul>
+    <section className="hud-panel shrink-0">
+      <h2 className="hud-panel-head">{capitalize(crewWord)}: entre todos</h2>
+      <div className="px-4 py-3">
+        <p className="font-display text-3xl font-semibold tabular-nums">
+          <AnimatedNumber value={board.crew_points} />{' '}
+          <span className="text-base font-normal text-env-muted">puntos</span>
+        </p>
+        <ul className="mt-3 space-y-2">
+          {members.map((m) => (
+            <li key={m.member_id} className="text-sm">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className={m.member_id === memberId ? 'font-semibold' : ''}>
+                  {m.name}
+                  {m.member_id === memberId && <span className="text-env-muted"> (tú)</span>}
+                </span>
+                <span className="text-env-muted tabular-nums">
+                  {m.points} pts · {m.streak_days} {m.streak_days === 1 ? 'día' : 'días'} de racha
+                </span>
+              </div>
+              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-env-bg" aria-hidden>
+                <div
+                  className="h-full rounded-full bg-env-primary"
+                  style={{ width: `${(m.points / total) * 100}%` }}
+                />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   )
 }
