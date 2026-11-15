@@ -229,6 +229,8 @@ export function BodyFigure({
     pad = true,
     /** Se ve sin señalarlo: más opaco y con un contorno fino. */
     emphasis = false,
+    /** Color propio del órgano (p. ej. el corazón, rojizo): el estado pasa al contorno. */
+    tint?: string,
   ) => {
     const kx = w / 512
     const ky = h / 512
@@ -237,11 +239,20 @@ export function BodyFigure({
     // Sin datos: gris liso (no rayado) en los iconos; tampoco es verde, y el "Sin datos" se lee
     // en el tooltip y en la columna de sistemas.
     if (stale || statusStyle(r.status).striped) style.fill = STATUS_COLORS.unknown
+    const known = !(stale || statusStyle(r.status).striped)
     if (emphasis && style.stroke === 'none') {
       style.fillOpacity = Math.max(style.fillOpacity, 0.8)
       style.stroke = '#ffffff'
       style.strokeOpacity = 0.75
       style.strokeWidth = 5
+    }
+    // Con color propio, el relleno es ese color y el contorno (grueso) lleva el del estado; sin
+    // datos sigue siendo gris (nunca un color que parezca un estado).
+    if (tint && known) {
+      style.stroke = style.strokeWidth > 5 ? '#ffffff' : STATUS_COLORS[r.status]
+      style.fill = tint
+      style.strokeOpacity = 1
+      style.strokeWidth = Math.max(style.strokeWidth, 8)
     }
     return (
       <g transform={`translate(${x} ${y}) scale(${kx} ${ky})`}>
@@ -291,12 +302,13 @@ export function BodyFigure({
     ['metabolic', (r) => organ(r, STOMACH, 365, 575, 200, 200, true, true)],
     // Corazón (icono)
     // Igual que el estómago: visible sin señalarlo.
-    // Late (lub-dub) salvo con «reducir movimiento» o sin datos recientes.
+    // Rojizo (el estado va en el contorno). Late (lub-dub) salvo con «reducir movimiento» o sin
+    // datos recientes.
     [
       'heart',
       (r) => (
         <g className={stale ? undefined : 'heart-beat'}>
-          {organ(r, HEART, 380, 400, 154, 154, true, true)}
+          {organ(r, HEART, 380, 400, 154, 154, true, true, '#d64545')}
         </g>
       ),
     ],
@@ -321,14 +333,14 @@ export function BodyFigure({
                 <circle
                   cx={cx}
                   cy={cy}
-                  r="27"
+                  r="24"
                   fill="none"
                   stroke="#fde047"
-                  strokeWidth="6"
-                  strokeOpacity="0.9"
+                  strokeWidth="4"
+                  strokeOpacity="0.5"
                 />
               )}
-              <circle cx={cx} cy={cy} r="18" />
+              <circle cx={cx} cy={cy} r="14" fillOpacity={0.45} />
             </g>
           ))}
         </g>

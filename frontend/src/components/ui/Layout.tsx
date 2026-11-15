@@ -161,7 +161,7 @@ export function Layout() {
                 id={TOPBAR_SLOT_ID}
                 // Por debajo de lg no cabe todo en una línea: el resumen de la página baja a una
                 // segunda línea (y no ocupa nada si está vacío) en vez de solaparse con el reloj.
-                className="flex flex-wrap items-center gap-2 max-lg:order-last max-lg:basis-full max-lg:empty:hidden lg:flex-1"
+                className="flex flex-wrap items-center gap-2 max-lg:order-last max-lg:basis-full max-lg:empty:hidden lg:flex-1 lg:justify-center"
               />
               <div className="max-lg:ml-auto">
                 <HudClock env={env} />

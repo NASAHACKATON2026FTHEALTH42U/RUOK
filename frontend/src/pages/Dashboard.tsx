@@ -144,10 +144,18 @@ export default function Dashboard() {
       <div
         className={
           desktop
-            ? 'flex min-w-0 flex-wrap items-center gap-2 text-xs'
+            ? 'flex min-w-0 flex-wrap items-center gap-3 text-xs'
             : 'mb-3 flex flex-wrap items-center gap-2 md:hidden'
         }
       >
+        {/* El estado general, en una palabra, en la barra superior (escritorio): es el peor entre
+            la salud y el liveness; con liveness stale o lost y todo normal, "Sin datos" (nunca verde
+            sin datos). */}
+        {desktop && (
+          <StatusHeadline
+            state={live && a.overall_status === 'normal' ? 'unknown' : a.overall_status}
+          />
+        )}
         {live && (
           <StatusBadge status={live} label={formatSinceLabel(a.last_seen_at, serverNow())} />
         )}
@@ -211,15 +219,8 @@ export default function Dashboard() {
             aria-labelledby="dash-systems"
             className="hud-panel @container flex min-h-0 min-w-0 flex-col [grid-area:systems]"
           >
-            {/* El estado general, en una palabra, en el extremo derecho del título: resume los
-                sistemas. Es el peor entre la salud y el liveness: con liveness stale o lost y todo
-                normal, "Sin datos" (nunca verde sin datos). */}
             <div className="hud-panel-head">
               <h2 id="dash-systems">Sistemas</h2>
-              <StatusHeadline
-                state={live && a.overall_status === 'normal' ? 'unknown' : a.overall_status}
-                className="mr-2.5 ml-auto"
-              />
             </div>
             <BodyLegend
               regions={regions}

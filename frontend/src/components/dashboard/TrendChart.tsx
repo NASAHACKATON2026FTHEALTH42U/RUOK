@@ -66,7 +66,7 @@ export function PeriodSwitch({
           type="button"
           onClick={() => onChange(p)}
           aria-pressed={days === p}
-          className={`${size === 'sm' ? 'px-2 py-0.5' : 'px-3 py-1'} first:rounded-l-md last:rounded-r-md ${
+          className={`${size === 'sm' ? 'px-2 py-0.5' : 'px-3 py-1'} ${
             days === p
               ? 'bg-env-primary text-env-primary-text'
               : 'text-env-muted hover:text-env-text'
