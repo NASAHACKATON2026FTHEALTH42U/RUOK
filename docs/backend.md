@@ -5,24 +5,21 @@
 
 ## Estado
 
-| Issue | Qué aporta | Estado |
-|---|---|---|
-| BE-01 (#3) | FastAPI, `/health`, CORS, `X-Server-Time`, SQLite en WAL, reloj inyectable, tests | Hecho |
-| FS-02 (#5) | Schemas Pydantic completos del contrato, routers stub de todos los endpoints, test de cobertura del contrato | Hecho |
-| BE-02 (#8) | Modelos SQLModel de **todas** las tablas de [data-model.md](data-model.md) con sus índices, `app_state` y persistencia del reloj | Hecho |
-| BE-08 (#15) | Motor de evaluación por indicador (`services/assessment.py`) | Hecho |
-| BE-09 (#16) | Evaluación agregada por sistema y global (`services/assessment.py`) | Hecho |
-| BE-03 (#9) | Perfiles de entorno en `app/data/environments.json`, loader validado y `GET /environments` reales | Hecho |
-| BE-04 (#10) | Catálogo de 20 indicadores y 7 sistemas en JSON, validación cruzada y `GET /indicators`, `/systems` reales | Hecho |
-| BE-10 (#17) | Tendencias, línea base personal (7 días) y regla de "3 días a peor" (`services/trends.py`) | Hecho |
-| BE-11 (#18) | Composición del `Assessment` completo (`services/member_assessment.py`) | **Parcial:** el servicio está hecho, pero `GET /members/{id}/assessment` sigue en stub |
-| FS-04 (#7) | `scripts/export_mocks.py`: mocks del front generados desde la API | Hecho |
-| BE-06 (#13) | `POST` de mediciones por lotes (idempotente por UUID, atómico, 409) y `GET` con filtros | Hecho |
-| BE-05 (#12) | Members de la BD: lista por entorno con resumen, detalle y privacidad guardada | Hecho (PR pendiente de merge) |
-| BE-18 (#36) | Rutina diaria desde `environment.routine` + `task_types.json`: `GET /tasks`, completado idempotente, autocompletado al medir y `task.completed` (`services/routine.py`) | Hecho |
-| BE-19 (#37) | Puntos, racha, 6 insignias (`badges.json`) y leaderboard cooperativo: `GET /game` y `/leaderboard` reales (`services/gamification.py`) | Hecho |
+**Todos los endpoints del contrato son reales** y todas las issues de backend están cerradas. El desglose por issue está en [status.md](status.md) y en [backlog.md](backlog.md).
 
-Estado global y lista de inconsistencias pendientes: [status.md](status.md).
+| Bloque | Dónde vive |
+|---|---|
+| Base (FastAPI, SQLite en WAL, reloj inyectable, modelos) | `app/main.py`, `app/db.py`, `app/clock.py`, `app/models.py` |
+| Catálogos JSON validados al arrancar | `app/data/*.json` + `services/environments.py`, `catalog.py`, `routine.py`, `gamification.py`, `crew.py` |
+| Motor de evaluación y tendencias | `services/assessment.py`, `trends.py`, `member_assessment.py`, `behavioral.py` |
+| Mediciones y members | `services/measurements.py`, `members.py` |
+| Liveness y "R U OK?" | `services/liveness.py`, `liveness_watch.py` |
+| Alertas, escalado y consola ground | `services/alerts.py`, `ground.py` |
+| Enlace simulado con tierra | `services/comm_link.py` (+ `home_messages.py`) |
+| Login y roles | `app/auth/`, `services/accounts.py`, `routers/deps.py` |
+| Tiempo real, dispositivos y centro de control | `services/events.py`, `devices.py`, `control.py`, `network.py` |
+| Rutina y juego | `services/routine.py`, `gamification.py`, `crew.py` |
+| Seed y escenarios de demo | `app/seed.py` |
 
 ## Arrancar
 
@@ -53,66 +50,73 @@ backend/
 ├── pyproject.toml        dependencias (fastapi, uvicorn, sqlmodel, pydantic; dev: pytest, httpx, ruff)
 ├── uv.lock               versiones exactas (lo genera uv, no se edita a mano)
 ├── app/
-│   ├── main.py           app FastAPI: lifespan (init_db, reloj, entornos y catálogo), CORS, X-Server-Time, /api/v1
+│   ├── main.py           app FastAPI: lifespan (init_db, reloj, seed, validación de catálogos, vigilancia de
+│   │                     liveness), CORS, X-Server-Time, /api/v1 y el build del front (modo "a bordo")
 │   ├── db.py             engine SQLite (WAL + foreign_keys), init_db(), get_session()
 │   ├── clock.py          reloj inyectable: now(), advance(), set_offset(), get_offset(), reset()
-│   ├── models.py         tablas SQLModel (15) e índices de data-model.md; tipo UTCDateTime
+│   ├── models.py         tablas SQLModel (16) e índices de data-model.md; tipo UTCDateTime
+│   ├── seed.py           seed determinista de 30 días, reset y escenarios de demo (BE-07, BE-37)
+│   ├── stubs.py          datos de apoyo para export_mocks.py y algunos tests; ningún router lo usa
+│   ├── auth/             security.py (JWT HS256 con el reloj de la demo) y permissions.py (matriz de roles)
 │   ├── data/
-│   │   ├── environments.json  los 6 perfiles de entorno (BE-03)
+│   │   ├── environments.json  los 6 perfiles de entorno (BE-03, BE-33)
 │   │   ├── indicators.json    20 indicadores con rangos revisados en CNT-01 (BE-04)
 │   │   ├── systems.json       7 sistemas del cuerpo con su región del SVG (BE-04)
-│   │   ├── protocols.json     protocolo por sistema y estado: mensaje y recomendaciones, con fuentes (CNT-02)
+│   │   ├── protocols.json     protocolos por sistema y estado y por categoría de alerta (CNT-02, CNT-03)
+│   │   ├── interventions.json tarjetas de intervención con pasos y fuentes (BE-21, CNT-03)
+│   │   ├── behavioral_rules.json  reglas conductuales frente a la línea base (BE-20)
 │   │   ├── task_types.json    tipos de tarea de la rutina: título, momento del día, indicador (BE-18)
-│   │   └── badges.json        insignias y sus reglas (tasks_completed, points, streak, perfect_days) (BE-19)
+│   │   ├── badges.json        insignias y sus reglas (BE-19)
+│   │   ├── crew_game.json     kudos y misiones de tripulación (BE-23)
+│   │   └── home_message_replies.json  respuestas simuladas de "Mensaje a casa" (BE-22)
 │   ├── services/
 │   │   ├── app_state.py     clave-valor de app_state: get_value/set_value, save_clock/restore_clock
-│   │   ├── assessment.py    motor de evaluación por indicador y por sistema (BE-08, BE-09)
-│   │   ├── catalog.py       indicadores y sistemas: list_indicators(), get_indicator(), list_systems(), check_consistency()
-│   │   ├── environments.py  carga y valida environments.json: list_environments(), get_environment()
-│   │   ├── measurements.py  lotes idempotentes (save_batch), series (list_series), validación (BE-06)
-│   │   ├── member_assessment.py  composición del Assessment completo de un member (BE-11; aún no lo usa el endpoint)
-│   │   ├── gamification.py  puntos, racha, insignias (badge_award) y leaderboard cooperativo (BE-19)
-│   │   ├── routine.py       tareas del día (plan_day, ensure_tasks), completado idempotente, autocompletado (BE-18)
-│   │   ├── members.py       members de la BD: get, list_by_env, set_privacy, to_summary; ensure_demo_members (STUB → BE-07)
-│   │   └── trends.py        tendencia, línea base de 7 días y regla de 3 días a peor (BE-10)
-│   ├── stubs.py          STUB(FS-02): datos de ejemplo de los routers stub (se van retirando)
+│   │   ├── environments.py  carga y valida environments.json
+│   │   ├── catalog.py       indicadores, sistemas, intervenciones y protocolos; fuentes de docs/sources.md
+│   │   ├── assessment.py    motor de evaluación por indicador y por sistema, escalado (BE-08, BE-09, BE-31)
+│   │   ├── trends.py        tendencia, línea base de 7 días y regla de 3 días a peor (BE-10)
+│   │   ├── member_assessment.py  composición del Assessment completo de un member (BE-11)
+│   │   ├── behavioral.py    reglas conductuales y privacidad de los detalles (BE-20)
+│   │   ├── measurements.py  lotes idempotentes (save_batch), series, validación y eventos (BE-06)
+│   │   ├── members.py       members de la BD: get, list_by_env, set_privacy, to_summary
+│   │   ├── liveness.py      liveness del member y combinación con la salud (BE-12)
+│   │   ├── liveness_watch.py  check-in "R U OK?" y alerta no_contact (BE-16)
+│   │   ├── alerts.py        alertas automáticas y manuales, deduplicación y escalera (BE-14, BE-15)
+│   │   ├── ground.py        consola del responder: estado as-of y filtro de privacidad (BE-17)
+│   │   ├── comm_link.py     enlace simulado: cola persistente, retardo y LOS (BE-13)
+│   │   ├── home_messages.py "Mensaje a casa" por el enlace (BE-22)
+│   │   ├── accounts.py      cuentas, contraseñas, PIN y usuarios de demo (BE-25, FS-07)
+│   │   ├── events.py        bitácora event_log y bus SSE (BE-28)
+│   │   ├── devices.py       registro de dispositivos (BE-29)
+│   │   ├── control.py       panorama del centro de control y pausa del liveness (BE-30)
+│   │   ├── network.py       IPs de la red local para el QR (BE-30)
+│   │   ├── routine.py       tareas del día, completado idempotente y autocompletado (BE-18)
+│   │   ├── gamification.py  puntos, racha, insignias y leaderboard cooperativo (BE-19)
+│   │   └── crew.py          kudos y misiones de tripulación (BE-23)
 │   ├── schemas/          modelos Pydantic del contrato, uno por dominio; se importan desde app.schemas
 │   │   ├── common.py     enumeraciones (Status, Liveness, Role…), Slug, Range, ApiModel, ErrorResponse
-│   │   ├── config.py     Environment, Indicator, BodySystem, Intervention
+│   │   ├── config.py     Environment, Indicator, BodySystem, Intervention y catálogos internos (Protocol, TaskType, BadgeDef)
 │   │   ├── auth.py       User, LoginIn, PinLoginIn, TokenResponse, DemoUser, UserCreate
 │   │   ├── members.py    Member(Summary), Measurement*, Assessment, Heartbeat*, Ruok*
 │   │   ├── alerts.py     Alert, AlertIn, AlertEvent, Escalate/Ack/Resolve/MessageIn, GroundView
 │   │   ├── link.py       LinkStatus, LinkMessage
-│   │   ├── game.py       Task, TaskCompleteIn, GameState, Badge, Leaderboard
+│   │   ├── game.py       Task, GameState, Badge, Leaderboard, Kudos, CrewMission
+│   │   ├── home.py       HomeMessage, HomeMessageIn
 │   │   └── realtime.py   Event, Device, ControlOverview, NetworkInfo, Demo*
 │   └── routers/
-│       ├── deps.py       Bearer opcional (stub de auth), cabecera X-Device-Id, respuestas de error
+│       ├── deps.py       sesión (JWT), permisos por rol y ámbito (allow, allow_member, allow_env), X-Device-Id
 │       ├── health.py     GET /health
 │       ├── auth.py       /auth/*, /users
-│       ├── catalog.py    /environments, /indicators, /systems (reales), /interventions (stub)
-│       ├── members.py    members y privacy (reales, BE-05), measurements (real, BE-06), assessment, heartbeat, ruok (stub)
+│       ├── catalog.py    /environments, /indicators, /systems, /interventions
+│       ├── members.py    members, privacy, measurements, assessment, heartbeat, ruok
 │       ├── alerts.py     alertas del member, acciones sobre alertas, consola ground
-│       ├── game.py       tareas (BE-18), game y leaderboard (BE-19), todo real
-│       └── realtime.py   events (SSE), devices, control, system, link, demo (stub salvo /demo/fast-forward)
+│       ├── game.py       tareas, game, leaderboard, kudos y misiones de tripulación
+│       ├── home.py       "Mensaje a casa"
+│       └── realtime.py   events (SSE), devices, control, system, link, demo
 ├── scripts/
 │   └── export_mocks.py   genera frontend/src/api/mocks/fixtures.gen.ts (FS-04)
-└── tests/
-    ├── conftest.py       BD temporal, reset del reloj, fixture `client`
-    ├── test_contract.py  FS-02: todo endpoint del contrato está en el OpenAPI (y viceversa) y su stub responde
-    ├── test_health.py    /health, X-Server-Time, CORS, /docs
-    ├── test_clock.py     reloj y fast-forward
-    ├── test_db.py        WAL, foreign_keys y sesión
-    ├── test_models.py    tablas, índices, crear/leer cada modelo, restricciones, fechas UTC, app_state
-    ├── test_assessment.py   motor de evaluación por indicador (BE-08)
-    ├── test_system_assessment.py  evaluación por sistema y global (BE-09)
-    ├── test_trends.py       tendencias y línea base (BE-10)
-    ├── test_member_assessment.py  composición del Assessment (BE-11)
-    ├── test_environments.py perfiles vs docs/environments.md, JSON inválido, GET /environments y 404
-    ├── test_catalog.py      indicadores y sistemas, coherencia, rangos con el motor, endpoints y 404
-    ├── test_measurements.py idempotencia, 409, lote atómico, validación, filtros y orden del GET
-    ├── test_members.py      lista por entorno, detalle, privacidad persistida, 404 y 422
-    ├── test_routine.py      generación de tareas, completado idempotente, 409/404 y autocompletado (BE-18)
-    └── test_gamification.py racha, reglas de insignias, puntos de tripulación y leaderboard (BE-19)
+└── tests/                un test_<pieza>.py por servicio o endpoint (conftest.py: BD temporal, reset del reloj,
+                          fixtures `client` con sesión de admin, `vega_auth`, `medic_auth`)
 ```
 
 La estructura objetivo completa (services, data, seed…) está en [architecture.md](architecture.md#estructura-de-carpetas).
@@ -180,7 +184,7 @@ Convenciones:
 | `reset()` | Vuelve al reloj real |
 
 El desfase vive en memoria. Para que sobreviva a un reinicio se guarda en `app_state.clock_offset_s`:
-- `services.app_state.save_clock(session)` lo guarda. ⚠️ **Todavía no lo llaman ni `/demo/fast-forward` ni `/demo/reset`**: tras un reinicio se pierde el offset. Pendiente en BE-07 (ver [status.md](status.md));
+- `services.app_state.save_clock(session)` lo guarda; lo llaman `/demo/fast-forward` y `/demo/reset` (BE-32);
 - al arrancar, el `lifespan` llama a `restore_clock(session)` y lo recupera.
 
 ### Catálogos JSON (`app/data/`)
@@ -194,9 +198,12 @@ La configuración de dominio (entornos, indicadores, sistemas, intervenciones…
 | `protocols.json` | `services/catalog.py` (`list_protocols`) | CNT-02 |
 | `task_types.json` | `services/routine.py` | BE-18 |
 | `badges.json` | `services/gamification.py` | BE-19 |
-| `interventions.json` | — | BE-21 |
+| `interventions.json` | `services/catalog.py` (`list_interventions`) | BE-21 |
+| `behavioral_rules.json` | `services/behavioral.py` | BE-20 |
+| `crew_game.json` | `services/crew.py` | BE-23 |
+| `home_message_replies.json` | `services/home_messages.py` | BE-22 |
 
-Cómo funciona `services/environments.py` (patrón que ya sigue `catalog.py`, de BE-04, y que debe seguir BE-21):
+Cómo funciona `services/environments.py` (patrón que siguen todos los catálogos):
 - `load_environments(path)` lee el fichero y lo valida con el schema del contrato (`TypeAdapter(list[Environment])`). `ApiModel` rechaza campos desconocidos, así que una errata en el JSON da error. También rechaza ids duplicados.
 - `list_environments()` y `get_environment(env_id)` usan una caché en memoria (`lru_cache`): el fichero se lee una sola vez.
 - El `lifespan` lo carga al arrancar: **si el JSON es inválido, el servidor no arranca** (mejor que fallar en mitad de la demo).
@@ -234,7 +241,7 @@ Implementa el principio **sin pérdida de datos** ([offline-and-liveness.md](off
 - **Lote atómico:** se valida todo antes de escribir y hay un solo `commit`. El cliente corrige y reenvía el lote entero.
 - `unit` sale del catálogo y `received_at` del reloj del servidor (`clock.now()`).
 - **Envíos simultáneos** del mismo lote (dos pestañas): si el `commit` choca con la PK, se reintenta una vez y esas mediciones pasan a `duplicates`.
-- El `assessment` de la respuesta sigue siendo stub hasta **BE-11**; el evento `measurement.created` / `sync.batch` está marcado con `TODO(BE-28)`.
+- La respuesta trae el `assessment` real recalculado. Cada medición nueva emite `measurement.created` (o un solo `sync.batch` si el lote llega del outbox) y autocompleta las tareas de la rutina de ese indicador (BE-18).
 
 `GET /members/{id}/measurements?indicator_id=&from=&to=`: ordenado por `taken_at`; `from` y `to` son inclusivos; `from > to` → 422.
 
@@ -246,19 +253,17 @@ Implementa el principio **sin pérdida de datos** ([offline-and-liveness.md](off
 | `GET /members/{id}` | El `Member`. 404 si no existe |
 | `PATCH /members/{id}/privacy` | Guarda `share_behavioral_details` y devuelve el member actualizado |
 
-Qué es real y qué sigue siendo stub en el resumen:
+De dónde sale cada campo del resumen (`to_summary()`):
 
-| Campo | Origen | Lo sustituye |
-|---|---|---|
-| `id`, `env_id`, `name`, `position`, `share_behavioral_details`, `last_seen_at` | BD | — |
-| `last_measurement_at` | BD (`max(taken_at)` de sus mediciones) | — |
-| `liveness` | stub (`stubs.MEMBERS`; un member sin stub sale `stale`) | BE-12 |
-| `overall_status` | stub (`stubs.member_summary`) | BE-11 |
-| `open_alerts` | stub (`stubs.member_summary`) | BE-14 |
+| Campo | Origen |
+|---|---|
+| `id`, `env_id`, `name`, `position`, `share_behavioral_details`, `last_seen_at` | BD |
+| `last_measurement_at` | BD (`max(taken_at)` de sus mediciones) |
+| `liveness` | `services/liveness.py` (heartbeat, actividad y umbrales del entorno) |
+| `overall_status` | El peor entre la salud (motor) y el liveness |
+| `open_alerts` | Alertas sin resolver del member |
 
-Para sustituir un stub, cambia **solo** `to_schema()` / `to_summary()` en `services/members.py`: los endpoints no cambian. La consola ground (`routers/alerts.py`) y el centro de control (`routers/realtime.py`) siguen usando `stubs.member_summary` hasta BE-17 y BE-30. El permiso de la privacidad (solo el propio member) llega con BE-27.
-
-**Members de ejemplo (temporal):** las mediciones tienen FK a `member`, pero aún no hay seed. Al arrancar, `ensure_demo_members()` inserta los 3 members de `stubs.MEMBERS` si la tabla está vacía. Lo sustituye el seed de **BE-07**.
+`PATCH …/privacy` solo lo puede hacer el propio member (BE-27). Los members salen del seed (`app/seed.py`), que se ejecuta al arrancar si la BD está vacía.
 
 ### Cabecera `X-Server-Time` y CORS (`app/main.py`)
 
@@ -272,38 +277,27 @@ Para sustituir un stub, cambia **solo** `to_schema()` / `to_summary()` en `servi
 - **Frescura:** un dato más antiguo que `indicator.max_age_s` pasa a `unknown`.
 - **Ajustes por entorno:** `environment.threshold_overrides` se fusiona con los rangos del catálogo.
 - **Escalado** (regla del contrato, [alerts-and-escalation.md](alerts-and-escalation.md#modo-de-escalado-según-el-retardo)):
-  - `self` y `crew` (y sus equivalentes en tierra) se resuelven **a bordo**: `realtime`, `delay_s = 0`. ⚠️ El código actual aún les aplica el retardo del enlace (ver [status.md](status.md)).
+  - `self` y `crew` (y sus equivalentes en tierra) se resuelven **a bordo**: `realtime`, `delay_s = 0`.
   - Los niveles externos usan el retardo: `realtime` si es < 5 s, `delayed` en caso contrario, y `autonomous` si es ≥ 60 s **y** el estado es `critical`.
-- **Liveness:** el `overall_status` debe ser el peor entre la salud y el liveness. ⚠️ Aún no se combina; llega con BE-12.
+- **Liveness:** el `overall_status` es el peor entre la salud y el liveness (`services/liveness.py`).
 
-## Próximas piezas que afectan a la base
+## Convenciones transversales
 
-Decisiones ya documentadas que todavía no están implementadas. Tenlas en cuenta al tocar `main.py`, `db.py` o los modelos:
+- **Autenticación y roles (BE-25 … BE-27):** `Authorization: Bearer <jwt>` en todos los endpoints salvo `/health`, `/auth/*`, `/system/network-info`, el catálogo de solo lectura y el SOS de emergencia. Los routers declaran el permiso con `allow(...)`, `allow_member(...)` o `allow_env(...)` de `routers/deps.py`; la matriz está en `app/auth/permissions.py`. La caducidad del token se mide con `clock.now()`. Ver [auth-and-roles.md](auth-and-roles.md).
+- **Dispositivo (BE-29):** las peticiones llevan `X-Device-Id`; uno mal formado se ignora (no da 422, para no romper un SOS).
+- **Tiempo real (BE-28):** todo cambio de estado se registra con `events.emit()` en la transacción del cambio y sale por SSE (`/events/stream`) al hacer commit.
+- **Red local y modo "a bordo" (FS-08, BE-24):** `make demo` o `docker compose up` arrancan en `0.0.0.0:8000` y FastAPI sirve también `frontend/dist` (mismo origen, sin CORS). Ver [control-center-and-devices.md](control-center-and-devices.md).
+- **Idempotencia:** todo `POST` que crea datos recibe un UUID del cliente; reenviarlo no duplica y el mismo UUID con otro contenido da 409.
 
-- **Red local (FS-08, #73):** para que se conecten los móviles, el servidor se arranca con `uv run uvicorn app.main:app --host 0.0.0.0 --port 8000` y se abre el puerto (`sudo ufw allow 8000/tcp`). Ver [control-center-and-devices.md](control-center-and-devices.md). En la demo, FastAPI sirve `frontend/dist` (mismo origen, sin CORS).
-- **Autenticación (BE-25/BE-26):** `Authorization: Bearer <jwt>` en todos los endpoints **salvo `/health`**, `/auth/*` y el SOS de emergencia. Código en `app/auth/` (`security.py`, `permissions.py`). Ver [auth-and-roles.md](auth-and-roles.md).
-- **Dispositivo (BE-29):** todas las peticiones llevan `X-Device-Id`. El CORS actual ya acepta cualquier cabecera (`allow_headers=["*"]`).
-- **Tiempo real (BE-28):** los cambios de estado se registran con `events.emit()` en la tabla `event_log` y se emiten por SSE (`/events/stream`).
+## Contrato y routers
 
-## Routers stub (FS-02)
-
-Todos los endpoints del contrato existen. **Reales:** `/health`, `/environments*`, `/indicators*`, `/systems`, members y privacidad (BE-05), `POST`/`GET /members/{id}/measurements` (BE-06) y `/demo/fast-forward` (a medias). **El resto** devuelve datos de ejemplo de `app/stubs.py` e indica en `description` qué issue lo implementa (`STUB(FS-02) → BE-06`). Tabla completa en [status.md](status.md#endpoints-reales-y-stubs).
-
-> El assessment ya sale del motor real (BE-11). Los tests de escalado de `tests/test_contract.py` comprueban la regla del contrato. ⚠️ `test_assessment_mode_depends_on_environment` tiene un `TODO(BE-31)`: hoy acepta `autonomous` con 840 s para un escalado a `crew` (a bordo), que es el bug de BE-31 (#111). Hay que cambiarlo al arreglarlo.
-
-**Al implementar tu issue:**
-1. Sustituye el cuerpo del endpoint por la llamada a tu servicio (`app/services/…`). **No cambies la firma ni el `response_model`** sin cambiar antes el contrato.
-2. Quita `STUB(FS-02) → …` de la `description`.
-3. Borra de `app/stubs.py` lo que ya no se use.
-4. `tests/test_contract.py` sigue pasando. Si cambias un endpoint del contrato, actualiza `CONTRACT_ENDPOINTS`.
+Todos los endpoints del contrato existen y son reales. `tests/test_contract.py` comprueba que el OpenAPI y `CONTRACT_ENDPOINTS` coinciden: si añades o cambias un endpoint, actualiza el contrato y esa lista. **No cambies la firma ni el `response_model`** de un endpoint sin cambiar antes [api-contract.md](api-contract.md).
 
 **Defaults en los schemas:** `ApiModel` usa `json_schema_serialization_defaults_required=True`. En las **respuestas**, los campos con valor por defecto salen como obligatorios (siempre vienen); en las **peticiones** siguen siendo opcionales. El front genera los tipos con `--default-non-nullable false`, así que no obliga a enviar los valores por defecto (por ejemplo, `MeasurementIn.source`).
 
-**Auth en los stubs:** `routers/deps.py` declara `Authorization: Bearer` (opcional) para que Swagger muestre el candado, pero **no valida nada** hasta BE-26 y BE-27. Los endpoints públicos (`/health`, `/auth/login`, `/auth/pin`, `/auth/demo-users`, `/system/network-info`) no lo declaran.
-
 ## Exportar mocks para el front (FS-04)
 
-`uv run python scripts/export_mocks.py` (o `npm run gen:mocks` desde `frontend/`) llama a cada endpoint con el `TestClient` y genera `frontend/src/api/mocks/fixtures.gen.ts`. **Es determinista:** el reloj se congela en `FROZEN_NOW` (14/11 10:00 UTC), así que dos ejecuciones dan el mismo fichero y solo cambia cuando cambian los datos. Si una PR muestra cambios en `fixtures.gen.ts` sin haber tocado datos, algo usa la hora real en lugar de `clock.now()`. Hoy los datos salen de `app/stubs.py`. Cuando los endpoints sean reales, ejecútalo tras el seed (BE-07) para tener mocks con datos realistas. **Si añades un endpoint, el test de mocks del front exige un handler para él** (`frontend/src/api/mocks/handlers.ts`).
+`uv run python scripts/export_mocks.py` (o `npm run gen:mocks` desde `frontend/`) llama a cada endpoint con el `TestClient` y genera `frontend/src/api/mocks/fixtures.gen.ts`. **Es determinista:** el reloj se congela en `FROZEN_NOW` (14/11 10:00 UTC), así que dos ejecuciones dan el mismo fichero y solo cambia cuando cambian los datos. Si una PR muestra cambios en `fixtures.gen.ts` sin haber tocado datos, algo usa la hora real en lugar de `clock.now()`. Los datos salen de los endpoints reales sobre el seed de demo. **Si añades un endpoint, el test de mocks del front exige un handler para él** (`frontend/src/api/mocks/handlers.ts`).
 
 ## Cómo añadir un endpoint
 
@@ -318,4 +312,4 @@ Todos los endpoints del contrato existen. **Reales:** `/health`, `/environments*
 
 - `conftest.py` apunta `DATABASE_URL` a una BD temporal **antes** de importar la app: los tests nunca tocan `ruok.db`.
 - El reloj se resetea antes y después de cada test.
-- La fixture `client` (`TestClient`) hace peticiones sin arrancar un servidor y ejecuta el `lifespan` (crea las tablas).
+- La fixture `client` (`TestClient`) hace peticiones sin arrancar un servidor, ejecuta el `lifespan` (crea las tablas y el seed) y lleva sesión de **admin**; `vega_auth` y `medic_auth` dan cabeceras de otros roles.

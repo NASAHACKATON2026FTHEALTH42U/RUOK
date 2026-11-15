@@ -75,7 +75,7 @@ Notas:
 | **Mock**                         | `VITE_USE_MOCKS=true npm run dev`, o `?mocks=1` en la URL (se recuerda; `?mocks=0` lo quita) | Todo el front funciona contra una API simulada en memoria. Banner amarillo **"DATOS DE EJEMPLO"**                                                                                                                                         |
 | **Fallback** (plan B de la demo) | `VITE_MOCK_FALLBACK=true`                                                                    | Si el servidor no responde, **solo las lecturas** usan mocks y aparece el banner. **Las escrituras nunca se simulan**: lanzan `NetworkError`; el formulario conserva los datos para reintentar (guardado persistente en IndexedDB: FE-11) |
 
-- **Datos:** `src/api/mocks/fixtures.gen.ts` lo genera `npm run gen:mocks`, que llama a cada endpoint del backend con su `TestClient`: el catálogo sale de los JSON reales (`backend/app/data/`) y el resto, mientras no esté implementado, de `backend/app/stubs.py`. Cada fixture lleva su tipo (`: Schema<'Assessment'>`), así que **si el contrato cambia y los mocks no encajan, `npm run build` falla**. No se edita a mano. La salida es **determinista** (reloj congelado en el script), así que solo cambia cuando cambian los datos.
+- **Datos:** `src/api/mocks/fixtures.gen.ts` lo genera `npm run gen:mocks`, que llama a cada endpoint del backend con su `TestClient`: todos los datos salen de los endpoints reales sobre el seed de demo (catálogos de `backend/app/data/`). Cada fixture lleva su tipo (`: Schema<'Assessment'>`), así que **si el contrato cambia y los mocks no encajan, `npm run build` falla**. No se edita a mano. La salida es **determinista** (reloj congelado en el script), así que solo cambia cuando cambian los datos.
 - **Estado en memoria** (`handlers.ts`): las mediciones enviadas aparecen en el historial (idempotentes por UUID), los SOS se crean, escalan y resuelven, las tareas suman puntos, `/demo/link` y `/demo/fast-forward` funcionan. `POST /demo/reset` lo reinicia.
 - **El assessment de ejemplo** tiene los 7 sistemas con los 4 estados (`normal`, `warning`, `critical`, `unknown`), y el modo de escalado cambia según el entorno (`?env=`).
 - **Usuarios demo:** `vega` (member, Marte), `medic-mars`, `surgeon-mars` y `admin`, con cualquier contraseña.
@@ -150,7 +150,7 @@ frontend/
     └── pages/                 una página por ruta (CheckIn, Missions, Alerts y Ground aún son PagePlaceholder)
 ```
 
-Carpetas que aún no existen y que crean sus issues: `components/game/`. `offline/` tiene la identidad de dispositivo y la base IndexedDB (FE-30) y el outbox persistente con su sincronización (FE-11).
+`offline/` tiene la identidad de dispositivo y la base IndexedDB (FE-30) y el outbox persistente con su sincronización (FE-11).
 
 ## Rutas
 
@@ -333,7 +333,7 @@ Serie temporal de un indicador con Recharts, dentro de cada `IndicatorCard` del 
 - **Accesibilidad:** la gráfica es `aria-hidden` y debajo hay una tabla desplegable **"Ver datos (N)"** con todas las mediciones.
 - Estados de carga, error con reintento y "Sin mediciones en los últimos N días".
 
-Verificado con una serie sintética de 30 días (interceptando la petición en Chrome), porque el seed de 30 días (BE-07) aún no existe: con el seed real debería verse igual.
+Verificado con una serie sintética de 30 días (interceptando la petición en Chrome); el seed de BE-07 da series equivalentes.
 
 ## Historial (FE-09)
 

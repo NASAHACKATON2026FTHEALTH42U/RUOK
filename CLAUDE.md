@@ -16,7 +16,7 @@ Toda la documentación está en [`docs/`](docs/README.md). **Léela antes de dis
 |---|---|---|
 | `backend/` | Python 3.11+, FastAPI, SQLModel, SQLite (WAL), pytest | `cd backend && uv run uvicorn app.main:app --reload` · `uv run pytest` |
 | `frontend/` | React 18 + Vite 6 + TS, Tailwind 4, React Router 6, Zustand, Recharts, Framer Motion, idb, openapi-fetch, Vitest | `cd frontend && npm run dev` · `npm run lint` · `npm run build` · `npm test` · `npm run format` · `npm run gen:api` · `npm run gen:mocks` |
-| Todo | docker-compose (**pendiente, BE-24**) | `docker compose up` (aún no existe) |
+| Todo | Makefile + docker-compose (BE-24): FastAPI sirve la API y el build del front en `:8000` | `make demo` · `make dev` · `make test` · `make lan` · `docker compose up` |
 | Backlog | `scripts/github/backlog.yaml` | `python3 scripts/github/create_issues.py [--dry-run]` |
 
 API en `http://localhost:8000/api/v1`, con Swagger en `/docs`. El front corre en `http://localhost:5173`.
