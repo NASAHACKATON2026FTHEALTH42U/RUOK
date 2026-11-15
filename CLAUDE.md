@@ -38,7 +38,7 @@ API en `http://localhost:8000/api/v1`, con Swagger en `/docs`. El front corre en
 ## Convenciones
 - **Idioma:** UI y docs en español; código, identificadores y commits en inglés o español, pero de forma coherente dentro de cada archivo. Los IDs de configuración son slugs en inglés (`mars`, `heart_rate`).
 - **Recurso genérico `members`.** El texto visible sale de `environment.vocabulary` (astronauta, paciente, residente). Nunca se escribe "astronauta" fijo en un componente.
-- **Nunca hagas commit ni push directo a `main`.** Trabaja siempre en una rama y entra por PR. `main` no está protegida técnicamente (repo privado en plan Free); la regla es por convención (ver `LEEME.txt` y `docs/team-and-schedule.md`). Tampoco se mergea una PR con la CI en rojo.
+- **Nunca hagas commit ni push directo a `main`.** Trabaja siempre en una rama y entra por PR. `main` está protegida en GitHub (repo público): PR obligatoria y los 3 checks de la CI en verde (ver `LEEME.txt` y `docs/team-and-schedule.md`). Tampoco se mergea una PR con la CI en rojo.
 - **Ramas:** `feat/<area>-<id>-<slug>` (por ejemplo `feat/be-08-assessment-engine`). PR pequeñas a `main` con `Closes #n`. Commits con el ID de la issue (`BE-08: ...`).
 - **Backend:**
   - routers delgados y lógica en `services/`;

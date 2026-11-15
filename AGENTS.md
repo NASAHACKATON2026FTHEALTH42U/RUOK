@@ -8,8 +8,8 @@ Este archivo aplica a **cualquier agente de IA** que trabaje en este repo. Las i
 - **Documentación:** [`docs/README.md`](docs/README.md).
 - **Contrato de la API:** [`docs/api-contract.md`](docs/api-contract.md).
 
-## 🚫 Regla de git obligatoria (protección de `main` por convención)
-`main` **no está protegida técnicamente**: el repo es privado y GitHub Free no permite proteger ramas (HTTP 403). La protección depende de que humanos y agentes la respeten. **Un agente NUNCA debe:**
+## 🚫 Regla de git obligatoria (`main` está protegida)
+`main` **tiene protección de rama** en GitHub (repo público desde el 15/11): todo entra por PR y solo se mergea con los 3 checks de la CI en verde. Aun así, **un agente NUNCA debe:**
 - hacer `commit` o `push` directo a `main`;
 - hacer `push --force` a `main` ni borrarla;
 - mergear una PR con la CI en rojo o pendiente, o sin aprobación humana;

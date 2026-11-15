@@ -19,7 +19,7 @@
 
 | Componente | Issues | Qué hay |
 |---|---|---|
-| ⚙️ Setup | FS-01, BE-01, FE-01, FS-05, BE-24 | Monorepo, CI con 3 jobs, `make demo` y `docker compose up` (FastAPI sirve la API y el build del front en un puerto) |
+| ⚙️ Setup | FS-01, BE-01, FE-01, FS-05, BE-24 | Monorepo, **repo público con `main` protegida** (PR obligatoria y CI en verde), CI con 3 jobs, `make demo` y `docker compose up` (FastAPI sirve la API y el build del front en un puerto) |
 | 📜 Contrato | FS-02, FS-03, FS-04 | Contrato en [`api-contract.md`](api-contract.md), schemas Pydantic, tipos TS generados (`npm run gen:api`), cliente tipado y **modo mock completo** (`?mocks=1`) generado desde la API real |
 | 🗄️ BD | BE-02, BE-07 | 16 tablas SQLModel, SQLite en WAL, **seed determinista** de 30 días y escenarios de demo (`mars_sleep_bp`, `eva_no_contact`, `geriatric_fall_risk`) |
 | 📚 Config | BE-03, BE-04, BE-33, BE-34, CNT-01, CNT-02, CNT-03 | Catálogos JSON validados al arrancar: entornos, indicadores, sistemas, protocolos, intervenciones, tipos de tarea, insignias. Umbrales y textos con fuente en [`sources.md`](sources.md) |

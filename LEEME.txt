@@ -18,10 +18,9 @@ Kanban (GitHub Project): https://github.com/orgs/NASAHACKATON2026FTHEALTH42U/pro
 
   >>> NUNCA hagas push directo a main. <<<
 
-  El repo es privado y con el plan Free de GitHub NO se puede bloquear main.
-  La protección es por CONVENCIÓN: depende de que todos la cumplamos.
-  (Cuando el repo pase a público para el envío de Space Apps, se activará
-  la protección automática y todo esto quedará forzado por GitHub.)
+  Desde el 15/11 el repo es público y GitHub BLOQUEA el push directo a main:
+  todo entra por PR y solo se puede mergear con los 3 checks de la CI en verde.
+  El force-push y el borrado de main también están bloqueados.
 
   Flujo:
     1. Coge una issue de tu área (ver sección 3) y asígnatela.
