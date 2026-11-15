@@ -20,7 +20,7 @@ from datetime import timedelta
 
 from sqlmodel import Session, col, select
 
-from app import clock, models
+from app import clock, i18n, models
 from app.schemas import AlertIn, RuokResult
 from app.schemas.common import AlertStatus, EventType, Liveness, Status
 from app.services import alerts, control, environments, events
@@ -80,7 +80,8 @@ def check_member(session: Session, member: models.Member) -> models.Alert | None
         origin="auto",
         category="no_contact",
         severity="critical",
-        message=f"Sin contacto con {member.name} desde las {since} UTC",
+        # En español en la BD; `alerts.localized_message` lo traduce al leerlo (FE-38).
+        message=alerts.NO_CONTACT_MESSAGE.format(name=member.name, since=since),
         level=0,
         target_role=env.escalation_ladder[0],
         delivery_mode="realtime",
@@ -94,7 +95,9 @@ def check_member(session: Session, member: models.Member) -> models.Alert | None
         session, alert, "created",
         category="no_contact", liveness=live.value, timed_out=timed_out,
     )
-    events.emit_alert(session, alert, EventType.alert_created, "Sin contacto con el member")
+    events.emit_alert(
+        session, alert, EventType.alert_created, i18n.tr("Sin contacto con el member")
+    )
     to_level = alerts.target_level(Status.critical, env)  # crew al instante, ground por el enlace
     alerts._escalate(session, alert, to_level, Status.critical, env)
     check.alert_id = alert.id
@@ -138,13 +141,13 @@ def answer_ruok(
     open_no_contact = alerts.open_alert(session, no_contact_key(member.id))
     if ok:
         if open_no_contact is not None:
-            alerts.resolve(session, open_no_contact, "member", "Respondió 'Estoy bien'")
+            alerts.resolve(session, open_no_contact, "member", alerts.RUOK_OK_NOTE)
     else:
         body = AlertIn(
             id=uuid.uuid5(NAMESPACE, f"ruok:{member.id}:{now.isoformat()}"),
             category="symptom",
             severity="critical",
-            message="Ha respondido 'Necesito ayuda' al R U OK?" + (f": {note}" if note else ""),
+            message=alerts.RUOK_HELP_MESSAGE + (f": {note}" if note else ""),
         )
         alert, _ = alerts.create_manual(session, member, body)
         alert_id = alert.id

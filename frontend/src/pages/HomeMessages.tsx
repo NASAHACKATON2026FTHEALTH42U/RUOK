@@ -18,6 +18,7 @@ import { pendingHomeMessages, sendHomeMessage, useOutboxStore } from '../offline
 import { useEnvironmentStore } from '../store/environment'
 import { NoMemberSelected } from '../components/ui/NoMemberSelected'
 import { AutoTextarea } from '../components/ui/AutoTextarea'
+import { useT } from '../i18n/t'
 
 /** Clase del color de cada tono. El estado nunca va solo con color: lleva icono y texto. */
 const TONE_CLASS: Record<Tone, string> = {
@@ -45,6 +46,7 @@ export default function HomeMessages() {
   const envId = useEnvironmentStore((s) => s.envId)
   const messages = useHomeMessages(memberId, envId)
   const link = useLink(envId, 5_000)
+  const t = useT()
 
   const [local, setLocal] = useState<LocalMessage[]>([])
   const [draft, setDraft] = useState('')
@@ -59,7 +61,7 @@ export default function HomeMessages() {
       const sum = await getStatusSummary(memberId, period)
       setDraft((d) => (d.trim() ? `${d.trim()}\n\n${sum.text}` : sum.text).slice(0, MAX_LENGTH))
     } catch {
-      setError('no se ha podido preparar el resumen (sin conexión con el servidor)')
+      setError(t('no se ha podido preparar el resumen (sin conexión con el servidor)'))
     } finally {
       setSummaryBusy(false)
     }
@@ -100,7 +102,7 @@ export default function HomeMessages() {
 
   const title = (
     <header className="shrink-0">
-      <h1 className="text-2xl font-semibold">Mensaje a casa</h1>
+      <h1 className="text-2xl font-semibold">{t('Mensaje a casa')}</h1>
     </header>
   )
 
@@ -118,12 +120,14 @@ export default function HomeMessages() {
   const linkText = describeLink(linkData)
   const linkTone = !linkData ? 'text-st-none' : linkData.state === 'los' ? 'text-st-warn' : ''
   const hint = !linkData
-    ? 'No se sabe cómo está el enlace. Puedes escribir: el mensaje saldrá cuando se pueda.'
+    ? t('No se sabe cómo está el enlace. Puedes escribir: el mensaje saldrá cuando se pueda.')
     : linkData.state === 'los'
-      ? 'Ahora no hay enlace con casa. Lo que escribas se queda en cola y sale en cuanto vuelva.'
+      ? t('Ahora no hay enlace con casa. Lo que escribas se queda en cola y sale en cuanto vuelva.')
       : linkData.delay_s > 0
-        ? `Cada mensaje tarda ${formatDelay(linkData.delay_s)} en llegar, y la respuesta otro tanto en volver.`
-        : 'El enlace va en directo: los mensajes llegan al momento.'
+        ? t('Cada mensaje tarda {delay} en llegar, y la respuesta otro tanto en volver.', {
+            delay: formatDelay(linkData.delay_s),
+          })
+        : t('El enlace va en directo: los mensajes llegan al momento.')
 
   const text = cleanText(draft)
   const send = async () => {
@@ -148,15 +152,15 @@ export default function HomeMessages() {
       {title}
 
       <section
-        aria-label="Conversación con casa"
+        aria-label={t('Conversación con casa')}
         className="hud-panel flex min-h-0 flex-1 flex-col"
       >
         <div className="hud-panel-head shrink-0">
-          Conversación
+          {t('Conversación')}
           {/* El chip ya lleva su cuadrito: el estado lo dice el texto, no solo el color. */}
           <span
             role="status"
-            title={`Enlace con casa: ${linkText.long}`}
+            title={t('Enlace con casa: {state}', { state: linkText.long })}
             className={`hud-chip mr-[22px] ${linkTone}`}
           >
             {linkText.short}
@@ -167,30 +171,30 @@ export default function HomeMessages() {
         </p>
 
         {messages.state === 'loading' && (
-          <p className="px-3.5 py-3 text-sm text-env-muted">Cargando la conversación…</p>
+          <p className="px-3.5 py-3 text-sm text-env-muted">{t('Cargando la conversación…')}</p>
         )}
         {messages.state === 'error' && thread.length === 0 && (
           <p role="alert" className="px-3.5 py-3 text-sm">
-            No se ha podido cargar la conversación.{' '}
+            {t('No se ha podido cargar la conversación.')}{' '}
             <button type="button" onClick={messages.retry} className="underline">
-              Reintentar
+              {t('Reintentar')}
             </button>
           </p>
         )}
         {messages.state === 'ready' && messages.refreshFailed && (
           <p role="status" className="shrink-0 px-3.5 pt-2 text-xs text-st-none">
-            Sin conexión con el servidor de a bordo: la conversación puede estar desfasada.
+            {t('Sin conexión con el servidor de a bordo: la conversación puede estar desfasada.')}
           </p>
         )}
         {messages.state === 'ready' && thread.length === 0 && (
           <p className="px-3.5 py-6 text-center text-sm text-env-muted">
-            Aún no has escrito a casa. Cuéntales cómo va el día.
+            {t('Aún no has escrito a casa. Cuéntales cómo va el día.')}
           </p>
         )}
 
         {/* Sin aria-live: la cuenta atrás cambia cada segundo y un lector la repetiría entera. */}
         <ol
-          aria-label="Mensajes"
+          aria-label={t('Mensajes')}
           className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-3.5 py-3"
         >
           {thread.map((m) => (
@@ -209,9 +213,9 @@ export default function HomeMessages() {
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <label htmlFor="home-message" className="hud-label">
-            Tu mensaje
+            {t('Tu mensaje')}
           </label>
-          <div role="group" aria-label="Añadir un resumen" className="flex gap-1.5">
+          <div role="group" aria-label={t('Añadir un resumen')} className="flex gap-1.5">
             {(
               [
                 ['day', 'Resumen de hoy'],
@@ -225,7 +229,7 @@ export default function HomeMessages() {
                 onClick={() => void addSummary(period)}
                 className="min-h-9 border border-env-border px-3 text-sm text-env-muted hover:border-env-text hover:text-env-text disabled:opacity-50"
               >
-                {label}
+                {t(label)}
               </button>
             ))}
           </div>
@@ -243,12 +247,12 @@ export default function HomeMessages() {
           }}
           maxLength={MAX_LENGTH}
           rows={2}
-          placeholder="Escribe a casa…"
+          placeholder={t('Escribe a casa…')}
           className={`hud-input !py-2.5 !font-sans !text-[0.9375rem] leading-snug ${focusRing}`}
         />
         {error && (
           <p role="alert" className="text-sm text-st-crit">
-            No se ha podido guardar: {error}
+            {t('No se ha podido guardar: {error}', { error })}
           </p>
         )}
         <div className="flex items-center gap-3">
@@ -260,7 +264,7 @@ export default function HomeMessages() {
             disabled={!text || busy}
             className="hud-btn hud-btn-primary ml-auto !h-11 min-w-[9.5rem]"
           >
-            {busy ? 'Enviando…' : 'Enviar'}
+            {busy ? t('Enviando…') : t('Enviar')}
           </button>
         </div>
       </form>
@@ -271,6 +275,7 @@ export default function HomeMessages() {
 /** Un mensaje del hilo: los míos a la derecha, las respuestas de casa a la izquierda. */
 function Bubble({ item, now }: { item: ThreadItem; now: Date }) {
   const mine = item.direction === 'up'
+  const t = useT()
   const state = describeState(item, now)
   const inTransit = item.state === 'in_transit' && item.eta !== null
   return (
@@ -282,7 +287,7 @@ function Bubble({ item, now }: { item: ThreadItem; now: Date }) {
       }`}
     >
       <p className="hud-label mb-1">
-        {mine ? 'Tú' : (item.sender ?? 'Casa')} · {hhmm(item.sentAt)}
+        {mine ? t('Tú') : (item.sender ?? t('Casa'))} · {hhmm(item.sentAt)}
       </p>
       <p className="text-[0.9375rem] leading-snug break-words whitespace-pre-wrap text-env-text">
         {item.text}
@@ -296,7 +301,7 @@ function Bubble({ item, now }: { item: ThreadItem; now: Date }) {
       {inTransit && (
         <span
           role="progressbar"
-          aria-label="Viaje del mensaje"
+          aria-label={t('Viaje del mensaje')}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(transitProgress(item.sentAt, item.eta!, now) * 100)}

@@ -28,7 +28,7 @@ from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, col, select
 
-from app import clock, models
+from app import clock, i18n, models
 from app.schemas import Task as TaskOut
 from app.schemas import TaskCompleteIn, TaskType
 from app.schemas.common import EventType
@@ -184,7 +184,11 @@ def _add_completion(
     session.add(row)
     events.emit(
         session, EventType.task_completed, env_id=member.env_id, member_id=member.id,
-        ref_id=task.id, summary=f"{member.name} completó «{task.title}» (+{task.points})",
+        ref_id=task.id,
+        summary=i18n.tr(
+            "{name} completó «{title}» (+{points})",
+            name=member.name, title=localized_title(task), points=task.points,
+        ),
         payload={"task_id": task.id, "task_type": task.task_type, "points": task.points,
                  "date": task.date.isoformat(), "auto": auto},
     )
@@ -283,7 +287,7 @@ def _find_task(session: Session, member: models.Member, tid: str) -> models.Task
                 ensure_tasks(session, member, day)
                 task = session.get(models.Task, tid)
     if task is None or task.member_id != member.id:
-        raise TaskNotFound(f"Tarea desconocida: {tid}")
+        raise TaskNotFound(i18n.tr("Tarea desconocida: {id}", id=tid))
     return task
 
 
@@ -304,7 +308,9 @@ def _complete(session: Session, member: models.Member, tid: str, body: TaskCompl
     previous = session.get(models.TaskCompletion, cid)
     if previous is not None:
         if previous.task_id != task.id:
-            raise CompletionConflict(f"El completado {cid} ya se usó para otra tarea")
+            raise CompletionConflict(
+                i18n.tr("El completado {id} ya se usó para otra tarea", id=cid)
+            )
         session.commit()
         return False
     if _completions(session, [task.id]):
@@ -318,11 +324,41 @@ def _complete(session: Session, member: models.Member, tid: str, body: TaskCompl
     return True
 
 
+_PROTOCOL_PREFIX = "Protocolo: "
+_REPEAT_SUFFIX = re.compile(r"^(.*?)( \(\d+/\d+\))$")
+
+
+def localized_title(task: models.Task) -> str:
+    """Título de la tarea en el idioma de la petición (FE-38).
+
+    En la BD se guarda en español al generarla. En inglés se rehace con la capa
+    `task_types` (manteniendo el sufijo `(n/N)`) o, para un protocolo («Protocolo: <título de
+    la intervención>»), con el título traducido de la intervención. Si el título guardado ya no
+    coincide con el catálogo, se devuelve tal cual.
+    """
+    if i18n.lang() == "es":
+        return task.title
+    if task.task_type == "protocol" and task.title.startswith(_PROTOCOL_PREFIX):
+        es_title = task.title[len(_PROTOCOL_PREFIX) :]
+        item = next((i for i in catalog.list_interventions() if i.title == es_title), None)
+        if item is None:
+            return task.title
+        return f"Protocol: {catalog.localized_intervention(item).title}"
+    tt = task_type(task.task_type)
+    if tt is None:
+        return task.title
+    match = _REPEAT_SUFFIX.match(task.title)
+    base, suffix = (match.group(1), match.group(2)) if match else (task.title, "")
+    if base != tt.title:
+        return task.title
+    return i18n.localized("task_types", tt.id, tt).title + suffix
+
+
 def to_schema(task: models.Task, completed: bool) -> TaskOut:
     return TaskOut(
         id=task.id,
         task_type=task.task_type,
-        title=task.title,
+        title=localized_title(task),
         points=task.points,
         due=task.due,
         completed=completed,

@@ -1,3 +1,4 @@
+import { useT } from '../../i18n/t'
 import { Icon } from '../ui/Icon'
 
 const KEY =
@@ -12,16 +13,21 @@ export function NumericKeypad({
   onKey,
   decimal,
   disabled = false,
-  label = 'Teclado numérico',
+  label,
 }: {
   onKey: (key: string) => void
   decimal: boolean
   disabled?: boolean
   label?: string
 }) {
+  const t = useT()
   const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', decimal ? ',' : 'clear', '0', 'back']
   return (
-    <div role="group" aria-label={label} className="grid grid-cols-3 gap-1.5 md:gap-2">
+    <div
+      role="group"
+      aria-label={label ?? t('Teclado numérico')}
+      className="grid grid-cols-3 gap-1.5 md:gap-2"
+    >
       {keys.map((k) => (
         <button
           key={k}
@@ -31,16 +37,16 @@ export function NumericKeypad({
           onClick={() => onKey(k)}
           aria-label={
             k === 'back'
-              ? 'Borrar el último dígito'
+              ? t('Borrar el último dígito')
               : k === 'clear'
-                ? 'Vaciar'
+                ? t('Vaciar')
                 : k === ','
-                  ? 'Coma decimal'
+                  ? t('Coma decimal')
                   : undefined
           }
           className={`${KEY} ${k === 'clear' ? '!text-sm tracking-wide text-env-muted uppercase' : ''}`}
         >
-          {k === 'back' ? <Icon name="backspace" size={26} /> : k === 'clear' ? 'Vaciar' : k}
+          {k === 'back' ? <Icon name="backspace" size={26} /> : k === 'clear' ? t('Vaciar') : k}
         </button>
       ))}
     </div>

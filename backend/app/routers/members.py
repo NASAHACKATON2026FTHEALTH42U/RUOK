@@ -11,7 +11,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session
 
-from app import models
+from app import i18n, models
 from app.db import get_session
 from app.routers.deps import (
     ERRORS_404,
@@ -62,7 +62,7 @@ router = APIRouter(dependencies=[AuthDep], responses={**ERRORS_AUTH, **ERRORS_40
 def _member(session: Session, member_id: int) -> models.Member:
     m = members.get_member(session, member_id)
     if m is None:
-        raise HTTPException(404, f"Member desconocido: {member_id}")
+        raise HTTPException(404, i18n.tr("Member desconocido: {id}", id=member_id))
     return m
 
 
@@ -77,7 +77,7 @@ def _member(session: Session, member_id: int) -> models.Member:
 )
 def list_members(env_id: Slug, session: SessionDep) -> list[MemberSummary]:
     if environments.get_environment(env_id) is None:
-        raise HTTPException(404, f"Entorno desconocido: {env_id}")
+        raise HTTPException(404, i18n.tr("Entorno desconocido: {id}", id=env_id))
     return [members.to_summary(session, m) for m in members.list_by_env(session, env_id)]
 
 
@@ -157,7 +157,7 @@ def list_measurements(
 ) -> list[Measurement]:
     _member(session, member_id)
     if from_ and to and measurements.as_utc(from_) > measurements.as_utc(to):
-        raise HTTPException(422, "`from` no puede ser posterior a `to`")
+        raise HTTPException(422, i18n.tr("`from` no puede ser posterior a `to`"))
     rows = measurements.list_series(session, member_id, indicator_id, from_, to)
     return [measurements.to_schema(r) for r in rows]
 
@@ -182,7 +182,7 @@ def get_assessment(
         # Detalles conductuales según quién consulta (BE-20 + BE-27).
         return for_viewer(session, assess_member(session, m, env), m, user)
     except UnknownEnvironment as exc:
-        raise HTTPException(404, f"Entorno desconocido: {exc}") from exc
+        raise HTTPException(404, i18n.tr("Entorno desconocido: {id}", id=exc)) from exc
 
 
 @router.get(
@@ -209,11 +209,12 @@ def get_forecast(
     m = _member(session, member_id)
     indicator = catalog.get_indicator(indicator_id)
     if indicator is None:
-        raise HTTPException(404, f"Indicador desconocido: {indicator_id}")
+        raise HTTPException(404, i18n.tr("Indicador desconocido: {id}", id=indicator_id))
     # Privacidad conductual (BE-20 + BE-27): la previsión delata los valores.
     if behavioral.is_private(indicator_id) and not can_view_behavioral(session, m, user):
-        raise HTTPException(403, "Los detalles conductuales de este member son privados")
-    return forecast.forecast_member(session, m, indicator, horizon_days)
+        raise HTTPException(403, i18n.tr("Los detalles conductuales de este member son privados"))
+    out = forecast.forecast_member(session, m, indicator, horizon_days)
+    return out.model_copy(update={"unit": catalog.localized_unit(indicator_id, out.unit)})
 
 
 @router.post(

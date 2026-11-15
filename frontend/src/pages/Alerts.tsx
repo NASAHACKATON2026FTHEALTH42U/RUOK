@@ -23,6 +23,7 @@ import { OperatorMessageButton } from '../components/control/OperatorMessageForm
 import { ScrollHint } from '../components/ui/ScrollHint'
 import { revealSection } from '../components/ui/scroll'
 import { useVocab } from '../environments/useVocab'
+import { useT } from '../i18n/t'
 import { formatAgo } from '../lib/time'
 import { useEnvironmentStore } from '../store/environment'
 
@@ -32,6 +33,7 @@ import { useEnvironmentStore } from '../store/environment'
  * Se refresca cada 10 s; el tiempo real (y la vibración en la tablet del médico) es FE-29.
  */
 export default function Alerts() {
+  const t = useT()
   const vocab = useVocab()
   const { role, can } = useAuth()
   const memberId = useActiveMemberId()
@@ -69,16 +71,16 @@ export default function Alerts() {
     />
   )
 
-  const title = <h1 className="text-2xl font-semibold">Alertas</h1>
+  const title = <h1 className="text-2xl font-semibold">{t('Alertas')}</h1>
 
   if (role === 'responder' || role === 'psych') {
     return (
       <section className="space-y-2">
         {title}
         <p className="text-env-muted">
-          Las alertas que te ha entregado el enlace están en la{' '}
+          {t('Las alertas que te ha entregado el enlace están en la')}{' '}
           <Link to="/ground" className="underline hover:text-env-text">
-            consola
+            {t('consola')}
           </Link>
           .
         </p>
@@ -103,7 +105,7 @@ export default function Alerts() {
           />
         ) : (
           <p className="text-env-muted">
-            Elige primero a quién quieres ver en{' '}
+            {t('Elige primero a quién quieres ver en')}{' '}
             <Link to="/members" className="underline hover:text-env-text">
               {vocab.crew}
             </Link>
@@ -142,9 +144,9 @@ export default function Alerts() {
             title={categoryLabel(a.category)}
             status={sev.status}
             severityLabel={sev.label}
-            state={`${statusLabel(a.status)} · ${a.origin === 'auto' ? 'Automática' : 'Manual'}`}
+            state={`${statusLabel(a.status)} · ${a.origin === 'auto' ? t('Automática') : t('Manual')}`}
             ago={formatAgo(a.created_at, now)}
-            target={`a ${roleLabel(a.target_role, vocab)}`}
+            target={t('a {role}', { role: roleLabel(a.target_role, vocab) })}
           />
         </button>
       </li>
@@ -162,22 +164,24 @@ export default function Alerts() {
       {alerts.state === 'loading' && <div className="h-32 animate-pulse  bg-env-surface" />}
       {alerts.state === 'error' && (
         <p className="text-env-muted">
-          No se han podido cargar las alertas.{' '}
+          {t('No se han podido cargar las alertas.')}{' '}
           <button type="button" onClick={alerts.retry} className="underline">
-            Reintentar
+            {t('Reintentar')}
           </button>
         </p>
       )}
       {alerts.refreshFailed && (
         <p role="status" className="text-sm text-env-muted">
-          ⚠ No se pudo actualizar: puede haber cambios que no se ven.
+          ⚠ {t('No se pudo actualizar: puede haber cambios que no se ven.')}
         </p>
       )}
       {alerts.state === 'ready' && list.length === 0 && (
         <p className="text-env-muted">
           {operator
-            ? 'No hay alertas.'
-            : 'No hay alertas. En una emergencia, pulsa SOS; para lo demás, «Enviar aviso a control».'}
+            ? t('No hay alertas.')
+            : t(
+                'No hay alertas. En una emergencia, pulsa SOS; para lo demás, «Enviar aviso a control».',
+              )}
         </p>
       )}
 
@@ -191,7 +195,7 @@ export default function Alerts() {
             className="hud-panel flex max-h-[45dvh] min-h-0 flex-col md:max-h-full"
           >
             <h2 id="alerts-list-title" className="hud-panel-head">
-              Abiertas
+              {t('Abiertas')}
               <span className="mr-2.5 ml-auto tracking-normal text-env-muted normal-case">
                 {open.length}
               </span>
@@ -201,9 +205,11 @@ export default function Alerts() {
               className="min-h-0 flex-1 overflow-y-auto [scrollbar-color:var(--env-border)_transparent]"
             >
               {open.length === 0 && (
-                <p className="px-3.5 py-3 text-sm text-env-muted">No hay alertas abiertas.</p>
+                <p className="px-3.5 py-3 text-sm text-env-muted">
+                  {t('No hay alertas abiertas.')}
+                </p>
               )}
-              <ul className="divide-y divide-env-border/60" aria-label="Alertas abiertas">
+              <ul className="divide-y divide-env-border/60" aria-label={t('Alertas abiertas')}>
                 {open.map(row)}
               </ul>
               {resolved.length > 0 && (
@@ -218,7 +224,7 @@ export default function Alerts() {
                     className="flex w-full items-center justify-between gap-2 min-h-11 px-3.5 py-2.5 text-left text-sm text-env-muted hover:text-env-text"
                   >
                     <span>
-                      {showResolved ? '▾' : '▸'} Resueltas ({resolved.length})
+                      {showResolved ? '▾' : '▸'} {t('Resueltas ({n})', { n: resolved.length })}
                     </span>
                     {operator && (
                       <Link
@@ -226,12 +232,15 @@ export default function Alerts() {
                         onClick={(e) => e.stopPropagation()}
                         className="underline hover:text-env-text"
                       >
-                        Registro
+                        {t('Registro')}
                       </Link>
                     )}
                   </button>
                   {showResolved && (
-                    <ul className="divide-y divide-env-border/60" aria-label="Alertas resueltas">
+                    <ul
+                      className="divide-y divide-env-border/60"
+                      aria-label={t('Alertas resueltas')}
+                    >
                       {resolved.map(row)}
                     </ul>
                   )}
@@ -248,10 +257,10 @@ export default function Alerts() {
                     }}
                     className="flex min-h-11 w-full items-center gap-2 px-3.5 py-2.5 text-left text-sm text-env-muted hover:text-env-text"
                   >
-                    {showNotes ? '▾' : '▸'} Notificaciones ({notes.length})
+                    {showNotes ? '▾' : '▸'} {t('Notificaciones ({n})', { n: notes.length })}
                   </button>
                   {showNotes && (
-                    <ul className="divide-y divide-env-border/60" aria-label="Notificaciones">
+                    <ul className="divide-y divide-env-border/60" aria-label={t('Notificaciones')}>
                       {notes.map((n) => {
                         const p = n.payload as {
                           title?: string | null
@@ -272,21 +281,21 @@ export default function Alerts() {
                             style={{ boxShadow: `inset 3px 0 0 ${tone}` }}
                           >
                             <span className="flex items-baseline justify-between gap-3">
-                              <span className="font-medium">{p.title || 'Notificación'}</span>
+                              <span className="font-medium">{p.title || t('Notificación')}</span>
                               <span
                                 className="shrink-0 text-[0.6875rem] font-semibold tracking-[0.12em] uppercase"
                                 style={{ color: tone }}
                               >
                                 {p.level === 'critical'
-                                  ? 'Importante'
+                                  ? t('Importante')
                                   : p.level === 'warning'
-                                    ? 'Aviso'
-                                    : 'Información'}
+                                    ? t('Aviso')
+                                    : t('Información')}
                               </span>
                             </span>
                             {p.text && <span className="text-sm">{p.text}</span>}
                             <span className="text-xs text-env-muted">
-                              {p.from_name ? `De ${p.from_name} · ` : ''}
+                              {p.from_name ? `${t('De {name}', { name: p.from_name })} · ` : ''}
                               {formatAgo(n.at, now)}
                             </span>
                           </li>
@@ -301,7 +310,7 @@ export default function Alerts() {
           </section>
           {current && (
             <section
-              aria-label="Detalle del aviso"
+              aria-label={t('Detalle del aviso')}
               className="hud-panel min-h-0 overflow-y-auto p-4 [scrollbar-color:var(--env-border)_transparent] md:max-h-full"
             >
               {current.system_id && (

@@ -155,14 +155,26 @@ def _load(name: str) -> list[dict]:
 
 
 def _front_dictionary() -> dict[str, str]:
-    """Diccionario español → inglés del front (src/i18n/en/*.ts), leído sin ejecutar TS."""
-    pair = re.compile(r"""^\s*(['"])(.+?)\1\s*:\s*(['"])(.+?)\3,?\s*$""")
+    """Diccionario español → inglés del front (src/i18n/en/*.ts). Se evalúa con Node quitando
+    el tipo (`Record<string, string>`): así valen las entradas en varias líneas y las claves sin
+    comillas."""
+    import subprocess
+
     out: dict[str, str] = {}
     for f in sorted(FRONT_DICTS.glob("*.ts")):
-        for line in f.read_text(encoding="utf-8").splitlines():
-            m = pair.match(line)
-            if m:
-                out[m.group(2).replace("\\'", "'")] = m.group(4).replace("\\'", "'")
+        if f.name == "index.ts":
+            continue
+        source = f.read_text(encoding="utf-8")
+        body = re.sub(r"export const \w+\s*:\s*Record<string,\s*string>\s*=", "const d =", source)
+        js = body + "\nprocess.stdout.write(JSON.stringify(d))"
+        try:
+            run = subprocess.run(
+                ["node", "--input-type=module", "-e", js],
+                capture_output=True, text=True, check=True,
+            )
+            out.update(json.loads(run.stdout))
+        except (OSError, subprocess.CalledProcessError, json.JSONDecodeError) as err:
+            print(f"  ! no se ha podido leer {f.name}: {err}")
     return out
 
 

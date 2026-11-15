@@ -1,4 +1,5 @@
 import type { Schema } from '../../api/client'
+import { translate } from '../../i18n/t'
 
 export type Status = Schema<'Status'>
 export type Liveness = Schema<'Liveness'>
@@ -49,7 +50,8 @@ const STYLES: Record<DisplayState, StatusStyle> = {
 
 /** Estilo de un estado. `unknown`, `stale` y `lost` nunca son verdes. */
 export function statusStyle(state: DisplayState): StatusStyle {
-  return STYLES[state]
+  const style = STYLES[state]
+  return { ...style, label: translate(style.label) }
 }
 
 /** Liveness que hay que señalar, o `null` si el dispositivo está activo. */

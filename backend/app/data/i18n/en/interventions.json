@@ -1,0 +1,164 @@
+{
+  "int_reach_out": {
+    "title": "Talk to someone you trust",
+    "steps": [
+      "Think of someone you feel comfortable with: someone on the team, someone at home or the psychological support service",
+      "Tell them how you have been feeling lately, without needing to go into detail",
+      "If you would rather do it privately, use “I need to talk”: it goes through a confidential channel",
+      "If the discomfort lasts for several days, ask for professional support"
+    ]
+  },
+  "int_box_breathing": {
+    "title": "Box breathing",
+    "steps": [
+      "Sit comfortably and relax your shoulders",
+      "Inhale through your nose for 4 seconds",
+      "Hold your breath for 4 seconds",
+      "Exhale through your mouth for 4 seconds",
+      "Hold your lungs empty for 4 seconds",
+      "Repeat for 4 cycles"
+    ]
+  },
+  "int_cbt_reframe": {
+    "title": "Reframing thoughts (brief CBT)",
+    "steps": [
+      "Write down the situation that worries you in one sentence",
+      "Note the automatic thought that comes to mind (“everything is going to go wrong”)",
+      "Look for evidence for and against that thought",
+      "Write down a more balanced alternative",
+      "Rate from 1 to 5 how you feel before and after"
+    ]
+  },
+  "int_journal": {
+    "title": "5-minute journal",
+    "steps": [
+      "Write down three things that went well today, however small",
+      "Note one thing you found hard and how you handled it",
+      "Write down something you would like to do tomorrow",
+      "The journal stays on this device: it is not shared"
+    ]
+  },
+  "int_connect_crew": {
+    "title": "Time with the team or with family",
+    "steps": [
+      "Suggest a shared activity: a meal, a game or a film",
+      "Or record a message for someone at home",
+      "Share something about your day, even briefly",
+      "When you finish, do your check-in and compare how you feel"
+    ]
+  },
+  "int_sleep_light": {
+    "title": "Sleep hygiene and light",
+    "steps": [
+      "Keep the same bedtime and wake-up time",
+      "Get bright light in the morning and dim light in the last hour of the day",
+      "Put screens away 30 minutes before bed",
+      "Avoid caffeine in the 6 hours before going to bed",
+      "Try to sleep at least 7 hours"
+    ]
+  },
+  "int_movement_break": {
+    "title": "Active break",
+    "steps": [
+      "Stand up and stretch your neck, shoulders and back",
+      "Do 5 minutes of gentle exercise: squats, lunges or cycling",
+      "Finish with three slow breaths",
+      "Note your energy level before and after"
+    ]
+  },
+  "int_exercise_session": {
+    "title": "Resistance exercise session",
+    "steps": [
+      "Warm up for 5 minutes",
+      "Do resistance exercises for your legs, hips and back",
+      "Add some cardio (treadmill, bike or walking)",
+      "Log your exercise minutes when you finish"
+    ]
+  },
+  "int_bp_out_of_range": {
+    "title": "Blood pressure out of range: what to do while you wait for a response",
+    "steps": [
+      "Stop what you are doing and sit down with your back supported",
+      "Breathe slowly for 5 minutes, without talking",
+      "Measure again with your arm at heart level and log the value",
+      "If you notice chest pain, shortness of breath, blurred vision, weakness or difficulty speaking, call for emergency help now with the SOS button",
+      "Do not take any new medication unless the medical officer tells you to",
+      "If it stays out of range, measure again every 15 minutes and do not stay alone"
+    ]
+  },
+  "med_breath_awareness": {
+    "title": "Mindful breathing",
+    "steps": [
+      "Sit or lie down comfortably and let your body rest",
+      "Close your eyes or look at a fixed point for 10 seconds",
+      "Inhale through your nose for 4 seconds",
+      "Exhale slowly through your mouth for 6 seconds",
+      "Inhale through your nose for 4 seconds",
+      "Exhale slowly through your mouth for 6 seconds",
+      "Inhale through your nose for 4 seconds",
+      "Exhale slowly through your mouth for 6 seconds",
+      "Inhale through your nose for 4 seconds",
+      "Exhale slowly through your mouth for 6 seconds",
+      "Breathe at your own pace and notice the air coming in and out for 60 seconds",
+      "Slowly open your eyes when you are ready"
+    ]
+  },
+  "med_sounds": {
+    "title": "Focus on sounds",
+    "steps": [
+      "Choose a soundscape, get comfortable and close your eyes",
+      "Listen to the sound without judging it for 60 seconds",
+      "If your mind wanders, gently come back to the sound for 60 seconds",
+      "Notice the sound and your breathing at the same time for 60 seconds",
+      "Let the sound fade into the background and rest for 30 seconds",
+      "Slowly open your eyes when you are ready"
+    ]
+  },
+  "med_body_scan": {
+    "title": "Body scan",
+    "steps": [
+      "Lie down or sit comfortably and close your eyes",
+      "Bring your attention to your feet and notice how they feel for 30 seconds",
+      "Move up to your legs and release any tension you find for 30 seconds",
+      "Notice your belly and your back as you breathe for 40 seconds",
+      "Bring your attention to your chest and your breathing for 40 seconds",
+      "Relax your shoulders, arms and hands for 40 seconds",
+      "Relax your neck, jaw and face for 40 seconds",
+      "Feel your whole body at once, calm and supported, for 60 seconds",
+      "Slowly move your fingers and open your eyes when you are ready"
+    ]
+  },
+  "med_pmr": {
+    "title": "Progressive muscle relaxation",
+    "steps": [
+      "Sit comfortably with your back supported",
+      "Clench your fists tightly for 5 seconds",
+      "Let go all at once and notice the difference for 15 seconds",
+      "Raise your shoulders towards your ears for 5 seconds",
+      "Release them and let them drop for 15 seconds",
+      "Scrunch up your face and squeeze your eyes shut for 5 seconds",
+      "Let go and relax your forehead and jaw for 15 seconds",
+      "Tense your legs and point your toes for 5 seconds",
+      "Let go and let your legs feel heavy for 15 seconds",
+      "Breathe calmly and notice your whole body relaxed for 60 seconds"
+    ]
+  },
+  "med_sleep": {
+    "title": "Before bed",
+    "steps": [
+      "If you are going to sleep, select “Sleep” in Activity and lie down",
+      "Dim the lights and close your eyes for 10 seconds",
+      "Inhale slowly through your nose for 4 seconds",
+      "Exhale very slowly for 8 seconds",
+      "Inhale slowly through your nose for 4 seconds",
+      "Exhale very slowly for 8 seconds",
+      "Inhale slowly through your nose for 4 seconds",
+      "Exhale very slowly for 8 seconds",
+      "Inhale slowly through your nose for 4 seconds",
+      "Exhale very slowly for 8 seconds",
+      "Go over your day without judging it and let it go for 60 seconds",
+      "Notice how heavy your body feels on the bed for 60 seconds",
+      "Let the sound keep you company: there is nothing else you need to do"
+    ]
+  }
+}

@@ -4,6 +4,7 @@ import { userRoleLabel } from '../../auth/permissions'
 import { useSession } from '../../auth/session'
 import { capitalize, useVocab } from '../../environments/useVocab'
 import { useEnvironmentStore } from '../../store/environment'
+import { useT } from '../../i18n/t'
 import { initials, shortDisplayName } from './demoUsers'
 
 /**
@@ -14,6 +15,7 @@ import { initials, shortDisplayName } from './demoUsers'
  * - Resto de roles: el rol como nombre ("Oficial médico") y el entorno debajo.
  */
 export function UserIdentity() {
+  const t = useT()
   const user = useSession((s) => s.user)
   const vocabulary = useVocab() as Record<string, string | undefined>
   const selectedEnvId = useEnvironmentStore((s) => s.envId)
@@ -40,7 +42,7 @@ export function UserIdentity() {
     ]
   } else if (user.role === 'admin') {
     name = user.display_name
-    detail = ['Administración del sistema']
+    detail = [t('Administración del sistema')]
   } else {
     name = role
     detail = [env?.name]

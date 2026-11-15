@@ -23,6 +23,7 @@ import { currentLang } from '../i18n/lang'
 import { mockFetch } from './mocks/mockFetch'
 import { isMockFallbackEnabled, isMockMode, setFallbackActive } from './mocks/mode'
 import type { components, paths } from './types.gen'
+import { translate } from '../i18n/t'
 
 export type { components, paths }
 /** Atajo para los schemas del contrato: `Schema<'Assessment'>`. */
@@ -49,7 +50,7 @@ export class ApiError extends Error {
 /** No se pudo contactar con el servidor de a bordo. El outbox reintenta más tarde. */
 export class NetworkError extends Error {
   constructor(cause: unknown) {
-    super('Sin conexión con el servidor de a bordo', { cause })
+    super(translate('Sin conexión con el servidor de a bordo'), { cause })
     this.name = 'NetworkError'
   }
 }

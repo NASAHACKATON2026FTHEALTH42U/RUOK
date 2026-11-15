@@ -7,6 +7,7 @@ import {
   type PvtMode,
   type PvtSummary,
 } from './pvt'
+import { useT } from '../../i18n/t'
 import { Modal } from '../ui/Modal'
 import { Icon } from '../ui/Icon'
 
@@ -31,6 +32,7 @@ interface PvtRunnerProps {
  * El test acaba al terminar la duración del modo (sin cortar un estímulo en pantalla).
  */
 export function PvtRunner({ mode, onFinish, onCancel }: PvtRunnerProps) {
+  const t = useT()
   const durationMs = PVT_MODES[mode].durationMs
   const [view, setView] = useState<View>({ kind: 'waiting' })
   const [remainingMs, setRemainingMs] = useState<number>(durationMs)
@@ -135,10 +137,10 @@ export function PvtRunner({ mode, onFinish, onCancel }: PvtRunnerProps) {
         onContextMenu={(e) => e.preventDefault()}
       >
         <h2 id="pvt-title" className="sr-only">
-          Test de vigilancia
+          {t('Test de vigilancia')}
         </h2>
         <div className="flex items-center justify-between gap-3 p-4 text-sm">
-          <span className="tabular-nums" aria-label={`Quedan ${secs} segundos`}>
+          <span className="tabular-nums" aria-label={t('Quedan {n} segundos', { n: secs })}>
             <Icon name="timer" size={16} /> {secs} s
           </span>
           <button
@@ -147,7 +149,7 @@ export function PvtRunner({ mode, onFinish, onCancel }: PvtRunnerProps) {
             onClick={onCancel}
             className=" border border-current/40 px-3 py-1.5"
           >
-            Cancelar
+            {t('Cancelar')}
           </button>
         </div>
         <div className="mx-4 h-1 overflow-hidden rounded-full bg-env-border" aria-hidden>
@@ -162,27 +164,29 @@ export function PvtRunner({ mode, onFinish, onCancel }: PvtRunnerProps) {
             <>
               <span aria-hidden className="h-24 w-24 rounded-full border-4 border-env-border" />
               <p className="mt-6 text-lg text-env-muted">
-                Espera… pulsa en cuanto cambie la pantalla
+                {t('Espera… pulsa en cuanto cambie la pantalla')}
               </p>
             </>
           )}
-          {view.kind === 'stimulus' && <p className="text-5xl font-bold">¡Pulsa!</p>}
+          {view.kind === 'stimulus' && <p className="text-5xl font-bold">{t('¡Pulsa!')}</p>}
           {view.kind === 'feedback' && (
             <>
               <p className="text-5xl font-bold tabular-nums">{view.rt} ms</p>
               <p className="mt-2 text-env-muted">
                 {classifyResponse(view.rt) === 'lapse'
-                  ? 'Lapso (más de 500 ms)'
+                  ? t('Lapso (más de 500 ms)')
                   : classifyResponse(view.rt) === 'false_start'
-                    ? 'Demasiado rápido: falso inicio'
-                    : 'Bien'}
+                    ? t('Demasiado rápido: falso inicio')
+                    : t('Bien')}
               </p>
             </>
           )}
           {view.kind === 'early' && (
             <>
-              <p className="text-3xl font-bold">Demasiado pronto</p>
-              <p className="mt-2 text-env-muted">Falso inicio: espera a que cambie la pantalla</p>
+              <p className="text-3xl font-bold">{t('Demasiado pronto')}</p>
+              <p className="mt-2 text-env-muted">
+                {t('Falso inicio: espera a que cambie la pantalla')}
+              </p>
             </>
           )}
         </div>

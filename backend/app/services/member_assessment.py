@@ -19,7 +19,7 @@ from typing import Any
 
 from sqlmodel import Session, select
 
-from app import clock, models
+from app import clock, i18n, models
 from app.schemas.common import Liveness, Status
 from app.schemas.members import (
     Assessment,
@@ -254,9 +254,39 @@ def for_viewer(
     Recalcula ``behavioral.details_visible`` con quien consulta (``can_view_behavioral``)
     y quita los indicadores privados si no puede verlos.
     """
-    out = assessment.model_copy(deep=True)
+    out = localize(assessment.model_copy(deep=True))
     out.behavioral.details_visible = can_view_behavioral(session, member, viewer)
     return behavioral.redact(out)
+
+
+def localize(assessment: Assessment) -> Assessment:
+    """Textos del protocolo, de las intervenciones y unidades en el idioma de la petición (FE-38).
+
+    Modifica ``assessment`` (una copia: ``for_viewer``). Solo para la respuesta: las alertas
+    se evalúan con el assessment original y guardan el mensaje en español.
+    """
+    if i18n.lang() == "es":
+        return assessment
+    protocols = {p.id: p for p in catalog.list_protocols()}
+    for system in assessment.systems:
+        texts: dict[str, str] = {}
+        protocol = protocols.get(system.escalation.protocol_id or "")
+        if protocol is not None:
+            shown = catalog.localized_protocol(protocol)
+            system.escalation.message = shown.message
+            texts = {
+                orig.id: loc.text
+                for orig, loc in zip(protocol.recommendations, shown.recommendations, strict=False)
+            }
+        for rec in system.recommendations:
+            if rec.id in texts:
+                rec.text = texts[rec.id]
+            elif rec.intervention_id and (item := catalog.get_intervention(rec.intervention_id)):
+                title = catalog.localized_intervention(item).title
+                rec.text = f"{title} ({item.duration_min} min)"
+        for ind in system.indicators:
+            ind.unit = catalog.localized_unit(ind.indicator_id, ind.unit)
+    return assessment
 
 
 def assess_member(

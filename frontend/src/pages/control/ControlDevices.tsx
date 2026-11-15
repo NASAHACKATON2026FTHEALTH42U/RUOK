@@ -4,6 +4,8 @@ import { useUsers } from '../../api/useUsers'
 import { ConnectQr } from '../../components/control/ConnectQr'
 import { ControlHeader, ControlPanel } from '../../components/control/ControlHeader'
 import { useControlScope } from '../../components/control/useControlScope'
+import { currentLang } from '../../i18n/lang'
+import { useT } from '../../i18n/t'
 import { formatAgo } from '../../lib/time'
 
 const KIND: Record<string, string> = {
@@ -18,6 +20,7 @@ const KIND: Record<string, string> = {
  * tienen pendiente de enviar y su última sincronización, y el QR para conectar uno nuevo.
  */
 export default function ControlDevices() {
+  const t = useT()
   const { envId, env } = useControlScope()
   const devices = useDevices(envId)
   const users = useUsers()
@@ -32,13 +35,15 @@ export default function ControlDevices() {
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-4">
       <ControlHeader
-        title="Dispositivos"
-        subtitle={`Móviles y tablets de ${env?.name ?? 'el entorno'}: conexión, pendientes y sincronización.`}
+        title={t('Dispositivos')}
+        subtitle={t('Móviles y tablets de {env}: conexión, pendientes y sincronización.', {
+          env: env?.name ?? t('el entorno'),
+        })}
       />
       {/* En escritorio, la tabla mide lo que su contenido y, como mucho, el hueco: el scroll es suyo. */}
       <div className="grid gap-4 xl:min-h-0 xl:flex-1 xl:grid-cols-[minmax(0,1fr)_26rem] xl:items-start">
         <ControlPanel
-          title="Dispositivos del entorno"
+          title={t('Dispositivos del entorno')}
           aside={devices.state === 'ready' ? `${list.length}` : undefined}
           className="xl:max-h-full xl:min-h-0"
           bodyClassName="min-h-0 flex-1 overflow-auto [scrollbar-color:var(--env-border)_transparent]"
@@ -46,15 +51,17 @@ export default function ControlDevices() {
           {devices.state === 'loading' && <div className="m-4 h-32 animate-pulse bg-env-bg" />}
           {devices.state === 'error' && (
             <p className="p-4 text-env-muted">
-              No se han podido cargar.{' '}
+              {t('No se han podido cargar.')}{' '}
               <button type="button" onClick={devices.retry} className="underline">
-                Reintentar
+                {t('Reintentar')}
               </button>
             </p>
           )}
           {devices.state === 'ready' && list.length === 0 && (
             <p className="p-4 text-sm text-env-muted">
-              Ningún dispositivo de este entorno todavía. Conecta uno con el QR e inicia sesión.
+              {t(
+                'Ningún dispositivo de este entorno todavía. Conecta uno con el QR e inicia sesión.',
+              )}
             </p>
           )}
           {list.length > 0 && (
@@ -65,7 +72,8 @@ export default function ControlDevices() {
                     {['Dispositivo', 'Usuario', 'IP', 'Visto', 'Pendientes', 'Sincronizado'].map(
                       (h) => (
                         <th key={h} className="hud-label px-4 py-2 font-normal">
-                          {h}
+                          {/* «Usuario» es el nombre de acceso en el login (Username); aquí, la persona. */}
+                          {h === 'Usuario' && currentLang() === 'en' ? 'User' : t(h)}
                         </th>
                       ),
                     )}
@@ -78,7 +86,7 @@ export default function ControlDevices() {
                         {d.label ?? d.id.slice(0, 8)}
                         {d.kind && (
                           <span className="block text-xs text-env-muted">
-                            {KIND[d.kind] ?? d.kind}
+                            {KIND[d.kind] ? t(KIND[d.kind]) : d.kind}
                           </span>
                         )}
                       </td>
@@ -91,7 +99,7 @@ export default function ControlDevices() {
                         {d.pending_outbox > 0 ? `⇡ ${d.pending_outbox}` : '0'}
                       </td>
                       <td className="px-4 py-2">
-                        {d.last_sync_at ? formatAgo(d.last_sync_at, now) : 'nunca'}
+                        {d.last_sync_at ? formatAgo(d.last_sync_at, now) : t('nunca')}
                       </td>
                     </tr>
                   ))}

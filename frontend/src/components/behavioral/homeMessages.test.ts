@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
+import { useLangStore } from '../../i18n/lang'
 import {
   buildThread,
   cleanText,
@@ -117,5 +118,19 @@ describe('cleanText', () => {
     expect(cleanText('  hola  ')).toBe('hola')
     expect(cleanText('   \n ')).toBeNull()
     expect(cleanText('x'.repeat(600))).toHaveLength(500)
+  })
+})
+
+describe('en inglés (FE-38)', () => {
+  afterEach(() => useLangStore.getState().setLang('es'))
+
+  it('traduce el texto del estado', () => {
+    useLangStore.getState().setLang('en')
+    expect(describeState(item({ state: 'queued', eta: null }), new Date(T0)).label).toBe(
+      'Queued · no link',
+    )
+    expect(describeState(item({ state: 'local', eta: null }), new Date(T0)).label).toContain(
+      'Saved on this device',
+    )
   })
 })

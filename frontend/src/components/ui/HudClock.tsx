@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { serverNow } from '../../api/client'
+import { dateLocale } from '../../i18n/lang'
+import { useT } from '../../i18n/t'
 import { missionPhase, type Mission } from '../behavioral/missionPhase'
 
 /** Solo lo que usa el reloj (vale el `Environment` del contrato o el de la caché). */
@@ -13,6 +15,7 @@ interface ClockEnv {
  * ("Sol" en Marte). Sin misión activa, solo la hora.
  */
 export function HudClock({ env }: { env?: ClockEnv }) {
+  const t = useT()
   const [now, setNow] = useState(() => serverNow())
   useEffect(() => {
     const id = setInterval(() => setNow(serverNow()), 1000)
@@ -22,7 +25,11 @@ export function HudClock({ env }: { env?: ClockEnv }) {
   const phase = env?.mission ? missionPhase(env.mission, now) : null
   // En Marte el día es un "sol"; en el resto, un día de misión.
   const day =
-    phase?.status === 'active' ? `${env?.id === 'mars' ? 'Sol' : 'Día'} ${phase.day}` : null
+    phase?.status === 'active'
+      ? env?.id === 'mars'
+        ? t('Sol {n}', { n: phase.day })
+        : t('Día {n}', { n: phase.day })
+      : null
 
   return (
     <div className="text-right">
@@ -30,7 +37,7 @@ export function HudClock({ env }: { env?: ClockEnv }) {
         dateTime={now.toISOString()}
         className="block font-mono text-[1.4375rem] leading-tight font-light tabular-nums"
       >
-        {now.toLocaleTimeString('es-ES', { hour12: false })}
+        {now.toLocaleTimeString(dateLocale(), { hour12: false })}
       </time>
       {day && <span className="hud-label block text-[0.6875rem] whitespace-nowrap">{day}</span>}
     </div>

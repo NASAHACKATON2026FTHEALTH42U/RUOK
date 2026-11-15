@@ -15,7 +15,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from sqlmodel import Session
 
-from app import clock, models, seed
+from app import clock, i18n, models, seed
 from app.db import engine, get_session
 from app.routers.deps import (
     ERRORS_404,
@@ -221,7 +221,7 @@ def list_devices(session: SessionDep, env_id: Slug | None = None) -> list[Device
 )
 def control_overview(session: SessionDep, env_id: Slug | None = None) -> ControlOverview:
     if env_id is not None and environments.get_environment(env_id) is None:
-        raise HTTPException(404, f"Entorno desconocido: {env_id}")
+        raise HTTPException(404, i18n.tr("Entorno desconocido: {id}", id=env_id))
     return control.overview(session, env_id)
 
 
@@ -237,9 +237,10 @@ def control_overview(session: SessionDep, env_id: Slug | None = None) -> Control
 )
 def pause_liveness(body: LivenessPauseIn, session: SessionDep) -> OkResponse:
     if environments.get_environment(body.env_id) is None:
-        raise HTTPException(404, f"Entorno desconocido: {body.env_id}")
+        raise HTTPException(404, i18n.tr("Entorno desconocido: {id}", id=body.env_id))
     control.set_liveness_paused(session, body.env_id, body.paused)
-    return OkResponse(detail=f"liveness {'pausado' if body.paused else 'activo'} en {body.env_id}")
+    detail = "liveness pausado en {env}" if body.paused else "liveness activo en {env}"
+    return OkResponse(detail=i18n.tr(detail, env=body.env_id))
 
 
 @public.get(
@@ -313,7 +314,10 @@ def demo_reset(session: Annotated[Session, Depends(get_session)]) -> OkResponse:
     members, measurements = seed.reset(session)
     app_state.save_clock(session)  # el reloj vuelve al real también tras un reinicio (BE-32)
     return OkResponse(
-        detail=f"seed v{seed.SEED_VERSION}: {members} members y {measurements} mediciones"
+        detail=i18n.tr(
+            "seed v{version}: {members} members y {measurements} mediciones",
+            version=seed.SEED_VERSION, members=members, measurements=measurements,
+        )
     )
 
 
@@ -329,7 +333,7 @@ def demo_reset(session: Annotated[Session, Depends(get_session)]) -> OkResponse:
 )
 def demo_scenario(name: str, session: Annotated[Session, Depends(get_session)]) -> OkResponse:
     if name not in seed.SCENARIOS:
-        raise HTTPException(404, f"Escenario desconocido: {name}")
+        raise HTTPException(404, i18n.tr("Escenario desconocido: {name}", name=name))
     return OkResponse(detail=f"{name}: {seed.apply_scenario(session, name)}")
 
 

@@ -19,6 +19,8 @@ import { CrewMissions } from '../components/game/CrewMissions'
 import { dayProgress, sortTasks, withLocalCompletions } from '../components/game/game'
 import { TaskItem } from '../components/game/TaskItem'
 import { useVocab } from '../environments/useVocab'
+import { dateLocale } from '../i18n/lang'
+import { useT } from '../i18n/t'
 import { completeTask, joinMission, locallyCompletedTasks, sendKudos } from '../offline/outbox'
 import { useEnvironmentStore } from '../store/environment'
 import { NoMemberSelected } from '../components/ui/NoMemberSelected'
@@ -34,6 +36,7 @@ const today = () => serverNow().toISOString().slice(0, 10)
  * marcada en el dispositivo y los puntos se suman de forma provisional hasta sincronizar.
  */
 export default function Missions() {
+  const t = useT()
   const vocab = useVocab()
   const memberId = useActiveMemberId()
   const envId = useEnvironmentStore((s) => s.envId)
@@ -66,11 +69,14 @@ export default function Missions() {
   }, [memberId])
 
   // Los avisos comunes de la app (abajo a la derecha), no unos propios.
-  const toast = useCallback((text: string) => {
-    pushToast({ tone: 'success', icon: 'check', label: 'Misiones', title: text })
-  }, [])
+  const toast = useCallback(
+    (text: string) => {
+      pushToast({ tone: 'success', icon: 'check', label: t('Misiones'), title: text })
+    },
+    [t],
+  )
 
-  const title = <h1 className="text-2xl font-semibold">Misiones diarias</h1>
+  const title = <h1 className="text-2xl font-semibold">{t('Misiones diarias')}</h1>
 
   if (memberId === null) {
     return (
@@ -99,12 +105,12 @@ export default function Missions() {
       const r = await completeTask(memberId, task, today())
       if (r.status === 'sent') {
         setFresh({ base: gameData, game: r.result })
-        toast(`+${task.points} puntos`)
+        toast(t('+{n} puntos', { n: task.points }))
         tasks.refresh()
         board.refresh()
       } else {
         setQueued((s) => new Set(s).add(task.id))
-        toast(`+${task.points} puntos · pendiente de sincronizar`)
+        toast(t('+{n} puntos · pendiente de sincronizar', { n: task.points }))
       }
     } catch (err) {
       setLocal((s) => {
@@ -112,7 +118,7 @@ export default function Missions() {
         n.delete(task.id)
         return n
       })
-      toast(`No se ha podido guardar: ${String(err)}`)
+      toast(t('No se ha podido guardar: {error}', { error: String(err) }))
     } finally {
       setBusy(null)
     }
@@ -121,12 +127,18 @@ export default function Missions() {
   const onKudos = async (toMemberId: number, message: string) => {
     try {
       const r = await sendKudos(memberId, toMemberId, message)
-      toast(r.status === 'sent' ? 'Kudos enviado' : 'Kudos guardado · pendiente de sincronizar')
+      toast(
+        r.status === 'sent' ? t('Kudos enviado') : t('Kudos guardado · pendiente de sincronizar'),
+      )
       kudos.refresh()
       board.refresh()
       return true
     } catch (err) {
-      toast(`No se ha podido enviar: ${err instanceof Error ? err.message : String(err)}`)
+      toast(
+        t('No se ha podido enviar: {error}', {
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      )
       return false
     }
   }
@@ -138,14 +150,18 @@ export default function Missions() {
       if (r.status === 'sent') {
         toast(
           r.result.completed
-            ? `¡Misión completada! +${mission.points} puntos para todos`
-            : `Te has apuntado a «${mission.title}»`,
+            ? t('¡Misión completada! +{n} puntos para todos', { n: mission.points })
+            : t('Te has apuntado a «{title}»', { title: mission.title }),
         )
-      } else toast('Apuntado · pendiente de sincronizar')
+      } else toast(t('Apuntado · pendiente de sincronizar'))
       crewMissions.refresh()
       board.refresh()
     } catch (err) {
-      toast(`No se ha podido apuntar: ${err instanceof Error ? err.message : String(err)}`)
+      toast(
+        t('No se ha podido apuntar: {error}', {
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      )
     } finally {
       setJoining(null)
     }
@@ -171,16 +187,16 @@ export default function Missions() {
       {title}
 
       {/* Tu día en tres cifras, como las celdas del panel. */}
-      <section aria-label="Tu progreso" className="hud-panel shrink-0">
+      <section aria-label={t('Tu progreso')} className="hud-panel shrink-0">
         <ul className="-mr-px -mb-px grid grid-cols-3">
           <li className="border-r border-b border-env-border/60 px-3 py-2.5 sm:px-5 sm:py-4">
-            <p className="text-sm text-env-muted">Tus puntos</p>
+            <p className="text-sm text-env-muted">{t('Tus puntos')}</p>
             {current ? (
               <p className="mt-1 font-display text-2xl font-semibold tabular-nums sm:text-3xl">
                 <AnimatedNumber value={current.points + pendingPoints} />
                 {pendingPoints > 0 && (
                   <span className="ml-2 align-middle font-sans text-xs font-normal text-env-muted">
-                    ⇡ {pendingPoints} sin sincronizar
+                    ⇡ {t('{n} sin sincronizar', { n: pendingPoints })}
                   </span>
                 )}
               </p>
@@ -189,14 +205,14 @@ export default function Missions() {
             )}
           </li>
           <li className="border-r border-b border-env-border/60 px-3 py-2.5 sm:px-5 sm:py-4">
-            <p className="text-sm text-env-muted">Racha</p>
+            <p className="text-sm text-env-muted">{t('Racha')}</p>
             <p className="mt-1 font-display text-2xl font-semibold sm:text-3xl">
               {current ? (
                 <>
                   <Icon name="flame" size={22} className="mr-1.5 text-env-primary" />
                   {current.streak_days}{' '}
                   <span className="font-sans text-base font-normal text-env-muted">
-                    {current.streak_days === 1 ? 'día' : 'días'}
+                    {current.streak_days === 1 ? t('día') : t('días')}
                   </span>
                 </>
               ) : (
@@ -205,12 +221,15 @@ export default function Missions() {
             </p>
           </li>
           <li className="border-r border-b border-env-border/60 px-3 py-2.5 sm:px-5 sm:py-4">
-            <p className="text-sm text-env-muted">Hoy</p>
+            <p className="text-sm text-env-muted">{t('Hoy')}</p>
             <p className="mt-1 font-display text-2xl font-semibold tabular-nums sm:text-3xl">
               {progress.done} / {progress.total}
             </p>
             <p className="text-xs text-env-muted">
-              {progress.points} de {progress.totalPoints} puntos del día
+              {t('{done} de {total} puntos del día', {
+                done: progress.points,
+                total: progress.totalPoints,
+              })}
             </p>
           </li>
         </ul>
@@ -223,24 +242,25 @@ export default function Missions() {
             className="hud-panel flex flex-col lg:max-h-[50%] lg:min-h-0 lg:shrink-0 2xl:max-h-none 2xl:flex-1"
           >
             <h2 id="tasks-title" className="hud-panel-head">
-              Tareas de hoy
+              {t('Tareas de hoy')}
             </h2>
             {tasks.state === 'loading' ? (
               <div className="m-4 h-32 animate-pulse  bg-env-bg" aria-busy="true" />
             ) : tasks.state === 'error' ? (
               <p className="p-4 text-sm" role="alert">
-                <span aria-hidden>⚠ </span>No se pudieron cargar las tareas.{' '}
+                <span aria-hidden>⚠ </span>
+                {t('No se pudieron cargar las tareas.')}{' '}
                 <button type="button" onClick={tasks.retry} className="underline">
-                  Reintentar
+                  {t('Reintentar')}
                 </button>
               </p>
             ) : list.length === 0 ? (
-              <p className="p-4 text-env-muted">No hay tareas para hoy.</p>
+              <p className="p-4 text-env-muted">{t('No hay tareas para hoy.')}</p>
             ) : (
               <ul
                 className="divide-y divide-env-border/60 [scrollbar-color:var(--env-border)_transparent] lg:min-h-0 lg:flex-1 lg:overflow-y-auto"
                 tabIndex={0}
-                aria-label="Tareas de hoy"
+                aria-label={t('Tareas de hoy')}
               >
                 {list.map((t) => (
                   <li key={t.id}>
@@ -279,14 +299,16 @@ export default function Missions() {
           {current && current.badges.length > 0 && (
             <section aria-labelledby="badges-title" className="hud-panel shrink-0">
               <h2 id="badges-title" className="hud-panel-head">
-                Insignias
+                {t('Insignias')}
               </h2>
               <ul className="flex flex-wrap gap-2 px-4 py-3">
                 {current.badges.map((b) => (
                   <li
                     key={b.id}
                     className="border border-env-primary/50 bg-env-primary/10 px-3 py-1 text-sm"
-                    title={`Conseguida el ${new Date(b.earned_at).toLocaleDateString('es-ES')}`}
+                    title={t('Conseguida el {date}', {
+                      date: new Date(b.earned_at).toLocaleDateString(dateLocale()),
+                    })}
                   >
                     <Icon name="medal" size={16} className="mr-1.5 text-env-primary" />
                     {b.name}

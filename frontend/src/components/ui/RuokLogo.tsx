@@ -1,3 +1,5 @@
+import { useT } from '../../i18n/t'
+
 /**
  * Logo de R U OK? (propuesta «A · anillo» del kit de logos): un anillo de 7 segmentos, uno por
  * sistema del cuerpo, con un cuadrado en el centro y un anillo punteado alrededor. El segmento de
@@ -77,16 +79,17 @@ export function RuokMark() {
 
 /** Grande, para el login: el emblema, «R U OK?» y el lema debajo (logo horizontal del kit). */
 export function RuokRings() {
+  const t = useT()
   return (
     <div
       className="mx-auto flex h-[132px] w-full max-w-[390px] items-center justify-center gap-5"
       role="img"
-      aria-label="R U OK? Salud en misión"
+      aria-label={t('R U OK? Salud en misión')}
     >
       <RuokEmblem size={104} />
       <span className="flex flex-col gap-2.5">
         <Wordmark className="text-[1.875rem] tracking-[0.05em]" />
-        <span className="hud-label text-[0.6875rem] tracking-[0.32em]">Salud en misión</span>
+        <span className="hud-label text-[0.6875rem] tracking-[0.32em]">{t('Salud en misión')}</span>
       </span>
     </div>
   )

@@ -12,6 +12,7 @@ import {
 } from '../../components/control/SimulationControls'
 import { useControlScope } from '../../components/control/useControlScope'
 import { useVocab } from '../../environments/useVocab'
+import { useT } from '../../i18n/t'
 
 /**
  * Simulación (FE-32): el banco de pruebas del operador para el entorno activo y, si se elige, un
@@ -19,6 +20,7 @@ import { useVocab } from '../../environments/useVocab'
  * vigilancia de contacto y reloj. Todo llega al momento a los móviles conectados.
  */
 export default function ControlSimulate() {
+  const t = useT()
   const { envId, env, recipients, memberId, memberName } = useControlScope()
   const vocab = useVocab()
   const overview = useControlOverview(envId)
@@ -28,14 +30,22 @@ export default function ControlSimulate() {
   return (
     <section className="flex flex-col gap-4">
       <ControlHeader
-        title="Simulación"
-        subtitle={`Provoca situaciones en ${env?.name ?? 'el entorno'}${
-          memberId !== null ? ` para ${memberName(memberId)}` : ''
-        }: llegan al momento a los móviles y tablets conectados.`}
+        title={t('Simulación')}
+        subtitle={
+          memberId !== null
+            ? t(
+                'Provoca situaciones en {env} para {member}: llegan al momento a los móviles y tablets conectados.',
+                { env: env?.name ?? t('el entorno'), member: memberName(memberId) },
+              )
+            : t(
+                'Provoca situaciones en {env}: llegan al momento a los móviles y tablets conectados.',
+                { env: env?.name ?? t('el entorno') },
+              )
+        }
         memberScope
       />
       {!env ? (
-        <p className="text-env-muted">Elige un entorno para simular.</p>
+        <p className="text-env-muted">{t('Elige un entorno para simular.')}</p>
       ) : (
         // Tres columnas equilibradas por contenido: a quién (alerta o notificación + vigilancia de
         // contacto) | qué datos (medición + enlace) | el guion de la demo (escenarios + reloj). El
@@ -43,7 +53,7 @@ export default function ControlSimulate() {
         // pantallas medias, dos columnas y el guion en una fila; en móvil, una.
         <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
           <div className="flex flex-col gap-4">
-            <ControlPanel title="Alerta o notificación">
+            <ControlPanel title={t('Alerta o notificación')}>
               <OperatorMessageForm
                 key={scope}
                 recipients={recipients}
@@ -55,7 +65,7 @@ export default function ControlSimulate() {
             {envOv && <LivenessPanel className="flex-1" env={envOv} onChanged={overview.refresh} />}
           </div>
           <div className="flex flex-col gap-4">
-            <ControlPanel title="Provocar una medición">
+            <ControlPanel title={t('Provocar una medición')}>
               <MeasurementInjector
                 key={scope}
                 env={env}

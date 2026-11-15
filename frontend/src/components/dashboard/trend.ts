@@ -1,5 +1,7 @@
 /** Lógica pura de TrendChart (fácil de testear). */
 import type { Schema } from '../../api/client'
+import { dateLocale } from '../../i18n/lang'
+import { translate } from '../../i18n/t'
 import { bySeverity, statusStyle } from '../ui/status'
 import { formatValue } from './format'
 
@@ -188,9 +190,6 @@ export interface ForecastSummary {
   text: string
 }
 
-const dayCount = (n: number) => (n === 1 ? '1 día' : `${n} días`)
-const nextDays = (n: number) => (n === 1 ? 'el próximo día' : `los próximos ${n} días`)
-
 /**
  * Lo que dice la previsión, en una frase. Habla siempre del **valor esperado** (el estado que
  * tendría ese valor con los rangos del entorno), no del semáforo, que además mira tendencias.
@@ -206,19 +205,23 @@ export function forecastSummary(forecast: Forecast): ForecastSummary {
   if (forecast.status === 'insufficient_data') {
     return {
       tone: 'none',
-      text: 'Aún no hay datos suficientes para prever: hacen falta al menos 7 mediciones regulares.',
+      text: translate(
+        'Aún no hay datos suficientes para prever: hacen falta al menos 7 mediciones regulares.',
+      ),
     }
   }
   if (forecast.status === 'stale') {
     return {
       tone: 'none',
-      text: 'Sin mediciones recientes: registra una nueva para ver la previsión.',
+      text: translate('Sin mediciones recientes: registra una nueva para ver la previsión.'),
     }
   }
   if (forecast.last_value_unusual) {
     return {
       tone: 'unusual',
-      text: 'El último valor se sale de lo habitual: la previsión espera a que se repita para seguirlo.',
+      text: translate(
+        'El último valor se sale de lo habitual: la previsión espera a que se repita para seguirlo.',
+      ),
     }
   }
   const { change, current_status: current, horizon_days: horizon } = forecast
@@ -227,15 +230,36 @@ export function forecastSummary(forecast: Forecast): ForecastSummary {
       tone: 'steady',
       text:
         current === 'unknown'
-          ? `Sin cambios de estado previstos en ${nextDays(horizon)}.`
-          : `El valor esperado seguiría en «${statusStyle(current).label}» ${nextDays(horizon)}.`,
+          ? horizon === 1
+            ? translate('Sin cambios de estado previstos en el próximo día.')
+            : translate('Sin cambios de estado previstos en los próximos {n} días.', { n: horizon })
+          : translate(
+              horizon === 1
+                ? 'El valor esperado seguiría en «{status}» el próximo día.'
+                : 'El valor esperado seguiría en «{status}» los próximos {n} días.',
+              { status: translate(statusStyle(current).label), n: horizon },
+            ),
     }
   }
   const worse = bySeverity(change.status, current) < 0
-  const verb = worse ? 'pasaría' : change.status === 'normal' ? 'volvería' : 'bajaría'
+  const one = change.in_days === 1
+  const sentence = worse
+    ? one
+      ? 'A este ritmo, el valor esperado pasaría a «{status}» en ~1 día.'
+      : 'A este ritmo, el valor esperado pasaría a «{status}» en ~{n} días.'
+    : change.status === 'normal'
+      ? one
+        ? 'A este ritmo, el valor esperado volvería a «{status}» en ~1 día.'
+        : 'A este ritmo, el valor esperado volvería a «{status}» en ~{n} días.'
+      : one
+        ? 'A este ritmo, el valor esperado bajaría a «{status}» en ~1 día.'
+        : 'A este ritmo, el valor esperado bajaría a «{status}» en ~{n} días.'
   return {
     tone: worse ? 'worse' : 'better',
-    text: `A este ritmo, el valor esperado ${verb} a «${statusStyle(change.status).label}» en ~${dayCount(change.in_days)}.`,
+    text: translate(sentence, {
+      status: translate(statusStyle(change.status).label),
+      n: change.in_days,
+    }),
   }
 }
 
@@ -245,19 +269,28 @@ export function forecastSummary(forecast: Forecast): ForecastSummary {
  * partes sin dato se omiten.
  */
 export function forecastNote(forecast: Forecast): string {
-  const parts = ['Estimación estadística, no es un diagnóstico']
-  if (forecast.history_days > 0) {
-    parts.push(`basada en ${dayCount(forecast.history_days)} de mediciones`)
+  const parts = [translate('Estimación estadística, no es un diagnóstico')]
+  const days = forecast.history_days
+  if (days > 0) {
+    parts.push(
+      days === 1
+        ? translate('basada en 1 día de mediciones')
+        : translate('basada en {n} días de mediciones', { n: days }),
+    )
   }
   const mae = forecast.backtest_mae
   if (mae !== null) {
     // Los valores van con un decimal; un error más pequeño se quedaría en «±0» y se da con dos.
     const amount =
       mae > 0 && mae < 0.05
-        ? mae.toLocaleString('es-ES', { maximumFractionDigits: 2 })
+        ? mae.toLocaleString(dateLocale(), { maximumFractionDigits: 2 })
         : formatValue(mae, '')
-    const unit = forecast.unit === '1-5' ? 'puntos' : forecast.unit
-    parts.push(`error medio reciente ±${amount}${unit ? ` ${unit}` : ''}`)
+    const unit = forecast.unit === '1-5' ? translate('puntos') : forecast.unit
+    parts.push(
+      unit
+        ? translate('error medio reciente ±{amount} {unit}', { amount, unit })
+        : translate('error medio reciente ±{amount}', { amount }),
+    )
   }
   return parts.join(' · ')
 }

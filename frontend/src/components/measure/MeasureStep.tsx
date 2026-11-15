@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import type { Indicator } from '../../api/useIndicators'
+import { useT } from '../../i18n/t'
 import { ListenButton } from '../behavioral/VoiceControls'
 import { STATUS_COLORS } from '../ui/status'
 import { allowsDecimal, applyKey, type RawValue } from './measureForm'
@@ -21,6 +22,7 @@ const INPUT =
  * pantalla. Se puede escribir con el teclado en pantalla o con el del dispositivo.
  */
 export function MeasureStep({ indicator, value, error, onChange }: MeasureStepProps) {
+  const t = useT()
   const id = useId()
   const errId = `${id}-err`
   const { input, unit } = indicator
@@ -42,7 +44,7 @@ export function MeasureStep({ indicator, value, error, onChange }: MeasureStepPr
     // El botón de voz va al lado de los pasos (no en una fila propia): en móvil cada línea cuenta.
     <div className="flex items-start gap-3">
       <div className="min-w-0 flex-1">
-        <p className="hud-label">Cómo medir</p>
+        <p className="hud-label">{t('Cómo medir')}</p>
         <ol className="mt-1 space-y-1 text-sm">
           {indicator.measurement_instructions.map((step, i) => (
             <li key={i} className="flex gap-2">
@@ -60,7 +62,7 @@ export function MeasureStep({ indicator, value, error, onChange }: MeasureStepPr
       {/* Voz guía (FE-37): los pasos en voz alta, con las manos ocupadas en el aparato. */}
       <ListenButton
         texts={indicator.measurement_instructions}
-        label={`Escuchar cómo medir: ${indicator.name}`}
+        label={t('Escuchar cómo medir: {name}', { name: indicator.name })}
         iconOnly
       />
     </div>
@@ -94,7 +96,7 @@ export function MeasureStep({ indicator, value, error, onChange }: MeasureStepPr
       <div className="grid grid-cols-2 gap-3">
         {(['hours', 'minutes'] as const).map((p) => (
           <label key={p} className="flex min-w-0 flex-col gap-1">
-            <span className="hud-label">{p === 'hours' ? 'Horas' : 'Minutos'}</span>
+            <span className="hud-label">{p === 'hours' ? t('Horas') : t('Minutos')}</span>
             <input
               ref={p === 'hours' ? ref : undefined}
               inputMode="numeric"
@@ -114,7 +116,7 @@ export function MeasureStep({ indicator, value, error, onChange }: MeasureStepPr
     keypad = (
       <NumericKeypad
         decimal={false}
-        label={`Teclado numérico: ${part === 'hours' ? 'horas' : 'minutos'}`}
+        label={part === 'hours' ? t('Teclado numérico: horas') : t('Teclado numérico: minutos')}
         onKey={(k) => onChange({ ...value, [part]: applyKey(value[part], k, false) })}
       />
     )

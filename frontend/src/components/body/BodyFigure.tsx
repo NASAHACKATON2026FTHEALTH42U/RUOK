@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import xrayHuman from '../../assets/xray-human.webp'
+import { useT } from '../../i18n/t'
 import { STATUS_COLORS, statusStyle, type Liveness } from '../ui/status'
 import { StatusBadge } from '../ui/StatusBadge'
 import { BodyLegend } from './BodyLegend'
@@ -78,6 +79,7 @@ export function BodyFigure({
   crop = 1,
   fill = false,
 }: BodyFigureProps) {
+  const t = useT()
   const uid = useId().replace(/:/g, '')
   const stripes = `stripes-${uid}`
   const glow = `glow-${uid}`
@@ -122,7 +124,7 @@ export function BodyFigure({
   const regionProps = (region: BodyRegion) => {
     const r = byRegion.get(region)
     if (!r) return null
-    const label = `${r.name}: ${stale ? 'sin datos recientes' : statusStyle(r.status).label}`
+    const label = `${r.name}: ${stale ? t('sin datos recientes') : t(statusStyle(r.status).label)}`
     return {
       r,
       g: {
@@ -455,7 +457,7 @@ export function BodyFigure({
             crop < 1 ? 'overflow-hidden' : 'overflow-visible'
           }`}
           role="group"
-          aria-label="Estado por sistema del cuerpo"
+          aria-label={t('Estado por sistema del cuerpo')}
         >
           <defs>
             <filter id={glow} x="-50%" y="-50%" width="200%" height="200%">
@@ -564,7 +566,9 @@ export function BodyFigure({
               />
               {stale && (
                 <p className="mt-1 text-xs whitespace-nowrap text-env-muted">
-                  Último conocido: {statusStyle(tooltip.region.status).label}
+                  {t('Último conocido: {status}', {
+                    status: t(statusStyle(tooltip.region.status).label),
+                  })}
                 </p>
               )}
             </div>,

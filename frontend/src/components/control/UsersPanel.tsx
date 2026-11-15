@@ -5,6 +5,7 @@ import { createUser, setUserActive, useUsers, type UserAccount } from '../../api
 import { useMembers } from '../../api/useMembers'
 import { userRoleLabel } from '../../auth/permissions'
 import { capitalize } from '../../environments/useVocab'
+import { translate, useT } from '../../i18n/t'
 import { ControlPanel } from './ControlHeader'
 
 type Role = Schema<'Role'>
@@ -17,7 +18,7 @@ const btn =
 const field = 'hud-input w-full !font-sans !text-[0.9375rem]'
 
 function errorText(err: unknown): string {
-  if (err instanceof NetworkError) return 'sin conexión con el servidor'
+  if (err instanceof NetworkError) return translate('sin conexión con el servidor')
   if (err instanceof ApiError) return err.message
   return String(err)
 }
@@ -27,6 +28,7 @@ function errorText(err: unknown): string {
  * El backend valida rol, entorno y member; aquí solo se guía el formulario.
  */
 export function UsersPanel({ env }: { env: Environment }) {
+  const t = useT()
   const users = useUsers()
   const vocab = env.vocabulary as Record<string, string>
   const label = (r: Role, server: string = r) => capitalize(userRoleLabel(r, vocab, server))
@@ -49,8 +51,11 @@ export function UsersPanel({ env }: { env: Environment }) {
   }
 
   const toggle = (u: UserAccount) =>
-    run(`${u.active ? 'Desactivar' : 'Activar'} a ${u.username}`, () =>
-      setUserActive(u.id, !u.active),
+    run(
+      u.active
+        ? t('Desactivar a {user}', { user: u.username })
+        : t('Activar a {user}', { user: u.username }),
+      () => setUserActive(u.id, !u.active),
     )
 
   const list = users.state === 'ready' ? users.data.filter((u) => u.env_id === env.id) : []
@@ -58,9 +63,9 @@ export function UsersPanel({ env }: { env: Environment }) {
   return (
     <div className="grid gap-4 xl:min-h-0 xl:flex-1 xl:grid-cols-[minmax(0,1fr)_24rem] xl:items-start">
       <ControlPanel
-        title={`Usuarios de ${env.name}`}
-        aside={users.state === 'ready' ? `${list.length} cuentas` : undefined}
-        aria-label="Usuarios"
+        title={t('Usuarios de {env}', { env: env.name })}
+        aside={users.state === 'ready' ? t('{n} cuentas', { n: list.length }) : undefined}
+        aria-label={t('Usuarios')}
         className="xl:max-h-full xl:min-h-0"
         bodyClassName="min-h-0 flex-1 overflow-auto [scrollbar-color:var(--env-border)_transparent]"
       >
@@ -70,9 +75,9 @@ export function UsersPanel({ env }: { env: Environment }) {
         {users.state === 'loading' && <div className="m-4 h-32 animate-pulse bg-env-bg" />}
         {users.state === 'error' && (
           <p className="p-4 text-env-muted">
-            No se han podido cargar los usuarios.{' '}
+            {t('No se han podido cargar los usuarios.')}{' '}
             <button type="button" onClick={users.retry} className="underline">
-              Reintentar
+              {t('Reintentar')}
             </button>
           </p>
         )}
@@ -83,7 +88,7 @@ export function UsersPanel({ env }: { env: Environment }) {
                 <tr>
                   {['Nombre', 'Usuario', 'Rol', 'Estado', ''].map((h) => (
                     <th key={h} className="hud-label px-4 py-2 font-normal">
-                      {h}
+                      {h && t(h)}
                     </th>
                   ))}
                 </tr>
@@ -95,7 +100,7 @@ export function UsersPanel({ env }: { env: Environment }) {
                     <td className="px-4 py-2 font-mono text-env-muted">{u.username}</td>
                     <td className="px-4 py-2">{label(u.role, u.role_label)}</td>
                     <td className={`px-4 py-2 ${u.active ? '' : 'text-env-muted'}`}>
-                      {u.active ? 'Activo' : 'Desactivado'}
+                      {u.active ? t('Activo') : t('Desactivado')}
                     </td>
                     <td className="px-4 py-2 text-right">
                       <button
@@ -104,7 +109,7 @@ export function UsersPanel({ env }: { env: Environment }) {
                         onClick={() => toggle(u)}
                         className={btn}
                       >
-                        {u.active ? 'Desactivar' : 'Activar'}
+                        {u.active ? t('Desactivar') : t('Activar')}
                       </button>
                     </td>
                   </tr>
@@ -131,6 +136,7 @@ function CreateUserForm({
   busy: boolean
   onCreate: (label: string, fn: () => Promise<unknown>) => Promise<boolean>
 }) {
+  const t = useT()
   const [username, setUsername] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [role, setRole] = useState<Role>('medic')
@@ -144,7 +150,7 @@ function CreateUserForm({
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    const ok = await onCreate(`Crear a ${username}`, () =>
+    const ok = await onCreate(t('Crear a {user}', { user: username }), () =>
       createUser({
         username,
         display_name: displayName,
@@ -163,23 +169,23 @@ function CreateUserForm({
   }
 
   return (
-    <form onSubmit={submit} aria-label="Nuevo usuario" className="hud-panel">
-      <h2 className="hud-panel-head">Nuevo usuario en {env.name}</h2>
+    <form onSubmit={submit} aria-label={t('Nuevo usuario')} className="hud-panel">
+      <h2 className="hud-panel-head">{t('Nuevo usuario en {env}', { env: env.name })}</h2>
       <div className="grid gap-3 p-4 text-sm sm:grid-cols-2 xl:grid-cols-1">
         <label className="flex flex-col gap-1">
-          <span className="hud-label">Usuario</span>
+          <span className="hud-label">{t('Usuario')}</span>
           <input
             required
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             pattern="[a-z0-9][a-z0-9._\-]{1,31}"
-            title="Minúsculas, números, punto, guion o guion bajo (2 a 32)"
+            title={t('Minúsculas, números, punto, guion o guion bajo (2 a 32)')}
             autoCapitalize="none"
             className={field}
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="hud-label">Nombre</span>
+          <span className="hud-label">{t('Nombre')}</span>
           <input
             required
             maxLength={80}
@@ -189,7 +195,7 @@ function CreateUserForm({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="hud-label">Rol</span>
+          <span className="hud-label">{t('Rol')}</span>
           <select value={role} onChange={(e) => setRole(e.target.value as Role)} className={field}>
             {ROLES.map((r) => (
               <option key={r} value={r}>
@@ -207,7 +213,7 @@ function CreateUserForm({
               onChange={(e) => setMemberId(e.target.value)}
               className={field}
             >
-              <option value="">Elige…</option>
+              <option value="">{t('Elige…')}</option>
               {members.state === 'ready' &&
                 members.data.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -218,7 +224,7 @@ function CreateUserForm({
           </label>
         )}
         <label className="flex flex-col gap-1">
-          <span className="hud-label">Contraseña (mín. 8)</span>
+          <span className="hud-label">{t('Contraseña (mín. 8)')}</span>
           <input
             required
             type="password"
@@ -233,7 +239,7 @@ function CreateUserForm({
       </div>
       <div className="px-4 pb-4">
         <button type="submit" disabled={busy} className="hud-btn hud-btn-primary w-full">
-          Crear usuario
+          {t('Crear usuario')}
         </button>
       </div>
     </form>

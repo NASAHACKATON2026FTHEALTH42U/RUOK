@@ -3,7 +3,7 @@
  * secuencia y énfasis de los textos. El audio está en `voiceGuide.ts`.
  */
 
-/** Aviso de transparencia: la voz es sintética. */
+/** Aviso de transparencia: la voz es sintética (clave en español: se pinta con `t(VOICE_NOTE)`). */
 export const VOICE_NOTE = 'La voz guía está generada con IA (ElevenLabs).'
 
 /** Preferencia «Voz guía» del dispositivo (vale para todas las partes guiadas). */

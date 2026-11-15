@@ -1,3 +1,4 @@
+import { useT } from '../../i18n/t'
 import { StatusBadge } from '../ui/StatusBadge'
 import type { RegionState } from './regions'
 
@@ -34,9 +35,10 @@ export function BodyLegend({
   vertical = false,
   rows = false,
 }: BodyLegendProps) {
+  const t = useT()
   if (rows) {
     return (
-      <ul className={`grid ${className}`} aria-label="Sistemas">
+      <ul className={`grid ${className}`} aria-label={t('Sistemas')}>
         {regions.map((r) => (
           <li key={r.systemId} className="dash-cell border-r border-b border-env-border/60">
             <button
@@ -67,7 +69,7 @@ export function BodyLegend({
   return (
     <ul
       className={`flex w-full font-mono ${vertical ? 'flex-col' : 'flex-wrap'} ${compact ? 'gap-1.5' : 'gap-2'} ${className}`}
-      aria-label="Sistemas"
+      aria-label={t('Sistemas')}
     >
       {regions.map((r) => (
         <li key={r.systemId} className={vertical ? 'w-full' : undefined}>

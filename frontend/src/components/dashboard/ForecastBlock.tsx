@@ -1,5 +1,6 @@
 import type { Forecast } from '../../api/useForecast'
 import type { LoadResult } from '../../api/useLoad'
+import { useT } from '../../i18n/t'
 import { forecastNote, forecastSummary } from './trend'
 
 /** Marca de un cambio a peor: el color del estado al que pasaría, como los valores de la tabla. */
@@ -15,6 +16,7 @@ const ACCENT: Record<string, string> = { warning: 'text-st-warn', critical: 'tex
  * El bloque reserva su alto: no hay saltos al cargar ni al cambiar de indicador.
  */
 export function ForecastBlock({ forecast }: { forecast: LoadResult<Forecast | null> }) {
+  const t = useT()
   if (forecast.state === 'ready' && forecast.data === null) return null
   const data = forecast.state === 'ready' ? forecast.data : null
   const summary = data && forecastSummary(data)
@@ -22,22 +24,22 @@ export function ForecastBlock({ forecast }: { forecast: LoadResult<Forecast | nu
 
   return (
     <section
-      aria-label="Previsión"
+      aria-label={t('Previsión')}
       className="flex min-h-[4.5rem] flex-col gap-0.5 border-l-2 border-env-border pl-3 lg:min-h-14"
     >
       <h2 className="hud-label leading-4">
-        Previsión
+        {t('Previsión')}
         {data?.status === 'ok' &&
-          ` · ${data.horizon_days} ${data.horizon_days === 1 ? 'día' : 'días'}`}
+          ` · ${data.horizon_days === 1 ? t('1 día') : t('{n} días', { n: data.horizon_days })}`}
       </h2>
       {forecast.state === 'loading' && (
         <div className="mt-1 h-3.5 w-3/5 animate-pulse bg-env-border/60" aria-busy="true" />
       )}
       {forecast.state === 'error' && (
         <p className="text-sm text-env-muted">
-          No se ha podido cargar la previsión.{' '}
+          {t('No se ha podido cargar la previsión.')}{' '}
           <button type="button" onClick={forecast.retry} className="underline">
-            Reintentar
+            {t('Reintentar')}
           </button>
         </p>
       )}

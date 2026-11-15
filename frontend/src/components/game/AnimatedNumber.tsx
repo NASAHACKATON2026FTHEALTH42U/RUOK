@@ -1,7 +1,8 @@
 import { animate, useReducedMotion } from 'framer-motion'
 import { useLayoutEffect, useRef } from 'react'
+import { dateLocale } from '../../i18n/lang'
 
-const fmt = (n: number) => Math.round(n).toLocaleString('es-ES')
+const fmt = (n: number) => Math.round(n).toLocaleString(dateLocale())
 
 /**
  * Número que cuenta hasta su nuevo valor (los puntos al completar una tarea, FE-18).

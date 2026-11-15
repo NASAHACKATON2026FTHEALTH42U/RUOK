@@ -8,6 +8,7 @@ import { useVocab } from '../../environments/useVocab'
 import { getDevice } from '../../offline/device'
 import { RealtimeConnector } from '../../realtime/RealtimeConnector'
 import { useEnvironmentStore } from '../../store/environment'
+import { useT } from '../../i18n/t'
 import { LiveAlertToast } from '../alerts/LiveAlertToast'
 import { SosButton } from '../alerts/SosButton'
 import { UserIdentity } from '../auth/UserIdentity'
@@ -34,6 +35,7 @@ import { TOPBAR_SLOT_ID } from './TopBarPortal'
  * `LivenessGuard` (heartbeat y modal "R U OK?"), el SSE y los avisos en vivo se montan UNA vez.
  */
 export function Layout() {
+  const t = useT()
   const device = getDevice()
   const vocab = useVocab()
   const { role, can } = useAuth()
@@ -60,7 +62,7 @@ export function Layout() {
     <NavLink
       to={role ? homeFor(role) : '/'}
       className="inline-flex min-h-11 shrink-0 items-center  focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-env-primary"
-      aria-label="R U OK?: inicio"
+      aria-label={t('R U OK?: inicio')}
     >
       <RuokMark />
     </NavLink>
@@ -85,7 +87,7 @@ export function Layout() {
       <div className="flex min-h-0 flex-1">
         {/* Barra lateral de escritorio */}
         <aside
-          aria-label="Menú principal"
+          aria-label={t('Menú principal')}
           // En pantallas bajas (≤ 800 px de alto), menos aire para que quepa todo sin scroll.
           className="hidden w-52 shrink-0 flex-col gap-3 overflow-y-auto border-r border-hud-line px-3 py-4 lg:w-64 lg:px-4 [scrollbar-width:none] md:flex [&::-webkit-scrollbar]:hidden [@media(max-height:800px)]:gap-2 [@media(max-height:800px)]:py-3"
         >
@@ -102,7 +104,7 @@ export function Layout() {
           {/* Ámbito (entorno y member): el único sitio donde se eligen, para todas las vistas. */}
           <ScopeSelector />
 
-          <nav aria-label="Secciones" className="hud-panel">
+          <nav aria-label={t('Secciones')} className="hud-panel">
             <ul>
               {allowed.map((item) => (
                 <li key={item.to}>
@@ -121,7 +123,7 @@ export function Layout() {
           </nav>
 
           <section
-            aria-label="Estado"
+            aria-label={t('Estado')}
             className="mt-auto flex w-full flex-col items-start gap-1.5 pt-2 text-xs [&_label]:flex-wrap [&_select]:max-w-full"
           >
             <MemberActivitySelector compact />
@@ -131,11 +133,14 @@ export function Layout() {
             <ServerStatus quiet />
             {/* Aviso siempre visible en escritorio; en móvil va en «Más» y en el login. */}
             <p className="mt-2 text-[0.75rem] leading-snug text-env-muted">
-              Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
-              el criterio de un profesional sanitario.
+              {t('Prototipo de autoevaluación.')}{' '}
+              <strong>{t('No es un dispositivo médico')}</strong>{' '}
+              {t('ni sustituye el criterio de un profesional sanitario.')}
               {device.mode === 'tab' && (
                 <span className="mt-1 block" title={device.id}>
-                  Dispositivo: {device.name ?? `pestaña ${device.id.slice(0, 8)}`}
+                  {t('Dispositivo: {name}', {
+                    name: device.name ?? t('pestaña {id}', { id: device.id.slice(0, 8) }),
+                  })}
                 </span>
               )}
             </p>
@@ -192,18 +197,18 @@ export function Layout() {
       </div>
 
       {/* Pestañas móviles: 3 del rol + «Más», con el SOS en el centro */}
-      <nav aria-label="Principal" className="hud-tabs shrink-0 md:hidden">
-        {tabs.map((t, i) => (
-          <Fragment key={t.to}>
+      <nav aria-label={t('Principal')} className="hud-tabs shrink-0 md:hidden">
+        {tabs.map((tab, i) => (
+          <Fragment key={tab.to}>
             {/* SOS en el centro de la barra (entre la 2.ª y la 3.ª pestaña) */}
             {i === Math.floor(tabs.length / 2) && <SosButton variant="tab" />}
             <NavLink
-              to={t.to}
+              to={tab.to}
               end
               className="hud-tab focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary"
             >
-              <NavIcon name={t.icon} />
-              {t.to === '/members' ? t.label.slice(0, 11) : t.label}
+              <NavIcon name={tab.icon} />
+              {tab.to === '/members' ? tab.label.slice(0, 11) : tab.label}
             </NavLink>
           </Fragment>
         ))}

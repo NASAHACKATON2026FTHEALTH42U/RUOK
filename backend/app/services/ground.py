@@ -15,7 +15,7 @@ from datetime import timedelta
 
 from sqlmodel import Session, col, select
 
-from app import clock, models
+from app import clock, i18n, models
 from app.schemas import Alert, GroundView
 from app.schemas.common import LinkState, Status
 from app.services import alerts, comm_link, members
@@ -42,7 +42,7 @@ def _redact(alert: Alert) -> Alert:
     """Quita el detalle conductual: mensaje genérico, sin indicadores ni textos en la timeline."""
     events = [e.model_copy(update={"payload": {}}) for e in alert.events]
     return alert.model_copy(
-        update={"message": HIDDEN_MESSAGE, "indicator_ids": [], "events": events}
+        update={"message": i18n.tr(HIDDEN_MESSAGE), "indicator_ids": [], "events": events}
     )
 
 

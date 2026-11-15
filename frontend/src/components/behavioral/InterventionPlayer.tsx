@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Intervention } from '../../api/useInterventions'
+import { useT } from '../../i18n/t'
 import { Modal } from '../ui/Modal'
 import { breathPhase, expandSteps } from './intervention'
 import { useVoiceAvailable, useVoicePref } from './useVoice'
@@ -61,6 +62,7 @@ export function InterventionPlayer({
   const voiceBusyTick = spokenIndex
   const [scale, setScale] = useState(() => targetScale(steps[0]?.text) ?? 0.55)
   const reduce = useReducedMotion()
+  const t = useT()
 
   const done = index >= steps.length
   const step = done ? null : steps[index]
@@ -82,8 +84,8 @@ export function InterventionPlayer({
   useEffect(() => {
     if (done || paused || left === null) return
     if (left <= 1 && voiceBusyRef.current) return
-    const t = window.setTimeout(() => (left <= 1 ? goTo(index + 1) : setLeft(left - 1)), 1000)
-    return () => window.clearTimeout(t)
+    const timer = window.setTimeout(() => (left <= 1 ? goTo(index + 1) : setLeft(left - 1)), 1000)
+    return () => window.clearTimeout(timer)
   }, [left, paused, done, index, goTo, voiceBusyTick])
 
   // Aviso al cambiar de paso o terminar. No al abrir (ni en el doble montaje del modo estricto):
@@ -109,7 +111,7 @@ export function InterventionPlayer({
   useEffect(() => {
     const text = steps[index]?.text
     if (!voice || done || !text) return
-    const t = window.setTimeout(
+    const timer = window.setTimeout(
       () => {
         spoken.current = true
         // Se espera a que la frase termine de sonar: hasta entonces el paso no avanza solo.
@@ -121,7 +123,7 @@ export function InterventionPlayer({
       spoken.current ? 150 : voiceDelayMs,
     )
     return () => {
-      window.clearTimeout(t)
+      window.clearTimeout(timer)
       stopSpeaking()
     }
   }, [voice, done, index, steps, voiceDelayMs])
@@ -135,8 +137,8 @@ export function InterventionPlayer({
   const autoAdvance = !done && !paused && left === null && !waitingVoice
   useEffect(() => {
     if (!autoAdvance) return
-    const t = window.setTimeout(() => goTo(index + 1), AUTO_NEXT_MS)
-    return () => window.clearTimeout(t)
+    const timer = window.setTimeout(() => goTo(index + 1), AUTO_NEXT_MS)
+    return () => window.clearTimeout(timer)
   }, [autoAdvance, index, goTo])
 
   // Al terminar, «Hecho» unos segundos y se cierra solo.
@@ -144,8 +146,8 @@ export function InterventionPlayer({
   closeRef.current = onClose
   useEffect(() => {
     if (!done) return
-    const t = window.setTimeout(() => closeRef.current(), AUTO_CLOSE_MS)
-    return () => window.clearTimeout(t)
+    const timer = window.setTimeout(() => closeRef.current(), AUTO_CLOSE_MS)
+    return () => window.clearTimeout(timer)
   }, [done])
 
   return (
@@ -165,7 +167,7 @@ export function InterventionPlayer({
               onClick={onClose}
               className=" border border-env-border px-3 py-1.5 text-sm hover:border-env-text"
             >
-              {done ? 'Cerrar' : 'Terminar'}
+              {done ? t('Cerrar') : t('Terminar')}
             </button>
           </div>
         </div>
@@ -185,9 +187,9 @@ export function InterventionPlayer({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35 }}
             >
-              <p className="font-display text-5xl font-bold">Hecho</p>
+              <p className="font-display text-5xl font-bold">{t('Hecho')}</p>
               <p className="mt-3 text-lg text-env-muted">
-                Bien hecho. Puedes repetirla cuando lo necesites.
+                {t('Bien hecho. Puedes repetirla cuando lo necesites.')}
               </p>
             </motion.div>
           ) : (
@@ -220,14 +222,14 @@ export function InterventionPlayer({
                 </AnimatePresence>
                 {step?.cycle && (
                   <p className="mt-3 text-base text-env-muted">
-                    Ciclo {step.cycle.n} de {step.cycle.of}
+                    {t('Ciclo {n} de {of}', { n: step.cycle.n, of: step.cycle.of })}
                   </p>
                 )}
               </div>
               {left !== null && (
                 <p
                   className="text-5xl font-bold tabular-nums"
-                  aria-label={`Quedan ${left} segundos`}
+                  aria-label={t('Quedan {n} segundos', { n: left })}
                 >
                   {left}
                 </p>
@@ -239,7 +241,7 @@ export function InterventionPlayer({
                     onClick={() => setPaused((p) => !p)}
                     className="border border-env-border px-6 py-3 text-lg hover:border-env-text"
                   >
-                    {paused ? 'Seguir' : 'Pausa'}
+                    {paused ? t('Seguir') : t('Pausa')}
                   </button>
                 )}
                 <button
@@ -259,17 +261,19 @@ export function InterventionPlayer({
                     />
                   )}
                   <span className="relative">
-                    {index === steps.length - 1 ? 'Terminar' : 'Siguiente'}
+                    {index === steps.length - 1 ? t('Terminar') : t('Siguiente')}
                   </span>
                 </button>
               </div>
               {autoAdvance && (
-                <p className="-mt-4 text-sm text-env-muted">Pasa solo en 3 s si no pulsas</p>
+                <p className="-mt-4 text-sm text-env-muted">{t('Pasa solo en 3 s si no pulsas')}</p>
               )}
             </>
           )}
         </div>
-        {voiceReady && <p className="px-4 pb-4 text-center text-xs text-env-muted">{VOICE_NOTE}</p>}
+        {voiceReady && (
+          <p className="px-4 pb-4 text-center text-xs text-env-muted">{t(VOICE_NOTE)}</p>
+        )}
       </div>
     </Modal>
   )

@@ -5,6 +5,7 @@ import { CrewOverview } from '../components/members/CrewOverview'
 import { pickIndividual } from '../components/members/crewOverview'
 import { MemberStrip } from '../components/members/MemberStrip'
 import { capitalize, useVocab } from '../environments/useVocab'
+import { useT } from '../i18n/t'
 import { useEnvironmentStore } from '../store/environment'
 import Dashboard from './Dashboard'
 
@@ -18,6 +19,7 @@ type View = 'conjunto' | 'individual'
  *   elegido. El elegido es el member activo de toda la app (el mismo que el selector global).
  */
 export default function Members() {
+  const t = useT()
   const vocab = useVocab()
   const envId = useEnvironmentStore((s) => s.envId)
   const activeId = useEnvironmentStore((s) => s.memberId)
@@ -42,7 +44,7 @@ export default function Members() {
   const toggle = (
     <div
       role="group"
-      aria-label="Vista"
+      aria-label={t('Vista')}
       className={`grid grid-cols-2 gap-1.5 ${view === 'individual' ? 'max-md:hidden' : ''}`}
     >
       {(
@@ -63,7 +65,7 @@ export default function Members() {
               : 'border-env-border text-env-muted hover:text-env-text'
           }`}
         >
-          {label}
+          {t(label)}
         </button>
       ))}
     </div>
@@ -78,12 +80,12 @@ export default function Members() {
       >
         <div className={`min-w-0 ${view === 'individual' ? 'max-md:sr-only' : ''}`}>
           <p className="hud-label">{capitalize(vocab.crew)}</p>
-          <h1 className="text-2xl font-semibold">Estado de {vocab.crew}</h1>
+          <h1 className="text-2xl font-semibold">{t('Estado de {crew}', { crew: vocab.crew })}</h1>
         </div>
         {toggle}
       </header>
 
-      {!envId && <p className="text-env-muted">Tu usuario no tiene entorno asignado.</p>}
+      {!envId && <p className="text-env-muted">{t('Tu usuario no tiene entorno asignado.')}</p>}
 
       {envId && members.state === 'loading' && (
         <ul className="grid gap-3 md:grid-cols-2" aria-busy="true">
@@ -95,19 +97,19 @@ export default function Members() {
 
       {envId && members.state === 'error' && (
         <div className="hud-panel p-4">
-          <p>No se ha podido cargar la lista.</p>
+          <p>{t('No se ha podido cargar la lista.')}</p>
           <button
             type="button"
             onClick={members.retry}
             className="mt-3  bg-env-primary px-3 py-1.5 text-sm font-medium text-env-primary-text"
           >
-            Reintentar
+            {t('Reintentar')}
           </button>
         </div>
       )}
 
       {members.state === 'ready' && list.length === 0 && (
-        <p className="text-env-muted">No hay nadie dado de alta en este entorno.</p>
+        <p className="text-env-muted">{t('No hay nadie dado de alta en este entorno.')}</p>
       )}
 
       {list.length > 0 && view === 'conjunto' && (
@@ -122,7 +124,7 @@ export default function Members() {
               onClick={() => show('conjunto')}
               className="flex min-h-11 shrink-0 items-center gap-2 border border-env-border px-3 text-sm whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-env-primary md:hidden"
             >
-              <span aria-hidden>←</span> Todos
+              <span aria-hidden>←</span> {t('Todos')}
             </button>
             <MemberStrip
               members={list}

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { useMembers } from '../../api/useMembers'
+import { useT } from '../../i18n/t'
 import type { Vocabulary } from '../../store/environment'
 import { livenessState } from '../ui/status'
 import { StatusBadge } from '../ui/StatusBadge'
@@ -12,6 +13,7 @@ interface MemberListProps {
 
 /** Members del entorno elegido. El puesto solo se muestra si el vocabulario lo traduce. */
 export function MemberList({ envId, vocabulary, onSelect }: MemberListProps) {
+  const t = useT()
   const members = useMembers(envId)
 
   if (members.state === 'loading') {
@@ -27,20 +29,20 @@ export function MemberList({ envId, vocabulary, onSelect }: MemberListProps) {
   if (members.state === 'error') {
     return (
       <div className=" border border-env-border bg-env-surface p-4">
-        <p>No se ha podido cargar la lista.</p>
+        <p>{t('No se ha podido cargar la lista.')}</p>
         <button
           type="button"
           onClick={members.retry}
           className="mt-3  bg-env-primary px-3 py-1.5 text-sm font-medium text-env-primary-text"
         >
-          Reintentar
+          {t('Reintentar')}
         </button>
       </div>
     )
   }
 
   if (members.data.length === 0) {
-    return <p className="text-env-muted">No hay nadie dado de alta en este entorno.</p>
+    return <p className="text-env-muted">{t('No hay nadie dado de alta en este entorno.')}</p>
   }
 
   return (

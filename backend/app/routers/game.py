@@ -5,7 +5,7 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session
 
-from app import models
+from app import i18n, models
 from app.routers.deps import (
     ERRORS_404,
     ERRORS_409,
@@ -35,7 +35,7 @@ router = APIRouter(tags=["game"], dependencies=[AuthDep], responses={**ERRORS_AU
 def _member(session: Session, member_id: int) -> models.Member:
     m = members.get_member(session, member_id)
     if m is None:
-        raise HTTPException(404, f"Member desconocido: {member_id}")
+        raise HTTPException(404, i18n.tr("Member desconocido: {id}", id=member_id))
     return m
 
 
@@ -122,13 +122,13 @@ def game_state(member_id: int, session: SessionDep) -> GameState:
 )
 def leaderboard(env_id: Slug, session: SessionDep) -> Leaderboard:
     if environments.get_environment(env_id) is None:
-        raise HTTPException(404, f"Entorno desconocido: {env_id}")
+        raise HTTPException(404, i18n.tr("Entorno desconocido: {id}", id=env_id))
     return gamification.leaderboard(session, env_id)
 
 
 def _env(env_id: str) -> None:
     if environments.get_environment(env_id) is None:
-        raise HTTPException(404, f"Entorno desconocido: {env_id}")
+        raise HTTPException(404, i18n.tr("Entorno desconocido: {id}", id=env_id))
 
 
 @router.post(

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { NetworkError } from '../../api/client'
+import { useT } from '../../i18n/t'
 import { answerRuok } from '../../offline/outbox'
 import { Modal } from '../ui/Modal'
 
@@ -29,6 +30,7 @@ interface RuokModalProps {
  *   momento (sin cuenta atrás: ya se ha pedido ayuda), que queda guardado en el outbox.
  */
 export function RuokModal({ memberId, onAnswered, onSendSos, onAddDetails }: RuokModalProps) {
+  const t = useT()
   const [phase, setPhase] = useState<Phase>({ kind: 'ask' })
   const detailsRef = useRef<HTMLButtonElement>(null)
 
@@ -55,8 +57,8 @@ export function RuokModal({ memberId, onAnswered, onSendSos, onAddDetails }: Ruo
         ok,
         message:
           err instanceof NetworkError
-            ? 'Sin conexión con el servidor. Vuelve a intentarlo.'
-            : `No se ha podido enviar: ${String(err)}`,
+            ? t('Sin conexión con el servidor. Vuelve a intentarlo.')
+            : t('No se ha podido enviar: {error}', { error: String(err) }),
       })
     }
   }
@@ -70,10 +72,10 @@ export function RuokModal({ memberId, onAnswered, onSendSos, onAddDetails }: Ruo
           <>
             <div>
               <h2 id="ruok-title" className="text-4xl font-bold">
-                Ayuda pedida
+                {t('Ayuda pedida')}
               </h2>
               <p id="ruok-desc" className="mt-3 text-lg text-env-muted">
-                Se ha creado una alerta y se está avisando. Si puedes, cuenta qué pasa.
+                {t('Se ha creado una alerta y se está avisando. Si puedes, cuenta qué pasa.')}
               </p>
             </div>
             <div className="flex w-full max-w-sm flex-col gap-3">
@@ -86,14 +88,14 @@ export function RuokModal({ memberId, onAnswered, onSendSos, onAddDetails }: Ruo
                 }}
                 className=" bg-[var(--sos-bg)] hover:bg-[var(--sos-bg-strong)] px-6 py-4 text-lg font-semibold text-[var(--sos-text)]"
               >
-                Añadir detalles
+                {t('Añadir detalles')}
               </button>
               <button
                 type="button"
                 onClick={onAnswered}
                 className=" border border-env-border px-6 py-3"
               >
-                Cerrar
+                {t('Cerrar')}
               </button>
             </div>
           </>
@@ -104,7 +106,7 @@ export function RuokModal({ memberId, onAnswered, onSendSos, onAddDetails }: Ruo
                 R U OK<span className="text-env-primary">?</span>
               </h2>
               <p id="ruok-desc" className="mt-4 text-lg text-env-muted">
-                Hace un rato que no recibimos señal tuya. ¿Estás bien?
+                {t('Hace un rato que no recibimos señal tuya. ¿Estás bien?')}
               </p>
             </div>
             <div className="flex w-full max-w-sm flex-col gap-3">
@@ -115,7 +117,7 @@ export function RuokModal({ memberId, onAnswered, onSendSos, onAddDetails }: Ruo
                 onClick={() => void answer(true)}
                 className=" bg-env-primary px-6 py-5 text-xl font-semibold text-env-primary-text disabled:opacity-60"
               >
-                {sending && phase.ok ? 'Enviando…' : 'Estoy bien'}
+                {sending && phase.ok ? t('Enviando…') : t('Estoy bien')}
               </button>
               <button
                 type="button"
@@ -123,7 +125,7 @@ export function RuokModal({ memberId, onAnswered, onSendSos, onAddDetails }: Ruo
                 onClick={() => void answer(false)}
                 className=" bg-[var(--sos-bg)] hover:bg-[var(--sos-bg-strong)] px-6 py-5 text-xl font-semibold text-white disabled:opacity-60"
               >
-                {sending && !phase.ok ? 'Enviando…' : 'Necesito ayuda'}
+                {sending && !phase.ok ? t('Enviando…') : t('Necesito ayuda')}
               </button>
             </div>
             {phase.kind === 'error' && (

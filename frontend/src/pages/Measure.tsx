@@ -20,6 +20,8 @@ import { useEnvironmentStore } from '../store/environment'
 import { useActiveMemberId, useAuth } from '../auth/useAuth'
 import { NoMemberSelected } from '../components/ui/NoMemberSelected'
 import { AutoTextarea } from '../components/ui/AutoTextarea'
+import { dateLocale } from '../i18n/lang'
+import { useT } from '../i18n/t'
 
 /** Sistema cuyas escalas (ánimo, estrés…) se registran con el check-in diario, no con este formulario. */
 const CHECKIN_SYSTEM = 'neuro_behavioral'
@@ -41,6 +43,7 @@ type Phase = { kind: 'editing' } | { kind: 'sending' } | { kind: 'failed'; messa
  * propio (horas de sueño) tienen su tarjeta aparte.
  */
 export default function Measure() {
+  const t = useT()
   // Un member, siempre los suyos; el resto de roles, el member elegido (FE-28).
   const memberId = useActiveMemberId()
   const { can } = useAuth()
@@ -81,7 +84,7 @@ export default function Measure() {
       ? active.filter((i) => i.system_id === systemParam)
       : []
 
-  const title = <h1 className="text-2xl font-semibold">Nueva medición</h1>
+  const title = <h1 className="text-2xl font-semibold">{t('Nueva medición')}</h1>
 
   if (memberId === null) {
     return (
@@ -116,14 +119,17 @@ export default function Measure() {
         {title}
         <div className="hud-panel p-4" role="status">
           <p className="font-medium">
-            {sysName ?? 'Este indicador'} no se mide en {env?.name ?? 'este entorno'}.
+            {t('{system} no se mide en {env}.', {
+              system: sysName ?? t('Este indicador'),
+              env: env?.name ?? t('este entorno'),
+            })}
           </p>
           <p className="mt-1 text-sm text-env-muted">
-            Ningún indicador de este sistema está activo en la configuración del entorno.
+            {t('Ningún indicador de este sistema está activo en la configuración del entorno.')}
           </p>
         </div>
         <Link to="/measure" className="hud-btn hud-btn-primary">
-          Elegir qué medir
+          {t('Elegir qué medir')}
         </Link>
       </section>
     )
@@ -139,7 +145,7 @@ export default function Measure() {
       <section className="flex flex-1 flex-col gap-4">
         <div>
           {title}
-          <p className="text-env-muted lg:text-lg">¿Qué quieres medir?</p>
+          <p className="text-env-muted lg:text-lg">{t('¿Qué quieres medir?')}</p>
         </div>
         {/* Las tarjetas reparten el alto disponible (filas iguales) y crecen con la pantalla. */}
         <ul className="grid flex-1 auto-rows-fr gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
@@ -158,7 +164,7 @@ export default function Measure() {
                         {s.name}
                       </span>
                       <span className="mt-1 block text-sm text-env-muted">
-                        Check-in diario «R U OK?»:{' '}
+                        {t('Check-in diario «R U OK?»:')}{' '}
                         {inds
                           .filter((i) => (CHECKIN_INDICATORS as readonly string[]).includes(i.id))
                           .map((i) => i.name)
@@ -226,6 +232,7 @@ function MeasureForm({
   heading: string
   onDone: () => void
 }) {
+  const t = useT()
   const [values, setValues] = useState<Record<string, RawValue>>(() =>
     Object.fromEntries(fields.map((f) => [f.id, emptyValue(f.input.type)])),
   )
@@ -280,7 +287,7 @@ function MeasureForm({
       return
     }
     if (ok.length === 0) {
-      setPhase({ kind: 'failed', message: 'Rellena al menos un valor.' })
+      setPhase({ kind: 'failed', message: t('Rellena al menos un valor.') })
       return
     }
     const takenAt = serverNow().toISOString()
@@ -304,22 +311,26 @@ function MeasureForm({
         pushToast({
           tone: 'success',
           icon: 'pulse',
-          label: 'Medición enviada',
+          label: t('Medición enviada'),
           title: `${heading}: ${statusStyle(sys?.status ?? a.overall_status).label}`,
           body:
-            (r.result.accepted === 1
-              ? '1 valor guardado'
-              : `${r.result.accepted} valores guardados`) +
-            ` · estado general: ${statusStyle(a.overall_status).label.toLowerCase()}`,
-          actions: [{ label: 'Ver el panel', to: '/dashboard' }],
+            r.result.accepted === 1
+              ? t('1 valor guardado · estado general: {status}', {
+                  status: statusStyle(a.overall_status).label.toLowerCase(),
+                })
+              : t('{n} valores guardados · estado general: {status}', {
+                  n: r.result.accepted,
+                  status: statusStyle(a.overall_status).label.toLowerCase(),
+                }),
+          actions: [{ label: t('Ver el panel'), to: '/dashboard' }],
         })
       } else {
         pushToast({
           tone: 'info',
           icon: 'upload',
-          label: 'Guardada en el dispositivo',
-          title: 'Sin conexión con el servidor',
-          body: 'La medición se enviará sola al volver la conexión, sin duplicarse.',
+          label: t('Guardada en el dispositivo'),
+          title: t('Sin conexión con el servidor'),
+          body: t('La medición se enviará sola al volver la conexión, sin duplicarse.'),
         })
       }
       onDone()
@@ -327,7 +338,7 @@ function MeasureForm({
       // Solo si falla el propio guardado local (IndexedDB no disponible).
       setPhase({
         kind: 'failed',
-        message: `No se ha podido guardar en el dispositivo: ${String(err)}`,
+        message: t('No se ha podido guardar en el dispositivo: {error}', { error: String(err) }),
       })
     }
   }
@@ -335,7 +346,7 @@ function MeasureForm({
   const busy = phase.kind === 'sending'
   const noteField = (
     <label className="flex flex-col gap-1">
-      <span className="hud-label">Nota (opcional)</span>
+      <span className="hud-label">{t('Nota (opcional)')}</span>
       <AutoTextarea
         value={note}
         onChange={(e) => setNote(e.target.value)}
@@ -353,14 +364,14 @@ function MeasureForm({
     >
       <div>
         <Link to="/measure" className="text-sm text-env-muted hover:text-env-text hover:underline">
-          ← Elegir otra cosa
+          ← {t('Elegir otra cosa')}
         </Link>
         <h1 className="mt-1 text-2xl font-semibold">{heading}</h1>
       </div>
 
       {multi && (
         // Progreso: un tramo por indicador (toca uno para volver a él) y el resumen al final.
-        <ol className="flex items-center gap-1.5" aria-label="Pasos de la medición">
+        <ol className="flex items-center gap-1.5" aria-label={t('Pasos de la medición')}>
           {fields.map((f, i) => {
             const r = filled(f)
             return (
@@ -370,7 +381,11 @@ function MeasureForm({
                   disabled={busy}
                   onClick={() => setStep(i)}
                   aria-current={step === i ? 'step' : undefined}
-                  aria-label={`Paso ${i + 1}: ${f.name}${r.ok === true ? ' (con valor)' : ''}`}
+                  aria-label={
+                    r.ok === true
+                      ? t('Paso {n}: {name} (con valor)', { n: i + 1, name: f.name })
+                      : t('Paso {n}: {name}', { n: i + 1, name: f.name })
+                  }
                   className="relative block h-2 w-full before:absolute before:inset-x-0 before:-inset-y-[18px] before:content-[''] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-env-primary"
                   style={{
                     background:
@@ -388,12 +403,14 @@ function MeasureForm({
       )}
 
       <fieldset disabled={busy} className="hud-panel min-w-0">
-        <legend className="sr-only">{reviewing ? 'Resumen' : current.name}</legend>
+        <legend className="sr-only">{reviewing ? t('Resumen') : current.name}</legend>
         <div className="hud-panel-head">
-          {reviewing ? 'Resumen' : current.name}
+          {reviewing ? t('Resumen') : current.name}
           {multi && (
             <span className="mr-2.5 ml-auto tracking-normal text-env-muted normal-case">
-              {reviewing ? 'Repasa y guarda' : `Paso ${step + 1} de ${fields.length}`}
+              {reviewing
+                ? t('Repasa y guarda')
+                : t('Paso {n} de {total}', { n: step + 1, total: fields.length })}
             </span>
           )}
         </div>
@@ -415,10 +432,10 @@ function MeasureForm({
                           className={`shrink-0 tabular-nums ${r.ok === true ? 'font-semibold' : 'text-env-muted'}`}
                         >
                           {r.ok === true
-                            ? `${r.value.toLocaleString('es-ES', { maximumFractionDigits: 2 })} ${f.unit}`
+                            ? `${r.value.toLocaleString(dateLocale(), { maximumFractionDigits: 2 })} ${f.unit}`
                             : r.ok === false
-                              ? 'Valor no válido'
-                              : 'Sin valor'}
+                              ? t('Valor no válido')
+                              : t('Sin valor')}
                         </span>
                       </button>
                     </li>
@@ -457,7 +474,7 @@ function MeasureForm({
             onClick={() => setStep((n) => n - 1)}
             className="hud-btn shrink-0 px-4"
           >
-            Atrás
+            {t('Atrás')}
           </button>
         )}
         {multi && !reviewing && (
@@ -471,17 +488,17 @@ function MeasureForm({
             }}
             className="hud-btn shrink-0 px-4"
           >
-            Omitir
+            {t('Omitir')}
           </button>
         )}
         <button type="submit" disabled={busy} className="hud-btn hud-btn-primary min-w-0 flex-1">
           {busy
-            ? 'Guardando…'
+            ? t('Guardando…')
             : multi && !reviewing
               ? step === fields.length - 1
-                ? 'Ver resumen'
-                : 'Siguiente'
-              : 'Guardar medición'}
+                ? t('Ver resumen')
+                : t('Siguiente')
+              : t('Guardar medición')}
         </button>
       </div>
       <VoiceNote

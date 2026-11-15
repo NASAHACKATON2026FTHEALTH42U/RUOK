@@ -1,0 +1,73 @@
+{
+  "iss": {
+    "name": "International Space Station",
+    "vocabulary": {
+      "member": "astronaut",
+      "crew": "crew",
+      "ground": "flight surgeon",
+      "medic": "medical officer",
+      "commander": "commander",
+      "psych": "BHP psychologist"
+    }
+  },
+  "moon": {
+    "name": "Artemis lunar base",
+    "vocabulary": {
+      "member": "astronaut",
+      "crew": "crew",
+      "ground": "flight surgeon",
+      "medic": "medical officer",
+      "commander": "commander",
+      "psych": "BHP psychologist"
+    }
+  },
+  "mars": {
+    "name": "Mars base",
+    "vocabulary": {
+      "member": "astronaut",
+      "crew": "crew",
+      "ground": "flight surgeon",
+      "medic": "medical officer",
+      "commander": "commander",
+      "psych": "BHP psychologist"
+    }
+  },
+  "earth": {
+    "name": "Earth analog",
+    "vocabulary": {
+      "member": "participant",
+      "crew": "team",
+      "ground": "doctor",
+      "medic": "team medic",
+      "commander": "team lead",
+      "psych": "psychologist"
+    }
+  },
+  "hospital": {
+    "name": "Hospital ward",
+    "vocabulary": {
+      "member": "patient",
+      "crew": "ward",
+      "ground": "doctor",
+      "medic": "nursing staff",
+      "nurse": "nursing staff",
+      "doctor": "doctor",
+      "commander": "ward supervisor",
+      "psych": "clinical psychology"
+    }
+  },
+  "geriatric": {
+    "name": "Care home",
+    "vocabulary": {
+      "member": "resident",
+      "crew": "care home",
+      "ground": "doctor",
+      "medic": "caregiver",
+      "caregiver": "caregiver",
+      "doctor": "doctor",
+      "family": "family",
+      "commander": "care home management",
+      "psych": "psychology"
+    }
+  }
+}

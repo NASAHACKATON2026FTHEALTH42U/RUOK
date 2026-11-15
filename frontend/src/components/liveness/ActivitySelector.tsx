@@ -1,3 +1,4 @@
+import { useT } from '../../i18n/t'
 import { useActivityStore } from '../../store/activity'
 import { activityHint, activityOptions, type Activity, type LivenessThresholds } from './heartbeat'
 
@@ -18,15 +19,16 @@ export function ActivitySelector({
   liveness?: LivenessThresholds
   compact?: boolean
 }) {
+  const t = useT()
   const activity = useActivityStore((s) => s.activity)
   const setActivity = useActivityStore((s) => s.setActivity)
 
   return (
     <fieldset className="hud-panel w-full">
-      <legend className="sr-only">Actividad actual</legend>
+      <legend className="sr-only">{t('Actividad actual')}</legend>
       <div className="hud-panel-head" aria-hidden="true">
-        Actividad
-        {!compact && <span className="hud-chip text-st-ok">Ajusta los avisos</span>}
+        {t('Actividad')}
+        {!compact && <span className="hud-chip text-st-ok">{t('Ajusta los avisos')}</span>}
       </div>
       <div className={`grid grid-cols-3 gap-1.5 pt-2.5 pb-3 ${compact ? 'px-2' : 'px-3.5'}`}>
         {activityOptions(isSpace).map((o) => {

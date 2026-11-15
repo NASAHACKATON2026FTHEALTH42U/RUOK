@@ -32,7 +32,7 @@ from sqlalchemy import func
 from sqlalchemy.dialects.sqlite import insert
 from sqlmodel import Session, col, select
 
-from app import clock, models
+from app import clock, i18n, models
 from app.schemas import Badge, BadgeDef, GameState, Leaderboard, LeaderboardEntry, TaskType
 from app.services import crew, routine
 from app.services import members as members_service
@@ -79,6 +79,11 @@ def _badges() -> dict[str, BadgeDef]:
 def list_badges() -> list[BadgeDef]:
     """Las insignias del catálogo, en el orden del JSON (valida el fichero)."""
     return list(_badges().values())
+
+
+def localized_badge(item: BadgeDef) -> BadgeDef:
+    """Copia de la insignia en el idioma de la petición (FE-38)."""
+    return i18n.localized("badges", item.id, item)
 
 
 # ── Cálculo (puro) ───────────────────────────────────────────────────
@@ -164,7 +169,11 @@ def badges_of(session: Session, member_id: int) -> list[Badge]:
         .order_by(col(models.BadgeAward.earned_at), col(models.BadgeAward.id))
     ).all()
     return [
-        Badge(id=r.badge_id, name=catalog[r.badge_id].name, earned_at=r.earned_at)
+        Badge(
+            id=r.badge_id,
+            name=localized_badge(catalog[r.badge_id]).name,
+            earned_at=r.earned_at,
+        )
         for r in rows
         if r.badge_id in catalog  # una insignia retirada del catálogo deja de mostrarse
     ]

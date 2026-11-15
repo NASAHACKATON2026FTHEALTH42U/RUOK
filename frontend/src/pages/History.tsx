@@ -18,6 +18,7 @@ import {
   type Period,
   type Ranges,
 } from '../components/dashboard/trend'
+import { useT } from '../i18n/t'
 import { useMediaQuery } from '../lib/useMediaQuery'
 import { classify, mergeRanges, type Ranges as FullRanges } from '../offline/provisional'
 import { useLiveRefresh } from '../realtime/events'
@@ -55,6 +56,7 @@ const VALUE_STATUS = {
  * con su rango probable. Es una estimación: nunca se pinta como un dato medido.
  */
 export default function History() {
+  const t = useT()
   // Un member, siempre los suyos; el resto de roles, el member elegido (FE-28).
   const memberId = useActiveMemberId()
   const envId = useEnvironmentStore((s) => s.envId)
@@ -133,7 +135,7 @@ export default function History() {
 
   const title = (
     <header>
-      <h1 className="text-2xl font-semibold">Historial</h1>
+      <h1 className="text-2xl font-semibold">{t('Historial')}</h1>
     </header>
   )
 
@@ -163,9 +165,9 @@ export default function History() {
 
   const errorMsg = series.state === 'error' && (
     <p className="px-3.5 py-3 text-sm">
-      No se han podido cargar las mediciones.{' '}
+      {t('No se han podido cargar las mediciones.')}{' '}
       <button type="button" onClick={series.retry} className="underline">
-        Reintentar
+        {t('Reintentar')}
       </button>
     </p>
   )
@@ -177,7 +179,7 @@ export default function History() {
       <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,18rem)] sm:items-end sm:gap-2.5">
         <div className="flex flex-col gap-1">
           <label htmlFor="history-indicator" className="text-sm text-env-muted">
-            Indicador
+            {t('Indicador')}
           </label>
           <select
             id="history-indicator"
@@ -186,7 +188,7 @@ export default function History() {
             disabled={options.length === 0}
             className="hud-input !pl-2.5 !font-sans !text-sm focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary"
           >
-            {options.length === 0 && <option value="">Cargando…</option>}
+            {options.length === 0 && <option value="">{t('Cargando…')}</option>}
             {options.map((id) => (
               <option key={id} value={id}>
                 {byId.get(id)?.name ?? id}
@@ -200,7 +202,7 @@ export default function History() {
 
         <div
           role="group"
-          aria-label="Periodo"
+          aria-label={t('Periodo')}
           className="grid grid-cols-2 border border-env-border"
         >
           {PERIODS.map((p, i) => (
@@ -217,7 +219,7 @@ export default function History() {
                   : 'text-env-muted hover:text-env-text'
               }`}
             >
-              {p} días
+              {t('{n} días', { n: p })}
             </button>
           ))}
         </div>
@@ -228,14 +230,16 @@ export default function History() {
       <div className="grid gap-2 sm:gap-2.5 md:gap-4 lg:flex-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-stretch">
         {/* Gráfica: solo en escritorio (en móvil la pantalla es la tabla, como la maqueta). */}
         <section
-          aria-label={`Tendencia de ${name}`}
+          aria-label={t('Tendencia de {name}', { name })}
           className="hud-panel hidden md:flex md:flex-col"
         >
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-hud-line px-3.5 py-2.5">
             <p className="text-sm text-env-muted">
-              {name} · últimos {days} días
-              {predicted && expected && ` · previsión ${expected.horizon_days} días`}
-              {unit && ` · ${unit === '1-5' ? 'escala 1-5' : unit}`}
+              {name} · {t('últimos {n} días', { n: days })}
+              {predicted &&
+                expected &&
+                ` · ${t('previsión {n} días', { n: expected.horizon_days })}`}
+              {unit && ` · ${unit === '1-5' ? t('escala 1-5') : unit}`}
             </p>
             {predicted && <ForecastLegend />}
           </div>
@@ -244,7 +248,7 @@ export default function History() {
             {chartLoading && <div className="h-64 animate-pulse bg-env-bg" aria-busy="true" />}
             {series.state === 'ready' && points.length === 0 && (
               <p className="flex h-64 items-center justify-center text-sm text-env-muted">
-                Sin mediciones en los últimos {days} días.
+                {t('Sin mediciones en los últimos {n} días.', { n: days })}
               </p>
             )}
             {!chartLoading && series.state === 'ready' && points.length > 0 && (
@@ -259,7 +263,7 @@ export default function History() {
             )}
             {series.state === 'error' && (
               <p className="flex h-64 items-center justify-center text-sm text-env-muted">
-                Sin datos que mostrar.
+                {t('Sin datos que mostrar.')}
               </p>
             )}
           </div>
@@ -269,8 +273,8 @@ export default function History() {
           <section className="hud-panel">
             <table className="w-full table-fixed border-collapse">
               <caption className="sr-only">
-                Mediciones de {name}, últimos {days} días
-                {pages > 1 && `, página ${page + 1} de ${pages}`}
+                {t('Mediciones de {name}, últimos {n} días', { name, n: days })}
+                {pages > 1 && t(', página {page} de {pages}', { page: page + 1, pages })}
               </caption>
               <thead>
                 <tr className="border-b border-hud-line text-left text-sm text-env-muted">
@@ -278,22 +282,22 @@ export default function History() {
                     scope="col"
                     className="w-[96px] py-1.5 sm:py-2.5 pr-2 pl-3.5 font-medium sm:w-[120px]"
                   >
-                    Fecha
+                    {t('Fecha')}
                   </th>
                   <th scope="col" className="px-2 py-1.5 sm:py-2.5 font-medium">
-                    Valor
+                    {t('Valor')}
                   </th>
                   <th
                     scope="col"
                     className="w-[92px] py-1.5 sm:py-2.5 pr-3.5 pl-2 text-right font-medium sm:w-[110px]"
                   >
-                    Origen
+                    {t('Origen')}
                   </th>
                   <th
                     scope="col"
                     className="hidden px-2 py-1.5 sm:py-2.5 pr-3.5 font-medium sm:table-cell lg:hidden xl:table-cell"
                   >
-                    Nota
+                    {t('Nota')}
                   </th>
                 </tr>
               </thead>
@@ -322,7 +326,7 @@ export default function History() {
                               {m.unit && <span className="text-xs text-env-muted">{m.unit}</span>}
                             </>
                           )}
-                          {st.label && <span className="sr-only">({st.label})</span>}
+                          {st.label && <span className="sr-only">({t(st.label)})</span>}
                         </span>
                       </td>
                       <td className="truncate py-1.5 pr-3.5 pl-2 text-right">
@@ -346,14 +350,14 @@ export default function History() {
             {errorMsg}
             {series.state === 'ready' && rows.length === 0 && (
               <p className="px-3.5 py-3 text-sm text-env-muted">
-                Sin mediciones en los últimos {days} días.
+                {t('Sin mediciones en los últimos {n} días.', { n: days })}
               </p>
             )}
           </section>
 
           {series.refreshFailed && (
             <p className="text-sm text-env-muted" role="status">
-              ⚠ No se pudo actualizar: puede haber mediciones nuevas que no se ven.
+              ⚠ {t('No se pudo actualizar: puede haber mediciones nuevas que no se ven.')}
             </p>
           )}
 
@@ -361,7 +365,7 @@ export default function History() {
             // Sin página anterior o siguiente, la flecha desaparece (`invisible`: conserva su hueco
             // para que el contador siga centrado).
             <nav
-              aria-label="Páginas del historial"
+              aria-label={t('Páginas del historial')}
               className="flex items-center justify-between gap-3"
             >
               <button
@@ -369,20 +373,25 @@ export default function History() {
                 className={`hud-btn w-[52px] !px-0 !font-sans !text-base !tracking-normal max-sm:!h-11 ${page === 0 ? 'invisible' : ''}`}
                 onClick={() => setPage(page - 1)}
                 disabled={page === 0}
-                aria-label="Página anterior"
+                aria-label={t('Página anterior')}
               >
                 ←
               </button>
               <span className="text-center text-sm text-env-muted" aria-live="polite">
-                Página {page + 1} / {pages} · {rows.length}{' '}
-                {rows.length === 1 ? 'medición' : 'mediciones'}
+                {rows.length === 1
+                  ? t('Página {page} / {pages} · 1 medición', { page: page + 1, pages })
+                  : t('Página {page} / {pages} · {n} mediciones', {
+                      page: page + 1,
+                      pages,
+                      n: rows.length,
+                    })}
               </span>
               <button
                 type="button"
                 className={`hud-btn w-[52px] !px-0 !font-sans !text-base !tracking-normal max-sm:!h-11 ${page >= pages - 1 ? 'invisible' : ''}`}
                 onClick={() => setPage(page + 1)}
                 disabled={page >= pages - 1}
-                aria-label="Página siguiente"
+                aria-label={t('Página siguiente')}
               >
                 →
               </button>

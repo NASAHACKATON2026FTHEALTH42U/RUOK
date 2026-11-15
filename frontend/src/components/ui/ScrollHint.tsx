@@ -1,4 +1,5 @@
 import type { RefObject } from 'react'
+import { useT } from '../../i18n/t'
 import { useCanScrollDown } from './scroll'
 
 /**
@@ -6,6 +7,7 @@ import { useCanScrollDown } from './scroll'
  * por ver. Pulsarlo baja una pantalla. Va como último hijo del contenedor (`sticky`).
  */
 export function ScrollHint({ target }: { target: RefObject<HTMLElement | null> }) {
+  const t = useT()
   const more = useCanScrollDown(target)
   if (!more) return null
   return (
@@ -21,7 +23,7 @@ export function ScrollHint({ target }: { target: RefObject<HTMLElement | null> }
         <span aria-hidden className="motion-safe:animate-bounce">
           ▾
         </span>
-        Más abajo
+        {t('Más abajo')}
       </button>
     </div>
   )

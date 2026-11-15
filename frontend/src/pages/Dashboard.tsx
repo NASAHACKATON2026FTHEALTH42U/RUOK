@@ -16,6 +16,7 @@ import { bySeverity, livenessState } from '../components/ui/status'
 import { StatusHeadline } from '../components/ui/StatusHeadline'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { capitalize, useVocab } from '../environments/useVocab'
+import { useT } from '../i18n/t'
 import { useEnvironmentStore } from '../store/environment'
 import { useActiveMemberId, useAuth } from '../auth/useAuth'
 import { useProvisionalAssessment } from '../offline/useProvisional'
@@ -32,6 +33,7 @@ const NO_INDICATORS: never[] = []
  * Los pendientes de sincronizar del outbox se ven en la cabecera global (PendingSyncChip, FE-11).
  */
 export default function Dashboard() {
+  const t = useT()
   const vocab = useVocab()
   // Un member, siempre los suyos; el resto de roles, el member elegido (FE-28).
   const memberId = useActiveMemberId()
@@ -70,7 +72,9 @@ export default function Dashboard() {
   )
 
   const title = (
-    <h1 className="text-2xl font-semibold">{capitalize(vocab.member)}: tu panel de salud</h1>
+    <h1 className="text-2xl font-semibold">
+      {t('{member}: tu panel de salud', { member: capitalize(vocab.member) })}
+    </h1>
   )
 
   if (memberId === null) {
@@ -87,7 +91,7 @@ export default function Dashboard() {
       <section className="space-y-4">
         {title}
         <div className=" border border-env-border bg-env-surface p-4">
-          <p>No se ha podido cargar la evaluación.</p>
+          <p>{t('No se ha podido cargar la evaluación.')}</p>
           <button
             type="button"
             onClick={() => {
@@ -96,7 +100,7 @@ export default function Dashboard() {
             }}
             className="mt-3  bg-env-primary px-3 py-1.5 text-sm font-medium text-env-primary-text"
           >
-            Reintentar
+            {t('Reintentar')}
           </button>
         </div>
       </section>
@@ -134,7 +138,14 @@ export default function Dashboard() {
 
   const provisionalText =
     provisionalIds && provisionalIds.size > 0
-      ? `${provisionalIds.size === 1 ? 'hay 1 indicador' : `hay ${provisionalIds.size} indicadores`} con mediciones sin sincronizar, evaluados en este dispositivo. Se sustituye por la evaluación del servidor al sincronizar.`
+      ? provisionalIds.size === 1
+        ? t(
+            'hay 1 indicador con mediciones sin sincronizar, evaluados en este dispositivo. Se sustituye por la evaluación del servidor al sincronizar.',
+          )
+        : t(
+            'hay {n} indicadores con mediciones sin sincronizar, evaluados en este dispositivo. Se sustituye por la evaluación del servidor al sincronizar.',
+            { n: provisionalIds.size },
+          )
       : null
 
   // Escritorio: en la barra superior (Layout, TopBarPortal), en línea. Móvil: aquí arriba y solo
@@ -162,10 +173,10 @@ export default function Dashboard() {
         {desktop && provisionalText && (
           <span
             className=" border border-dashed border-env-border px-2 py-0.5 text-env-muted"
-            title={`Estado provisional: ${provisionalText}`}
+            title={t('Estado provisional: {text}', { text: provisionalText })}
           >
             <span aria-hidden>⇡ </span>
-            <strong className="text-env-text">Estado provisional</strong>
+            <strong className="text-env-text">{t('Estado provisional')}</strong>
             <span className="sr-only">: {provisionalText}</span>
           </span>
         )}
@@ -174,7 +185,8 @@ export default function Dashboard() {
           role={desktop ? 'status' : undefined}
         >
           {/* Solo el aviso de fallo: los datos pueden estar desfasados. */}
-          {assessment.refreshFailed && '⚠ No se pudo actualizar: los datos pueden estar desfasados'}
+          {assessment.refreshFailed &&
+            `⚠ ${t('No se pudo actualizar: los datos pueden estar desfasados')}`}
         </span>
       </div>
     )
@@ -192,7 +204,7 @@ export default function Dashboard() {
         {provisionalText && (
           <p className="mb-3  border border-dashed border-env-border px-3 py-2 text-sm text-env-muted md:hidden">
             <span aria-hidden>⇡ </span>
-            <strong className="text-env-text">Estado provisional:</strong> {provisionalText}
+            <strong className="text-env-text">{t('Estado provisional:')}</strong> {provisionalText}
           </p>
         )}
       </header>
@@ -220,7 +232,7 @@ export default function Dashboard() {
             className="hud-panel @container flex min-h-0 min-w-0 flex-col [grid-area:systems]"
           >
             <div className="hud-panel-head">
-              <h2 id="dash-systems">Sistemas</h2>
+              <h2 id="dash-systems">{t('Sistemas')}</h2>
             </div>
             <BodyLegend
               regions={regions}
@@ -234,7 +246,7 @@ export default function Dashboard() {
           </section>
 
           <section
-            aria-label="Cuerpo"
+            aria-label={t('Cuerpo')}
             className="hud-panel min-h-0 min-w-0 [container-type:size] [grid-area:body]"
           >
             <BodyFigure
@@ -256,10 +268,12 @@ export default function Dashboard() {
             className="hud-panel @container flex min-h-0 min-w-0 flex-col [grid-area:indicators]"
           >
             <h2 id="dash-indicators" className="hud-panel-head">
-              Indicadores
+              {t('Indicadores')}
             </h2>
             {cards.length === 0 ? (
-              <p className="px-3.5 py-3 text-sm text-env-muted">Todavía no hay mediciones.</p>
+              <p className="px-3.5 py-3 text-sm text-env-muted">
+                {t('Todavía no hay mediciones.')}
+              </p>
             ) : (
               // Celdas separadas por líneas; las del borde se esconden bajo el marco del panel.
               <ul className="-mr-px -mb-px grid min-h-0 flex-1 auto-rows-[minmax(3.75rem,1fr)] grid-cols-2 overflow-y-auto @min-[30rem]:grid-cols-3 @min-[44rem]:grid-cols-4">

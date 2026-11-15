@@ -21,7 +21,7 @@ from uuid import NAMESPACE_URL, uuid5
 
 from sqlmodel import Session
 
-from app import models
+from app import i18n, models
 from app.schemas import ProtocolCompleteIn
 from app.schemas.common import EventType
 from app.services import alerts, catalog, events, routine
@@ -45,18 +45,20 @@ def complete(
     """Registra el protocolo hecho. True si es nuevo (suma puntos y avisa)."""
     intervention = catalog.get_intervention(intervention_id)
     if intervention is None:
-        raise ProtocolNotFound(f"Protocolo desconocido: {intervention_id}")
+        raise ProtocolNotFound(i18n.tr("Protocolo desconocido: {id}", id=intervention_id))
     alert = None
     if body.alert_id:
         alert = session.get(models.Alert, body.alert_id)
         if alert is None or alert.member_id != member.id:
-            raise ProtocolNotFound(f"Alerta desconocida: {body.alert_id}")
+            raise ProtocolNotFound(i18n.tr("Alerta desconocida: {id}", id=body.alert_id))
 
     cid = str(body.id)
     previous = session.get(models.TaskCompletion, cid)
     if previous is not None:
         if previous.task_id != _task_id(member, intervention_id, body):
-            raise routine.CompletionConflict(f"El completado {cid} ya se usó para otra cosa")
+            raise routine.CompletionConflict(
+                i18n.tr("El completado {id} ya se usó para otra cosa", id=cid)
+            )
         return False
     tid = _task_id(member, intervention_id, body)
     if session.get(models.Task, tid) is not None:
@@ -79,15 +81,21 @@ def complete(
     session.flush()
     routine.add_completion(session, member, task, cid, completed_at)
 
-    title = "Protocolo completado"
-    text = f"«{intervention.title}»: +{points} puntos para la tripulación."
+    # La notificación y el mensaje de la alerta se guardan en el idioma de quien completa el
+    # protocolo, que es quien los lee (FE-38). El título de la tarea sigue en español.
+    shown = catalog.localized_intervention(intervention).title
+    title = i18n.tr("Protocolo completado")
+    text = i18n.tr("«{title}»: +{points} puntos para la tripulación.", title=shown, points=points)
     events.emit(
         session,
         EventType.notification_sent,
         env_id=member.env_id,
         member_id=member.id,
         ref_id=str(uuid5(NAMESPACE_URL, f"ruok:protocol:{cid}")),
-        summary=f"{member.name}: {title.lower()} «{intervention.title}» (+{points})",
+        summary=i18n.tr(
+            "{name}: protocolo completado «{title}» (+{points})",
+            name=member.name, title=shown, points=points,
+        ),
         payload={
             "title": title,
             "text": text,
@@ -102,7 +110,8 @@ def complete(
     if alert is not None:
         # add_message hace commit de todo (tarea, completado y eventos).
         alerts.add_message(
-            session, alert, "member", f"He completado el protocolo «{intervention.title}»."
+            session, alert, "member",
+            i18n.tr("He completado el protocolo «{title}».", title=shown),
         )
     else:
         session.commit()

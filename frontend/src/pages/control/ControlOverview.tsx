@@ -11,6 +11,7 @@ import { describeLink, hhmm } from '../../components/ui/link'
 import { livenessState } from '../../components/ui/status'
 import { StatusBadge } from '../../components/ui/StatusBadge'
 import { capitalize, useVocab } from '../../environments/useVocab'
+import { useT } from '../../i18n/t'
 import { formatAgo } from '../../lib/time'
 import { useEvents } from '../../realtime/events'
 import type { RealtimeEvent } from '../../realtime/match'
@@ -36,6 +37,7 @@ const FEED_TYPES = [
  * demás tiene su sección: Simulación, Usuarios, Dispositivos y Registro.
  */
 export default function ControlOverview() {
+  const t = useT()
   const { envId, memberId, memberName } = useControlScope()
   const vocab = useVocab()
   const navigate = useNavigate()
@@ -89,22 +91,22 @@ export default function ControlOverview() {
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-4">
       <ControlHeader
-        title="Centro de control"
+        title={t('Centro de control')}
         subtitle={
           <>
-            Panorama en tiempo real, sin el retardo del enlace
-            {data && ` · actualizado ${formatAgo(data.generated_at, now)}`}
-            {overview.refreshFailed && ' · ⚠ no se pudo actualizar'}
+            {t('Panorama en tiempo real, sin el retardo del enlace')}
+            {data && ` · ${t('actualizado {ago}', { ago: formatAgo(data.generated_at, now) })}`}
+            {overview.refreshFailed && ` · ⚠ ${t('no se pudo actualizar')}`}
           </>
         }
         memberScope
       />
 
       {!envId ? (
-        <p className="text-env-muted">Elige un entorno para ver su panorama.</p>
+        <p className="text-env-muted">{t('Elige un entorno para ver su panorama.')}</p>
       ) : (
         <>
-          <section aria-label="Métricas" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <section aria-label={t('Métricas')} className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {(
               [
                 ['Mediciones (última hora)', metrics?.measurements_last_hour],
@@ -117,7 +119,7 @@ export default function ControlOverview() {
               ] as const
             ).map(([label, value]) => (
               <div key={label} className="hud-panel px-4 py-3">
-                <p className="hud-label">{label}</p>
+                <p className="hud-label">{t(label)}</p>
                 <p className="mt-1 text-3xl font-light tabular-nums">{value ?? '—'}</p>
               </div>
             ))}
@@ -125,9 +127,9 @@ export default function ControlOverview() {
 
           {overview.state === 'error' && (
             <p className="text-env-muted">
-              No se ha podido cargar el panorama.{' '}
+              {t('No se ha podido cargar el panorama.')}{' '}
               <button type="button" onClick={overview.retry} className="underline">
-                Reintentar
+                {t('Reintentar')}
               </button>
             </p>
           )}
@@ -139,7 +141,9 @@ export default function ControlOverview() {
                 link && (
                   <span title={link.long}>
                     {link.icon} {link.short}
-                    {envOv && envOv.link.queued > 0 && ` · ${envOv.link.queued} en cola`}
+                    {envOv &&
+                      envOv.link.queued > 0 &&
+                      ` · ${t('{n} en cola', { n: envOv.link.queued })}`}
                   </span>
                 )
               }
@@ -151,7 +155,7 @@ export default function ControlOverview() {
                   {(['emergency', 'critical', 'warning'] as const).every(
                     (s) => envOv.open_alerts[s] === 0,
                   ) ? (
-                    <span className="text-sm text-env-muted">Sin alertas abiertas</span>
+                    <span className="text-sm text-env-muted">{t('Sin alertas abiertas')}</span>
                   ) : (
                     (['emergency', 'critical', 'warning'] as const)
                       .filter((s) => envOv.open_alerts[s] > 0)
@@ -166,14 +170,16 @@ export default function ControlOverview() {
                   )}
                   {envOv.liveness_paused && (
                     <span className="text-xs text-env-muted">
-                      · vigilancia de contacto en pausa
+                      · {t('vigilancia de contacto en pausa')}
                     </span>
                   )}
                 </div>
               )}
               {overview.state === 'loading' && <div className="m-4 h-40 animate-pulse bg-env-bg" />}
               {envOv && members.length === 0 && (
-                <p className="p-4 text-sm text-env-muted">Sin {vocab.crew}.</p>
+                <p className="p-4 text-sm text-env-muted">
+                  {t('Sin {crew}.', { crew: vocab.crew })}
+                </p>
               )}
               <ul className="divide-y divide-env-border/60">
                 {members.map((m) => {
@@ -189,8 +195,8 @@ export default function ControlOverview() {
                           <span className="block truncate font-medium">{m.name}</span>
                           <span className="block text-xs text-env-muted">
                             {m.last_measurement_at
-                              ? `medido ${formatAgo(m.last_measurement_at, now)}`
-                              : 'sin mediciones'}
+                              ? t('medido {ago}', { ago: formatAgo(m.last_measurement_at, now) })
+                              : t('sin mediciones')}
                           </span>
                         </span>
                         <span className="flex shrink-0 flex-wrap justify-end gap-1">
@@ -207,19 +213,19 @@ export default function ControlOverview() {
             </ControlPanel>
 
             <ControlPanel
-              title="Eventos en vivo"
+              title={t('Eventos en vivo')}
               aside={
                 <label className="flex items-center gap-2">
-                  <span className="sr-only">Tipo de evento</span>
+                  <span className="sr-only">{t('Tipo de evento')}</span>
                   <select
                     value={group}
                     onChange={(e) => setGroup(e.target.value)}
                     className="hud-input !py-0.5 !font-sans !text-sm"
                   >
-                    <option value="">Todos</option>
+                    <option value="">{t('Todos')}</option>
                     {feedGroups.map(([k, g]) => (
                       <option key={k} value={k}>
-                        {g.label}
+                        {t(g.label)}
                       </option>
                     ))}
                   </select>
@@ -232,7 +238,9 @@ export default function ControlOverview() {
                 aria-live="polite"
                 className="min-h-0 flex-1 divide-y divide-env-border/60 overflow-y-auto [scrollbar-color:var(--env-border)_transparent] max-lg:max-h-[30rem]"
               >
-                {shown.length === 0 && <li className="p-4 text-sm text-env-muted">Sin eventos.</li>}
+                {shown.length === 0 && (
+                  <li className="p-4 text-sm text-env-muted">{t('Sin eventos.')}</li>
+                )}
                 {shown.map((e) => (
                   <li
                     key={e.id}
@@ -249,7 +257,7 @@ export default function ControlOverview() {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate">{e.summary || e.type}</span>
                       <span className="block truncate text-xs text-env-muted">
-                        {GROUPS[groupOf(e.type)]?.label ?? e.type}
+                        {GROUPS[groupOf(e.type)] ? t(GROUPS[groupOf(e.type)].label) : e.type}
                         {e.member_id != null && ` · ${memberName(e.member_id)}`}
                       </span>
                     </span>

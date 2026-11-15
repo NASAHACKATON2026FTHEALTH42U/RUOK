@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import type { Indicator } from '../../api/useIndicators'
+import { useT } from '../../i18n/t'
 import { Icon } from '../ui/Icon'
 import { faceFor } from './checkin'
 
@@ -16,6 +17,7 @@ interface FaceScaleProps {
  * Pulsar la opción elegida la quita.
  */
 export function FaceScale({ indicator, value, onChange }: FaceScaleProps) {
+  const t = useT()
   const id = useId()
   const question = indicator.measurement_instructions[0] ?? indicator.name
 
@@ -38,7 +40,7 @@ export function FaceScale({ indicator, value, onChange }: FaceScaleProps) {
               type="button"
               role="radio"
               aria-checked={checked}
-              aria-label={`${n} de 5`}
+              aria-label={t('{n} de 5', { n })}
               onClick={() => onChange(checked ? undefined : n)}
               className={`flex h-16 flex-col items-center lg:h-24 justify-center  border transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary active:scale-95 ${
                 checked

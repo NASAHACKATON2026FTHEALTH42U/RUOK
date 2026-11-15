@@ -22,6 +22,7 @@ import { StatusBadge } from '../components/ui/StatusBadge'
 import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox'
 import { NoMemberSelected } from '../components/ui/NoMemberSelected'
 import { AutoTextarea } from '../components/ui/AutoTextarea'
+import { useT } from '../i18n/t'
 
 type Phase =
   | { kind: 'editing' }
@@ -52,6 +53,7 @@ const spokenQuestion = (q: { name: string; measurement_instructions: string[] })
  * responder la anterior o al saltar de paso) y al encender la voz; al abrir la página, no.
  */
 export default function CheckIn() {
+  const t = useT()
   const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el elegido
   const catalog = useIndicators()
   const interventions = useInterventions()
@@ -120,7 +122,7 @@ export default function CheckIn() {
         {title}
         <p className=" border border-env-border bg-env-surface p-3 text-sm" role="alert">
           <span aria-hidden>⚠ </span>
-          No se pudo cargar el check-in. Comprueba la conexión con el servidor.
+          {t('No se pudo cargar el check-in. Comprueba la conexión con el servidor.')}
         </p>
       </section>
     )
@@ -133,7 +135,7 @@ export default function CheckIn() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!complete) {
-      setPhase({ kind: 'failed', message: 'Responde a todas las preguntas.' })
+      setPhase({ kind: 'failed', message: t('Responde a todas las preguntas.') })
       return
     }
     const batch = buildCheckinBatch(answers, ids, note, serverNow().toISOString(), newId)
@@ -147,7 +149,7 @@ export default function CheckIn() {
       // Solo si falla el propio guardado local (IndexedDB no disponible).
       setPhase({
         kind: 'failed',
-        message: `No se ha podido guardar en el dispositivo: ${String(err)}`,
+        message: t('No se ha podido guardar en el dispositivo: {error}', { error: String(err) }),
       })
     }
   }
@@ -168,7 +170,8 @@ export default function CheckIn() {
         className="flex w-full items-center justify-between gap-3  border border-env-border bg-env-surface px-3 py-2 text-left font-semibold hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary"
       >
         <span>
-          Para cuidarte hoy <span className="font-normal text-env-muted">({care.length})</span>
+          {t('Para cuidarte hoy')}{' '}
+          <span className="font-normal text-env-muted">({care.length})</span>
         </span>
         <span aria-hidden>{careOpen ? '▾' : '▸'}</span>
       </button>
@@ -190,10 +193,10 @@ export default function CheckIn() {
   const links = (
     <div className="flex flex-wrap gap-2">
       <Link to="/dashboard" className={btnPrimary}>
-        Ver el panel
+        {t('Ver el panel')}
       </Link>
       <Link to="/history?indicator=mood" className={btnSecondary}>
-        Ver el historial
+        {t('Ver el historial')}
       </Link>
     </div>
   )
@@ -201,16 +204,18 @@ export default function CheckIn() {
   if (phase.kind === 'queued') {
     return (
       <section className="mx-auto my-auto w-full max-w-xl space-y-3 lg:max-w-3xl">
-        <h1 className="text-2xl font-semibold">Check-in guardado en el dispositivo</h1>
+        <h1 className="text-2xl font-semibold">{t('Check-in guardado en el dispositivo')}</h1>
         <div className=" border border-env-border bg-env-surface p-3" role="status">
           <p>
             <span aria-hidden>⇡ </span>
-            No hay conexión con el servidor. Tus respuestas están guardadas aquí y{' '}
-            <strong>se enviarán solas</strong> cuando vuelva la conexión, sin duplicarse.
+            {t('No hay conexión con el servidor. Tus respuestas están guardadas aquí y')}{' '}
+            <strong>{t('se enviarán solas')}</strong>{' '}
+            {t('cuando vuelva la conexión, sin duplicarse.')}
           </p>
           <p className="mt-2 text-sm text-env-muted">
-            Verás los pendientes en la cabecera. Hasta entonces, el panel y el historial pueden no
-            reflejarlas.
+            {t(
+              'Verás los pendientes en la cabecera. Hasta entonces, el panel y el historial pueden no reflejarlas.',
+            )}
           </p>
         </div>
         {careSection}
@@ -223,14 +228,16 @@ export default function CheckIn() {
     const { assessment } = phase.result
     return (
       <section className="mx-auto my-auto w-full max-w-xl space-y-3 lg:max-w-3xl">
-        <h1 className="text-2xl font-semibold">Check-in guardado</h1>
+        <h1 className="text-2xl font-semibold">{t('Check-in guardado')}</h1>
         <div className=" border border-env-border bg-env-surface p-3" role="status">
-          <p>Gracias. Tus respuestas de hoy ya están registradas.</p>
+          <p>{t('Gracias. Tus respuestas de hoy ya están registradas.')}</p>
           <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-env-muted">
-            Evaluación actualizada:
+            {t('Evaluación actualizada:')}
             <StatusBadge
               status={assessment.overall_status}
-              label={`Estado general: ${statusStyle(assessment.overall_status).label}`}
+              label={t('Estado general: {status}', {
+                status: statusStyle(assessment.overall_status).label,
+              })}
               size="sm"
             />
           </p>
@@ -271,7 +278,9 @@ export default function CheckIn() {
       <div className="flex items-start justify-between gap-3">
         <div>
           {title}
-          <p className="text-env-muted">¿Cómo estás hoy? {total} preguntas rápidas.</p>
+          <p className="text-env-muted">
+            {t('¿Cómo estás hoy? {n} preguntas rápidas.', { n: total })}
+          </p>
         </div>
         {voiceReady && (
           <VoiceToggle
@@ -283,11 +292,11 @@ export default function CheckIn() {
       </div>
 
       {/* Progreso: un segmento por pregunta más el de envío. Se puede saltar a una ya vista. */}
-      <nav aria-label="Progreso del check-in">
+      <nav aria-label={t('Progreso del check-in')}>
         <ol className="flex gap-1.5">
           {[
             ...questions.map((q) => ({ id: q.id, name: q.name })),
-            { id: '_send', name: 'Enviar' },
+            { id: '_send', name: t('Enviar') },
           ].map((q, i) => {
             const answered = i < total ? answers[q.id] !== undefined : complete
             const reachable = i <= current || answered || (i === total && complete)
@@ -298,7 +307,15 @@ export default function CheckIn() {
                   onClick={() => goTo(i)}
                   disabled={!reachable || phase.kind === 'sending'}
                   aria-current={i === current ? 'step' : undefined}
-                  aria-label={`Paso ${i + 1}: ${q.name}${answered && i < total ? ` (respondida: ${answers[q.id]})` : ''}`}
+                  aria-label={
+                    answered && i < total
+                      ? t('Paso {n}: {name} (respondida: {value})', {
+                          n: i + 1,
+                          name: q.name,
+                          value: answers[q.id] ?? '',
+                        })
+                      : t('Paso {n}: {name}', { n: i + 1, name: q.name })
+                  }
                   className={`relative before:absolute before:inset-x-0 before:content-[''] before:-inset-y-[18px] block h-2 w-full rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
                     i === current
                       ? 'bg-env-primary'
@@ -312,14 +329,22 @@ export default function CheckIn() {
           })}
         </ol>
         <p className="mt-2 text-sm text-env-muted" aria-live="polite">
-          {isReview ? 'Último paso: revisar y enviar' : `Pregunta ${current + 1} de ${total}`}
+          {isReview
+            ? t('Último paso: revisar y enviar')
+            : t('Pregunta {n} de {total}', { n: current + 1, total })}
         </p>
       </nav>
 
       <fieldset disabled={phase.kind === 'sending'} className="space-y-3">
-        <legend className="sr-only">Check-in diario</legend>
+        <legend className="sr-only">{t('Check-in diario')}</legend>
         <h2 ref={stepHeading} tabIndex={-1} className="sr-only">
-          {isReview ? 'Revisar y enviar' : `Pregunta ${current + 1} de ${total}: ${question?.name}`}
+          {isReview
+            ? t('Revisar y enviar')
+            : t('Pregunta {n} de {total}: {name}', {
+                n: current + 1,
+                total,
+                name: question?.name ?? '',
+              })}
         </h2>
 
         {question && (
@@ -340,13 +365,20 @@ export default function CheckIn() {
                     type="button"
                     onClick={() => goTo(i)}
                     className="flex w-full items-center justify-between gap-3 px-4 py-2 text-left hover:bg-env-bg focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary"
-                    aria-label={`${q.name}: ${answers[q.id] ?? 'sin responder'}. Cambiar`}
+                    aria-label={
+                      answers[q.id] !== undefined
+                        ? t('{name}: {value}. Cambiar', {
+                            name: q.name,
+                            value: answers[q.id] ?? '',
+                          })
+                        : t('{name}: sin responder. Cambiar', { name: q.name })
+                    }
                   >
                     <span>{q.name}</span>
                     <span
                       className={`font-semibold tabular-nums ${answers[q.id] === undefined ? 'text-env-muted' : ''}`}
                     >
-                      {answers[q.id] !== undefined ? `${answers[q.id]} / 5` : 'Sin responder'}
+                      {answers[q.id] !== undefined ? `${answers[q.id]} / 5` : t('Sin responder')}
                     </span>
                   </button>
                 </li>
@@ -354,7 +386,7 @@ export default function CheckIn() {
             </ul>
 
             <label className="block text-sm">
-              <span className="text-env-muted">¿Algo más? (opcional)</span>
+              <span className="text-env-muted">{t('¿Algo más? (opcional)')}</span>
               <AutoTextarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
@@ -368,8 +400,9 @@ export default function CheckIn() {
 
       {isReview && (
         <p className="text-xs text-env-muted">
-          Tus respuestas son privadas: fuera de tu perfil solo se ve un semáforo agregado, salvo que
-          decidas compartirlas o haya una emergencia.
+          {t(
+            'Tus respuestas son privadas: fuera de tu perfil solo se ve un semáforo agregado, salvo que decidas compartirlas o haya una emergencia.',
+          )}
         </p>
       )}
 
@@ -387,7 +420,7 @@ export default function CheckIn() {
           disabled={current === 0 || phase.kind === 'sending'}
           className={`${btnSecondary} py-3 disabled:opacity-40`}
         >
-          ← Anterior
+          ← {t('Anterior')}
         </button>
         {isReview ? (
           <button
@@ -396,10 +429,10 @@ export default function CheckIn() {
             className="flex-1  bg-env-primary px-4 py-3 font-medium text-env-primary-text disabled:opacity-60"
           >
             {phase.kind === 'sending'
-              ? 'Guardando…'
+              ? t('Guardando…')
               : complete
-                ? 'Enviar check-in'
-                : `Responde ${done} / ${total}`}
+                ? t('Enviar check-in')
+                : t('Responde {done} / {total}', { done, total })}
           </button>
         ) : (
           <button
@@ -408,7 +441,7 @@ export default function CheckIn() {
             disabled={question !== undefined && answers[question.id] === undefined}
             className="flex-1  bg-env-primary px-4 py-3 font-medium text-env-primary-text disabled:opacity-60"
           >
-            Siguiente →
+            {t('Siguiente')} →
           </button>
         )}
       </div>

@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
+import { useLangStore } from '../../i18n/lang'
 import { cleanKudos, memberName, missionStatus, type CrewMissionLike } from './crew'
 
 const mission = (over: Partial<CrewMissionLike>): CrewMissionLike => ({
@@ -48,5 +49,14 @@ describe('cleanKudos', () => {
     expect(cleanKudos('  ¡Gracias!  ')).toBe('¡Gracias!')
     expect(cleanKudos('  ')).toBeNull()
     expect(cleanKudos('x'.repeat(300))).toHaveLength(200)
+  })
+})
+
+describe('en inglés (FE-38)', () => {
+  afterEach(() => useLangStore.getState().setLang('es'))
+  it('traduce las etiquetas', () => {
+    useLangStore.getState().setLang('en')
+    expect(missionStatus(mission({}), 1).label).toBe('0/3 joined · 3 more needed')
+    expect(memberName(1, new Map(), 1)).toBe('you')
   })
 })

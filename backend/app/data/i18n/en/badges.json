@@ -1,0 +1,8 @@
+{
+  "first_step": { "name": "First step", "description": "Complete your first routine task" },
+  "streak_3": { "name": "Consistency", "description": "3 days in a row completing a task" },
+  "streak_7": { "name": "A week without a miss", "description": "7 days in a row completing a task" },
+  "perfect_day": { "name": "Perfect day", "description": "Complete every task in a day" },
+  "checkin_7": { "name": "Always in touch", "description": "Do 7 R U OK? check-ins" },
+  "points_100": { "name": "Century", "description": "Earn 100 points" }
+}

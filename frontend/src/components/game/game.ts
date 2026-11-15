@@ -4,6 +4,8 @@
  * presentan y se suma de forma optimista lo completado sin conexión.
  */
 
+import { translate } from '../../i18n/t'
+
 export interface TaskLike {
   id: string
   task_type: string
@@ -33,6 +35,7 @@ export function dayProgress(tasks: readonly TaskLike[]) {
 }
 
 const DUE_ORDER: Record<string, number> = { morning: 0, afternoon: 1, evening: 2, any: 3 }
+// Claves en español: se traducen al pintarlas (`formatDue`), no al importar el módulo.
 const DUE_LABEL: Record<string, string> = {
   morning: 'Mañana',
   afternoon: 'Tarde',
@@ -42,7 +45,8 @@ const DUE_LABEL: Record<string, string> = {
 
 /** Etiqueta del momento del día. Un valor desconocido se muestra tal cual. */
 export function formatDue(due: string): string {
-  return DUE_LABEL[due] ?? due
+  const label = DUE_LABEL[due]
+  return label ? translate(label) : due
 }
 
 /** Pendientes primero; dentro de cada grupo, por momento del día. */

@@ -15,6 +15,7 @@ import { useVoiceAvailable, useVoicePref } from '../components/behavioral/useVoi
 import { VOICE_NOTE } from '../components/behavioral/voice'
 import { VoiceToggle } from '../components/behavioral/VoiceControls'
 import { stopSpeaking } from '../components/behavioral/voiceGuide'
+import { useT } from '../i18n/t'
 
 /**
  * Meditación (FE-36, sustituye a la galería «La Tierra»): paisajes sonoros relajantes que se
@@ -37,6 +38,7 @@ export default function Meditation() {
   const [now, setNow] = useState(() => Date.now())
   const [session, setSession] = useState<Intervention | null>(null)
   const [noAudio, setNoAudio] = useState(false)
+  const t = useT()
 
   // ¿Hay audios de la voz guía para estas meditaciones? ¿Está encendida?
   const voiceReady = useVoiceAvailable(meditations.flatMap((m) => m.steps))
@@ -101,14 +103,14 @@ export default function Meditation() {
 
   /** Botones de paisaje compactos, para cambiarlo sin salir de una meditación. */
   const switcher = (
-    <div role="group" aria-label="Paisaje sonoro" className="flex gap-1">
+    <div role="group" aria-label={t('Paisaje sonoro')} className="flex gap-1">
       {SOUNDSCAPES.map((s) => (
         <button
           key={s.id}
           type="button"
           aria-pressed={playing === s.id}
-          aria-label={s.name}
-          title={s.name}
+          aria-label={t(s.name)}
+          title={t(s.name)}
           onClick={() => toggle(s.id)}
           className={`flex size-10 items-center justify-center  border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
             playing === s.id
@@ -125,17 +127,18 @@ export default function Meditation() {
   return (
     <section className="flex flex-1 flex-col gap-4 lg:gap-6">
       <header>
-        <h1 className="text-2xl font-semibold">Meditación</h1>
+        <h1 className="text-2xl font-semibold">{t('Meditación')}</h1>
         <p className="text-env-muted lg:text-lg">
-          Elige un paisaje sonoro y, si quieres, una meditación guiada. Puedes cambiar el sonido
-          cuando quieras.
+          {t(
+            'Elige un paisaje sonoro y, si quieres, una meditación guiada. Puedes cambiar el sonido cuando quieras.',
+          )}
         </p>
       </header>
 
       <div className="grid flex-1 gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6">
         <section aria-labelledby="scapes-title" className="hud-panel flex min-w-0 flex-col">
           <h2 id="scapes-title" className="hud-panel-head">
-            Paisajes sonoros
+            {t('Paisajes sonoros')}
           </h2>
           <ul className="grid flex-1 auto-rows-fr grid-cols-2 sm:grid-cols-3">
             {SOUNDSCAPES.map((s) => {
@@ -156,9 +159,9 @@ export default function Meditation() {
                       <SoundscapeIcon id={s.id} size={34} />
                     </span>
                     <span className="font-display text-lg font-semibold tracking-wide lg:text-xl">
-                      {s.name}
+                      {t(s.name)}
                     </span>
-                    <span className="text-sm text-env-muted lg:text-base">{s.description}</span>
+                    <span className="text-sm text-env-muted lg:text-base">{t(s.description)}</span>
                     {on && (
                       <span className="hud-label flex items-center gap-1.5 text-env-primary">
                         <span aria-hidden className="meditation-bars">
@@ -166,7 +169,7 @@ export default function Meditation() {
                           <i />
                           <i />
                         </span>
-                        Sonando
+                        {t('Sonando')}
                       </span>
                     )}
                   </button>
@@ -178,7 +181,7 @@ export default function Meditation() {
           {/* Volumen, temporizador y estado. */}
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-env-border/60 px-4 py-3 lg:px-6">
             <label className="flex items-center gap-3 text-sm">
-              Volumen
+              {t('Volumen')}
               <input
                 type="range"
                 min={0}
@@ -194,7 +197,7 @@ export default function Meditation() {
               />
             </label>
             <label className="flex items-center gap-3 text-sm">
-              Temporizador
+              {t('Temporizador')}
               <select
                 value={timerMin}
                 onChange={(e) => {
@@ -206,17 +209,22 @@ export default function Meditation() {
               >
                 {TIMER_OPTIONS.map((m) => (
                   <option key={m} value={m}>
-                    {m ? `${m} min` : 'Sin límite'}
+                    {m ? `${m} min` : t('Sin límite')}
                   </option>
                 ))}
               </select>
             </label>
             <p className="min-w-0 flex-1 text-sm text-env-muted" aria-live="polite">
               {noAudio
-                ? 'Este navegador no puede reproducir sonido.'
+                ? t('Este navegador no puede reproducir sonido.')
                 : current
-                  ? `Sonando: ${current.name}${endsAt ? ` · quedan ${formatRemaining(endsAt - now)}` : ''}`
-                  : 'Toca un paisaje para escucharlo.'}
+                  ? endsAt
+                    ? t('Sonando: {name} · quedan {left}', {
+                        name: t(current.name),
+                        left: formatRemaining(endsAt - now),
+                      })
+                    : t('Sonando: {name}', { name: t(current.name) })
+                  : t('Toca un paisaje para escucharlo.')}
             </p>
             {current && (
               <button
@@ -224,7 +232,7 @@ export default function Meditation() {
                 onClick={stop}
                 className=" border border-env-border px-3 py-1.5 text-sm hover:border-env-text focus-visible:outline-2 focus-visible:outline-env-primary"
               >
-                Parar
+                {t('Parar')}
               </button>
             )}
           </div>
@@ -232,7 +240,7 @@ export default function Meditation() {
 
         <section aria-labelledby="guided-title" className="hud-panel flex min-w-0 flex-col">
           <div className="hud-panel-head">
-            <h2 id="guided-title">Meditaciones guiadas</h2>
+            <h2 id="guided-title">{t('Meditaciones guiadas')}</h2>
             <span className="mr-2.5 ml-auto">{voiceReady && <VoiceToggle />}</span>
           </div>
           {interventions.state === 'loading' && (
@@ -240,9 +248,9 @@ export default function Meditation() {
           )}
           {interventions.state === 'error' && (
             <p className="p-4 text-sm text-env-muted">
-              No se han podido cargar las meditaciones.{' '}
+              {t('No se han podido cargar las meditaciones.')}{' '}
               <button type="button" onClick={interventions.retry} className="underline">
-                Reintentar
+                {t('Reintentar')}
               </button>
             </p>
           )}
@@ -260,15 +268,16 @@ export default function Meditation() {
                   onClick={() => startSession(m)}
                   className="shrink-0  bg-env-primary px-4 py-2.5 font-semibold text-env-primary-text hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary"
                 >
-                  Empezar
+                  {t('Empezar')}
                 </button>
               </li>
             ))}
           </ul>
           <p className="border-t border-env-border/60 px-4 py-3 text-xs text-env-muted lg:px-6">
-            Si vas a dormir, marca «Sueño» en Actividad: el sistema esperará más antes de
-            preguntarte «R U OK?».
-            {voiceReady && ` ${VOICE_NOTE}`}
+            {t(
+              'Si vas a dormir, marca «Sueño» en Actividad: el sistema esperará más antes de preguntarte «R U OK?».',
+            )}
+            {voiceReady && ` ${t(VOICE_NOTE)}`}
           </p>
         </section>
       </div>

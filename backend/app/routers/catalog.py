@@ -2,12 +2,16 @@
 
 Entornos (BE-03), indicadores y sistemas (BE-04): reales. STUB(FS-02) → BE-21 (intervenciones).
 
+Idioma (FE-38): cada objeto sale localizado según `Accept-Language` (`localized*` de los
+servicios); los servicios devuelven siempre el original, que es el que usa la lógica interna.
+
 Públicos (BE-27): son configuración sin datos personales, y el modal de SOS y el protocolo
 autónomo los necesitan también sin sesión (docs/auth-and-roles.md, principio 3).
 """
 
 from fastapi import APIRouter, HTTPException
 
+from app import i18n
 from app.routers.deps import ERRORS_404
 from app.schemas import BodySystem, Environment, Indicator, Intervention, Slug
 from app.services import catalog, environments
@@ -23,7 +27,7 @@ router = APIRouter()
     description="Los 6 perfiles de app/data/environments.json (docs/environments.md).",
 )
 def list_environments() -> list[Environment]:
-    return environments.list_environments()
+    return [environments.localized(e) for e in environments.list_environments()]
 
 
 @router.get(
@@ -37,8 +41,8 @@ def list_environments() -> list[Environment]:
 def get_environment(env_id: Slug) -> Environment:
     env = environments.get_environment(env_id)
     if env is None:
-        raise HTTPException(404, f"Entorno desconocido: {env_id}")
-    return env
+        raise HTTPException(404, i18n.tr("Entorno desconocido: {id}", id=env_id))
+    return environments.localized(env)
 
 
 @router.get(
@@ -50,7 +54,7 @@ def get_environment(env_id: Slug) -> Environment:
     "Rangos provisionales hasta CNT-01 (docs/sources.md).",
 )
 def list_indicators() -> list[Indicator]:
-    return catalog.list_indicators()
+    return [catalog.localized_indicator(i) for i in catalog.list_indicators()]
 
 
 @router.get(
@@ -64,8 +68,8 @@ def list_indicators() -> list[Indicator]:
 def get_indicator(indicator_id: Slug) -> Indicator:
     ind = catalog.get_indicator(indicator_id)
     if ind is None:
-        raise HTTPException(404, f"Indicador desconocido: {indicator_id}")
-    return ind
+        raise HTTPException(404, i18n.tr("Indicador desconocido: {id}", id=indicator_id))
+    return catalog.localized_indicator(ind)
 
 
 @router.get(
@@ -76,7 +80,7 @@ def get_indicator(indicator_id: Slug) -> Indicator:
     description="Los sistemas de app/data/systems.json, con su región del SVG de BodyFigure.",
 )
 def list_systems() -> list[BodySystem]:
-    return catalog.list_systems()
+    return [catalog.localized_system(s) for s in catalog.list_systems()]
 
 
 @router.get(
@@ -90,4 +94,6 @@ def list_systems() -> list[BodySystem]:
 def list_interventions(
     system_id: Slug | None = None, category: str | None = None
 ) -> list[Intervention]:
-    return catalog.list_interventions(system_id, category)
+    return [
+        catalog.localized_intervention(i) for i in catalog.list_interventions(system_id, category)
+    ]

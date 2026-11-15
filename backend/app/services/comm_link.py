@@ -22,7 +22,7 @@ from typing import Any
 
 from sqlmodel import Session, col, select
 
-from app import clock, models
+from app import clock, i18n, models
 from app.schemas import Environment, LinkStatus
 from app.schemas import LinkMessage as LinkMessageOut
 from app.schemas.common import EventType, LinkDirection, LinkState
@@ -38,7 +38,7 @@ class UnknownEnvironment(Exception):
 def _env(env_id: str) -> Environment:
     env = environments.get_environment(env_id)
     if env is None:
-        raise UnknownEnvironment(f"Entorno desconocido: {env_id}")
+        raise UnknownEnvironment(i18n.tr("Entorno desconocido: {id}", id=env_id))
     return env
 
 
@@ -98,7 +98,7 @@ def send(
     up = LinkDirection(direction) == LinkDirection.up
     events.emit(
         session, EventType.link_queued, env_id=env_id, ref_id=message.ref_id,
-        summary=f"Mensaje en cola hacia {'tierra' if up else 'a bordo'}",
+        summary=i18n.tr("Mensaje en cola hacia tierra" if up else "Mensaje en cola hacia a bordo"),
         payload={
             "message_id": message.id, "direction": "up" if up else "down", "kind": kind,
             "eta": message.eta.isoformat() if message.eta else None,
@@ -160,7 +160,9 @@ def deliver_due(session: Session, env_id: str | None = None) -> list[models.Link
             events.emit(
                 session, EventType.link_delivered, env_id=message.env_id,
                 member_id=_member_of(session, message), ref_id=message.ref_id,
-                summary=f"Entregado {'en tierra' if message.direction == 'up' else 'a bordo'}",
+                summary=i18n.tr(
+                    "Entregado en tierra" if message.direction == "up" else "Entregado a bordo"
+                ),
                 payload={"message_id": message.id, "direction": message.direction,
                          "kind": message.kind},
             )
@@ -192,7 +194,8 @@ def set_state(
             session.add(message)
     events.emit(
         session, EventType.link_state_changed, env_id=env_id,
-        summary=f"Enlace {env_id}: {row.state}", payload={"state": row.state},
+        summary=i18n.tr("Enlace {env}: {state}", env=env_id, state=row.state),
+        payload={"state": row.state},
     )
     session.commit()
     session.refresh(row)

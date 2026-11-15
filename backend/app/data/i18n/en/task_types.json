@@ -1,0 +1,9 @@
+{
+  "measure_bp": { "title": "Measure your blood pressure" },
+  "resistive_exercise": { "title": "Resistance exercise" },
+  "checkin": { "title": "R U OK? daily check-in" },
+  "walk": { "title": "Go for a walk" },
+  "hydration": { "title": "Drink water" },
+  "pvt": { "title": "Vigilance test (PVT)" },
+  "protocol": { "title": "Response protocol" }
+}

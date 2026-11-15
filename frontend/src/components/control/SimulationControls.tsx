@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ApiError, NetworkError, type Schema } from '../../api/client'
 import type { EnvironmentOverview } from '../../api/useControl'
+import { useT } from '../../i18n/t'
 import {
   demoFastForward,
   demoLink,
@@ -26,6 +27,7 @@ const BTN =
 
 /** Ejecuta una acción de simulación y deja una línea de resultado. */
 function useSimulationRun(onChanged: () => void) {
+  const t = useT()
   const [busy, setBusy] = useState(false)
   const [log, setLog] = useState<string | null>(null)
   const run = async (label: string, fn: () => Promise<unknown>, confirmText?: string) => {
@@ -39,7 +41,7 @@ function useSimulationRun(onChanged: () => void) {
       setLog(
         `⚠ ${label}: ${
           err instanceof NetworkError
-            ? 'sin conexión con el servidor'
+            ? t('sin conexión con el servidor')
             : err instanceof ApiError
               ? err.message
               : String(err)
@@ -64,13 +66,15 @@ export function ScenarioPanel({
   onChanged: () => void
   className?: string
 }) {
+  const t = useT()
   const { busy, log, run } = useSimulationRun(onChanged)
   return (
-    <ControlPanel title="Escenarios" aside={log} className={className}>
+    <ControlPanel title={t('Escenarios')} aside={log} className={className}>
       {scenarios.length === 0 ? (
         <p className="text-sm text-env-muted">
-          No hay escenarios guionizados para esta selección. Provoca la situación con una medición,
-          una alerta o el estado del enlace.
+          {t(
+            'No hay escenarios guionizados para esta selección. Provoca la situación con una medición, una alerta o el estado del enlace.',
+          )}
         </p>
       ) : (
         <ul className="flex flex-col gap-3">
@@ -78,18 +82,22 @@ export function ScenarioPanel({
             <li key={s.id} className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="font-medium">
-                  {s.label} <span className="text-env-muted">· {memberName(s.memberId)}</span>
+                  {t(s.label)} <span className="text-env-muted">· {memberName(s.memberId)}</span>
                 </p>
-                <p className="text-sm text-env-muted">{s.detail}</p>
+                <p className="text-sm text-env-muted">{t(s.detail)}</p>
               </div>
               <button
                 type="button"
                 disabled={busy}
                 className={BTN}
-                onClick={() => run(`Escenario «${s.label}» cargado`, () => demoScenario(s.id))}
+                onClick={() =>
+                  run(t('Escenario «{name}» cargado', { name: t(s.label) }), () =>
+                    demoScenario(s.id),
+                  )
+                }
               >
                 <Icon name="play" size={14} className="mr-1" />
-                Lanzar
+                {t('Lanzar')}
               </button>
             </li>
           ))}
@@ -111,34 +119,48 @@ export function LinkPanel({
   onChanged: () => void
   className?: string
 }) {
+  const t = useT()
   const { busy, log, run } = useSimulationRun(onChanged)
   const link = describeLink(env.link)
+  const linkStates = LINK_STATES.map((l) => ({ id: l.id, label: t(l.label) }))
   return (
-    <ControlPanel title={`Enlace con ${groundLabel}`} aside={log} className={className}>
+    <ControlPanel
+      title={t('Enlace con {ground}', { ground: groundLabel })}
+      aside={log}
+      className={className}
+    >
       <p className="mb-3 text-sm">
-        Ahora:{' '}
+        {t('Ahora:')}{' '}
         <span title={link.long}>
           {link.icon} {link.short}
         </span>
         {env.link.queued > 0 && (
-          <span className="text-env-muted"> · {env.link.queued} mensajes en cola</span>
+          <span className="text-env-muted">
+            {' '}
+            · {t('{n} mensajes en cola', { n: env.link.queued })}
+          </span>
         )}
       </p>
       <fieldset disabled={busy}>
         <Segmented
-          label={`Estado del enlace con ${groundLabel}`}
+          label={t('Estado del enlace con {ground}', { ground: groundLabel })}
           value={env.link.state}
-          options={LINK_STATES}
+          options={linkStates}
           onChange={(state) =>
-            run(`Enlace → ${LINK_STATES.find((l) => l.id === state)?.label}`, () =>
-              demoLink(env.environment.id, state),
+            run(
+              t('Enlace → {state}', {
+                state: linkStates.find((l) => l.id === state)?.label ?? state,
+              }),
+              () => demoLink(env.environment.id, state),
             )
           }
         />
       </fieldset>
       <p className="mt-3 text-xs text-env-muted">
-        Lo que va a {groundLabel} espera en la cola mientras no hay enlace y llega con el retardo
-        del entorno.
+        {t(
+          'Lo que va a {ground} espera en la cola mientras no hay enlace y llega con el retardo del entorno.',
+          { ground: groundLabel },
+        )}
       </p>
     </ControlPanel>
   )
@@ -154,9 +176,10 @@ export function LivenessPanel({
   onChanged: () => void
   className?: string
 }) {
+  const t = useT()
   const { busy, log, run } = useSimulationRun(onChanged)
   return (
-    <ControlPanel title="Vigilancia de contacto" aside={log} className={className}>
+    <ControlPanel title={t('Vigilancia de contacto')} aside={log} className={className}>
       <label className="flex items-start gap-3 text-sm">
         <input
           type="checkbox"
@@ -164,15 +187,15 @@ export function LivenessPanel({
           disabled={busy}
           checked={env.liveness_paused}
           onChange={(e) =>
-            run(e.target.checked ? 'Vigilancia en pausa' : 'Vigilancia reanudada', () =>
+            run(e.target.checked ? t('Vigilancia en pausa') : t('Vigilancia reanudada'), () =>
               pauseLiveness(env.environment.id, e.target.checked),
             )
           }
         />
         <span>
-          Pausar los «R U OK?» y las alertas de sin contacto
+          {t('Pausar los «R U OK?» y las alertas de sin contacto')}
           <span className="block text-env-muted">
-            Útil durante la presentación. El contacto se sigue calculando y mostrando igual.
+            {t('Útil durante la presentación. El contacto se sigue calculando y mostrando igual.')}
           </span>
         </span>
       </label>
@@ -188,10 +211,11 @@ export function ClockPanel({
   onChanged: () => void
   className?: string
 }) {
+  const t = useT()
   const { busy, log, run } = useSimulationRun(onChanged)
   return (
-    <ControlPanel title="Reloj y datos de la demo" aside={log} className={className}>
-      <p className="hud-label mb-2">Adelantar el reloj</p>
+    <ControlPanel title={t('Reloj y datos de la demo')} aside={log} className={className}>
+      <p className="hud-label mb-2">{t('Adelantar el reloj')}</p>
       <div className="flex flex-wrap gap-1.5">
         {FAST_FORWARD.map((s) => (
           <button
@@ -199,14 +223,16 @@ export function ClockPanel({
             type="button"
             disabled={busy}
             className={BTN}
-            onClick={() => run(`Reloj adelantado ${formatDuration(s)}`, () => demoFastForward(s))}
+            onClick={() =>
+              run(t('Reloj adelantado {d}', { d: formatDuration(s) }), () => demoFastForward(s))
+            }
           >
             +{formatDuration(s)}
           </button>
         ))}
       </div>
       <p className="mt-2 text-xs text-env-muted">
-        Afecta a todo el servidor: datos que caducan, tareas del día y falta de contacto.
+        {t('Afecta a todo el servidor: datos que caducan, tareas del día y falta de contacto.')}
       </p>
       <div className="mt-4 border-t border-env-border/60 pt-4">
         <button
@@ -215,13 +241,13 @@ export function ClockPanel({
           className="hud-btn hud-btn-danger !h-auto min-h-10 px-4"
           onClick={() =>
             run(
-              'Datos de la demo reiniciados',
+              t('Datos de la demo reiniciados'),
               demoReset,
-              '¿Reiniciar TODOS los datos de la demo (todos los entornos) con el seed inicial?',
+              t('¿Reiniciar TODOS los datos de la demo (todos los entornos) con el seed inicial?'),
             )
           }
         >
-          ↺ Reiniciar los datos de la demo
+          ↺ {t('Reiniciar los datos de la demo')}
         </button>
       </div>
     </ControlPanel>

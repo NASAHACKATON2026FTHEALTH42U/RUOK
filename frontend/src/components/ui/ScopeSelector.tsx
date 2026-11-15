@@ -3,6 +3,7 @@ import { useMembers } from '../../api/useMembers'
 import { useAuth } from '../../auth/useAuth'
 import { capitalize, useVocab } from '../../environments/useVocab'
 import { useEnvironmentStore } from '../../store/environment'
+import { useT } from '../../i18n/t'
 
 const SELECT = 'hud-input w-full min-w-0 !py-1.5 !font-sans !text-[0.9375rem] disabled:opacity-60'
 
@@ -12,6 +13,7 @@ const SELECT = 'hud-input w-full min-w-0 !py-1.5 !font-sans !text-[0.9375rem] di
  * elegido aquí. Va arriba de la barra lateral y, en el móvil, en «Más».
  */
 export function ScopeSelector({ className = '' }: { className?: string }) {
+  const t = useT()
   const { can } = useAuth()
   const vocab = useVocab()
   const showEnv = can('action:change-environment')
@@ -30,10 +32,13 @@ export function ScopeSelector({ className = '' }: { className?: string }) {
   const memberValue = list.some((m) => m.id === memberId) ? String(memberId) : ''
 
   return (
-    <section aria-label="Ámbito" className={`hud-panel flex flex-col gap-2.5 p-3 ${className}`}>
+    <section
+      aria-label={t('Ámbito')}
+      className={`hud-panel flex flex-col gap-2.5 p-3 ${className}`}
+    >
       {showEnv && (
         <label className="flex min-w-0 flex-col gap-1">
-          <span className="hud-label">Entorno</span>
+          <span className="hud-label">{t('Entorno')}</span>
           <select
             value={envId ?? ''}
             disabled={envs.state !== 'ready'}
@@ -45,7 +50,7 @@ export function ScopeSelector({ className = '' }: { className?: string }) {
           >
             {!envId && (
               <option value="" disabled>
-                {envs.state === 'loading' ? 'Cargando…' : 'Elige un entorno…'}
+                {envs.state === 'loading' ? t('Cargando…') : t('Elige un entorno…')}
               </option>
             )}
             {envList.map((e) => (
@@ -70,10 +75,10 @@ export function ScopeSelector({ className = '' }: { className?: string }) {
           >
             <option value="">
               {members.state === 'loading'
-                ? 'Cargando…'
+                ? t('Cargando…')
                 : members.state === 'error'
-                  ? 'Sin conexión'
-                  : `Todo ${vocab.crew}`}
+                  ? t('Sin conexión')
+                  : t('Todo {crew}', { crew: vocab.crew })}
             </option>
             {list.map((m) => (
               <option key={m.id} value={m.id}>

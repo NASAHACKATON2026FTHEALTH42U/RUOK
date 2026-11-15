@@ -22,7 +22,7 @@ from fastapi import Depends, Header, HTTPException, Query, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlmodel import Session
 
-from app import models
+from app import i18n, models
 from app.auth import permissions
 from app.auth.security import InvalidToken, decode_token
 from app.db import get_session
@@ -43,14 +43,14 @@ def _unauthorized(detail: str) -> HTTPException:
 
 def _user_from_token(session: Session, token: str | None) -> models.UserAccount:
     if not token:
-        raise _unauthorized("Falta el token de sesión")
+        raise _unauthorized(i18n.tr("Falta el token de sesión"))
     try:
         claims = decode_token(session, token)
     except InvalidToken as exc:
-        raise _unauthorized(str(exc)) from exc
+        raise _unauthorized(i18n.tr(str(exc))) from exc
     user = session.get(models.UserAccount, claims.user_id)
     if user is None or not user.active:
-        raise _unauthorized("La cuenta no existe o está desactivada")
+        raise _unauthorized(i18n.tr("La cuenta no existe o está desactivada"))
     return user
 
 
@@ -81,7 +81,8 @@ OptionalUser = Annotated[models.UserAccount | None, Depends(optional_user)]
 
 
 def _forbidden(exc: permissions.Forbidden) -> HTTPException:
-    return HTTPException(403, str(exc))
+    # Los textos de `permissions.Forbidden` son fijos: se traducen con messages.json (FE-38).
+    return HTTPException(403, i18n.tr(str(exc)))
 
 
 def check(user: models.UserAccount, permission: str) -> None:
@@ -166,7 +167,7 @@ def require_roles(*roles: str) -> Callable[..., models.UserAccount]:
 
     def dependency(user: CurrentUser) -> models.UserAccount:
         if user.role not in allowed:
-            raise HTTPException(403, "Tu rol no tiene permiso para esta acción")
+            raise HTTPException(403, i18n.tr("Tu rol no tiene permiso para esta acción"))
         return user
 
     return dependency

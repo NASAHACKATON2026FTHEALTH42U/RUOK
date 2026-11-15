@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { userRoleLabel } from '../../auth/permissions'
 import { logout, useSession } from '../../auth/session'
 import { useVocab } from '../../environments/useVocab'
+import { useT } from '../../i18n/t'
 
 /**
  * Usuario de la sesión y "Salir" en la cabecera. Cerrar sesión NO borra el outbox.
@@ -16,6 +17,7 @@ export function SessionMenu({
   /** «Salir» a todo el ancho (bloque de sesión de «Más», en móvil). */
   block?: boolean
 }) {
+  const t = useT()
   const user = useSession((s) => s.user)
   const vocabulary = useVocab()
   const navigate = useNavigate()
@@ -51,7 +53,7 @@ export function SessionMenu({
           >
             <path d="M6.5 2.5h-3v11h3M10 5l3 3-3 3M13 8H6.5" />
           </svg>
-          Salir
+          {t('Salir')}
         </button>
       )}
     </span>

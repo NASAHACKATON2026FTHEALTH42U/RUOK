@@ -9,6 +9,7 @@ import { allowedItems, menuFor, navItems, tabsFor } from '../components/ui/navig
 import { PendingSyncChip } from '../components/ui/PendingSyncChip'
 import { ServerStatus } from '../components/ui/ServerStatus'
 import { useVocab } from '../environments/useVocab'
+import { useT } from '../i18n/t'
 import { getDevice } from '../offline/device'
 
 /**
@@ -16,19 +17,20 @@ import { getDevice } from '../offline/device'
  * (Normal / EVA / Sueño), el estado de la conexión y la sesión. En móvil sustituye al cajón.
  */
 export default function More() {
+  const t = useT()
   const vocab = useVocab()
   const { role, can } = useAuth()
   const device = getDevice()
   const allowed = menuFor(role, allowedItems(navItems(vocab), can))
-  const inTabs = new Set(tabsFor(role, allowed).map((t) => t.to))
+  const inTabs = new Set(tabsFor(role, allowed).map((tab) => tab.to))
   const rest = allowed.filter((i) => !inTabs.has(i.to))
 
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-3">
-      <h1 className="text-[1.375rem] font-light">Más</h1>
+      <h1 className="text-[1.375rem] font-light">{t('Más')}</h1>
 
       {rest.length > 0 && (
-        <nav aria-label="Secciones" className="hud-panel">
+        <nav aria-label={t('Secciones')} className="hud-panel">
           <ul>
             {rest.map((item, i) => (
               <li key={item.to}>
@@ -51,8 +53,8 @@ export default function More() {
 
       <ScopeSelector />
 
-      <section aria-label="Estado del dispositivo" className="hud-panel">
-        <div className="hud-panel-head">Conexión</div>
+      <section aria-label={t('Estado del dispositivo')} className="hud-panel">
+        <div className="hud-panel-head">{t('Conexión')}</div>
         <div className="flex flex-wrap items-center gap-2 px-3.5 py-3 text-xs">
           <ServerStatus />
           <LinkStatusChip />
@@ -61,8 +63,8 @@ export default function More() {
       </section>
 
       {/* Sesión: quién ha entrado y «Salir», bien visible (en móvil no hay barra superior). */}
-      <section aria-label="Sesión" className="hud-panel">
-        <div className="hud-panel-head">Sesión</div>
+      <section aria-label={t('Sesión')} className="hud-panel">
+        <div className="hud-panel-head">{t('Sesión')}</div>
         <div className="flex flex-col gap-3 px-3.5 py-3">
           <SessionMenu part="user" />
           <SessionMenu part="logout" block />
@@ -70,11 +72,13 @@ export default function More() {
       </section>
 
       <p className="px-1 text-center text-xs text-env-muted">
-        Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye el
-        criterio de un profesional sanitario.
+        {t('Prototipo de autoevaluación.')} <strong>{t('No es un dispositivo médico')}</strong>{' '}
+        {t('ni sustituye el criterio de un profesional sanitario.')}
         {device.mode === 'tab' && (
           <span className="mt-1 block" title={device.id}>
-            Dispositivo: {device.name ?? `pestaña ${device.id.slice(0, 8)}`}
+            {t('Dispositivo: {name}', {
+              name: device.name ?? t('pestaña {id}', { id: device.id.slice(0, 8) }),
+            })}
           </span>
         )}
       </p>

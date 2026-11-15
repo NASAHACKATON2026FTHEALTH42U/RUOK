@@ -1,5 +1,8 @@
 /** Lógica pura de los formularios de medición (fácil de testear). */
 
+import { dateLocale } from '../../i18n/lang'
+import { translate } from '../../i18n/t'
+
 export interface InputSpec {
   type: 'number' | 'scale_1_5' | 'duration'
   min?: number | null
@@ -12,7 +15,7 @@ export type RawValue = { text: string } | { hours: string; minutes: string }
 
 export type Parsed = { ok: true; value: number } | { ok: false; error: string } | { ok: 'empty' }
 
-const fmt = (n: number) => n.toLocaleString('es-ES', { maximumFractionDigits: 2 })
+const fmt = (n: number) => n.toLocaleString(dateLocale(), { maximumFractionDigits: 2 })
 
 /** Acepta coma o punto decimal. */
 function toNumber(s: string): number | null {
@@ -40,24 +43,32 @@ export function parseValue(raw: RawValue, input: InputSpec, unit: string): Parse
     const h = toNumber(raw.hours)
     const m = toNumber(raw.minutes)
     if (h === null && m === null) return { ok: 'empty' }
-    if (Number.isNaN(h) || Number.isNaN(m)) return { ok: false, error: 'Escribe un número' }
-    if ((m ?? 0) >= 60 || (m ?? 0) < 0) return { ok: false, error: 'Los minutos van de 0 a 59' }
+    if (Number.isNaN(h) || Number.isNaN(m))
+      return { ok: false, error: translate('Escribe un número') }
+    if ((m ?? 0) >= 60 || (m ?? 0) < 0)
+      return { ok: false, error: translate('Los minutos van de 0 a 59') }
     value = durationToUnit(h ?? 0, m ?? 0, unit)
   }
   if (value === null) return { ok: 'empty' }
-  if (Number.isNaN(value)) return { ok: false, error: 'Escribe un número' }
+  if (Number.isNaN(value)) return { ok: false, error: translate('Escribe un número') }
 
   const { min, max, step } = input
-  if (min != null && value < min) return { ok: false, error: `Mínimo ${fmt(min)} ${unit}` }
-  if (max != null && value > max) return { ok: false, error: `Máximo ${fmt(max)} ${unit}` }
+  if (min != null && value < min)
+    return { ok: false, error: translate('Mínimo {n} {unit}', { n: fmt(min), unit }) }
+  if (max != null && value > max)
+    return { ok: false, error: translate('Máximo {n} {unit}', { n: fmt(max), unit }) }
   if (step && input.type !== 'duration') {
     const k = (value - (min ?? 0)) / step
-    if (Math.abs(k - Math.round(k)) > 1e-6) return { ok: false, error: `Usa pasos de ${fmt(step)}` }
+    if (Math.abs(k - Math.round(k)) > 1e-6)
+      return { ok: false, error: translate('Usa pasos de {n}', { n: fmt(step) }) }
   }
   if (input.type === 'duration' && step) {
     const k = value / step
     if (Math.abs(k - Math.round(k)) > 1e-6) {
-      return { ok: false, error: `Redondea a pasos de ${fmt(step)} ${unit}` }
+      return {
+        ok: false,
+        error: translate('Redondea a pasos de {n} {unit}', { n: fmt(step), unit }),
+      }
     }
   }
   return { ok: true, value }

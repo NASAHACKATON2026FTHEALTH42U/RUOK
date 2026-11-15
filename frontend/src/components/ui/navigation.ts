@@ -1,6 +1,7 @@
 import type { Permission } from '../../auth/permissions'
 import { ROUTE_PERMISSIONS } from '../../auth/permissions'
 import type { Role } from '../../auth/roles'
+import { translate } from '../../i18n/t'
 
 /**
  * Navegación del estilo HUD (docs/design/hud-style.md §6): en móvil, 3 pestañas por rol + «Más»;
@@ -18,24 +19,28 @@ export type IconName =
 export function navItems(vocab: { crew: string; ground: string }): NavItem[] {
   const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
   return [
-    { to: '/dashboard', label: 'Panel', icon: 'panel' },
+    { to: '/dashboard', label: translate('Panel'), icon: 'panel' },
     { to: '/members', label: cap(vocab.crew), icon: 'crew' },
-    { to: '/measure', label: 'Medir', icon: 'measure' },
-    { to: '/missions', label: 'Misiones', icon: 'missions' },
-    { to: '/alerts', label: 'Alertas', icon: 'alerts' },
-    { to: '/checkin', label: 'Check-in diario', icon: 'list' },
-    { to: '/pvt', label: 'Test de vigilancia', icon: 'list' },
-    { to: '/history', label: 'Historial', icon: 'list' },
-    { to: '/meditation', label: 'Meditación', icon: 'meditation' },
-    { to: '/home', label: 'Mensaje a casa', icon: 'list' },
-    { to: '/ground', label: `Consola de ${vocab.ground}`, icon: 'alerts' },
-    { to: '/control', label: 'Centro de control', icon: 'panel' },
-    { to: '/control/simulate', label: 'Simulación', icon: 'missions' },
-    { to: '/control/users', label: 'Usuarios', icon: 'crew' },
-    { to: '/control/devices', label: 'Dispositivos', icon: 'list' },
-    { to: '/control/log', label: 'Registro', icon: 'list' },
-    { to: '/', label: 'Entornos', icon: 'list' },
-    { to: '/settings', label: 'Ajustes', icon: 'list' },
+    { to: '/measure', label: translate('Medir'), icon: 'measure' },
+    { to: '/missions', label: translate('Misiones'), icon: 'missions' },
+    { to: '/alerts', label: translate('Alertas'), icon: 'alerts' },
+    { to: '/checkin', label: translate('Check-in diario'), icon: 'list' },
+    { to: '/pvt', label: translate('Test de vigilancia'), icon: 'list' },
+    { to: '/history', label: translate('Historial'), icon: 'list' },
+    { to: '/meditation', label: translate('Meditación'), icon: 'meditation' },
+    { to: '/home', label: translate('Mensaje a casa'), icon: 'list' },
+    {
+      to: '/ground',
+      label: translate('Consola de {ground}', { ground: vocab.ground }),
+      icon: 'alerts',
+    },
+    { to: '/control', label: translate('Centro de control'), icon: 'panel' },
+    { to: '/control/simulate', label: translate('Simulación'), icon: 'missions' },
+    { to: '/control/users', label: translate('Usuarios'), icon: 'crew' },
+    { to: '/control/devices', label: translate('Dispositivos'), icon: 'list' },
+    { to: '/control/log', label: translate('Registro'), icon: 'list' },
+    { to: '/', label: translate('Entornos'), icon: 'list' },
+    { to: '/settings', label: translate('Ajustes'), icon: 'list' },
   ]
 }
 
@@ -50,6 +55,7 @@ const TAB_PREFERENCE: Record<Role, string[]> = {
   admin: ['/control', '/control/simulate', '/alerts'],
 }
 
+/** Pestaña «Más» (la etiqueta se traduce al usarla, en `tabsFor`). */
 export const MORE: NavItem = { to: '/more', label: 'Más', icon: 'more' }
 
 /**
@@ -104,5 +110,5 @@ export function tabsFor(role: Role | null, allowed: NavItem[]): NavItem[] {
     .map((to) => allowed.find((i) => i.to === to))
     .filter((i): i is NavItem => Boolean(i))
     .slice(0, 3)
-  return [...tabs, MORE]
+  return [...tabs, { ...MORE, label: translate(MORE.label) }]
 }

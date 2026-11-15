@@ -1,4 +1,5 @@
 import type { CrewMission } from '../../api/useGame'
+import { useT } from '../../i18n/t'
 import { missionStatus } from './crew'
 
 interface CrewMissionsProps {
@@ -17,9 +18,10 @@ interface CrewMissionsProps {
  * se completan cuando se apuntan los que hacen falta y los puntos son para todos.
  */
 export function CrewMissions({ missions, memberId, canJoin, busyId, onJoin }: CrewMissionsProps) {
+  const t = useT()
   return (
     <section className="hud-panel shrink-0">
-      <h2 className="hud-panel-head">Misiones de grupo</h2>
+      <h2 className="hud-panel-head">{t('Misiones de grupo')}</h2>
       <ul className="divide-y divide-env-border/60">
         {missions.map((m) => {
           const s = missionStatus(m, memberId)
@@ -36,7 +38,8 @@ export function CrewMissions({ missions, memberId, canJoin, busyId, onJoin }: Cr
               </div>
               {s.joined ? (
                 <span className="shrink-0 text-xs text-env-muted">
-                  <span aria-hidden>✓ </span>Apuntado
+                  <span aria-hidden>✓ </span>
+                  {t('Apuntado')}
                 </span>
               ) : (
                 canJoin &&
@@ -47,7 +50,7 @@ export function CrewMissions({ missions, memberId, canJoin, busyId, onJoin }: Cr
                     disabled={busyId !== null}
                     className="min-h-11 shrink-0  border border-env-border px-3 text-sm hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary disabled:opacity-60"
                   >
-                    {busyId === m.id ? 'Apuntando…' : 'Me apunto'}
+                    {busyId === m.id ? t('Apuntando…') : t('Me apunto')}
                   </button>
                 )
               )}

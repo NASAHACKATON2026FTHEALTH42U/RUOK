@@ -1,5 +1,6 @@
 import type { Schema } from '../../api/client'
 import { formatDelay } from '../ui/link'
+import { translate } from '../../i18n/t'
 
 /**
  * Lógica pura del heartbeat (FE-15, docs/offline-and-liveness.md §2). Los umbrales de
@@ -56,9 +57,9 @@ export function buildHeartbeat(opts: {
  */
 export function activityOptions(isSpace: boolean): { id: Activity; label: string }[] {
   return [
-    { id: 'normal', label: 'Normal' },
-    { id: 'eva', label: isSpace ? 'EVA' : 'Actividad de riesgo' },
-    { id: 'sleep', label: 'Sueño' },
+    { id: 'normal', label: translate('Normal') },
+    { id: 'eva', label: isSpace ? 'EVA' : translate('Actividad de riesgo') },
+    { id: 'sleep', label: translate('Sueño') },
   ]
 }
 
@@ -80,30 +81,52 @@ export function activityHint(
     case 'normal':
       if (short)
         return liveness
-          ? `Sin señal ${t(liveness.stale_after_s)}: «R U OK?». Sin respuesta: alerta.`
-          : 'Sin señal: «R U OK?». Sin respuesta: alerta.'
+          ? translate('Sin señal {t}: «R U OK?». Sin respuesta: alerta.', {
+              t: t(liveness.stale_after_s),
+            })
+          : translate('Sin señal: «R U OK?». Sin respuesta: alerta.')
       return liveness
-        ? `Si tu dispositivo pasa ${t(liveness.stale_after_s)} sin dar señal, te preguntamos «R U OK?». Si no respondes, salta una alerta.`
-        : 'Si tu dispositivo deja de dar señal, te preguntamos «R U OK?». Si no respondes, salta una alerta.'
+        ? translate(
+            'Si tu dispositivo pasa {t} sin dar señal, te preguntamos «R U OK?». Si no respondes, salta una alerta.',
+            { t: t(liveness.stale_after_s) },
+          )
+        : translate(
+            'Si tu dispositivo deja de dar señal, te preguntamos «R U OK?». Si no respondes, salta una alerta.',
+          )
     case 'eva': {
       if (short) {
-        const who = isSpace ? 'EVA' : 'Riesgo'
+        const who = isSpace ? 'EVA' : translate('Riesgo')
         return liveness
-          ? `${who}: «R U OK?» a los ${t(liveness.eva_stale_after_s)} sin señal y alerta a los ${t(liveness.eva_lost_after_s)}.`
-          : `${who}: los avisos llegan mucho antes.`
+          ? translate('{who}: «R U OK?» a los {stale} sin señal y alerta a los {lost}.', {
+              who,
+              stale: t(liveness.eva_stale_after_s),
+              lost: t(liveness.eva_lost_after_s),
+            })
+          : translate('{who}: los avisos llegan mucho antes.', { who })
       }
-      const what = isSpace ? 'Salida al exterior (EVA)' : 'Actividad de riesgo'
+      const what = isSpace
+        ? translate('Salida al exterior (EVA)')
+        : translate('Actividad de riesgo')
       return liveness
-        ? `${what}: se vigila más de cerca. La pregunta llega a los ${t(liveness.eva_stale_after_s)} sin señal y la alerta, a los ${t(liveness.eva_lost_after_s)}.`
-        : `${what}: se vigila más de cerca y los avisos llegan mucho antes.`
+        ? translate(
+            '{what}: se vigila más de cerca. La pregunta llega a los {stale} sin señal y la alerta, a los {lost}.',
+            { what, stale: t(liveness.eva_stale_after_s), lost: t(liveness.eva_lost_after_s) },
+          )
+        : translate('{what}: se vigila más de cerca y los avisos llegan mucho antes.', { what })
     }
     case 'sleep':
       if (short)
         return liveness
-          ? `Sueño: se espera ×${liveness.sleep_factor} (${t(liveness.stale_after_s * liveness.sleep_factor)}) para no despertarte.`
-          : 'Sueño: se espera más para no despertarte.'
+          ? translate('Sueño: se espera ×{factor} ({t}) para no despertarte.', {
+              factor: liveness.sleep_factor,
+              t: t(liveness.stale_after_s * liveness.sleep_factor),
+            })
+          : translate('Sueño: se espera más para no despertarte.')
       return liveness
-        ? `Para dormir: se espera ×${liveness.sleep_factor} (${t(liveness.stale_after_s * liveness.sleep_factor)} sin señal) antes de preguntar, para no despertarte.`
-        : 'Para dormir: se espera más antes de preguntar, para no despertarte.'
+        ? translate(
+            'Para dormir: se espera ×{factor} ({t} sin señal) antes de preguntar, para no despertarte.',
+            { factor: liveness.sleep_factor, t: t(liveness.stale_after_s * liveness.sleep_factor) },
+          )
+        : translate('Para dormir: se espera más antes de preguntar, para no despertarte.')
   }
 }

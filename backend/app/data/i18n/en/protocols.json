@@ -1,0 +1,119 @@
+{
+  "proto_cardiovascular_warning": {
+    "message": "Cardiovascular warning: measure again at rest.",
+    "recommendations": [
+      { "text": "Rest for 5 minutes sitting down and measure again" },
+      { "text": "Avoid intense effort until you get a normal reading" },
+      { "text": "Write down any chest pain, dizziness or shortness of breath and tell the medical officer" }
+    ]
+  },
+  "proto_cardiovascular_critical": {
+    "message": "Cardiovascular critical: tell someone now and do not stay alone.",
+    "recommendations": [
+      { "text": "Tell someone who is with you right now and ask for help with the SOS button" },
+      { "text": "Stop what you are doing, sit down and avoid any effort" },
+      { "text": "Measure again after 5 minutes and log the value" }
+    ]
+  },
+  "proto_musculoskeletal_warning": {
+    "message": "Musculoskeletal warning: you have done less exercise than recommended today.",
+    "recommendations": [
+      { "text": "Set aside a block today to complete your exercise session" },
+      { "text": "If a long session does not fit, split it into two shorter blocks" }
+    ]
+  },
+  "proto_musculoskeletal_critical": {
+    "message": "Musculoskeletal critical: almost no exercise, and without it you lose bone and muscle.",
+    "recommendations": [
+      { "text": "Resume your resistance exercise session as soon as you can" },
+      { "text": "If you are not training because of pain or an injury, do not push yourself and tell the medical officer" }
+    ]
+  },
+  "proto_immune_warning": {
+    "message": "Immune warning: temperature outside the normal range.",
+    "recommendations": [
+      { "text": "Take your temperature again in 30 minutes" },
+      { "text": "Drink fluids and rest" },
+      { "text": "Until you know whether it is an infection, limit close contact with others" }
+    ]
+  },
+  "proto_immune_critical": {
+    "message": "Immune critical: temperature very high or very low. Tell someone now.",
+    "recommendations": [
+      { "text": "Tell the medical officer now and do not stay alone" },
+      { "text": "Take your temperature again after 15 minutes and log the value" }
+    ]
+  },
+  "proto_metabolic_warning": {
+    "message": "Metabolic warning: glucose, hydration or weight outside the normal range.",
+    "recommendations": [
+      { "text": "Measure again to confirm the value" },
+      { "text": "Drink some water now and do not skip your next meal" },
+      { "text": "If you notice shaking, cold sweats or dizziness, have something sugary and tell someone" }
+    ]
+  },
+  "proto_metabolic_critical": {
+    "message": "Metabolic critical: tell someone now.",
+    "recommendations": [
+      { "text": "Tell the medical officer now and do not stay alone" },
+      { "text": "If your glucose is low, have some fast-acting sugar and measure again after 15 minutes" },
+      { "text": "If it is due to a lack of fluids, drink water in small sips" }
+    ]
+  },
+  "proto_neuro_behavioral_warning": {
+    "message": "Neurobehavioral warning: sleep, mood or attention below your usual level.",
+    "recommendations": [
+      { "text": "Make getting at least 7 hours of sleep tonight a priority" },
+      { "text": "If you have slept little, avoid risky tasks or tasks that require a lot of attention today" },
+      { "text": "Tell someone you trust how you are doing" }
+    ]
+  },
+  "proto_neuro_behavioral_critical": {
+    "message": "Neurobehavioral critical: do not carry this alone, ask for support today.",
+    "recommendations": [
+      { "text": "Talk today with someone you trust or with the medical officer" },
+      { "text": "Do not do critical tasks on your own until you feel better" },
+      { "text": "If you prefer a confidential channel, use “I need to talk” in “Send alert to control”" }
+    ]
+  },
+  "proto_eyes_warning": {
+    "message": "Eyes warning: you have noticed changes in your vision.",
+    "recommendations": [
+      { "text": "Note what you notice (blurred vision, blind spots, headache) and in which eye" },
+      { "text": "Do the self-assessment again tomorrow at the same time" },
+      { "text": "Mention it to the medical officer at your next consultation" }
+    ]
+  },
+  "proto_eyes_critical": {
+    "message": "Eyes critical: a sharp change in your vision. Tell someone now.",
+    "recommendations": [
+      { "text": "Tell the medical officer now" },
+      { "text": "Avoid tasks that depend on fine vision until you have been assessed" }
+    ]
+  },
+  "proto_radiation_warning": {
+    "message": "Radiation warning: your accumulated dose is above half of the career limit.",
+    "recommendations": [
+      { "text": "Review the planning of your outside excursions with the medical officer" },
+      { "text": "During a solar storm, stay in the most shielded area of the habitat" }
+    ]
+  },
+  "proto_radiation_critical": {
+    "message": "Radiation critical: the career dose limit has been reached.",
+    "recommendations": [
+      { "text": "Tell the medical officer: your exposure needs to be replanned" },
+      { "text": "Avoid any additional exposure that is not essential" }
+    ]
+  },
+  "proto_no_contact": {
+    "message": "No contact: someone needs to go and check on them.",
+    "steps": [
+      "Call them by voice, radio or phone",
+      "Go to where they were last seen; if you can, take someone with you",
+      "When you find them, check whether they respond and are breathing normally",
+      "If they respond, ask them to confirm “I’m OK” on their device",
+      "If they do not respond or are not breathing normally, call for emergency help and start the first aid you are trained in",
+      "Note what you found in the alert and resolve it once they are safe"
+    ]
+  }
+}

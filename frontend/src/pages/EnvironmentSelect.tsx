@@ -2,6 +2,7 @@ import { motion, MotionConfig } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useEnvironments, type Environment } from '../api/useEnvironments'
 import { EnvironmentCard } from '../components/environment/EnvironmentCard'
+import { useT } from '../i18n/t'
 import { useEnvironmentStore } from '../store/environment'
 
 /**
@@ -10,6 +11,7 @@ import { useEnvironmentStore } from '../store/environment'
  * y se va al centro de control de ese entorno (gestión y monitorización, no la vista de un member).
  */
 export default function EnvironmentSelect() {
+  const t = useT()
   const envs = useEnvironments()
   const currentEnvId = useEnvironmentStore((s) => s.envId)
   const selectEnvironment = useEnvironmentStore((s) => s.selectEnvironment)
@@ -23,9 +25,9 @@ export default function EnvironmentSelect() {
   return (
     <MotionConfig reducedMotion="user">
       <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <h1 className="text-2xl font-semibold">Elige el entorno</h1>
+        <h1 className="text-2xl font-semibold">{t('Elige el entorno')}</h1>
         <p className="mt-1 text-env-muted">
-          Cada entorno cambia los umbrales, el escalado de alertas, los textos y los colores.
+          {t('Cada entorno cambia los umbrales, el escalado de alertas, los textos y los colores.')}
         </p>
 
         {envs.state === 'loading' && (
@@ -38,13 +40,15 @@ export default function EnvironmentSelect() {
 
         {envs.state === 'error' && (
           <div className="mt-6  border border-env-border bg-env-surface p-4">
-            <p>No se han podido cargar los entornos. Comprueba la conexión con el servidor.</p>
+            <p>
+              {t('No se han podido cargar los entornos. Comprueba la conexión con el servidor.')}
+            </p>
             <button
               type="button"
               onClick={envs.retry}
               className="mt-3  bg-env-primary px-3 py-1.5 text-sm font-medium text-env-primary-text"
             >
-              Reintentar
+              {t('Reintentar')}
             </button>
           </div>
         )}

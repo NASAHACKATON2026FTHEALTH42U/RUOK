@@ -1,6 +1,7 @@
 import QRCode from 'qrcode'
 import { useEffect, useState } from 'react'
 import { useNetworkInfo } from '../../api/useNetworkInfo'
+import { useT } from '../../i18n/t'
 import { joinUrl } from './qr'
 
 /**
@@ -9,6 +10,7 @@ import { joinUrl } from './qr'
  * abre el login en la red local; cada móvil es un dispositivo propio (su `device_id`).
  */
 export function ConnectQr() {
+  const t = useT()
   const info = useNetworkInfo()
   const urls = info.state === 'ready' ? info.data.lan_urls : []
   const [index, setIndex] = useState(0)
@@ -28,37 +30,41 @@ export function ConnectQr() {
   }, [url])
 
   return (
-    <section aria-label="QR de conexión" className="hud-panel">
-      <h2 className="hud-panel-head">Conectar un móvil</h2>
+    <section aria-label={t('QR de conexión')} className="hud-panel">
+      <h2 className="hud-panel-head">{t('Conectar un móvil')}</h2>
       <div className="p-4">
         {info.state === 'loading' && <div className="h-48 w-48 animate-pulse bg-env-bg" />}
         {info.state === 'error' && (
           <p className="text-env-muted">
-            No se ha podido obtener la dirección del servidor.{' '}
+            {t('No se ha podido obtener la dirección del servidor.')}{' '}
             <button type="button" onClick={info.retry} className="underline">
-              Reintentar
+              {t('Reintentar')}
             </button>
           </p>
         )}
         {info.state === 'ready' && urls.length === 0 && (
-          <p className="text-env-muted">El servidor no tiene dirección en la red local.</p>
+          <p className="text-env-muted">{t('El servidor no tiene dirección en la red local.')}</p>
         )}
         {url && (
           <div className="flex flex-wrap items-center gap-4">
             {/* Fondo blanco siempre: los lectores de QR necesitan contraste oscuro sobre claro. */}
             <div
               role="img"
-              aria-label={`Código QR para abrir ${url}`}
+              aria-label={t('Código QR para abrir {url}', { url })}
               className="h-48 w-48  bg-white p-2"
               // SVG generado localmente por la librería a partir de la URL del servidor.
               dangerouslySetInnerHTML={svg ? { __html: svg } : undefined}
             />
             <div className="space-y-2 text-sm">
-              <p>Escanéalo con la cámara del móvil, conectado a la misma wifi que este servidor.</p>
+              <p>
+                {t(
+                  'Escanéalo con la cámara del móvil, conectado a la misma wifi que este servidor.',
+                )}
+              </p>
               <p className="font-mono text-base break-all">{url}</p>
               {urls.length > 1 && (
                 <label className="block">
-                  <span className="text-env-muted">Dirección</span>
+                  <span className="text-env-muted">{t('Dirección')}</span>
                   <select
                     value={index}
                     onChange={(e) => setIndex(Number(e.target.value))}
@@ -73,7 +79,9 @@ export function ConnectQr() {
                 </label>
               )}
               {info.state === 'ready' && (
-                <p className="text-env-muted">Servidor: {info.data.hostname}</p>
+                <p className="text-env-muted">
+                  {t('Servidor: {host}', { host: info.data.hostname })}
+                </p>
               )}
             </div>
           </div>

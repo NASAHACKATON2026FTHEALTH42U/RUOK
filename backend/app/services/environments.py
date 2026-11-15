@@ -3,6 +3,8 @@
 El JSON se valida con el schema `Environment` del contrato (app/schemas/config.py),
 que rechaza campos desconocidos. Se lee una sola vez y queda en memoria.
 La app lo carga al arrancar: si el JSON es inválido, el servidor no arranca.
+`localized()` da la copia en el idioma de la petición (FE-38) para la API; la lógica interna
+usa siempre el perfil original.
 Ver docs/environments.md.
 """
 
@@ -11,6 +13,7 @@ from pathlib import Path
 
 from pydantic import TypeAdapter
 
+from app import i18n
 from app.schemas import Environment
 
 DATA_FILE = Path(__file__).resolve().parent.parent / "data" / "environments.json"
@@ -41,3 +44,11 @@ def list_environments() -> list[Environment]:
 def get_environment(env_id: str) -> Environment | None:
     """Un perfil por id, o None si no existe."""
     return _by_id().get(env_id)
+
+
+def localized(env: Environment) -> Environment:
+    """Copia del perfil con nombre y vocabulario en el idioma de la petición (FE-38).
+
+    Solo para lo que sale por la API: el objeto en caché no se modifica.
+    """
+    return i18n.localized("environments", env.id, env)

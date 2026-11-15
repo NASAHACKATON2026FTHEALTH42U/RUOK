@@ -1,4 +1,5 @@
 import type { Schema } from '../../api/client'
+import { translate } from '../../i18n/t'
 import { formatDelay, hhmm } from '../ui/link'
 
 /**
@@ -86,18 +87,25 @@ export function describeState(
     case 'local':
       return {
         icon: '◦',
-        label: 'Guardado en este dispositivo · saldrá al volver la conexión',
+        label: translate('Guardado en este dispositivo · saldrá al volver la conexión'),
         tone: 'none',
       }
     case 'failed':
-      return { icon: '✕', label: 'No enviado: el servidor lo ha rechazado', tone: 'crit' }
+      return {
+        icon: '✕',
+        label: translate('No enviado: el servidor lo ha rechazado'),
+        tone: 'crit',
+      }
     case 'queued':
-      return { icon: '○', label: 'En cola · sin enlace', tone: 'none' }
+      return { icon: '○', label: translate('En cola · sin enlace'), tone: 'none' }
     case 'in_transit': {
       const left = item.eta ? secondsLeft(item.eta, now) : 0
       return {
         icon: '◷',
-        label: left > 0 ? `En tránsito · llega en ${formatDelay(left)}` : 'En tránsito · llegando',
+        label:
+          left > 0
+            ? translate('En tránsito · llega en {delay}', { delay: formatDelay(left) })
+            : translate('En tránsito · llegando'),
         tone: 'transit',
       }
     }
@@ -105,7 +113,10 @@ export function describeState(
       const at = item.deliveredAt ? ` ${hhmm(item.deliveredAt)}` : ''
       return {
         icon: '✓',
-        label: item.direction === 'up' ? `Entregado en casa${at}` : `Recibido${at}`,
+        label:
+          item.direction === 'up'
+            ? translate('Entregado en casa{at}', { at })
+            : translate('Recibido{at}', { at }),
         tone: 'ok',
       }
     }

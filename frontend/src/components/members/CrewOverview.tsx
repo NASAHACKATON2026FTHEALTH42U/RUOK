@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import type { MemberSummary } from '../../api/useMembers'
 import { useIndicators } from '../../api/useIndicators'
 import { useSystems } from '../../api/useSystems'
+import { useT } from '../../i18n/t'
 import type { Vocabulary } from '../../store/environment'
 import { STATUS_COLORS } from '../ui/status'
 import { StatusBadge, StatusIcon } from '../ui/StatusBadge'
@@ -38,6 +39,7 @@ export function CrewOverview({
   vocabulary: Vocabulary
   onOpen: (memberId: number) => void
 }) {
+  const t = useT()
   const systems = useSystems()
   const indicators = useIndicators()
   const names = useMemo<CatalogNames>(
@@ -58,10 +60,10 @@ export function CrewOverview({
       {/* Resumen del conjunto: el estado de cada member cuenta una vez; sin contacto, aparte. */}
       <div
         role="group"
-        aria-label="Resumen del conjunto"
+        aria-label={t('Resumen del conjunto')}
         className="flex flex-wrap items-center gap-2 text-sm"
       >
-        <span className="hud-label mr-1">{members.length} en total</span>
+        <span className="hud-label mr-1">{t('{n} en total', { n: members.length })}</span>
         {(['critical', 'warning', 'unknown', 'normal'] as const)
           .filter((s) => counts.byState[s] > 0)
           .map((s) => (
@@ -73,14 +75,16 @@ export function CrewOverview({
         {counts.openAlerts > 0 && (
           <span className="inline-flex items-center gap-1.5 text-env-muted">
             <StatusIcon glyph="alert" color={STATUS_COLORS.warning} size={14} />
-            {counts.openAlerts === 1 ? '1 alerta abierta' : `${counts.openAlerts} alertas abiertas`}
+            {counts.openAlerts === 1
+              ? t('1 alerta abierta')
+              : t('{n} alertas abiertas', { n: counts.openAlerts })}
           </span>
         )}
       </div>
 
       {density === 'rows' ? (
         <ul
-          aria-label={`Resumen de ${vocabulary.crew}`}
+          aria-label={t('Resumen de {crew}', { crew: vocabulary.crew })}
           className={`hud-panel min-h-0 flex-1 divide-y divide-env-border/60 ${SCROLL}`}
         >
           {sorted.map((m) => (
@@ -91,7 +95,7 @@ export function CrewOverview({
         </ul>
       ) : (
         <ul
-          aria-label={`Resumen de ${vocabulary.crew}`}
+          aria-label={t('Resumen de {crew}', { crew: vocabulary.crew })}
           className={`grid min-h-0 flex-1 content-start gap-2.5 md:gap-3 ${SCROLL} ${
             density === 'rich'
               ? richGrid(members.length)

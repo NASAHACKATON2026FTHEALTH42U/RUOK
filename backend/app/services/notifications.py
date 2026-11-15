@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from sqlmodel import Session, col, select
 
-from app import models
+from app import i18n, models
 from app.schemas import NotificationIn
 from app.schemas.common import EventType
 from app.services import events
@@ -32,7 +32,7 @@ def send(
     if existing is not None:
         same = {k: (existing.payload or {}).get(k) for k in content} == content
         if not same or existing.member_id != member.id:
-            raise NotificationConflict("Ese id ya se usó con otra notificación")
+            raise NotificationConflict(i18n.tr("Ese id ya se usó con otra notificación"))
         return existing
     row = events.emit(
         session,

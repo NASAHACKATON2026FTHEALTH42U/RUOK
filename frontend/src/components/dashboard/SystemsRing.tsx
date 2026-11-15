@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
+import { translate, useT } from '../../i18n/t'
 import { BodyFigure } from '../body/BodyFigure'
 import type { RegionState } from '../body/regions'
 import {
@@ -71,24 +72,22 @@ function useFitHeight(ref: React.RefObject<HTMLElement | null>) {
 
 function greeting(now: Date) {
   const h = now.getHours()
-  return h >= 6 && h < 13 ? 'Buenos días' : h >= 13 && h < 20 ? 'Buenas tardes' : 'Buenas noches'
-}
-
-function plural(n: number, one: string, many: string) {
-  return n === 1 ? `${n} ${one}` : `${n} ${many}`
+  return translate(
+    h >= 6 && h < 13 ? 'Buenos días' : h >= 13 && h < 20 ? 'Buenas tardes' : 'Buenas noches',
+  )
 }
 
 function summaryText(statuses: Status[]) {
   const crit = statuses.filter((s) => s === 'critical').length
   const warn = statuses.filter((s) => s === 'warning').length
   const none = statuses.filter((s) => s === 'unknown').length
-  if (crit + warn + none === 0) return 'Todos los sistemas, nominales.'
+  if (crit + warn + none === 0) return translate('Todos los sistemas, nominales.')
   const parts = [
-    crit && plural(crit, 'crítico', 'críticos'),
-    warn && plural(warn, 'en atención', 'en atención'),
-    none && plural(none, 'sin datos', 'sin datos'),
+    crit && translate(crit === 1 ? '{n} crítico' : '{n} críticos', { n: crit }),
+    warn && translate('{n} en atención', { n: warn }),
+    none && translate('{n} sin datos', { n: none }),
   ].filter(Boolean)
-  return `${parts.join(', ')}. El resto, nominal.`
+  return translate('{list}. El resto, nominal.', { list: parts.join(', ') })
 }
 
 export function SystemsRing({
@@ -100,6 +99,7 @@ export function SystemsRing({
   staleLabel,
   onSelectSystem,
 }: SystemsRingProps) {
+  const t = useT()
   const ringRef = useRef<HTMLElement>(null)
   const ringHeight = useFitHeight(ringRef)
   const items = regions.map((r) => ({ ...r, status: stale ? ('unknown' as Status) : r.status }))
@@ -131,7 +131,7 @@ export function SystemsRing({
           )}
         </h1>
         <p className="mt-0.5 text-sm text-hud-soft">
-          {stale ? 'Sin datos recientes: estado desconocido.' : summaryText(statuses)}
+          {stale ? t('Sin datos recientes: estado desconocido.') : summaryText(statuses)}
         </p>
       </div>
 
@@ -140,7 +140,7 @@ export function SystemsRing({
           móvil se leía mal y no aportaba. */}
       <section
         ref={ringRef}
-        aria-label="Estado global"
+        aria-label={t('Estado global')}
         className="hud-panel grid w-full grid-cols-[minmax(0,5fr)_minmax(0,6fr)] items-stretch gap-4 p-3.5"
         style={{ height: ringHeight }}
       >
@@ -165,16 +165,16 @@ export function SystemsRing({
               size={44}
             />
             <p className="min-w-0">
-              <span className="hud-label block">Estado general</span>
+              <span className="hud-label block">{t('Estado general')}</span>
               <span className="block text-sm font-semibold tracking-wide uppercase">
-                {statusStyle(headline).label}
+                {t(statusStyle(headline).label)}
               </span>
             </p>
           </div>
           {urgent ? (
             <>
               <p className="min-w-0">
-                <span className="hud-label block">Lo más urgente</span>
+                <span className="hud-label block">{t('Lo más urgente')}</span>
                 <span className="mt-1 block text-lg leading-snug font-medium">{urgent.name}</span>
               </p>
               <button
@@ -182,25 +182,27 @@ export function SystemsRing({
                 onClick={() => onSelectSystem(urgent.systemId)}
                 className="hud-btn hud-btn-primary !h-12 w-full"
               >
-                Ver qué hacer
+                {t('Ver qué hacer')}
               </button>
             </>
           ) : (
             <p className="text-sm text-env-muted">
-              {nominal} de {items.length} sistemas nominales. Toca una zona del cuerpo para ver su
-              sistema.
+              {t(
+                '{n} de {total} sistemas nominales. Toca una zona del cuerpo para ver su sistema.',
+                { n: nominal, total: items.length },
+              )}
             </p>
           )}
         </div>
       </section>
 
-      <section className="hud-panel" aria-label="Sistemas del cuerpo">
+      <section className="hud-panel" aria-label={t('Sistemas del cuerpo')}>
         <div className="hud-panel-head">
-          Sistemas
+          {t('Sistemas')}
           <span
             className={`hud-chip ${crit ? 'text-st-crit' : warn ? 'text-st-warn' : 'text-st-ok'}`}
           >
-            {crit || warn ? `${crit} crít · ${warn} atn` : 'Nominal'}
+            {crit || warn ? t('{crit} crít · {warn} atn', { crit, warn }) : t('Nominal')}
           </span>
         </div>
         <ul>
@@ -214,7 +216,10 @@ export function SystemsRing({
                   className={`hud-row w-full !text-sm text-left hover:text-white focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary ${
                     i === 0 && r.status !== 'normal' ? 'is-active' : ''
                   } ${i === sorted.length - 1 ? '!border-b-0' : ''}`}
-                  aria-label={`${r.name}: ${s.label}. Ver detalle`}
+                  aria-label={t('{name}: {status}. Ver detalle', {
+                    name: r.name,
+                    status: t(s.label),
+                  })}
                 >
                   <span
                     className={`w-[30px] font-mono text-[0.75rem] ${r.status === 'normal' ? 'text-env-muted' : ST_CLASS[r.status]}`}
@@ -231,7 +236,7 @@ export function SystemsRing({
                   <span
                     className={`w-[72px] shrink-0 text-right font-mono text-[0.6875rem] tracking-[0.08em] uppercase ${ST_CLASS[r.status]}`}
                   >
-                    {r.status === 'normal' ? 'Nominal' : s.label}
+                    {r.status === 'normal' ? t('Nominal') : t(s.label)}
                   </span>
                 </button>
               </li>

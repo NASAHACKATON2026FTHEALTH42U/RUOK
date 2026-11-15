@@ -11,7 +11,7 @@ from datetime import timedelta
 
 from sqlmodel import Session, col, select
 
-from app import clock, models
+from app import clock, i18n, models
 from app.schemas import StatusSummary
 from app.services import catalog, member_assessment
 
@@ -22,6 +22,9 @@ WORD = {
     "unknown": "sin datos recientes",
 }
 
+# Frase completa por estado (FE-38: se traduce entera con `i18n.tr`, en messages.json).
+OVERALL = {status: f"En general estoy {word}." for status, word in WORD.items()}
+
 
 def _lower_names(names: list[str]) -> str:
     """Nombres de sistema en minúscula para la frase, salvo las siglas («ojos (SANS)»)."""
@@ -29,12 +32,14 @@ def _lower_names(names: list[str]) -> str:
 
 
 def _join(items: list[str]) -> str:
-    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " y " + items[-1]
+    if len(items) == 1:
+        return items[0]
+    return i18n.tr("{first} y {last}", first=", ".join(items[:-1]), last=items[-1])
 
 
 def summary(session: Session, member: models.Member, period: str) -> StatusSummary:
     now = clock.now()
-    names = {s.id: s.name for s in catalog.load_systems()}
+    names = {s.id: catalog.localized_system(s).name for s in catalog.load_systems()}
     a = member_assessment.assess_member(session, member)
     attention = [
         names.get(s.system_id, s.system_id)
@@ -42,11 +47,11 @@ def summary(session: Session, member: models.Member, period: str) -> StatusSumma
         if s.status in ("warning", "critical")
     ]
     unknown = [names.get(s.system_id, s.system_id) for s in a.systems if s.status == "unknown"]
-    parts = [f"En general estoy {WORD.get(a.overall_status, 'sin datos recientes')}."]
+    parts = [i18n.tr(OVERALL.get(a.overall_status, OVERALL["unknown"]))]
     if attention:
-        parts.append(f"Tengo que vigilar: {_lower_names(attention)}.")
+        parts.append(i18n.tr("Tengo que vigilar: {systems}.", systems=_lower_names(attention)))
     elif a.overall_status == "normal":
-        parts.append("Todos los sistemas que mido están en su rango.")
+        parts.append(i18n.tr("Todos los sistemas que mido están en su rango."))
     if period == "week":
         since = now - timedelta(days=7)
         rows = session.exec(
@@ -57,15 +62,20 @@ def summary(session: Session, member: models.Member, period: str) -> StatusSumma
             )
         ).all()
         days = len({r.date() for r in rows})
-        intro = (
-            f"Esta semana me he medido {len(rows)} {'vez' if len(rows) == 1 else 'veces'} "
-            f"en {days} de los últimos 7 días."
-            if rows
-            else "Esta semana no he registrado mediciones."
-        )
+        if not rows:
+            intro = i18n.tr("Esta semana no he registrado mediciones.")
+        elif len(rows) == 1:
+            intro = i18n.tr(
+                "Esta semana me he medido 1 vez en {days} de los últimos 7 días.", days=days
+            )
+        else:
+            intro = i18n.tr(
+                "Esta semana me he medido {n} veces en {days} de los últimos 7 días.",
+                n=len(rows), days=days,
+            )
         parts.insert(0, intro)
     else:
-        parts.insert(0, "Así estoy hoy:")
+        parts.insert(0, i18n.tr("Así estoy hoy:"))
     if unknown and period == "day":
-        parts.append(f"Me falta medir: {_lower_names(unknown)}.")
+        parts.append(i18n.tr("Me falta medir: {systems}.", systems=_lower_names(unknown)))
     return StatusSummary(member_id=member.id, period=period, text=" ".join(parts), generated_at=now)

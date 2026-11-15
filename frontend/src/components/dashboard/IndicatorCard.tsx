@@ -1,5 +1,6 @@
 import { serverNow } from '../../api/client'
 import type { Assessment } from '../../api/useAssessment'
+import { useT } from '../../i18n/t'
 import { formatAgo } from '../../lib/time'
 import { statusStyle } from '../ui/status'
 import { StatusBadge, StatusIcon } from '../ui/StatusBadge'
@@ -50,9 +51,11 @@ export function IndicatorCard({
   compact = false,
   tile = false,
 }: IndicatorCardProps) {
+  const t = useT()
   const trend = formatTrend(indicator.trend)
   const st = statusStyle(stale ? 'stale' : indicator.status)
-  const stateLabel = provisional && !stale ? `${st.label} · provisional` : st.label
+  const stateLabel =
+    provisional && !stale ? t('{status} · provisional', { status: t(st.label) }) : t(st.label)
   const compactBody = (
     <span className="flex items-center justify-between gap-3" title={stateLabel}>
       <span className="flex min-w-0 items-center gap-2">
@@ -100,7 +103,7 @@ export function IndicatorCard({
           status={stale ? 'stale' : indicator.status}
           label={
             provisional && !stale
-              ? `${statusStyle(indicator.status).label} · provisional`
+              ? t('{status} · provisional', { status: t(statusStyle(indicator.status).label) })
               : undefined
           }
           size="xs"
@@ -114,7 +117,7 @@ export function IndicatorCard({
           <span aria-hidden>{trend.arrow}</span> {trend.label}
         </span>
         <span className="text-env-muted">
-          {indicator.taken_at ? formatAgo(indicator.taken_at, serverNow()) : 'Nunca medido'}
+          {indicator.taken_at ? formatAgo(indicator.taken_at, serverNow()) : t('Nunca medido')}
         </span>
       </span>
     </>

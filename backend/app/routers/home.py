@@ -4,7 +4,7 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app import models
+from app import i18n, models
 from app.routers.deps import (
     ERRORS_404,
     ERRORS_409,
@@ -24,7 +24,7 @@ router = APIRouter(
 def _member(session: SessionDep, member_id: int) -> models.Member:
     m = members.get_member(session, member_id)
     if m is None:
-        raise HTTPException(404, f"Member desconocido: {member_id}")
+        raise HTTPException(404, i18n.tr("Member desconocido: {id}", id=member_id))
     return m
 
 

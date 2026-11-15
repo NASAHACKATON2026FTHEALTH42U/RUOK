@@ -12,7 +12,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 
-from app import models
+from app import i18n, models
 from app.db import get_session
 from app.routers.deps import (
     ERRORS_404,
@@ -84,7 +84,7 @@ def list_member_alerts(
 ) -> list[Alert]:
     member = session.get(models.Member, member_id)
     if member is None:
-        raise HTTPException(404, f"Member desconocido: {member_id}")
+        raise HTTPException(404, i18n.tr("Member desconocido: {id}", id=member_id))
     comm_link.deliver_due(session, member.env_id)  # marca las que ya han llegado a tierra
     rows = alerts_service.list_for_member(session, member_id, status)
     return [alerts_service.to_schema(session, a) for a in rows]
@@ -98,7 +98,9 @@ def _may_create(user: models.UserAccount | None, member: models.Member, *, emerg
     if user is None:
         if emergency:
             return False
-        raise HTTPException(401, "Falta el token de sesión", headers={"WWW-Authenticate": "Bearer"})
+        raise HTTPException(
+            401, i18n.tr("Falta el token de sesión"), headers={"WWW-Authenticate": "Bearer"}
+        )
     try:
         check(user, "alerts:create")
         check_member(user, member)
@@ -123,7 +125,7 @@ def _may_create(user: models.UserAccount | None, member: models.Member, *, emerg
 def create_alert(member_id: int, body: AlertIn, session: SessionDep, user: OptionalUser) -> Alert:
     member = session.get(models.Member, member_id)
     if member is None:
-        raise HTTPException(404, f"Member desconocido: {member_id}")
+        raise HTTPException(404, i18n.tr("Member desconocido: {id}", id=member_id))
     authenticated = _may_create(user, member, emergency=body.category == "emergency")
     try:
         alert, _created = alerts_service.create_manual(
@@ -154,7 +156,7 @@ def send_notification(
 ) -> Event:
     member = session.get(models.Member, member_id)
     if member is None:
-        raise HTTPException(404, f"Member desconocido: {member_id}")
+        raise HTTPException(404, i18n.tr("Member desconocido: {id}", id=member_id))
     check(user, "notifications:send")
     check_member(user, member)
     try:
@@ -175,7 +177,7 @@ def send_notification(
 def list_notifications(member_id: int, session: SessionDep) -> list[Event]:
     member = session.get(models.Member, member_id)
     if member is None:
-        raise HTTPException(404, f"Member desconocido: {member_id}")
+        raise HTTPException(404, i18n.tr("Member desconocido: {id}", id=member_id))
     return [events.to_schema(r) for r in notifications.list_for(session, member)]
 
 

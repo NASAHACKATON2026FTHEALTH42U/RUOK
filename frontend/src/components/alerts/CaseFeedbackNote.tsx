@@ -2,6 +2,7 @@ import { useMemberAlerts } from '../../api/useAlerts'
 import { useSystems } from '../../api/useSystems'
 import { useActiveMemberId, useAuth } from '../../auth/useAuth'
 import { useVocab } from '../../environments/useVocab'
+import { translate } from '../../i18n/t'
 import { caseFeedback, type CaseFeedback } from './caseFeedback'
 import { roleLabel } from './sos'
 
@@ -61,7 +62,7 @@ function useCaseFeedback(systemId: string, current: string | undefined): CaseFee
   const name =
     systems.state === 'ready' ? systems.data.find((s) => s.id === systemId)?.name : undefined
   return caseFeedback(alerts.data, systemId, current, {
-    system: name ?? 'Este sistema',
+    system: name ?? translate('Este sistema'),
     role: (r) => roleLabel(r, vocab),
   })
 }
