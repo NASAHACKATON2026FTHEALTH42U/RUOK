@@ -1,0 +1,3 @@
+# Vercel CLI: enlace local del proyecto y variables descargadas (llevan tokens)
+.vercel
+.env*.local
