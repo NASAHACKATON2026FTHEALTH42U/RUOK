@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { serverNow } from '../api/client'
-import { useHomeMessages } from '../api/useHomeMessages'
+import { getStatusSummary, useHomeMessages } from '../api/useHomeMessages'
 import { useLink } from '../api/useLink'
 import { useActiveMemberId } from '../auth/useAuth'
 import {
@@ -50,6 +50,20 @@ export default function HomeMessages() {
   const [draft, setDraft] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [summaryBusy, setSummaryBusy] = useState(false)
+  /** Añade al mensaje un resumen con los datos reales (se puede editar antes de enviarlo). */
+  const addSummary = async (period: 'day' | 'week') => {
+    if (memberId === null) return
+    setSummaryBusy(true)
+    try {
+      const sum = await getStatusSummary(memberId, period)
+      setDraft((d) => (d.trim() ? `${d.trim()}\n\n${sum.text}` : sum.text).slice(0, MAX_LENGTH))
+    } catch {
+      setError('no se ha podido preparar el resumen (sin conexión con el servidor)')
+    } finally {
+      setSummaryBusy(false)
+    }
+  }
   const [now, setNow] = useState(() => serverNow())
   const endRef = useRef<HTMLLIElement>(null)
 
@@ -193,9 +207,29 @@ export default function HomeMessages() {
           void send()
         }}
       >
-        <label htmlFor="home-message" className="hud-label">
-          Tu mensaje
-        </label>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <label htmlFor="home-message" className="hud-label">
+            Tu mensaje
+          </label>
+          <div role="group" aria-label="Añadir un resumen" className="flex gap-1.5">
+            {(
+              [
+                ['day', 'Resumen de hoy'],
+                ['week', 'Resumen de la semana'],
+              ] as const
+            ).map(([period, label]) => (
+              <button
+                key={period}
+                type="button"
+                disabled={memberId === null || summaryBusy}
+                onClick={() => void addSummary(period)}
+                className="min-h-9 border border-env-border px-3 text-sm text-env-muted hover:border-env-text hover:text-env-text disabled:opacity-50"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
         <AutoTextarea
           id="home-message"
           value={draft}

@@ -14,7 +14,7 @@ interface CrewKudosProps {
 }
 
 /** Cuántos kudos recientes se enseñan. */
-const SHOWN = 4
+const SHOWN = 12
 
 const field =
   'min-h-11 w-full  border border-env-border bg-env-bg px-3 text-sm text-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary'
@@ -45,25 +45,50 @@ export function CrewKudos({ kudos, members, memberId, canSend, onSend }: CrewKud
   }
 
   return (
-    <section className="hud-panel shrink-0">
-      <h2 className="hud-panel-head">Kudos</h2>
-      <div className="px-4 py-3">
-        {canSend && mates.length > 0 && (
-          <form
-            className="mt-2 flex flex-col gap-2"
-            onSubmit={(e) => {
-              e.preventDefault()
-              void submit()
-            }}
-          >
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-env-muted">Para</span>
+    // Muro de agradecimientos: el formulario en una línea arriba y los kudos como tarjetas con
+    // scroll propio (el panel se estira en su columna).
+    <section aria-labelledby="kudos-title" className="hud-panel flex min-h-0 flex-1 flex-col">
+      <h2 id="kudos-title" className="hud-panel-head">
+        Kudos
+        <span className="mr-2.5 ml-auto tracking-normal text-env-muted normal-case">
+          {kudos.length}
+        </span>
+      </h2>
+      {canSend && mates.length > 0 && (
+        // El mensaje ocupa todo el ancho (es lo que se escribe); debajo, para quién y «Dar kudos».
+        <form
+          className="flex flex-col gap-2 border-b border-env-border/60 px-4 py-3"
+          onSubmit={(e) => {
+            e.preventDefault()
+            void submit()
+          }}
+        >
+          <label className="flex flex-col gap-1">
+            <span className="sr-only">Qué le agradeces</span>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  void submit()
+                }
+              }}
+              maxLength={KUDOS_MAX}
+              rows={2}
+              placeholder="Gracias por ayudarme con…"
+              className={`${field} min-h-[4.5rem] resize-none py-2.5 leading-snug [field-sizing:content]`}
+            />
+          </label>
+          <div className="flex gap-2">
+            <label className="flex min-w-0 flex-1 flex-col">
+              <span className="sr-only">Para</span>
               <select
                 value={to}
                 onChange={(e) => setTo(e.target.value === '' ? '' : Number(e.target.value))}
                 className={field}
               >
-                <option value="">Elige a alguien…</option>
+                <option value="">Para…</option>
                 {mates.map((m) => (
                   <option key={m.member_id} value={m.member_id}>
                     {m.name}
@@ -71,45 +96,44 @@ export function CrewKudos({ kudos, members, memberId, canSend, onSend }: CrewKud
                 ))}
               </select>
             </label>
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-env-muted">Qué le agradeces</span>
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                maxLength={KUDOS_MAX}
-                placeholder="Gracias por…"
-                className={field}
-              />
-            </label>
             <button
               type="submit"
               disabled={to === '' || !text || busy}
-              className="min-h-11  bg-env-primary px-4 text-sm font-semibold text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary disabled:opacity-60"
+              className="hud-btn hud-btn-primary !h-11 shrink-0 px-4 disabled:opacity-60"
             >
               {busy ? 'Enviando…' : 'Dar kudos'}
             </button>
-          </form>
-        )}
+          </div>
+        </form>
+      )}
 
-        {kudos.length === 0 ? (
-          <p className="mt-3 text-sm text-env-muted">
-            Todavía no hay kudos. Estrena tú el tablero.
-          </p>
-        ) : (
-          <ul className="mt-3 space-y-2" aria-label="Kudos recientes">
-            {kudos.slice(0, SHOWN).map((k) => (
-              <li key={k.id} className="text-sm">
-                <p className="text-xs text-env-muted">
-                  {memberName(k.from_member_id, names, memberId)} →{' '}
-                  {memberName(k.to_member_id, names, memberId)}
-                </p>
-                <p className="break-words">«{k.message}»</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {kudos.length === 0 ? (
+        <p className="px-4 py-3 text-sm text-env-muted">
+          Todavía no hay kudos. Estrena tú el tablero.
+        </p>
+      ) : (
+        <ul
+          aria-label="Kudos recientes"
+          className="grid min-h-0 flex-1 auto-rows-min gap-2 overflow-y-auto p-3 [scrollbar-color:var(--env-border)_transparent] sm:grid-cols-2"
+        >
+          {kudos.slice(0, SHOWN).map((k) => (
+            <li
+              key={k.id}
+              className="flex flex-col gap-1.5 border border-env-border/70 bg-env-bg/60 px-3.5 py-3"
+              style={{ boxShadow: 'inset 3px 0 0 var(--env-primary)' }}
+            >
+              <p className="text-[0.9375rem] leading-snug break-words">«{k.message}»</p>
+              <p className="text-xs text-env-muted">
+                <span className="text-env-text">
+                  {memberName(k.from_member_id, names, memberId)}
+                </span>{' '}
+                para{' '}
+                <span className="text-env-text">{memberName(k.to_member_id, names, memberId)}</span>
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   )
 }

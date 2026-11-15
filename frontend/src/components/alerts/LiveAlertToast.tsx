@@ -15,6 +15,7 @@ type Payload = {
   text?: string
   level?: Schema<'NotificationLevel'>
   from_name?: string
+  member_name?: string | null
 }
 
 /**
@@ -52,7 +53,9 @@ export function LiveAlertToast() {
         pushToast({
           tone,
           icon: 'mail',
-          label: 'Notificación',
+          label: `Notificación · ${
+            p.level === 'critical' ? 'Importante' : p.level === 'warning' ? 'Aviso' : 'Información'
+          }`,
           title: p.title || 'Mensaje de control',
           body: p.text,
           meta: p.from_name ? `De ${p.from_name}` : undefined,
@@ -70,14 +73,20 @@ export function LiveAlertToast() {
         pushToast({
           tone: p.severity === 'warning' ? 'warning' : 'critical',
           icon: created ? 'alert' : 'escalate',
-          label: otherEnv ? otherEnv.name : created ? 'Alerta' : 'Alerta escalada',
+          label: [
+            p.severity ? severityStyle(p.severity).label : created ? 'Alerta' : 'Alerta escalada',
+            otherEnv?.name,
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          // Quien atiende ve siempre quién necesita ayuda (el SOS, en primer lugar).
           title: member
             ? created
               ? 'Nueva alerta para ti'
               : 'Tu alerta ha cambiado'
-            : created
-              ? 'Nueva alerta'
-              : 'Alerta escalada',
+            : `${p.category === 'emergency' ? 'SOS' : created ? 'Nueva alerta' : 'Alerta escalada'}${
+                p.member_name ? ` · ${p.member_name}` : ''
+              }`,
           body: member
             ? [
                 p.category && categoryLabel(p.category),
@@ -85,7 +94,7 @@ export function LiveAlertToast() {
               ]
                 .filter(Boolean)
                 .join(' · ')
-            : e.summary,
+            : [p.category && categoryLabel(p.category), e.summary].filter(Boolean).join(' · '),
           actions: [
             {
               label: 'Ver',

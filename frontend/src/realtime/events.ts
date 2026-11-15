@@ -58,9 +58,23 @@ function stop() {
   useRealtimeStore.setState({ mode: 'off' })
 }
 
+/** Con polling, cada cuántos tics se vuelve a intentar el stream (30 s). */
+const SSE_RETRY_TICKS = 6
+/** Última sesión con la que se abrió el tiempo real (para reintentar el stream). */
+let current: { token: string; envId: string | null; isAdmin: boolean } | null = null
+
 function startPolling(isAdmin: boolean) {
   useRealtimeStore.setState({ mode: 'polling' })
+  let ticks = 0
   pollTimer = setInterval(async () => {
+    // El polling es un plan B: cada 30 s se vuelve a probar el stream (un reinicio del servidor
+    // no puede dejar el dispositivo sin avisos para siempre: sin stream, quien no es admin solo
+    // recibe "tics" y no le llegan las notificaciones).
+    ticks += 1
+    if (current && typeof EventSource !== 'undefined' && ticks % SSE_RETRY_TICKS === 0) {
+      const { token, envId, isAdmin: admin } = current
+      return startRealtime(token, envId, admin)
+    }
     if (!isAdmin) return emit(null)
     try {
       const events = await unwrap(
@@ -77,6 +91,7 @@ function startPolling(isAdmin: boolean) {
 export function startRealtime(token: string | null, envId: string | null, isAdmin: boolean) {
   stop()
   failures = 0
+  current = token ? { token, envId, isAdmin } : null
   if (!token) return
   if (isMockMode()) {
     stopMock = createMockEventStream(emit, { intervalMs: 4000, startId: lastId + 1 })

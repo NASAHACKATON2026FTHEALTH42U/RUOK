@@ -1,5 +1,7 @@
 """Mensaje a casa (BE-22): mensajes personales del member por el enlace con la Tierra."""
 
+from typing import Literal
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from app import models
@@ -11,8 +13,8 @@ from app.routers.deps import (
     SessionDep,
     allow_member,
 )
-from app.schemas import HomeMessage, HomeMessageIn
-from app.services import comm_link, home_messages, members
+from app.schemas import HomeMessage, HomeMessageIn, StatusSummary
+from app.services import comm_link, home_messages, members, summaries
 
 router = APIRouter(
     tags=["behavioral"], dependencies=[AuthDep], responses={**ERRORS_AUTH, **ERRORS_404}
@@ -57,3 +59,17 @@ def send_home_message(member_id: int, body: HomeMessageIn, session: SessionDep) 
 )
 def list_home_messages(member_id: int, session: SessionDep) -> list[HomeMessage]:
     return home_messages.list_thread(session, _member(session, member_id))
+
+
+@router.get(
+    "/members/{member_id}/summary",
+    response_model=StatusSummary,
+    summary="Resumen en texto del estado de hoy o de la semana",
+    description="Para contárselo a casa: se genera con los datos reales (evaluación y "
+    "mediciones), sin LLM. Solo palabras de estado y nombres de sistema.",
+    dependencies=[Depends(allow_member("home:read"))],
+)
+def get_summary(
+    member_id: int, session: SessionDep, period: Literal["day", "week"] = "day"
+) -> StatusSummary:
+    return summaries.summary(session, _member(session, member_id), period)

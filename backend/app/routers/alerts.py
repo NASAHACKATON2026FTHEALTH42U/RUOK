@@ -164,6 +164,21 @@ def send_notification(
     return events.to_schema(row)
 
 
+@router.get(
+    "/members/{member_id}/notifications",
+    response_model=list[Event],
+    summary="Notificaciones recibidas por un member (las más recientes primero)",
+    description="Las notificaciones personalizadas que ha recibido (eventos `notification.sent` "
+    "del `event_log`, que se guardan 7 días). Las ve el propio member y el staff de su entorno.",
+    dependencies=[Depends(allow_member("alerts:read"))],
+)
+def list_notifications(member_id: int, session: SessionDep) -> list[Event]:
+    member = session.get(models.Member, member_id)
+    if member is None:
+        raise HTTPException(404, f"Member desconocido: {member_id}")
+    return [events.to_schema(r) for r in notifications.list_for(session, member)]
+
+
 @router.post(
     "/alerts/{alert_id}/escalate",
     response_model=Alert,

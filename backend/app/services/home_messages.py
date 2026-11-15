@@ -5,9 +5,9 @@ Ver docs/behavioral-health.md ("Conexión con la Tierra").
 - El mensaje del member sale como `link_message` (`kind=home_message`, `direction=up`):
   con retardo en Marte y en cola si hay LOS (``comm_link.send``).
 - Cuando llega a la Tierra, "casa" responde (simulado): se programa un mensaje `down`
-  que sale ``response_delay_s`` después y tarda otro retardo de ida en llegar. El texto
-  sale de ``data/home_message_replies.json`` (configuración, no código) y se elige de
-  forma determinista a partir del UUID del mensaje.
+  que sale ``response_delay_s`` después y tarda otro retardo de ida en llegar. Responde el
+  personaje del entorno (``home_persona``): con el LLM local si está (``OLLAMA_URL``) y, si
+  no, con una frase de ``data/home_message_replies.json`` elegida a partir del UUID.
 - El member solo ve las respuestas ya entregadas a bordo.
 """
 
@@ -26,7 +26,7 @@ from sqlmodel import Session, col, select
 from app import models
 from app.schemas import HomeMessage
 from app.schemas.common import EventType, LinkDirection
-from app.services import comm_link, environments, events
+from app.services import comm_link, environments, events, home_persona
 
 __all__ = ["KIND", "IdConflict", "list_thread", "on_link_delivered", "send"]
 
@@ -100,7 +100,26 @@ def on_link_delivered(session: Session, delivered: Iterable[models.LinkMessage])
         row = comm_link.get_state(session, message.env_id)
         sent_at = message.delivered_at + timedelta(seconds=cfg["response_delay_s"])
         replies = cfg["replies"]
-        text = replies[uuid.UUID(message.ref_id).int % len(replies)]
+        scripted = replies[uuid.UUID(message.ref_id).int % len(replies)]
+        # Quien responde depende del entorno (familiar, pareja, amigo…). Con el LLM local
+        # (OLLAMA_URL) contesta en su papel y sin salirse del contexto; si no, la frase de siempre.
+        member_id = message.payload.get("member_id")
+        member = session.get(models.Member, member_id) if member_id else None
+        history = [
+            ("user" if m.direction == LinkDirection.up else "assistant", m.payload.get("text", ""))
+            for m in _messages(session, message.env_id)
+            if m.payload.get("member_id") == member_id
+            and m.ref_id != message.ref_id
+            and (m.direction == LinkDirection.up or m.state == "delivered")
+        ]
+        text, source = home_persona.reply(
+            message.env_id,
+            member.name if member else "",
+            history,
+            message.payload.get("text", ""),
+            message.ref_id,
+            scripted,
+        )
         session.add(
             models.LinkMessage(
                 env_id=message.env_id,
@@ -110,7 +129,8 @@ def on_link_delivered(session: Session, delivered: Iterable[models.LinkMessage])
                 payload={
                     "member_id": message.payload.get("member_id"),
                     "text": text,
-                    "sender": cfg["sender"],
+                    "sender": home_persona.persona(message.env_id)["sender"],
+                    "source": source,
                     "in_reply_to": message.ref_id,
                 },
                 sent_at=sent_at,

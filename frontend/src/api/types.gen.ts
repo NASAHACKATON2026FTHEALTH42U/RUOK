@@ -422,7 +422,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Notificaciones recibidas por un member (las más recientes primero)
+         * @description Las notificaciones personalizadas que ha recibido (eventos `notification.sent` del `event_log`, que se guardan 7 días). Las ve el propio member y el staff de su entorno.
+         */
+        get: operations["list_notifications_api_v1_members__member_id__notifications_get"];
         put?: never;
         /**
          * Notificación personalizada a un member (idempotente por UUID)
@@ -704,6 +708,26 @@ export interface paths {
          * @description Sale por el enlace con la Tierra: con el retardo del entorno, o en cola si hay LOS. Cuando llega, casa responde (simulado). Reenviar el mismo `id` devuelve el mensaje original; el mismo `id` con otro texto → 409.
          */
         post: operations["send_home_message_api_v1_members__member_id__home_messages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/members/{member_id}/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resumen en texto del estado de hoy o de la semana
+         * @description Para contárselo a casa: se genera con los datos reales (evaluación y mediciones), sin LLM. Solo palabras de estado y nombres de sistema.
+         */
+        get: operations["get_summary_api_v1_members__member_id__summary_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2364,6 +2388,29 @@ export interface components {
          * @enum {string}
          */
         Status: "normal" | "warning" | "critical" | "unknown";
+        /**
+         * StatusSummary
+         * @description Resumen en texto del estado de hoy o de la semana, para contárselo a casa.
+         */
+        StatusSummary: {
+            /** Member Id */
+            member_id: number;
+            /**
+             * Period
+             * @enum {string}
+             */
+            period: "day" | "week";
+            /**
+             * Text
+             * @description Resumen en lenguaje llano, con los datos reales (sin LLM)
+             */
+            text: string;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+        };
         /** SystemAssessment */
         SystemAssessment: {
             /**
@@ -3845,6 +3892,67 @@ export interface operations {
             };
         };
     };
+    list_notifications_api_v1_members__member_id__notifications_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
+                "x-device-id"?: string | null;
+            };
+            path: {
+                member_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Event"][];
+                };
+            };
+            /** @description Sin sesión válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rol sin permiso o dato ajeno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     send_notification_api_v1_members__member_id__notifications_post: {
         parameters: {
             query?: never;
@@ -4919,6 +5027,69 @@ export interface operations {
             };
             /** @description Mismo id con contenido distinto */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_summary_api_v1_members__member_id__summary_get: {
+        parameters: {
+            query?: {
+                period?: "day" | "week";
+            };
+            header?: {
+                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
+                "x-device-id"?: string | null;
+            };
+            path: {
+                member_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusSummary"];
+                };
+            };
+            /** @description Sin sesión válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rol sin permiso o dato ajeno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -25,8 +25,13 @@ export function matches(event: RealtimeEvent | null, f: EventFilter): boolean {
 
 /** Descarta repetidos: el stream reenvía los mismos ids al reconectar. */
 export function isNew(id: number, lastId: number): boolean {
-  return id > lastId
+  // Un id muy por debajo del último no es un repetido: el servidor ha reiniciado la bitácora
+  // (reinicio de la demo) y los ids vuelven a empezar. Se acepta y se sigue desde ahí.
+  return id > lastId || id < lastId - RESET_GAP
 }
+
+/** Diferencia a partir de la cual un id menor que el último indica un reinicio del servidor. */
+export const RESET_GAP = 50
 
 /** URL del stream SSE. EventSource no admite cabeceras: el token va en `?token=`. */
 export function streamUrl(origin: string, token: string, envId: string | null): string {

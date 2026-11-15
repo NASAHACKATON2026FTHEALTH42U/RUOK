@@ -5,7 +5,7 @@ import uuid
 from tests.conftest import API
 
 MARS_DELAY = 840
-RESPONSE_S = 1800  # home_message_replies.json
+RESPONSE_S = 20  # home_message_replies.json (tiempo de «escribir» la respuesta)
 
 
 def _send(client, member=1, text="Hola, os echo de menos", mid=None, headers=None):

@@ -39,7 +39,9 @@ function ToastCard({ toast, onClose }: { toast: Toast; onClose: () => void }) {
         style={
           {
             '--tone': TONE[toast.tone],
-            boxShadow: 'inset 3px 0 0 var(--tone)',
+            // Todo el borde con el color del aviso y una franja más gruesa a la izquierda.
+            borderColor: 'color-mix(in srgb, var(--tone) 70%, transparent)',
+            boxShadow: 'inset 4px 0 0 var(--tone)',
           } as CSSProperties
         }
       >
@@ -54,14 +56,19 @@ function ToastCard({ toast, onClose }: { toast: Toast; onClose: () => void }) {
           <Icon name={toast.icon} size={20} />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="hud-label" style={{ color: 'var(--tone)' }}>
+          <p
+            className="text-[0.6875rem] font-semibold tracking-[0.12em] uppercase"
+            style={{ color: 'var(--tone)' }}
+          >
             {toast.label}
           </p>
-          <p className="mt-0.5 leading-snug font-medium">{toast.title}</p>
-          {toast.body && <p className="mt-0.5 text-sm leading-snug">{toast.body}</p>}
-          {toast.meta && <p className="mt-1 text-xs text-env-muted">{toast.meta}</p>}
+          <p className="mt-1 text-base leading-snug font-semibold">{toast.title}</p>
+          {toast.body && (
+            <p className="mt-1 text-[0.9375rem] leading-snug text-env-text/90">{toast.body}</p>
+          )}
+          {toast.meta && <p className="mt-1.5 text-xs text-env-muted">{toast.meta}</p>}
           {(toast.actions?.length || toast.sound) && (
-            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+            <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
               {toast.actions?.map((a) => {
                 const className = `${ACTION} ${
                   a.primary

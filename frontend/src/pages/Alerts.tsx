@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { NoticeButton } from '../components/alerts/SosButton'
 import { serverNow } from '../api/client'
-import { useMemberAlerts } from '../api/useAlerts'
+import { useMemberAlerts, useNotifications } from '../api/useAlerts'
 import { useMembers } from '../api/useMembers'
 import { useAssessment } from '../api/useAssessment'
 import { useEnvironments } from '../api/useEnvironments'
@@ -44,6 +44,9 @@ export default function Alerts() {
   const [selected, setSelected] = useState<string | null>(null)
   // Las resueltas salen de la lista: quedan plegadas en «Resueltas» (y en el Registro del operador).
   const [showResolved, setShowResolved] = useState(false)
+  // Notificaciones personalizadas recibidas (las guarda el servidor 7 días): se pueden repasar.
+  const notifications = useNotifications(memberId)
+  const [showNotes, setShowNotes] = useState(false)
   const ladder = (envs.state === 'ready'
     ? envs.data.find((e) => e.id === envId)?.escalation_ladder
     : null) ?? ['self', 'crew', 'ground']
@@ -105,6 +108,7 @@ export default function Alerts() {
   }
 
   const list = alerts.state === 'ready' ? sortAlerts(alerts.data) : []
+  const notes = notifications.state === 'ready' ? notifications.data : []
   const open = list.filter((a) => a.status !== 'resolved')
   const resolved = list.filter((a) => a.status === 'resolved')
   // La elegida; si no, la primera abierta (las resueltas solo si se despliegan).
@@ -170,7 +174,7 @@ export default function Alerts() {
         </p>
       )}
 
-      {list.length > 0 && (
+      {(list.length > 0 || notes.length > 0) && (
         // Lista y detalle miden lo que su contenido y, como mucho, el hueco: si no caben, el
         // scroll es suyo y no de la página. En móvil, la lista con su propio scroll y el detalle
         // debajo.
@@ -216,6 +220,62 @@ export default function Alerts() {
                   {showResolved && (
                     <ul className="divide-y divide-env-border/60" aria-label="Alertas resueltas">
                       {resolved.map(row)}
+                    </ul>
+                  )}
+                </div>
+              )}
+              {notes.length > 0 && (
+                <div className="border-t border-env-border">
+                  <button
+                    type="button"
+                    aria-expanded={showNotes}
+                    onClick={() => setShowNotes((v) => !v)}
+                    className="flex min-h-11 w-full items-center gap-2 px-3.5 py-2.5 text-left text-sm text-env-muted hover:text-env-text"
+                  >
+                    {showNotes ? '▾' : '▸'} Notificaciones ({notes.length})
+                  </button>
+                  {showNotes && (
+                    <ul className="divide-y divide-env-border/60" aria-label="Notificaciones">
+                      {notes.map((n) => {
+                        const p = n.payload as {
+                          title?: string | null
+                          text?: string
+                          level?: string
+                          from_name?: string
+                        }
+                        const tone =
+                          p.level === 'critical'
+                            ? 'var(--color-st-crit)'
+                            : p.level === 'warning'
+                              ? 'var(--color-st-warn)'
+                              : 'var(--env-primary)'
+                        return (
+                          <li
+                            key={n.id}
+                            className="flex flex-col gap-1 px-4 py-3"
+                            style={{ boxShadow: `inset 3px 0 0 ${tone}` }}
+                          >
+                            <span className="flex items-baseline justify-between gap-3">
+                              <span className="font-medium">{p.title || 'Notificación'}</span>
+                              <span
+                                className="shrink-0 text-[0.6875rem] font-semibold tracking-[0.12em] uppercase"
+                                style={{ color: tone }}
+                              >
+                                {p.level === 'critical'
+                                  ? 'Importante'
+                                  : p.level === 'warning'
+                                    ? 'Aviso'
+                                    : 'Información'}
+                              </span>
+                            </span>
+                            {p.text && <span className="text-sm">{p.text}</span>}
+                            <span className="text-xs text-env-muted">
+                              {p.from_name ? `De ${p.from_name} · ` : ''}
+                              {formatAgo(n.at, now)}
+                            </span>
+                          </li>
+                        )
+                      })}
                     </ul>
                   )}
                 </div>

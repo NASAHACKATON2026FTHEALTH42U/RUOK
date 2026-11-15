@@ -111,6 +111,14 @@ export const CONTRACT_OPERATIONS = [
   ],
   [
     "GET",
+    "/members/{member_id}/notifications"
+  ],
+  [
+    "GET",
+    "/members/{member_id}/summary"
+  ],
+  [
+    "GET",
     "/members/{member_id}/tasks"
   ],
   [
@@ -274,7 +282,9 @@ export const environments: Schema<'Environment'>[] = [
       "crew_relation",
       "pvt_mean_rt_ms",
       "pvt_lapses",
-      "vision_changes"
+      "vision_changes",
+      "hydration_ml",
+      "weight_kg"
     ],
     "routine": [
       {
@@ -351,7 +361,9 @@ export const environments: Schema<'Environment'>[] = [
       "crew_relation",
       "pvt_mean_rt_ms",
       "pvt_lapses",
-      "vision_changes"
+      "vision_changes",
+      "hydration_ml",
+      "weight_kg"
     ],
     "routine": [
       {
@@ -438,7 +450,9 @@ export const environments: Schema<'Environment'>[] = [
       "crew_relation",
       "pvt_mean_rt_ms",
       "pvt_lapses",
-      "vision_changes"
+      "vision_changes",
+      "hydration_ml",
+      "weight_kg"
     ],
     "routine": [
       {
@@ -505,7 +519,10 @@ export const environments: Schema<'Environment'>[] = [
       "spo2",
       "temperature",
       "sleep_hours",
-      "mood"
+      "mood",
+      "hydration_ml",
+      "weight_kg",
+      "exercise_min"
     ],
     "routine": [
       {
@@ -561,7 +578,9 @@ export const environments: Schema<'Environment'>[] = [
       "spo2",
       "temperature",
       "sleep_hours",
-      "mood"
+      "mood",
+      "hydration_ml",
+      "weight_kg"
     ],
     "routine": [
       {
@@ -1815,7 +1834,7 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "liveness": "active",
       "overall_status": "warning",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T08:49:35.366850Z"
+      "last_measurement_at": "2026-11-14T09:12:01.532948Z"
     },
     {
       "id": 10,
@@ -1853,7 +1872,7 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "liveness": "active",
       "overall_status": "warning",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T09:32:49.156823Z"
+      "last_measurement_at": "2026-11-14T09:49:14.174722Z"
     },
     {
       "id": 4,
@@ -1877,7 +1896,7 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "liveness": "active",
       "overall_status": "normal",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T08:39:00.634194Z"
+      "last_measurement_at": "2026-11-14T09:27:18.422175Z"
     }
   ],
   "earth": [
@@ -1941,7 +1960,7 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "liveness": "active",
       "overall_status": "normal",
       "open_alerts": 0,
-      "last_measurement_at": "2026-11-14T08:55:44.511251Z"
+      "last_measurement_at": "2026-11-14T09:17:57.324952Z"
     },
     {
       "id": 16,
@@ -2206,6 +2225,55 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               "warning": [
                 38.0,
                 39.5
+              ]
+            }
+          }
+        ],
+        "recommendations": [],
+        "escalation": {
+          "level": 0,
+          "target_role": "self",
+          "mode": "realtime",
+          "delay_s": 0,
+          "message": "",
+          "protocol_id": null
+        }
+      },
+      {
+        "system_id": "metabolic",
+        "status": "normal",
+        "indicators": [
+          {
+            "indicator_id": "hydration_ml",
+            "last_value": 3200.0,
+            "unit": "ml",
+            "taken_at": "2026-11-14T06:41:20.860169Z",
+            "status": "normal",
+            "trend": "rising",
+            "baseline": 2862.5,
+            "range": {
+              "normal": [
+                1500.0,
+                4000.0
+              ],
+              "warning": [
+                800.0,
+                1499.0
+              ]
+            }
+          },
+          {
+            "indicator_id": "weight_kg",
+            "last_value": 64.6,
+            "unit": "kg",
+            "taken_at": "2026-11-14T07:33:58.990821Z",
+            "status": "normal",
+            "trend": "insufficient_data",
+            "baseline": 74.0,
+            "range": {
+              "normal": [
+                45.0,
+                110.0
               ]
             }
           }
@@ -2743,6 +2811,55 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         }
       },
       {
+        "system_id": "metabolic",
+        "status": "normal",
+        "indicators": [
+          {
+            "indicator_id": "hydration_ml",
+            "last_value": 3200.0,
+            "unit": "ml",
+            "taken_at": "2026-11-14T06:41:20.860169Z",
+            "status": "normal",
+            "trend": "rising",
+            "baseline": 2862.5,
+            "range": {
+              "normal": [
+                1500.0,
+                4000.0
+              ],
+              "warning": [
+                800.0,
+                1499.0
+              ]
+            }
+          },
+          {
+            "indicator_id": "weight_kg",
+            "last_value": 64.6,
+            "unit": "kg",
+            "taken_at": "2026-11-14T07:33:58.990821Z",
+            "status": "normal",
+            "trend": "insufficient_data",
+            "baseline": 74.0,
+            "range": {
+              "normal": [
+                45.0,
+                110.0
+              ]
+            }
+          }
+        ],
+        "recommendations": [],
+        "escalation": {
+          "level": 0,
+          "target_role": "self",
+          "mode": "realtime",
+          "delay_s": 0,
+          "message": "",
+          "protocol_id": null
+        }
+      },
+      {
         "system_id": "neuro_behavioral",
         "status": "critical",
         "indicators": [
@@ -3265,6 +3382,55 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         }
       },
       {
+        "system_id": "metabolic",
+        "status": "normal",
+        "indicators": [
+          {
+            "indicator_id": "hydration_ml",
+            "last_value": 3200.0,
+            "unit": "ml",
+            "taken_at": "2026-11-14T06:41:20.860169Z",
+            "status": "normal",
+            "trend": "rising",
+            "baseline": 2862.5,
+            "range": {
+              "normal": [
+                1500.0,
+                4000.0
+              ],
+              "warning": [
+                800.0,
+                1499.0
+              ]
+            }
+          },
+          {
+            "indicator_id": "weight_kg",
+            "last_value": 64.6,
+            "unit": "kg",
+            "taken_at": "2026-11-14T07:33:58.990821Z",
+            "status": "normal",
+            "trend": "insufficient_data",
+            "baseline": 74.0,
+            "range": {
+              "normal": [
+                45.0,
+                110.0
+              ]
+            }
+          }
+        ],
+        "recommendations": [],
+        "escalation": {
+          "level": 0,
+          "target_role": "self",
+          "mode": "realtime",
+          "delay_s": 0,
+          "message": "",
+          "protocol_id": null
+        }
+      },
+      {
         "system_id": "neuro_behavioral",
         "status": "critical",
         "indicators": [
@@ -3700,6 +3866,59 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         }
       },
       {
+        "system_id": "musculoskeletal",
+        "status": "warning",
+        "indicators": [
+          {
+            "indicator_id": "exercise_min",
+            "last_value": 90.0,
+            "unit": "min",
+            "taken_at": "2026-11-14T10:00:00Z",
+            "status": "warning",
+            "trend": "falling",
+            "baseline": 217.14285714285714,
+            "range": {
+              "normal": [
+                120.0,
+                300.0
+              ],
+              "warning": [
+                30.0,
+                119.0
+              ]
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "id": "rec_musculoskeletal_warning_1",
+            "text": "Reserva hoy un bloque para completar la sesión de ejercicio",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_musculoskeletal_warning_2",
+            "text": "Si no te cabe una sesión larga, repártela en dos bloques más cortos",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_int_exercise_session",
+            "text": "Sesión de ejercicio de resistencia (30 min)",
+            "priority": 3,
+            "intervention_id": "int_exercise_session"
+          }
+        ],
+        "escalation": {
+          "level": 0,
+          "target_role": "self",
+          "mode": "realtime",
+          "delay_s": 0,
+          "message": "Musculoesquelético en aviso: hoy llevas menos ejercicio del recomendado.",
+          "protocol_id": "proto_musculoskeletal_warning"
+        }
+      },
+      {
         "system_id": "immune",
         "status": "normal",
         "indicators": [
@@ -3719,6 +3938,55 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               "warning": [
                 38.0,
                 39.5
+              ]
+            }
+          }
+        ],
+        "recommendations": [],
+        "escalation": {
+          "level": 0,
+          "target_role": "self",
+          "mode": "realtime",
+          "delay_s": 0,
+          "message": "",
+          "protocol_id": null
+        }
+      },
+      {
+        "system_id": "metabolic",
+        "status": "normal",
+        "indicators": [
+          {
+            "indicator_id": "hydration_ml",
+            "last_value": 3200.0,
+            "unit": "ml",
+            "taken_at": "2026-11-14T06:41:20.860169Z",
+            "status": "normal",
+            "trend": "rising",
+            "baseline": 2862.5,
+            "range": {
+              "normal": [
+                1500.0,
+                4000.0
+              ],
+              "warning": [
+                800.0,
+                1499.0
+              ]
+            }
+          },
+          {
+            "indicator_id": "weight_kg",
+            "last_value": 64.6,
+            "unit": "kg",
+            "taken_at": "2026-11-14T07:33:58.990821Z",
+            "status": "normal",
+            "trend": "insufficient_data",
+            "baseline": 74.0,
+            "range": {
+              "normal": [
+                45.0,
+                110.0
               ]
             }
           }
@@ -3968,6 +4236,55 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
               "warning": [
                 38.0,
                 39.5
+              ]
+            }
+          }
+        ],
+        "recommendations": [],
+        "escalation": {
+          "level": 0,
+          "target_role": "self",
+          "mode": "realtime",
+          "delay_s": 0,
+          "message": "",
+          "protocol_id": null
+        }
+      },
+      {
+        "system_id": "metabolic",
+        "status": "normal",
+        "indicators": [
+          {
+            "indicator_id": "hydration_ml",
+            "last_value": 3200.0,
+            "unit": "ml",
+            "taken_at": "2026-11-14T06:41:20.860169Z",
+            "status": "normal",
+            "trend": "rising",
+            "baseline": 2862.5,
+            "range": {
+              "normal": [
+                1500.0,
+                4000.0
+              ],
+              "warning": [
+                800.0,
+                1499.0
+              ]
+            }
+          },
+          {
+            "indicator_id": "weight_kg",
+            "last_value": 64.6,
+            "unit": "kg",
+            "taken_at": "2026-11-14T07:33:58.990821Z",
+            "status": "normal",
+            "trend": "insufficient_data",
+            "baseline": 74.0,
+            "range": {
+              "normal": [
+                45.0,
+                110.0
               ]
             }
           }
@@ -4233,16 +4550,16 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
       },
       {
         "system_id": "metabolic",
-        "status": "unknown",
+        "status": "normal",
         "indicators": [
           {
             "indicator_id": "hydration_ml",
-            "last_value": null,
+            "last_value": 3200.0,
             "unit": "ml",
-            "taken_at": null,
-            "status": "unknown",
-            "trend": "insufficient_data",
-            "baseline": null,
+            "taken_at": "2026-11-14T06:41:20.860169Z",
+            "status": "normal",
+            "trend": "rising",
+            "baseline": 2862.5,
             "range": {
               "normal": [
                 1500.0,
@@ -4256,12 +4573,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           },
           {
             "indicator_id": "weight_kg",
-            "last_value": null,
+            "last_value": 64.6,
             "unit": "kg",
-            "taken_at": null,
-            "status": "unknown",
+            "taken_at": "2026-11-14T07:33:58.990821Z",
+            "status": "normal",
             "trend": "insufficient_data",
-            "baseline": null,
+            "baseline": 74.0,
             "range": {
               "normal": [
                 45.0,
@@ -4417,6 +4734,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "°C",
     "received_at": "2026-10-16T05:21:58.575321Z"
+  },
+  {
+    "id": "fc5eb887-9d19-5739-a2d4-037523659b80",
+    "indicator_id": "hydration_ml",
+    "value": 2800.0,
+    "taken_at": "2026-10-16T06:35:40.071500Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-16T06:36:58.071500Z"
   },
   {
     "id": "a26faee4-5ca3-579e-9509-efc0f6ec6994",
@@ -4595,6 +4923,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-10-17T06:15:29.614592Z"
   },
   {
+    "id": "980d1c7e-d488-515e-9630-8c26e33ec188",
+    "indicator_id": "hydration_ml",
+    "value": 2800.0,
+    "taken_at": "2026-10-17T06:19:08.429245Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-17T06:20:18.429245Z"
+  },
+  {
     "id": "ab255ee4-dc81-5f14-ab15-c9b7821dcd8d",
     "indicator_id": "vision_changes",
     "value": 2.0,
@@ -4648,6 +4987,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-10-17T07:10:21.796486Z"
+  },
+  {
+    "id": "3618cd76-94ac-500f-b0e3-26d6cac2306a",
+    "indicator_id": "weight_kg",
+    "value": 74.0,
+    "taken_at": "2026-10-17T07:34:15.334181Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "kg",
+    "received_at": "2026-10-17T07:34:18.334181Z"
   },
   {
     "id": "500cadaf-4338-518a-8887-3a831f36b00a",
@@ -4769,6 +5119,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-10-18T06:38:44.634461Z"
+  },
+  {
+    "id": "6aa7d531-72ff-5ee7-9502-5f60bf4c9e83",
+    "indicator_id": "hydration_ml",
+    "value": 3000.0,
+    "taken_at": "2026-10-18T06:44:36.889240Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-18T06:45:49.889240Z"
   },
   {
     "id": "7b9b7440-c363-5692-a0de-c7571ac269b4",
@@ -4934,6 +5295,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-10-19T06:16:55.082368Z"
+  },
+  {
+    "id": "00ac80c0-39ee-5593-a695-82641233cc79",
+    "indicator_id": "hydration_ml",
+    "value": 3000.0,
+    "taken_at": "2026-10-19T06:26:22.185189Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-19T06:26:51.185189Z"
   },
   {
     "id": "1ae1e0ce-37d7-5321-8437-0be446d887f8",
@@ -5134,6 +5506,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-10-20T06:56:40.782694Z"
   },
   {
+    "id": "260021ad-e546-5d7b-8144-eea62b4c8bbd",
+    "indicator_id": "hydration_ml",
+    "value": 3300.0,
+    "taken_at": "2026-10-20T06:57:57.030080Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-20T06:58:03.030080Z"
+  },
+  {
     "id": "8cdbe8f3-f4a4-5dd2-bc6b-c67ee7a8a94b",
     "indicator_id": "pvt_lapses",
     "value": 2.0,
@@ -5275,6 +5658,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "ms",
     "received_at": "2026-10-21T06:53:43.518216Z"
+  },
+  {
+    "id": "9a8d88f5-7f8c-5c84-b9ef-75442077c397",
+    "indicator_id": "hydration_ml",
+    "value": 2900.0,
+    "taken_at": "2026-10-21T06:55:09.824869Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-21T06:56:24.824869Z"
   },
   {
     "id": "6a7e6692-433c-5132-99db-e565c4ffc114",
@@ -5442,6 +5836,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-10-22T07:11:13.267473Z"
   },
   {
+    "id": "2ba74cc9-b646-5128-aeaa-125a009d8675",
+    "indicator_id": "hydration_ml",
+    "value": 2500.0,
+    "taken_at": "2026-10-22T07:10:45.812172Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-22T07:11:38.812172Z"
+  },
+  {
     "id": "7a49210e-ad4e-5757-9462-1e032ee1ed58",
     "indicator_id": "pvt_lapses",
     "value": 1.0,
@@ -5594,6 +5999,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-10-23T06:13:16.035579Z"
+  },
+  {
+    "id": "71de4423-cb83-51c0-a089-dd3198b9a04d",
+    "indicator_id": "hydration_ml",
+    "value": 2600.0,
+    "taken_at": "2026-10-23T06:24:36.194080Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-23T06:24:38.194080Z"
   },
   {
     "id": "9686c5f2-ea80-545c-a5bc-39c624547985",
@@ -5805,6 +6221,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-10-24T07:02:52.615519Z"
   },
   {
+    "id": "13b5f5d2-4eab-590d-8470-b83f045336c2",
+    "indicator_id": "hydration_ml",
+    "value": 2800.0,
+    "taken_at": "2026-10-24T07:01:50.105877Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-24T07:02:33.105877Z"
+  },
+  {
     "id": "067d9ddf-5949-5ded-90ff-c0ec39913f90",
     "indicator_id": "sleep_hours",
     "value": 8.5,
@@ -5825,6 +6252,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "mmHg",
     "received_at": "2026-10-24T07:41:35.742823Z"
+  },
+  {
+    "id": "46b407d5-ed40-5e3c-a0a9-b4ef5c1acf86",
+    "indicator_id": "weight_kg",
+    "value": 83.9,
+    "taken_at": "2026-10-24T07:44:53.420236Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "kg",
+    "received_at": "2026-10-24T07:45:54.420236Z"
   },
   {
     "id": "3e72a92d-23dd-5be9-84fe-aad844aad38b",
@@ -5935,6 +6373,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-10-25T06:18:39.998088Z"
+  },
+  {
+    "id": "cdc1e877-6aa9-56d5-8dc9-129c6a0ea0b3",
+    "indicator_id": "hydration_ml",
+    "value": 3000.0,
+    "taken_at": "2026-10-25T06:37:59.824689Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-25T06:38:32.824689Z"
   },
   {
     "id": "5c12b44d-58f2-5b88-ad6a-c256140a773c",
@@ -6089,6 +6538,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-10-26T06:05:56.258816Z"
+  },
+  {
+    "id": "19d3f6c4-ca64-5f68-b5ca-fe2b01733fb5",
+    "indicator_id": "hydration_ml",
+    "value": 3000.0,
+    "taken_at": "2026-10-26T06:15:40.249095Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-26T06:16:57.249095Z"
   },
   {
     "id": "1f2915de-8f82-5c0e-a187-e43093f7c65c",
@@ -6289,6 +6749,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-10-27T07:06:03.570995Z"
   },
   {
+    "id": "95b8ab81-6085-596b-93f2-208bed5a1a0c",
+    "indicator_id": "hydration_ml",
+    "value": 2900.0,
+    "taken_at": "2026-10-27T07:09:43.708377Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-27T07:09:51.708377Z"
+  },
+  {
     "id": "38cd5dba-faa0-54b4-a3c2-bae7158efb32",
     "indicator_id": "pvt_mean_rt_ms",
     "value": 210.0,
@@ -6419,6 +6890,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-10-28T06:00:31.019719Z"
+  },
+  {
+    "id": "623d2af3-97d3-552f-a91f-e3484ad54ae0",
+    "indicator_id": "hydration_ml",
+    "value": 2600.0,
+    "taken_at": "2026-10-28T06:19:56.212067Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-28T06:21:07.212067Z"
   },
   {
     "id": "ccfb2f81-f0e1-57d2-9241-285b4106e4ee",
@@ -6584,6 +7066,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-10-29T06:13:12.520192Z"
+  },
+  {
+    "id": "54933f12-91ce-5e67-ad99-930469aca2ab",
+    "indicator_id": "hydration_ml",
+    "value": 2600.0,
+    "taken_at": "2026-10-29T06:34:47.813617Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-29T06:35:25.813617Z"
   },
   {
     "id": "95c5509f-0c3a-5287-bb7c-bf9a14df97df",
@@ -6762,6 +7255,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-10-30T06:42:46.035140Z"
   },
   {
+    "id": "580c042b-f5b5-58cc-8e93-c538a7188498",
+    "indicator_id": "hydration_ml",
+    "value": 3100.0,
+    "taken_at": "2026-10-30T07:09:19.706304Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-30T07:09:23.706304Z"
+  },
+  {
     "id": "5a7af5c1-4afb-57e6-a7de-18bd5d161a94",
     "indicator_id": "stress",
     "value": 2.0,
@@ -6927,6 +7431,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-10-31T06:39:43.485021Z"
   },
   {
+    "id": "31e108b9-892f-5e40-8d57-6bd1600f8ce0",
+    "indicator_id": "hydration_ml",
+    "value": 2900.0,
+    "taken_at": "2026-10-31T06:40:34.125198Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-10-31T06:41:25.125198Z"
+  },
+  {
     "id": "bd794037-8981-592f-bd98-669bc5b87dbe",
     "indicator_id": "pvt_lapses",
     "value": 1.0,
@@ -6991,6 +7506,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "h",
     "received_at": "2026-10-31T07:29:42.021558Z"
+  },
+  {
+    "id": "4cb3b151-cdfd-5767-88c8-80a8bd5afe7f",
+    "indicator_id": "weight_kg",
+    "value": 74.0,
+    "taken_at": "2026-10-31T07:34:10.147396Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "kg",
+    "received_at": "2026-10-31T07:34:49.147396Z"
   },
   {
     "id": "3f4695be-6193-51f5-8658-8fae3575ca2f",
@@ -7090,6 +7616,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-11-01T05:34:52.468052Z"
+  },
+  {
+    "id": "ea212172-393e-5221-8814-be813c3c5f9c",
+    "indicator_id": "hydration_ml",
+    "value": 2900.0,
+    "taken_at": "2026-11-01T06:24:32.843099Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-11-01T06:25:02.843099Z"
   },
   {
     "id": "f67ed6c3-0f6f-5838-8207-c5d7b05968ff",
@@ -7268,6 +7805,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-11-02T06:40:18.246584Z"
   },
   {
+    "id": "41b42dcd-3be1-5c5f-a52d-d34411f85815",
+    "indicator_id": "hydration_ml",
+    "value": 3000.0,
+    "taken_at": "2026-11-02T06:49:26.804204Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-11-02T06:50:32.804204Z"
+  },
+  {
     "id": "eb4980f3-2159-5ab4-9d5a-8a86d5741929",
     "indicator_id": "stress",
     "value": 2.0,
@@ -7442,6 +7990,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-11-03T06:59:13.651841Z"
+  },
+  {
+    "id": "c8486848-d3df-5ad2-8982-fa83c8012d11",
+    "indicator_id": "hydration_ml",
+    "value": 3000.0,
+    "taken_at": "2026-11-03T07:05:59.901354Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-11-03T07:06:33.901354Z"
   },
   {
     "id": "4cfbd688-29b0-5bfc-ab4a-d57650d9acb0",
@@ -7631,6 +8190,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-11-04T07:06:14.525491Z"
   },
   {
+    "id": "f71d0af6-ae20-5cd8-aa61-0b10d75d253a",
+    "indicator_id": "hydration_ml",
+    "value": 3300.0,
+    "taken_at": "2026-11-04T07:07:45.567670Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-11-04T07:07:56.567670Z"
+  },
+  {
     "id": "8c6edd22-cd20-5987-aeaf-98f6bdef160f",
     "indicator_id": "sleep_hours",
     "value": 8.5,
@@ -7761,6 +8331,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-11-05T06:38:41.345672Z"
+  },
+  {
+    "id": "407dc33f-251b-5933-9082-b98a426fcf5a",
+    "indicator_id": "hydration_ml",
+    "value": 3000.0,
+    "taken_at": "2026-11-05T07:03:19.596018Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-11-05T07:04:34.596018Z"
   },
   {
     "id": "81c2e87b-9419-581f-8d91-f666f7730761",
@@ -7915,6 +8496,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-11-06T05:24:38.144189Z"
+  },
+  {
+    "id": "e5b5b6ba-6b43-5fa6-85c9-841e47927636",
+    "indicator_id": "hydration_ml",
+    "value": 2700.0,
+    "taken_at": "2026-11-06T06:23:57.585885Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-11-06T06:24:23.585885Z"
   },
   {
     "id": "a0007be2-cb6f-516e-ba51-05ce8825ba25",
@@ -8137,6 +8729,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-11-07T07:06:51.540420Z"
   },
   {
+    "id": "15ba862c-da93-5da1-9a47-8b596c80a410",
+    "indicator_id": "hydration_ml",
+    "value": 3000.0,
+    "taken_at": "2026-11-07T07:12:14.986823Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-11-07T07:12:27.986823Z"
+  },
+  {
     "id": "e0a3429f-e47c-59ee-b631-0e06b0b61a4d",
     "indicator_id": "bp_systolic",
     "value": 104.0,
@@ -8168,6 +8771,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-11-07T07:54:21.554933Z"
+  },
+  {
+    "id": "20af698b-039b-5268-95c1-178bb2b55d97",
+    "indicator_id": "weight_kg",
+    "value": 69.4,
+    "taken_at": "2026-11-07T08:10:03.905940Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "kg",
+    "received_at": "2026-11-07T08:10:42.905940Z"
   },
   {
     "id": "e2822bbd-dbd2-50e7-8c15-afae616594e8",
@@ -8278,6 +8892,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-11-08T06:32:55.610079Z"
+  },
+  {
+    "id": "c09c91c1-ab39-5a65-a420-31977a1c54ad",
+    "indicator_id": "hydration_ml",
+    "value": 3400.0,
+    "taken_at": "2026-11-08T06:41:46.800891Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-11-08T06:42:44.800891Z"
   },
   {
     "id": "eafc7ddc-b4e3-550c-bfde-1a60dd9479b8",
@@ -8456,6 +9081,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-11-09T07:01:38.422393Z"
   },
   {
+    "id": "653f426d-db54-5b96-8776-bf4be6dde7f5",
+    "indicator_id": "hydration_ml",
+    "value": 2900.0,
+    "taken_at": "2026-11-09T07:05:31.258790Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-11-09T07:06:03.258790Z"
+  },
+  {
     "id": "deb4382a-9b86-5ce1-9a71-49eb95d737cc",
     "indicator_id": "stress",
     "value": 2.0,
@@ -8632,6 +9268,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-11-10T06:55:41.189037Z"
   },
   {
+    "id": "43eabe82-7686-5454-8281-1a2abd72977e",
+    "indicator_id": "hydration_ml",
+    "value": 3100.0,
+    "taken_at": "2026-11-10T06:54:27.324761Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-11-10T06:55:56.324761Z"
+  },
+  {
     "id": "7cff7471-6982-5aa2-8748-439a2d4384ad",
     "indicator_id": "crew_relation",
     "value": 4.0,
@@ -8762,6 +9409,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-11-11T06:34:43.310526Z"
+  },
+  {
+    "id": "aeaf397e-6c8a-5f6f-9ce0-7132876e0582",
+    "indicator_id": "hydration_ml",
+    "value": 3000.0,
+    "taken_at": "2026-11-11T06:44:57.357324Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-11-11T06:45:57.357324Z"
   },
   {
     "id": "9e0b4ef9-ecf1-5a0c-b5ff-cf13110afa60",
@@ -8951,6 +9609,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-11-12T07:02:18.132208Z"
   },
   {
+    "id": "34c92b54-6b95-5e39-a44c-d6d48a7a8268",
+    "indicator_id": "hydration_ml",
+    "value": 2800.0,
+    "taken_at": "2026-11-12T07:01:31.790054Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-11-12T07:02:59.790054Z"
+  },
+  {
     "id": "71d6edc4-81ad-515c-922e-fd44b2351b6f",
     "indicator_id": "pvt_mean_rt_ms",
     "value": 165.0,
@@ -9116,6 +9785,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-11-13T07:02:37.578935Z"
   },
   {
+    "id": "c21119d3-af5e-5005-9c65-69f083f2041d",
+    "indicator_id": "hydration_ml",
+    "value": 2900.0,
+    "taken_at": "2026-11-13T07:04:19.780647Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-11-13T07:05:03.780647Z"
+  },
+  {
     "id": "3cdb0f01-7af1-5910-ab9d-95a3af902b77",
     "indicator_id": "pvt_lapses",
     "value": 1.0,
@@ -9270,6 +9950,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-11-14T06:27:03.206621Z"
   },
   {
+    "id": "693f77f3-36a0-578a-8b7c-d365ffdbf739",
+    "indicator_id": "hydration_ml",
+    "value": 3200.0,
+    "taken_at": "2026-11-14T06:41:20.860169Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "ml",
+    "received_at": "2026-11-14T06:41:58.860169Z"
+  },
+  {
     "id": "51ae0e64-49b4-579f-8daf-51a9fab274f4",
     "indicator_id": "loneliness",
     "value": 2.0,
@@ -9290,6 +9981,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "lapsos",
     "received_at": "2026-11-14T07:15:19.159041Z"
+  },
+  {
+    "id": "02833c3a-6f44-518c-9cc9-ee37b2886932",
+    "indicator_id": "weight_kg",
+    "value": 64.6,
+    "taken_at": "2026-11-14T07:33:58.990821Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "kg",
+    "received_at": "2026-11-14T07:34:18.990821Z"
   },
   {
     "id": "e44d4a1b-af36-51e7-be88-cd1bc1f6c011",
@@ -9996,16 +10698,66 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "indicator_id": "hydration_ml",
     "unit": "ml",
     "generated_at": "2026-11-14T10:00:00Z",
-    "status": "insufficient_data",
+    "status": "ok",
     "method": "holt_damped",
     "horizon_days": 7,
-    "step_days": null,
-    "history_days": 0,
-    "current_status": "unknown",
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "normal",
     "last_value_unusual": false,
-    "points": [],
+    "points": [
+      {
+        "at": "2026-11-15T06:41:20.860169Z",
+        "value": 3009.87,
+        "low": 2683.2,
+        "high": 3336.53,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-16T06:41:20.860169Z",
+        "value": 3009.99,
+        "low": 2676.85,
+        "high": 3343.13,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-17T06:41:20.860169Z",
+        "value": 3010.09,
+        "low": 2670.61,
+        "high": 3349.57,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-18T06:41:20.860169Z",
+        "value": 3010.17,
+        "low": 2664.46,
+        "high": 3355.88,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-19T06:41:20.860169Z",
+        "value": 3010.23,
+        "low": 2658.4,
+        "high": 3362.06,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T06:41:20.860169Z",
+        "value": 3010.28,
+        "low": 2652.44,
+        "high": 3368.13,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-21T06:41:20.860169Z",
+        "value": 3010.32,
+        "low": 2646.56,
+        "high": 3374.08,
+        "status": "normal"
+      }
+    ],
     "change": null,
-    "backtest_mae": null
+    "backtest_mae": 215.55
   },
   "weight_kg": {
     "member_id": 1,
@@ -10016,8 +10768,8 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "method": "holt_damped",
     "horizon_days": 7,
     "step_days": null,
-    "history_days": 0,
-    "current_status": "unknown",
+    "history_days": 5,
+    "current_status": "normal",
     "last_value_unusual": false,
     "points": [],
     "change": null,
@@ -10770,7 +11522,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "liveness": "active",
         "overall_status": "warning",
         "open_alerts": 0,
-        "last_measurement_at": "2026-11-14T08:49:35.366850Z"
+        "last_measurement_at": "2026-11-14T09:12:01.532948Z"
       },
       {
         "id": 10,
@@ -10820,7 +11572,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "liveness": "active",
         "overall_status": "warning",
         "open_alerts": 0,
-        "last_measurement_at": "2026-11-14T09:32:49.156823Z"
+        "last_measurement_at": "2026-11-14T09:49:14.174722Z"
       },
       {
         "id": 4,
@@ -10844,7 +11596,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "liveness": "active",
         "overall_status": "normal",
         "open_alerts": 0,
-        "last_measurement_at": "2026-11-14T08:39:00.634194Z"
+        "last_measurement_at": "2026-11-14T09:27:18.422175Z"
       }
     ],
     "alerts": []
@@ -10932,7 +11684,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "liveness": "active",
         "overall_status": "normal",
         "open_alerts": 0,
-        "last_measurement_at": "2026-11-14T08:55:44.511251Z"
+        "last_measurement_at": "2026-11-14T09:17:57.324952Z"
       },
       {
         "id": 16,
@@ -11357,7 +12109,8 @@ export const events: Schema<'Event'>[] = [
       "category": "indicator",
       "severity": "critical",
       "level": 0,
-      "target_role": "self"
+      "target_role": "self",
+      "member_name": "Cmdr. Vega"
     }
   },
   {
@@ -11375,6 +12128,7 @@ export const events: Schema<'Event'>[] = [
       "severity": "critical",
       "level": 1,
       "target_role": "crew",
+      "member_name": "Cmdr. Vega",
       "actor": "system"
     }
   },
@@ -11410,6 +12164,7 @@ export const events: Schema<'Event'>[] = [
       "severity": "critical",
       "level": 2,
       "target_role": "ground",
+      "member_name": "Cmdr. Vega",
       "actor": "system"
     }
   },
@@ -11427,7 +12182,8 @@ export const events: Schema<'Event'>[] = [
       "category": "indicator",
       "severity": "warning",
       "level": 0,
-      "target_role": "self"
+      "target_role": "self",
+      "member_name": "Cmdr. Vega"
     }
   },
   {
@@ -11444,7 +12200,8 @@ export const events: Schema<'Event'>[] = [
       "category": "indicator",
       "severity": "critical",
       "level": 0,
-      "target_role": "self"
+      "target_role": "self",
+      "member_name": "Cmdr. Vega"
     }
   },
   {
@@ -11462,6 +12219,7 @@ export const events: Schema<'Event'>[] = [
       "severity": "critical",
       "level": 1,
       "target_role": "crew",
+      "member_name": "Cmdr. Vega",
       "actor": "system"
     }
   },
@@ -11497,6 +12255,7 @@ export const events: Schema<'Event'>[] = [
       "severity": "critical",
       "level": 2,
       "target_role": "ground",
+      "member_name": "Cmdr. Vega",
       "actor": "system"
     }
   },
@@ -11546,7 +12305,8 @@ export const events: Schema<'Event'>[] = [
       "category": "indicator",
       "severity": "warning",
       "level": 0,
-      "target_role": "self"
+      "target_role": "self",
+      "member_name": "Cmdr. Vega"
     }
   },
   {
@@ -12269,7 +13029,7 @@ export const controlOverview: Schema<'ControlOverview'> = {
           "liveness": "active",
           "overall_status": "warning",
           "open_alerts": 0,
-          "last_measurement_at": "2026-11-14T08:49:35.366850Z"
+          "last_measurement_at": "2026-11-14T09:12:01.532948Z"
         },
         {
           "id": 10,
@@ -12327,7 +13087,7 @@ export const controlOverview: Schema<'ControlOverview'> = {
           "liveness": "active",
           "overall_status": "warning",
           "open_alerts": 0,
-          "last_measurement_at": "2026-11-14T09:32:49.156823Z"
+          "last_measurement_at": "2026-11-14T09:49:14.174722Z"
         },
         {
           "id": 4,
@@ -12351,7 +13111,7 @@ export const controlOverview: Schema<'ControlOverview'> = {
           "liveness": "active",
           "overall_status": "normal",
           "open_alerts": 0,
-          "last_measurement_at": "2026-11-14T08:39:00.634194Z"
+          "last_measurement_at": "2026-11-14T09:27:18.422175Z"
         }
       ],
       "open_alerts": {
@@ -12455,7 +13215,7 @@ export const controlOverview: Schema<'ControlOverview'> = {
           "liveness": "active",
           "overall_status": "normal",
           "open_alerts": 0,
-          "last_measurement_at": "2026-11-14T08:55:44.511251Z"
+          "last_measurement_at": "2026-11-14T09:17:57.324952Z"
         },
         {
           "id": 16,
@@ -12549,7 +13309,7 @@ export const controlOverview: Schema<'ControlOverview'> = {
     }
   ],
   "metrics": {
-    "measurements_last_hour": 36,
+    "measurements_last_hour": 40,
     "open_alerts": 4,
     "active_devices": 1,
     "avg_alert_response_s": null

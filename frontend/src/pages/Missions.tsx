@@ -1,5 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { serverNow } from '../api/client'
 import {
   useCrewMissions,
@@ -15,6 +14,7 @@ import { useActiveMemberId, useAuth } from '../auth/useAuth'
 import { AnimatedNumber } from '../components/game/AnimatedNumber'
 import { CrewBoard } from '../components/game/CrewBoard'
 import { CrewKudos } from '../components/game/CrewKudos'
+import { pushToast } from '../store/toasts'
 import { CrewMissions } from '../components/game/CrewMissions'
 import { dayProgress, sortTasks, withLocalCompletions } from '../components/game/game'
 import { TaskItem } from '../components/game/TaskItem'
@@ -23,11 +23,6 @@ import { completeTask, joinMission, locallyCompletedTasks, sendKudos } from '../
 import { useEnvironmentStore } from '../store/environment'
 import { NoMemberSelected } from '../components/ui/NoMemberSelected'
 import { Icon } from '../components/ui/Icon'
-
-interface Toast {
-  id: number
-  text: string
-}
 
 /** Fecha del día según el servidor (la demo acelera el reloj). */
 const today = () => serverNow().toISOString().slice(0, 10)
@@ -58,8 +53,6 @@ export default function Missions() {
   // GameState devuelto al completar, hasta que llegue el siguiente GET /game.
   const [fresh, setFresh] = useState<{ base: Game | undefined; game: Game } | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
-  const [toasts, setToasts] = useState<Toast[]>([])
-  const toastId = useRef(0)
 
   useEffect(() => {
     if (memberId === null) return
@@ -72,10 +65,9 @@ export default function Missions() {
     }
   }, [memberId])
 
+  // Los avisos comunes de la app (abajo a la derecha), no unos propios.
   const toast = useCallback((text: string) => {
-    const id = ++toastId.current
-    setToasts((t) => [...t, { id, text }])
-    window.setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 2500)
+    pushToast({ tone: 'success', icon: 'check', label: 'Misiones', title: text })
   }, [])
 
   const title = <h1 className="text-2xl font-semibold">Misiones diarias</h1>
@@ -172,8 +164,8 @@ export default function Missions() {
 
   return (
     // Estética de los paneles HUD: franja de indicadores y paneles con título. En escritorio
-    // ocupa todo el hueco (Layout `fill`) y cada columna tiene su scroll: tareas e insignias |
-    // tripulación y misiones de grupo (y kudos debajo); desde 1536 px, kudos aparte. En móvil,
+    // ocupa todo el hueco (Layout `fill`) y cada columna tiene su scroll: tareas, kudos e
+    // insignias | tripulación y misiones de grupo; desde 1536 px, kudos aparte. En móvil,
     // los paneles uno debajo de otro y la página hace scroll.
     <section className="flex min-h-0 w-full flex-1 flex-col gap-3 md:gap-4">
       {title}
@@ -228,7 +220,7 @@ export default function Missions() {
         <div className="flex flex-col gap-3 md:gap-4 lg:min-h-0 lg:flex-1">
           <section
             aria-labelledby="tasks-title"
-            className="hud-panel flex flex-col lg:min-h-0 lg:flex-1"
+            className="hud-panel flex flex-col lg:max-h-[50%] lg:min-h-0 lg:shrink-0 2xl:max-h-none 2xl:flex-1"
           >
             <h2 id="tasks-title" className="hud-panel-head">
               Tareas de hoy
@@ -266,6 +258,24 @@ export default function Missions() {
             )}
           </section>
 
+          {/* Hasta 1536 px, los kudos van aquí, bajo las tareas, y se estiran hasta abajo. */}
+          <div className="flex min-h-0 flex-col lg:flex-1 2xl:hidden">{kudosPanel}</div>
+        </div>
+
+        <div className="flex flex-col gap-3 [scrollbar-color:var(--env-border)_transparent] md:gap-4 lg:min-h-0 lg:overflow-y-auto">
+          {board.state === 'ready' && (
+            <CrewBoard board={board.data} crewWord={vocab.crew} memberId={memberId} />
+          )}
+
+          {crewMissions.state === 'ready' && crewMissions.data.length > 0 && (
+            <CrewMissions
+              missions={crewMissions.data}
+              memberId={memberId}
+              canJoin={canAct}
+              busyId={joining}
+              onJoin={(m) => void onJoin(m)}
+            />
+          )}
           {current && current.badges.length > 0 && (
             <section aria-labelledby="badges-title" className="hud-panel shrink-0">
               <h2 id="badges-title" className="hud-panel-head">
@@ -287,47 +297,7 @@ export default function Missions() {
           )}
         </div>
 
-        <div className="flex flex-col gap-3 [scrollbar-color:var(--env-border)_transparent] md:gap-4 lg:min-h-0 lg:overflow-y-auto">
-          {board.state === 'ready' && (
-            <CrewBoard board={board.data} crewWord={vocab.crew} memberId={memberId} />
-          )}
-
-          {crewMissions.state === 'ready' && crewMissions.data.length > 0 && (
-            <CrewMissions
-              missions={crewMissions.data}
-              memberId={memberId}
-              canJoin={canAct}
-              busyId={joining}
-              onJoin={(m) => void onJoin(m)}
-            />
-          )}
-
-          {/* Hasta 1536 px, los kudos van debajo; desde ahí, en su propia columna. */}
-          <div className="2xl:hidden">{kudosPanel}</div>
-        </div>
-
-        <div className="hidden min-h-0 flex-col overflow-y-auto [scrollbar-color:var(--env-border)_transparent] 2xl:flex">
-          {kudosPanel}
-        </div>
-      </div>
-
-      <div
-        aria-live="polite"
-        className="pointer-events-none fixed inset-x-0 bottom-20 z-50 flex flex-col items-center gap-2 px-4"
-      >
-        <AnimatePresence>
-          {toasts.map((t) => (
-            <motion.p
-              key={t.id}
-              initial={{ opacity: 0, y: 16, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12 }}
-              className="rounded-full bg-env-primary px-4 py-2 font-semibold text-env-primary-text shadow-lg"
-            >
-              {t.text}
-            </motion.p>
-          ))}
-        </AnimatePresence>
+        <div className="hidden min-h-0 flex-col 2xl:flex">{kudosPanel}</div>
       </div>
     </section>
   )

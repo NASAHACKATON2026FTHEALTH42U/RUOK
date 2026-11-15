@@ -91,7 +91,11 @@ def emit(
 def emit_alert(
     session: Session, alert: models.Alert, type_: EventType | str, summary: str, **payload
 ) -> models.EventLog:
-    """Atajo para los eventos ``alert.*``: entorno, member y ``ref_id`` = id de la alerta."""
+    """Atajo para los eventos ``alert.*``: entorno, member y ``ref_id`` = id de la alerta.
+
+    Lleva el nombre del member (``member_name``): el aviso en vivo dice quién necesita ayuda.
+    """
+    member = session.get(models.Member, alert.member_id)
     return emit(
         session,
         type_,
@@ -105,6 +109,7 @@ def emit_alert(
             "severity": alert.severity,
             "level": alert.level,
             "target_role": alert.target_role,
+            "member_name": member.name if member else None,
             **payload,
         },
     )

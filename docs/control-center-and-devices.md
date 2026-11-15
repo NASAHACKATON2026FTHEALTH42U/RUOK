@@ -30,6 +30,8 @@ Es la **vista global, en tiempo real y sin retardo** para operar y gestionar la 
 | Privacidad | Filtro conductual según rol | Ve todo, porque es la herramienta de operación |
 | Ámbito | Su entorno | Todos los entornos |
 
+> **Estado actual (15-nov):** el centro de control se dividió en secciones del menú del operador: **Centro de control** (`/control`: métricas, estado de cada member y eventos en vivo), **Simulación** (`/control/simulate`: alerta o notificación personalizada, medición provocada, escenarios, enlace, vigilancia de contacto y reloj), **Usuarios** (`/control/users`), **Dispositivos** (`/control/devices`, con el QR) y **Registro** (`/control/log`). Todo se limita al entorno (y al member, si se elige) del selector único de la barra lateral. Las notificaciones (`notification.sent`) llegan al momento al móvil del member y quedan en su historial de Alertas.
+
 ### Paneles
 1. **Panorama global:** cada entorno, sus members con estado global, liveness, última medición y alertas abiertas.
 2. **Flujo de datos en vivo:** stream de eventos con filtros por entorno, usuario, dispositivo y tipo:

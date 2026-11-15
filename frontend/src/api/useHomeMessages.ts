@@ -25,3 +25,15 @@ export function useHomeMessages(memberId: number | null, envId: string | null) {
   useLiveRefresh({ types: ['link.*'], envId }, r.refresh)
   return r
 }
+
+/**
+ * Resumen en texto del estado de hoy o de la semana (`GET /members/{id}/summary`), para
+ * contárselo a casa. Lo genera el servidor con los datos reales (sin LLM).
+ */
+export function getStatusSummary(memberId: number, period: 'day' | 'week') {
+  return unwrap(
+    api.GET('/api/v1/members/{member_id}/summary', {
+      params: { path: { member_id: memberId }, query: { period } },
+    }),
+  )
+}

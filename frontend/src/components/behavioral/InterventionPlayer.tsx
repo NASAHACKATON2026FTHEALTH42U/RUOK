@@ -6,7 +6,7 @@ import { breathPhase, expandSteps } from './intervention'
 import { useVoiceAvailable, useVoicePref } from './useVoice'
 import { VOICE_NOTE } from './voice'
 import { VoiceToggle } from './VoiceControls'
-import { speak, stopSpeaking } from './voiceGuide'
+import { speakToEnd, stopSpeaking } from './voiceGuide'
 
 interface InterventionPlayerProps {
   intervention: Intervention
@@ -55,6 +55,10 @@ export function InterventionPlayer({
   const [index, setIndex] = useState(0)
   const [left, setLeft] = useState<number | null>(steps[0]?.seconds ?? null)
   const [paused, setPaused] = useState(false)
+  // Paso cuya voz ya terminó de sonar (o que no tiene audio): hasta entonces no avanza solo.
+  const [spokenIndex, setSpokenIndex] = useState(-1)
+  const voiceBusyRef = useRef(false)
+  const voiceBusyTick = spokenIndex
   const [scale, setScale] = useState(() => targetScale(steps[0]?.text) ?? 0.55)
   const reduce = useReducedMotion()
 
@@ -73,12 +77,14 @@ export function InterventionPlayer({
     [steps],
   )
 
-  // Cuenta atrás: un tic por segundo; al acabar el paso, el siguiente.
+  // Cuenta atrás: un tic por segundo; al acabar el paso, el siguiente. Si la voz aún está leyendo
+  // el paso, espera en el último segundo a que termine.
   useEffect(() => {
     if (done || paused || left === null) return
+    if (left <= 1 && voiceBusyRef.current) return
     const t = window.setTimeout(() => (left <= 1 ? goTo(index + 1) : setLeft(left - 1)), 1000)
     return () => window.clearTimeout(t)
-  }, [left, paused, done, index, goTo])
+  }, [left, paused, done, index, goTo, voiceBusyTick])
 
   // Aviso al cambiar de paso o terminar. No al abrir (ni en el doble montaje del modo estricto):
   // se compara con el paso anterior.
@@ -106,9 +112,10 @@ export function InterventionPlayer({
     const t = window.setTimeout(
       () => {
         spoken.current = true
-        void speak(text).then((ok) => {
+        // Se espera a que la frase termine de sonar: hasta entonces el paso no avanza solo.
+        void speakToEnd(text).then((ok) => {
           if (!ok) missingRef.current?.()
-          setSpokenIndex(index) // termina de leerlo (o no hay audio): ya puede avanzar solo
+          setSpokenIndex(index)
         })
       },
       spoken.current ? 150 : voiceDelayMs,
@@ -123,8 +130,8 @@ export function InterventionPlayer({
 
   // Pasos sin cuenta atrás: si no se pulsa «Siguiente», avanza solo a los 3 s (con la voz activa,
   // 3 s después de que termine de leerlo). En pausa, no.
-  const [spokenIndex, setSpokenIndex] = useState(-1)
   const waitingVoice = voice && spokenIndex !== index
+  voiceBusyRef.current = waitingVoice
   const autoAdvance = !done && !paused && left === null && !waitingVoice
   useEffect(() => {
     if (!autoAdvance) return
