@@ -72,11 +72,24 @@ async function playClip(text: string, gen: number): Promise<Clip> {
   const audio = await buffer
   if (!audio) return { state: 'missing', ended: Promise.resolve('missing') }
   if (gen !== generation) return { state: 'superseded', ended: Promise.resolve(false) }
+  // Si el navegador aún no deja sonar audio (contexto suspendido, sin un clic antes), no se
+  // programa: quedaría en espera y sonaría de golpe al activarse el audio por otra cosa (p. ej.
+  // al tocar un paisaje sonoro). Se intenta reanudar y, si no se puede, se trata como sin audio.
+  if (out.ctx.state !== 'running') {
+    await Promise.race([out.ctx.resume().catch(() => {}), new Promise((r) => setTimeout(r, 300))])
+    // (el estado puede haber cambiado tras `resume()`: se vuelve a leer)
+    if ((out.ctx.state as AudioContextState) !== 'running' || gen !== generation) {
+      return { state: 'missing', ended: Promise.resolve('missing') }
+    }
+  }
   stopCurrent()
   const src = out.ctx.createBufferSource()
   src.buffer = audio
   src.connect(out.out)
+  // `onended` no llega si el navegador no deja sonar el audio (contexto suspendido): como mucho,
+  // la duración del clip y un margen, para que nada se quede esperando para siempre.
   const ended = new Promise<ClipResult>((resolve) => {
+    window.setTimeout(() => resolve(false), audio.duration * 1000 + 1500)
     src.onended = () => {
       const natural = speaking === src
       if (natural) {
@@ -99,6 +112,18 @@ async function playClip(text: string, gen: number): Promise<Clip> {
 export async function speak(text: string): Promise<boolean> {
   const gen = ++generation
   return (await playClip(text, gen)).state !== 'missing'
+}
+
+/**
+ * Como `speak`, pero resuelve cuando la frase TERMINA de sonar (o enseguida si no tiene audio o
+ * la corta otra). Para no pasar de paso mientras la voz sigue hablando.
+ */
+export async function speakToEnd(text: string): Promise<boolean> {
+  const gen = ++generation
+  const clip = await playClip(text, gen)
+  if (clip.state === 'missing') return false
+  await clip.ended
+  return true
 }
 
 /** Lee varias frases seguidas (p. ej. los pasos de un protocolo). true si llegó al final. */
