@@ -9,7 +9,8 @@ por defecto y las privadas (192.168.x, 10.x, 172.16-31.x).
 
 `RUOK_LAN_HOST` fuerza la IP (o nombre) si la detección no acierta en la demo.
 `RUOK_PUBLIC_PORT` fija el puerto del QR (por defecto, el de la petición o 8000).
-`RUOK_HOSTNAME` fija el nombre que se muestra (los mocks del front lo usan).
+`RUOK_HOSTNAME` fija el nombre que se muestra (por defecto `ruok-server`, no el del equipo:
+no se enseña el nombre de la máquina de nadie).
 """
 
 from __future__ import annotations
@@ -83,7 +84,7 @@ def detect_ips(hostname: str | None = None) -> list[str]:
 
 
 def hostname() -> str:
-    return os.environ.get("RUOK_HOSTNAME") or socket.gethostname()
+    return os.environ.get("RUOK_HOSTNAME") or "ruok-server"
 
 
 def public_port(request_port: int | None) -> int:
