@@ -27,10 +27,10 @@ export interface StatusStyle {
  * el color de texto del tema y el icono lleva contorno (el estado nunca depende del color).
  */
 export const STATUS_COLORS = {
-  normal: '#5fd4e8',
-  warning: '#f5a623',
-  critical: '#ff6b6b',
-  unknown: '#7c9aa3',
+  normal: 'var(--color-st-ok)',
+  warning: 'var(--color-st-warn)',
+  critical: 'var(--color-st-crit)',
+  unknown: 'var(--color-st-none)',
 } as const
 
 const STYLES: Record<DisplayState, StatusStyle> = {
