@@ -59,6 +59,38 @@ async function refreshCounts() {
   })
 }
 
+// ── Rechazadas: verlas, reintentarlas o descartarlas ─────────
+
+/** Entradas que el servidor rechazó (4xx): no se reintentan solas. */
+export async function failedEntries(): Promise<OutboxEntry[]> {
+  const db = await getDb()
+  const all = await db.getAll('outbox')
+  return all
+    .filter((e) => e.status === 'failed')
+    .sort((a, b) => a.created_at.localeCompare(b.created_at))
+}
+
+/** Vuelve a poner una rechazada en cola y la envía ya (mismo UUID: sigue siendo idempotente). */
+export async function retryEntry(id: string): Promise<void> {
+  const db = await getDb()
+  const entry = await db.get('outbox', id)
+  if (!entry) return
+  await db.put('outbox', {
+    ...entry,
+    status: 'pending',
+    next_retry_at: new Date().toISOString(),
+  })
+  await refreshCounts()
+  await syncNow(true)
+}
+
+/** Descarta una rechazada (solo a petición de quien usa el dispositivo). */
+export async function discardEntry(id: string): Promise<void> {
+  const db = await getDb()
+  await db.delete('outbox', id)
+  await refreshCounts()
+}
+
 // ── Envío de cada tipo de entrada ───────────────────────────
 
 /** Respuesta del lote de mediciones: aceptadas, duplicadas y la evaluación actualizada. */
