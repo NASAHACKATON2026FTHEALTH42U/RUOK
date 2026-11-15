@@ -30,17 +30,23 @@ export function LinkStatusChip({ quiet = false }: { quiet?: boolean }) {
   if (quiet && data?.state === 'online') return null
 
   return (
+    // Corta y en una línea: «Enlace · Sin enlace». El detalle (con quién, desde cuándo, cola) va en
+    // el título y para lectores de pantalla.
     <span
       role="status"
       title={`Enlace con ${other}: ${d.long}`}
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs ${
+      className={`inline-flex max-w-full items-center gap-1.5 border px-2 py-1 font-mono text-xs whitespace-nowrap ${
         los ? 'border-env-text font-semibold' : 'border-env-border'
       } bg-env-bg text-env-text`}
     >
       <span aria-hidden>{d.icon}</span>
-      <span className="sm:hidden">{d.short}</span>
-      <span className="hidden sm:inline">
-        <span className="text-env-muted">Enlace con {other}:</span> {d.long}
+      <span className="text-env-muted">Enlace</span>
+      <span aria-hidden className="text-env-muted">
+        ·
+      </span>
+      <span className="truncate">{d.short}</span>
+      <span className="sr-only">
+        : con {other}, {d.long}
       </span>
     </span>
   )
