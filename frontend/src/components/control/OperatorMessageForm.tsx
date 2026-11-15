@@ -7,6 +7,8 @@ import { categoryLabel, severityStyle } from '../alerts/alertFormat'
 import { defaultTarget, roleLabel } from '../alerts/sos'
 import { Modal } from '../ui/Modal'
 import { AutoTextarea } from '../ui/AutoTextarea'
+import { Icon } from '../ui/Icon'
+import { pushToast } from '../../store/toasts'
 
 type Category = Schema<'AlertCategory'>
 type Severity = Schema<'AlertSeverity'>
@@ -133,12 +135,23 @@ export function OperatorMessageForm({
           })
         }
       }
-      const who = targets.length === 1 ? targets[0].name : `${targets.length} ${vocabulary.crew}`
+      const who =
+        targets.length === 1 ? targets[0].name : `todo ${vocabulary.crew} (${targets.length})`
       setLog(
         queued
           ? `⇡ Sin conexión: la alerta para ${who} se enviará sola al volver`
           : `✓ ${mode === 'alert' ? 'Alerta enviada' : 'Notificación enviada'} a ${who}`,
       )
+      // Confirmación a la vista (el aviso de verdad salta en el dispositivo de quien lo recibe).
+      if (!queued)
+        pushToast({
+          tone: 'success',
+          icon: mode === 'alert' ? 'alert' : 'mail',
+          label: 'Enviado',
+          title: mode === 'alert' ? 'Alerta enviada' : 'Notificación enviada',
+          body: `A ${who}${text.trim() ? `: «${text.trim()}»` : ''}`,
+          meta: 'Salta al momento en los dispositivos con su sesión abierta.',
+        })
       setText('')
       setTitle('')
       onSent?.()
@@ -278,12 +291,13 @@ export function OperatorMessageButton(props: Parameters<typeof OperatorMessageFo
         onClick={() => setOpen(true)}
         className="hud-btn hud-btn-primary !h-auto min-h-10 px-4"
       >
-        ＋ Alerta o notificación
+        <Icon name="plus" size={16} className="mr-1.5" />
+        Alerta o notificación
       </button>
       {open && (
         <Modal onClose={() => setOpen(false)} labelledBy="operator-message-title">
           <div className="flex min-h-full items-center justify-center p-4">
-            <div className="hud-panel w-full max-w-xl">
+            <div className="hud-panel w-full max-w-xl bg-env-surface">
               <h2 id="operator-message-title" className="hud-panel-head">
                 Nueva alerta o notificación
                 <button
@@ -296,7 +310,13 @@ export function OperatorMessageButton(props: Parameters<typeof OperatorMessageFo
                 </button>
               </h2>
               <div className="p-4">
-                <OperatorMessageForm {...props} />
+                <OperatorMessageForm
+                  {...props}
+                  onSent={() => {
+                    props.onSent?.()
+                    setOpen(false)
+                  }}
+                />
               </div>
             </div>
           </div>

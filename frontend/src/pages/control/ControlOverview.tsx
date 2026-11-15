@@ -6,6 +6,7 @@ import { severityStyle } from '../../components/alerts/alertFormat'
 import { ControlHeader, ControlPanel } from '../../components/control/ControlHeader'
 import { formatDuration, GROUPS, groupOf, mergeEvents } from '../../components/control/feed'
 import { useControlScope } from '../../components/control/useControlScope'
+import { Icon } from '../../components/ui/Icon'
 import { describeLink, hhmm } from '../../components/ui/link'
 import { livenessState } from '../../components/ui/status'
 import { StatusBadge } from '../../components/ui/StatusBadge'
@@ -239,8 +240,10 @@ export default function ControlOverview() {
                       fresh.has(e.id) ? 'bg-env-primary/10' : ''
                     }`}
                   >
-                    <span aria-hidden className="w-5 shrink-0 text-center">
-                      {GROUPS[groupOf(e.type)]?.icon ?? '·'}
+                    <span className="w-5 shrink-0 text-center text-env-muted">
+                      {GROUPS[groupOf(e.type)] && (
+                        <Icon name={GROUPS[groupOf(e.type)].icon} size={16} />
+                      )}
                     </span>
                     <span className="w-12 shrink-0 text-env-muted tabular-nums">{hhmm(e.at)}</span>
                     <span className="min-w-0 flex-1">

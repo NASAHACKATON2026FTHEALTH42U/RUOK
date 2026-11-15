@@ -248,8 +248,9 @@ export default function Alerts() {
                 vocabulary={vocab}
                 assessment={assessment.state === 'ready' ? assessment.data : undefined}
                 interventions={interventions.state === 'ready' ? interventions.data : []}
-                onChanged={() => {
-                  setSelected(current.id) // sigue a la vista tras escalar/recibir/resolver
+                onChanged={(what) => {
+                  // Sigue a la vista tras escalar o recibir; al resolver sale de las abiertas.
+                  setSelected(what === 'resolved' ? null : current.id)
                   alerts.refresh()
                 }}
               />

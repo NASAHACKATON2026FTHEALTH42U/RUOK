@@ -76,6 +76,7 @@ export const OPERATOR_FILL_ROUTES = [
   '/control/log',
   '/control/users',
   '/control/devices',
+  '/ground', // la consola de tierra (responder, psych y operador)
 ]
 
 /** Entradas del menú del rol: todas las permitidas, salvo el operador, que tiene el suyo. */

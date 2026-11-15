@@ -6,6 +6,7 @@ import { useIndicators } from '../../api/useIndicators'
 import { sendMeasurements } from '../../offline/outbox'
 import type { Recipient } from './OperatorMessageForm'
 import { effectiveRanges, presetValue, type PresetKind, type Ranges } from './simulate'
+import { pushToast } from '../../store/toasts'
 
 const FIELD = 'flex min-w-0 flex-col gap-1.5'
 const INPUT = 'hud-input w-full !font-sans !text-[0.9375rem]'
@@ -67,6 +68,15 @@ export function MeasurementInjector({
           ? '⇡ Sin conexión: se enviará sola al volver'
           : `✓ ${indicator.name} de ${who}: ${value} ${indicator.unit}`,
       )
+      if (res.status !== 'queued')
+        pushToast({
+          tone: 'success',
+          icon: 'pulse',
+          label: 'Enviado',
+          title: 'Medición enviada',
+          body: `${indicator.name} de ${who}: ${value} ${indicator.unit}`,
+          meta: 'El panel se actualiza al momento; si sale de rango, salta la alerta.',
+        })
     } catch (err) {
       setLog(
         `⚠ No se ha podido enviar: ${
