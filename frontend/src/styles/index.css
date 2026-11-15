@@ -693,9 +693,15 @@ textarea {
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: minmax(0, 1fr);
-    border-top: 1px solid var(--color-hud-line);
+    /* Por encima de las vistas: el SOS sobresale de la barra y los paneles (posicionados) lo
+       tapaban en parte. */
+    position: relative;
+    z-index: 20;
+    border-top: 1px solid var(--env-border);
     padding: 0 6px calc(18px + env(safe-area-inset-bottom));
-    background: rgba(9, 19, 23, 0.96);
+    /* Con los colores del entorno: el fondo oscuro fijo dejaba las etiquetas sin contraste en los
+       entornos claros (hospital, residencia). */
+    background: color-mix(in srgb, var(--env-surface) 97%, transparent);
   }
   .hud-tab {
     display: flex;
@@ -714,7 +720,10 @@ textarea {
   .hud-tab[aria-current='page'] {
     color: var(--env-text);
     border-top-color: var(--env-primary);
-    background: linear-gradient(rgba(95, 212, 232, 0.1), transparent);
+    background: linear-gradient(
+      color-mix(in srgb, var(--env-primary) 14%, transparent),
+      transparent
+    );
   }
 
   /* Barra de la cuenta atrás del SOS (SosEmergency): se vacía en los segundos del aviso. */

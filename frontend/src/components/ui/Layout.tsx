@@ -173,7 +173,7 @@ export function Layout() {
           {/* Contenido. En móvil, cada pantalla debería caber sin scroll (hud-style.md §5). */}
           <main className="min-w-0 flex-1 overflow-x-clip overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
             <div
-              className={`mx-auto w-full px-3.5 py-3.5 md:px-4 md:py-4 lg:px-6 lg:py-6 max-w-[1800px] ${fillPage ? 'flex h-full flex-col' : 'flex min-h-full flex-col'}`}
+              className={`mx-auto w-full px-3.5 pt-3.5 pb-9 md:px-4 md:py-4 lg:px-6 lg:py-6 max-w-[1800px] ${fillPage ? 'flex h-full flex-col' : 'flex min-h-full flex-col'}`}
             >
               {/* Fundido corto al cambiar de página (FE-26). Solo opacidad: un transform crearía un
                 bloque contenedor y descolocaría las modales `fixed` de las páginas. */}
