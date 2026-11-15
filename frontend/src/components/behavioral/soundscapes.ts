@@ -21,6 +21,10 @@ type Noise = 'white' | 'pink' | 'brown'
 
 let ctx: AudioContext | null = null
 let master: GainNode | null = null
+// Entre los paisajes y el volumen general: baja el paisaje mientras habla la voz guía.
+let duck: GainNode | null = null
+// Salida de la voz guía (FE-37): pasa por el volumen general, pero no por `duck`.
+let voice: GainNode | null = null
 let current: { id: SoundscapeId; out: GainNode; stop: Stop } | null = null
 let volume = 0.6
 const buffers = new Map<Noise, AudioBuffer>()
@@ -37,6 +41,11 @@ function audio(): AudioContext | null {
       master = ctx.createGain()
       master.gain.value = volume
       master.connect(ctx.destination)
+      duck = ctx.createGain()
+      duck.connect(master)
+      voice = ctx.createGain()
+      voice.gain.value = 1.3
+      voice.connect(master)
       // Safari 17+: que suene aunque el iPhone tenga el interruptor de silencio.
       const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession
       if (session) session.type = 'playback'
@@ -312,7 +321,7 @@ export function playSoundscape(id: SoundscapeId): boolean {
   try {
     stopSoundscape(1200)
     const out = gain(c, 0)
-    out.connect(master)
+    out.connect(duck ?? master)
     const stop = BUILD[id](c, out)
     out.gain.setValueAtTime(0, c.currentTime)
     out.gain.linearRampToValueAtTime(1, c.currentTime + 1.5)
@@ -377,4 +386,16 @@ export function playBell(): void {
   } catch {
     // sin campana no pasa nada
   }
+}
+
+/** Baja el paisaje mientras habla la voz guía (y lo vuelve a subir), con un fundido corto. */
+export function duckSoundscape(on: boolean): void {
+  if (!ctx || !duck) return
+  duck.gain.setTargetAtTime(on ? 0.3 : 1, ctx.currentTime, 0.25)
+}
+
+/** Contexto de audio y salida para la voz guía (null si no hay audio). */
+export function voiceOutput(): { ctx: AudioContext; out: GainNode } | null {
+  const c = audio()
+  return c && voice ? { ctx: c, out: voice } : null
 }
