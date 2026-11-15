@@ -1,13 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { ApiError, NetworkError, type Schema } from '../../api/client'
 import type { Environment } from '../../api/useEnvironments'
-import {
-  createUser,
-  resetUserPin,
-  setUserActive,
-  useUsers,
-  type UserAccount,
-} from '../../api/useUsers'
+import { createUser, setUserActive, useUsers, type UserAccount } from '../../api/useUsers'
 import { useMembers } from '../../api/useMembers'
 import { userRoleLabel } from '../../auth/permissions'
 import { capitalize } from '../../environments/useVocab'
@@ -17,7 +11,6 @@ type Role = Schema<'Role'>
 
 // El admin es global: no se crea desde un entorno.
 const ROLES: Role[] = ['member', 'medic', 'commander', 'responder', 'psych', 'family']
-const PIN_ROLES: Role[] = ['member', 'medic']
 
 const btn =
   'min-h-8 border border-env-border px-2.5 text-sm hover:border-env-text disabled:opacity-50'
@@ -30,8 +23,8 @@ function errorText(err: unknown): string {
 }
 
 /**
- * Gestión de usuarios (FS-07, solo admin) del entorno activo: listado, alta, activar/desactivar y
- * restablecer PIN. El backend valida rol, entorno y member; aquí solo se guía el formulario.
+ * Gestión de usuarios (FS-07, solo admin) del entorno activo: listado, alta y activar/desactivar.
+ * El backend valida rol, entorno y member; aquí solo se guía el formulario.
  */
 export function UsersPanel({ env }: { env: Environment }) {
   const users = useUsers()
@@ -59,16 +52,6 @@ export function UsersPanel({ env }: { env: Environment }) {
     run(`${u.active ? 'Desactivar' : 'Activar'} a ${u.username}`, () =>
       setUserActive(u.id, !u.active),
     )
-
-  const pin = (u: UserAccount) => {
-    const value = window.prompt(`Nuevo PIN para ${u.username} (4 a 6 dígitos)`)
-    if (value === null) return
-    if (!/^\d{4,6}$/.test(value)) {
-      setLog('⚠ El PIN tiene que ser de 4 a 6 dígitos')
-      return
-    }
-    return run(`Restablecer el PIN de ${u.username}`, () => resetUserPin(u.id, value))
-  }
 
   const list = users.state === 'ready' ? users.data.filter((u) => u.env_id === env.id) : []
 
@@ -114,7 +97,7 @@ export function UsersPanel({ env }: { env: Environment }) {
                     <td className={`px-4 py-2 ${u.active ? '' : 'text-env-muted'}`}>
                       {u.active ? 'Activo' : 'Desactivado'}
                     </td>
-                    <td className="flex flex-wrap justify-end gap-2 px-4 py-2">
+                    <td className="px-4 py-2 text-right">
                       <button
                         type="button"
                         disabled={busy}
@@ -123,16 +106,6 @@ export function UsersPanel({ env }: { env: Environment }) {
                       >
                         {u.active ? 'Desactivar' : 'Activar'}
                       </button>
-                      {PIN_ROLES.includes(u.role) && (
-                        <button
-                          type="button"
-                          disabled={busy}
-                          onClick={() => pin(u)}
-                          className={btn}
-                        >
-                          Restablecer PIN
-                        </button>
-                      )}
                     </td>
                   </tr>
                 ))}
@@ -164,10 +137,8 @@ function CreateUserForm({
   const envId = env.id
   const [memberId, setMemberId] = useState('')
   const [password, setPassword] = useState('')
-  const [pin, setPin] = useState('')
 
   const needsMember = role === 'member'
-  const usesPin = PIN_ROLES.includes(role)
   // Members de un entorno: solo se piden cuando el rol lo necesita.
   const members = useMembers(needsMember && envId ? envId : null)
 
@@ -181,14 +152,12 @@ function CreateUserForm({
         env_id: envId,
         member_id: needsMember ? Number(memberId) : null,
         password,
-        pin: usesPin && pin ? pin : null,
       }),
     )
     if (ok) {
       setUsername('')
       setDisplayName('')
       setPassword('')
-      setPin('')
       setMemberId('')
     }
   }
@@ -261,18 +230,6 @@ function CreateUserForm({
             className={field}
           />
         </label>
-        {usesPin && (
-          <label className="flex flex-col gap-1">
-            <span className="hud-label">PIN rápido (opcional, 4 a 6 dígitos)</span>
-            <input
-              inputMode="numeric"
-              pattern="\d{4,6}"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              className={field}
-            />
-          </label>
-        )}
       </div>
       <div className="px-4 pb-4">
         <button type="submit" disabled={busy} className="hud-btn hud-btn-primary w-full">

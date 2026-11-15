@@ -18,7 +18,6 @@ NOW = datetime(2026, 11, 14, 10, 0, tzinfo=UTC).isoformat()
 CONTRACT_ENDPOINTS = [
     ("get", "/health"),
     ("post", "/auth/login"),
-    ("post", "/auth/pin"),
     ("get", "/auth/me"),
     ("get", "/auth/demo-users"),
     ("get", "/users"),
@@ -26,7 +25,6 @@ CONTRACT_ENDPOINTS = [
     ("post", "/members/{member_id}/home-messages"),
     ("get", "/members/{member_id}/home-messages"),
     ("patch", "/users/{user_id}"),
-    ("put", "/users/{user_id}/pin"),
     ("post", "/members/{member_id}/kudos"),
     ("get", "/environments/{env_id}/kudos"),
     ("get", "/environments/{env_id}/missions"),
@@ -74,7 +72,6 @@ CONTRACT_ENDPOINTS = [
 PUBLIC = {
     "/health",
     "/auth/login",
-    "/auth/pin",
     "/auth/demo-users",
     "/system/network-info",
     # Catálogo de configuración: lo usan el SOS y el protocolo autónomo sin sesión (BE-27).
@@ -153,7 +150,6 @@ MEASUREMENT = {
 CALLS = [
     ("get", "/health", None, 200),
     ("post", "/auth/login", {"username": "vega", "password": "ruok-mars"}, 200),
-    ("post", "/auth/pin", {"username": "vega", "pin": "1234"}, 200),
     ("get", "/auth/me", None, 200),
     ("get", "/auth/demo-users", None, 200),
     ("get", "/users?env_id=mars", None, 200),
@@ -170,7 +166,6 @@ CALLS = [
         201,
     ),
     ("patch", "/users/1", {"active": True}, 200),
-    ("put", "/users/1/pin", {"pin": "1234"}, 200),  # vega: vuelve al PIN de la demo
     ("get", "/environments", None, 200),
     ("get", "/environments/mars", None, 200),
     ("get", "/indicators", None, 200),

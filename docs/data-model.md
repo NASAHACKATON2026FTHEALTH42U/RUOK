@@ -59,7 +59,6 @@ erDiagram
     text env_id "slug; null solo para admin"
     int member_id FK "UNIQUE, si role=member"
     text password_hash "bcrypt"
-    text pin_hash "bcrypt, nullable"
     int failed_attempts
     datetime locked_until
     bool active
@@ -222,7 +221,7 @@ Hay además una tabla técnica, fuera del diagrama: **`app_state`** (`key TEXT P
 
 | Tabla | Notas clave | Issue |
 |---|---|---|
-| `user_account` | Login local. `UNIQUE(username)` y `UNIQUE(member_id)`. Bloqueo de PIN con `failed_attempts`/`locked_until`. Ver [auth-and-roles.md](auth-and-roles.md). | BE-25, BE-26 |
+| `user_account` | Login local. `UNIQUE(username)` y `UNIQUE(member_id)`. Bloqueo tras 5 fallos con `failed_attempts`/`locked_until`. Ver [auth-and-roles.md](auth-and-roles.md). | BE-25, BE-26 |
 | `member` | Cada entorno tiene sus members (`env_id`). `last_seen_at` lo actualiza el heartbeat y de él se deriva el liveness (no se guarda). | BE-02, BE-05, BE-12 |
 | `measurement` | **Solo se añade, nunca se edita.** La PK es el UUID del cliente: un reintento con el mismo `id` y el mismo contenido devuelve 200, y con contenido distinto, 409. El check-in y el PVT también son measurements (`source`). | BE-06, BE-20 |
 | `task` | Se genera cada día desde `environment.routine`. El `id` determinista evita duplicados si la generación se repite. | BE-18 |

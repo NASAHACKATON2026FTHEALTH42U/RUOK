@@ -92,19 +92,11 @@ export async function initSession(): Promise<void> {
 
 export type LoginError = { kind: 'credentials' | 'offline' | 'locked' | 'other'; message: string }
 
-/** Inicia sesión con contraseña o PIN. Lanza `LoginError` con un mensaje para la UI. */
-export async function login(
-  username: string,
-  secret: { password: string } | { pin: string },
-): Promise<User> {
+/** Inicia sesión con usuario y contraseña. Lanza `LoginError` con un mensaje para la UI. */
+export async function login(username: string, password: string): Promise<User> {
   let res: Schema<'TokenResponse'>
   try {
-    res =
-      'password' in secret
-        ? await unwrap(
-            api.POST('/api/v1/auth/login', { body: { username, password: secret.password } }),
-          )
-        : await unwrap(api.POST('/api/v1/auth/pin', { body: { username, pin: secret.pin } }))
+    res = await unwrap(api.POST('/api/v1/auth/login', { body: { username, password } }))
   } catch (err) {
     throw toLoginError(err)
   }
@@ -127,7 +119,7 @@ function toLoginError(err: unknown): LoginError {
     return { kind: 'offline', message: 'Sin conexión con el servidor de a bordo.' }
   }
   if (err instanceof ApiError && err.status === 401) {
-    return { kind: 'credentials', message: 'Usuario, contraseña o PIN incorrectos.' }
+    return { kind: 'credentials', message: 'Usuario o contraseña incorrectos.' }
   }
   if (err instanceof ApiError && err.status === 429) {
     return { kind: 'locked', message: 'Demasiados intentos. Espera unos minutos.' }

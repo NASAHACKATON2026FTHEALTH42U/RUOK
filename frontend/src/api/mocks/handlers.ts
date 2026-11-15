@@ -174,7 +174,6 @@ export const handlers: Record<string, Handler> = {
   // Sistema y auth
   'GET /health': () => ({ status: 'ok', server_time: nowIso() }),
   'POST /auth/login': (req) => tokenFor(body<{ username: string }>(req).username),
-  'POST /auth/pin': (req) => tokenFor(body<{ username: string }>(req).username),
   'GET /auth/me': () =>
     state.currentUser ?? new MockResponse(401, { detail: 'Sin sesión válida (mock)' }),
   'GET /auth/demo-users': () => fx.demoUsers,
@@ -200,8 +199,6 @@ export const handlers: Record<string, Handler> = {
     if (!u) return notFound('Usuario inexistente')
     return { ...u, active: body<Schema<'UserUpdate'>>(req).active }
   },
-  'PUT /users/{user_id}/pin': (req) =>
-    fx.users.find((x) => String(x.id) === req.params.user_id) ?? notFound('Usuario inexistente'),
 
   // Configuración
   'GET /environments': () => fx.environments,
