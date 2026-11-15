@@ -56,14 +56,16 @@ export function ScenarioPanel({
   scenarios,
   memberName,
   onChanged,
+  className,
 }: {
   scenarios: Scenario[]
   memberName: (id: number) => string
   onChanged: () => void
+  className?: string
 }) {
   const { busy, log, run } = useSimulationRun(onChanged)
   return (
-    <ControlPanel title="Escenarios" aside={log}>
+    <ControlPanel title="Escenarios" aside={log} className={className}>
       {scenarios.length === 0 ? (
         <p className="text-sm text-env-muted">
           No hay escenarios guionizados para esta selección. Provoca la situación con una medición,
@@ -100,15 +102,17 @@ export function LinkPanel({
   env,
   groundLabel,
   onChanged,
+  className,
 }: {
   env: EnvironmentOverview
   groundLabel: string
   onChanged: () => void
+  className?: string
 }) {
   const { busy, log, run } = useSimulationRun(onChanged)
   const link = describeLink(env.link)
   return (
-    <ControlPanel title={`Enlace con ${groundLabel}`} aside={log}>
+    <ControlPanel title={`Enlace con ${groundLabel}`} aside={log} className={className}>
       <p className="mb-3 text-sm">
         Ahora:{' '}
         <span title={link.long}>
@@ -142,13 +146,15 @@ export function LinkPanel({
 export function LivenessPanel({
   env,
   onChanged,
+  className,
 }: {
   env: EnvironmentOverview
   onChanged: () => void
+  className?: string
 }) {
   const { busy, log, run } = useSimulationRun(onChanged)
   return (
-    <ControlPanel title="Vigilancia de contacto" aside={log}>
+    <ControlPanel title="Vigilancia de contacto" aside={log} className={className}>
       <label className="flex items-start gap-3 text-sm">
         <input
           type="checkbox"
@@ -173,10 +179,16 @@ export function LivenessPanel({
 }
 
 /** Reloj de la demo y reinicio de los datos. */
-export function ClockPanel({ onChanged }: { onChanged: () => void }) {
+export function ClockPanel({
+  onChanged,
+  className,
+}: {
+  onChanged: () => void
+  className?: string
+}) {
   const { busy, log, run } = useSimulationRun(onChanged)
   return (
-    <ControlPanel title="Reloj y datos de la demo" aside={log}>
+    <ControlPanel title="Reloj y datos de la demo" aside={log} className={className}>
       <p className="hud-label mb-2">Adelantar el reloj</p>
       <div className="flex flex-wrap gap-1.5">
         {FAST_FORWARD.map((s) => (

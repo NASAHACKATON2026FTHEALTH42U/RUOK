@@ -217,7 +217,7 @@ export function OperatorMessageForm({
           </label>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
+        <div className="grid gap-4">
           <label className={FIELD}>
             <span className="hud-label">Título (opcional)</span>
             <input

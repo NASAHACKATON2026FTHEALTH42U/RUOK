@@ -19,7 +19,7 @@ import { LinkStatusChip } from './LinkStatusChip'
 import { ScopeSelector } from './ScopeSelector'
 import { MockBanner } from './MockBanner'
 import { NavIcon } from './NavIcon'
-import { allowedItems, menuFor, navItems, tabsFor } from './navigation'
+import { allowedItems, menuFor, navItems, OPERATOR_FILL_ROUTES, tabsFor } from './navigation'
 import { PendingSyncChip } from './PendingSyncChip'
 import { ServerStatus } from './ServerStatus'
 import { TOPBAR_SLOT_ID } from './TopBarPortal'
@@ -51,6 +51,8 @@ export function Layout() {
   // Menú del rol (el operador tiene el suyo: gestión y monitorización).
   const allowed = menuFor(role, allowedItems(navItems(vocab), can))
   const tabs = tabsFor(role, allowed)
+  // Vistas que ocupan el alto disponible (el scroll es de sus paneles, no de la página).
+  const fillPage = fill || OPERATOR_FILL_ROUTES.includes(pathname)
 
   // Logo de las maquetas HUD (emblema de anillos y "R U OK?"); lleva a la vista inicial del rol.
   const logo = (
@@ -164,13 +166,13 @@ export function Layout() {
           {/* Contenido. En móvil, cada pantalla debería caber sin scroll (hud-style.md §5). */}
           <main className="min-w-0 flex-1 overflow-x-clip overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
             <div
-              className={`mx-auto w-full px-3.5 py-3.5 md:px-4 md:py-4 lg:px-6 lg:py-6 max-w-[1800px] ${fill ? 'flex h-full flex-col' : 'flex min-h-full flex-col'}`}
+              className={`mx-auto w-full px-3.5 py-3.5 md:px-4 md:py-4 lg:px-6 lg:py-6 max-w-[1800px] ${fillPage ? 'flex h-full flex-col' : 'flex min-h-full flex-col'}`}
             >
               {/* Fundido corto al cambiar de página (FE-26). Solo opacidad: un transform crearía un
                 bloque contenedor y descolocaría las modales `fixed` de las páginas. */}
               <motion.div
                 key={pathname}
-                className={fill ? 'flex min-h-0 flex-1 flex-col' : 'flex flex-1 flex-col'}
+                className={fillPage ? 'flex min-h-0 flex-1 flex-col' : 'flex flex-1 flex-col'}
                 initial={reducedMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}

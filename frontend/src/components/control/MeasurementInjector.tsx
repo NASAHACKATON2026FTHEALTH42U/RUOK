@@ -84,80 +84,83 @@ export function MeasurementInjector({
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4" aria-label="Provocar una medición">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <p className="text-sm">
-          <span className="hud-label mr-2">De</span>
-          {chosen !== null ? (
-            recipients.find((r) => r.id === chosen)?.name
-          ) : (
-            <span className="text-env-muted">
-              Elige un {env.vocabulary.member} en el selector de la barra lateral.
-            </span>
-          )}
-        </p>
-        <label className={FIELD}>
-          <span className="hud-label">Indicador</span>
-          <select
-            required
-            value={indicatorId}
-            onChange={(e) => {
-              setIndicatorId(e.target.value)
-              setValue('')
-            }}
-            className={INPUT}
-          >
-            <option value="" disabled>
-              {indicators.state === 'loading' ? 'Cargando…' : 'Elige…'}
+      <p className="text-sm">
+        <span className="hud-label mr-2">De</span>
+        {chosen !== null ? (
+          recipients.find((r) => r.id === chosen)?.name
+        ) : (
+          <span className="text-env-muted">
+            elige un {env.vocabulary.member} en el selector de la barra lateral
+          </span>
+        )}
+      </p>
+      <label className={FIELD}>
+        <span className="hud-label">Indicador</span>
+        <select
+          required
+          value={indicatorId}
+          onChange={(e) => {
+            setIndicatorId(e.target.value)
+            setValue('')
+          }}
+          className={INPUT}
+        >
+          <option value="" disabled>
+            {indicators.state === 'loading' ? 'Cargando…' : 'Elige…'}
+          </option>
+          {list.map((i) => (
+            <option key={i.id} value={i.id}>
+              {i.name}
             </option>
-            {list.map((i) => (
-              <option key={i.id} value={i.id}>
-                {i.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+          ))}
+        </select>
+      </label>
 
-      {indicator && ranges && (
-        <div className="flex flex-wrap items-end gap-3">
-          <label className={`${FIELD} w-40`}>
-            <span className="hud-label">Valor ({indicator.unit})</span>
-            <input
-              required
-              type="number"
-              inputMode="decimal"
-              step={indicator.input.step ?? 'any'}
-              min={indicator.input.min ?? undefined}
-              max={indicator.input.max ?? undefined}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              className={`${INPUT} tabular-nums`}
-            />
-          </label>
-          <div className="flex flex-col gap-1.5">
-            <span className="hud-label">Valor de ejemplo</span>
-            <div className="flex gap-1.5">
-              {PRESETS.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() =>
-                    setValue(
-                      String(presetValue(ranges, indicator.higher_is_worse, p.id, indicator.input)),
-                    )
-                  }
-                  className="min-h-9 border border-env-border px-3 text-sm text-env-muted hover:border-env-text hover:text-env-text"
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
+      {/* Siempre a la vista (desactivado hasta elegir indicador): el panel no cambia de tamaño. */}
+      <div className="flex flex-wrap items-end gap-3">
+        <label className={`${FIELD} w-28`}>
+          <span className="hud-label">Valor{indicator ? ` (${indicator.unit})` : ''}</span>
+          <input
+            required
+            type="number"
+            inputMode="decimal"
+            disabled={!indicator}
+            step={indicator?.input.step ?? 'any'}
+            min={indicator?.input.min ?? undefined}
+            max={indicator?.input.max ?? undefined}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            className={`${INPUT} tabular-nums disabled:opacity-50`}
+          />
+        </label>
+        <div className="flex flex-col gap-1.5">
+          <span className="hud-label">Valor de ejemplo</span>
+          <div className="flex gap-1.5">
+            {PRESETS.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                disabled={!indicator || !ranges}
+                onClick={() =>
+                  indicator &&
+                  ranges &&
+                  setValue(
+                    String(presetValue(ranges, indicator.higher_is_worse, p.id, indicator.input)),
+                  )
+                }
+                className="min-h-9 border border-env-border px-2.5 text-sm text-env-muted hover:border-env-text hover:text-env-text disabled:opacity-50 disabled:hover:border-env-border disabled:hover:text-env-muted"
+              >
+                {p.label}
+              </button>
+            ))}
           </div>
-          <p className="w-full text-xs text-env-muted">
-            Normal en {env.name}: {ranges.normal[0]}–{ranges.normal[1]} {indicator.unit}
-          </p>
         </div>
-      )}
+      </div>
+      <p className="-mt-1 text-xs text-env-muted">
+        {indicator && ranges
+          ? `Normal en ${env.name}: ${ranges.normal[0]}–${ranges.normal[1]} ${indicator.unit}`
+          : 'Los valores de ejemplo salen de los rangos del entorno.'}
+      </p>
 
       <div className="flex flex-wrap items-center gap-3">
         <button

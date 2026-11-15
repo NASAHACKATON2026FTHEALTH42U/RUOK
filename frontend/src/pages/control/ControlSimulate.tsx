@@ -37,16 +37,23 @@ export default function ControlSimulate() {
       {!env ? (
         <p className="text-env-muted">Elige un entorno para simular.</p>
       ) : (
-        <div className="grid gap-4 xl:grid-cols-2 xl:items-start">
-          <ControlPanel title="Alerta o notificación">
-            <OperatorMessageForm
-              key={scope}
-              recipients={recipients}
-              memberId={memberId}
-              ladder={env.escalation_ladder}
-              vocabulary={env.vocabulary}
-            />
-          </ControlPanel>
+        // Tres columnas equilibradas por contenido: a quién (alerta o notificación + vigilancia de
+        // contacto) | qué datos (medición + enlace) | el guion de la demo (escenarios + reloj). El
+        // último panel de cada columna se estira para que todas acaben a la misma altura. En
+        // pantallas medias, dos columnas y el guion en una fila; en móvil, una.
+        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+          <div className="flex flex-col gap-4">
+            <ControlPanel title="Alerta o notificación">
+              <OperatorMessageForm
+                key={scope}
+                recipients={recipients}
+                memberId={memberId}
+                ladder={env.escalation_ladder}
+                vocabulary={env.vocabulary}
+              />
+            </ControlPanel>
+            {envOv && <LivenessPanel className="flex-1" env={envOv} onChanged={overview.refresh} />}
+          </div>
           <div className="flex flex-col gap-4">
             <ControlPanel title="Provocar una medición">
               <MeasurementInjector
@@ -56,20 +63,24 @@ export default function ControlSimulate() {
                 memberId={memberId}
               />
             </ControlPanel>
+            {envOv && (
+              <LinkPanel
+                className="flex-1"
+                env={envOv}
+                groundLabel={vocab.ground}
+                onChanged={overview.refresh}
+              />
+            )}
+          </div>
+          <div className="grid gap-4 lg:col-span-2 lg:grid-cols-2 xl:col-span-1 xl:flex xl:flex-col">
             <ScenarioPanel
               scenarios={scenariosFor(envId, memberId)}
               memberName={memberName}
               onChanged={overview.refresh}
             />
+            <ClockPanel className="xl:flex-1" onChanged={overview.refresh} />
           </div>
-          {envOv && (
-            <LinkPanel env={envOv} groundLabel={vocab.ground} onChanged={overview.refresh} />
-          )}
-          <div className="flex flex-col gap-4">
-            {envOv && <LivenessPanel env={envOv} onChanged={overview.refresh} />}
-            <ClockPanel onChanged={overview.refresh} />
-          </div>
-          <div className="xl:col-span-2">
+          <div className="lg:col-span-2 xl:col-span-3">
             <EnvironmentConfig env={env} />
           </div>
         </div>
