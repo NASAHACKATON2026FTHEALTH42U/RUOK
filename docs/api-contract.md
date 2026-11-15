@@ -26,6 +26,7 @@
 Status         = normal | warning | critical | unknown
 Liveness       = active | stale | lost
 Trend          = rising | falling | stable | insufficient_data
+ForecastStatus = ok | insufficient_data | stale
 EscalationMode = realtime | delayed | autonomous
 LinkState      = online | delayed | los
 AlertOrigin    = auto | manual
@@ -66,7 +67,7 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 **Permisos por endpoint:** los define la matriz de [auth-and-roles.md](auth-and-roles.md#matriz-de-acceso-a-vistas). Reglas generales:
 - un `member` solo accede a `/members/{su_member_id}/…`;
 - `medic` y `commander` acceden a los members de su `env_id`;
-- `responder` y `psych` acceden solo a `/environments/{su_env}/alerts?view=ground` y a las acciones sobre alertas entregadas;
+- `responder` y `psych` acceden a `/environments/{su_env}/alerts?view=ground` y a las acciones sobre alertas entregadas; hoy también leen el historial, la evaluación y la previsión de los members de su entorno (falta limitarlo a lo entregado por el enlace, BE-17);
 - `/demo/*` es solo para `admin`.
 
 **Excepción de seguridad:** `POST /members/{id}/alerts` con `category: "emergency"` se acepta **sin token**, y la alerta queda marcada con `authenticated: false`.
@@ -266,14 +267,19 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 //   member (services/forecast.py; fuentes S32–S34). Los estados salen de los mismos rangos que el motor.
 {
   "member_id": 1, "indicator_id": "bp_systolic", "unit": "mmHg", "generated_at": "...",
-  "status": "ok",              // ok | insufficient_data (menos de 7 días con mediciones en el tramo reciente)
+  "status": "ok",              // ok | insufficient_data (menos de 7 mediciones a su cadencia en el tramo reciente,
+                               //    o más de la mitad de la serie serían huecos)
                                //    | stale (el último dato ha caducado, max_age_s). Solo "ok" trae points
   "method": "holt_damped",
   "horizon_days": 7,           // días previstos desde ahora (como mínimo, un paso de la serie)
   "step_days": 1,              // cadencia de la serie: 1 = diaria, 7 = semanal. null si no hay previsión
   "history_days": 30,          // días con mediciones usados para ajustar el modelo
-  "current_status": "warning", // estado del último valor con los rangos del entorno (unknown si ha caducado)
-  "points": [                  // un punto por paso, a partir del último dato; low–high = intervalo del 80 %
+  "current_status": "warning", // estado del último valor con los rangos del entorno (unknown si ha caducado).
+                               // Solo mira el valor: NO incluye las reglas de tendencia ni conductuales del Assessment
+  "last_value_unusual": false, // true = la última medición se aparta de lo esperado mucho más que el ruido habitual
+                               // de la persona: la previsión la trata con cautela hasta que otra medición la confirme
+  "points": [                  // un punto por paso, a partir del último dato; low–high = intervalo de
+                               // predicción aproximado del 80 %
     { "at": "...", "value": 138.6, "low": 128.89, "high": 148.31, "status": "warning" }
   ],
   "change": { "status": "critical", "at": "...", "in_days": 3 },  // primer punto cuyo estado difiere de
@@ -376,4 +382,4 @@ data: {"id":2,"type":"alert.created","at":"...","env_id":"mars","member_id":1,..
 1. **Nunca pintar en verde** `unknown`, `stale` ni `lost`. Para esos casos se usa el estilo gris con rayado.
 2. Cada `POST` que crea datos lleva un `id` UUID generado en el cliente. Si falla, se guarda en el outbox y se reintenta.
 3. La consola `/ground` muestra siempre la antigüedad del dato (`last_seen_at`, `delivered_at`) y el estado del enlace.
-4. La previsión (`Forecast`) se pinta siempre como **estimación** (línea discontinua y banda, nunca como un dato medido) y con el aviso de que no es un diagnóstico. Con `status` distinto de `ok` no se dibuja nada: sin datos = desconocido.
+4. La previsión (`Forecast`) se pinta siempre como **estimación** (línea discontinua y banda, nunca como un dato medido) y con el aviso de que no es un diagnóstico. Con `status` distinto de `ok` no se dibuja nada: sin datos = desconocido. Con `last_value_unusual`, el texto dice que la última medición se sale de lo habitual y pide repetirla, en vez de anunciar una mejora.

@@ -141,8 +141,8 @@ class MeasurementBatchResult(ApiModel):
 class ForecastPoint(ApiModel):
     at: datetime = Field(description="Instante previsto: el último dato más n pasos de la serie")
     value: float = Field(description="Valor esperado")
-    low: float = Field(description="Límite inferior del intervalo de predicción del 80 %")
-    high: float = Field(description="Límite superior del intervalo de predicción del 80 %")
+    low: float = Field(description="Límite inferior del intervalo de predicción (aprox. 80 %)")
+    high: float = Field(description="Límite superior del intervalo de predicción (aprox. 80 %)")
     status: Status = Field(description="Estado del valor esperado con los rangos del entorno")
 
 
@@ -163,8 +163,9 @@ class Forecast(ApiModel):
     unit: str
     generated_at: datetime
     status: ForecastStatus = Field(
-        description="`insufficient_data`: menos de 7 días con mediciones en el tramo reciente. "
-        "`stale`: el último dato ha caducado (`max_age_s`). Solo `ok` trae `points`."
+        description="`insufficient_data`: menos de 7 mediciones a su cadencia en el tramo "
+        "reciente (o más de la mitad serían huecos). `stale`: el último dato ha caducado "
+        "(`max_age_s`). Solo `ok` trae `points`."
     )
     method: str = Field(
         description="Modelo usado: suavizado exponencial de Holt con tendencia amortiguada",
@@ -180,7 +181,14 @@ class Forecast(ApiModel):
         default=0, ge=0, description="Días con mediciones usados para ajustar el modelo"
     )
     current_status: Status = Field(
-        description="Estado del último valor con los rangos del entorno (`unknown` si ha caducado)"
+        description="Estado del último valor con los rangos del entorno (`unknown` si ha "
+        "caducado). Solo mira el valor: no incluye las reglas de tendencia ni las conductuales "
+        "del `Assessment`."
+    )
+    last_value_unusual: bool = Field(
+        default=False,
+        description="true si la última medición se aparta de lo esperado mucho más que el ruido "
+        "habitual de la persona: la previsión la trata con cautela hasta que otra la confirme",
     )
     points: list[ForecastPoint] = Field(default_factory=list)
     change: ForecastChange | None = Field(

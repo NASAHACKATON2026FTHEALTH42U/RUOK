@@ -192,16 +192,16 @@ def get_assessment(
     summary="Previsión estadística de un indicador",
     description="Valores esperados de los próximos días (modelo de Holt con tendencia "
     "amortiguada, ajustado con las mediciones del propio member), intervalo de predicción "
-    "del 80 % y primer cambio de estado previsto. Informativa: no crea alertas ni cambia el "
-    "`assessment`. Sin datos suficientes o con el último dato caducado, `status` lo dice y "
-    "no hay puntos. Un indicador desconocido → 404; la previsión de un indicador conductual "
-    "privado solo la ve quien puede ver sus detalles (403 para el resto).",
+    "aproximado del 80 % y primer cambio de estado previsto. Informativa: no crea alertas ni "
+    "cambia el `assessment`. Sin datos suficientes o con el último dato caducado, `status` lo "
+    "dice y no hay puntos. Un indicador desconocido → 404; la previsión de un indicador "
+    "conductual privado solo la ve quien puede ver sus detalles (403 para el resto).",
 )
 def get_forecast(
     member_id: int,
     session: SessionDep,
     user: Annotated[models.UserAccount, Depends(allow_member("history:read"))],
-    indicator_id: Slug,
+    indicator_id: Annotated[Slug, Query(examples=["bp_systolic"])],
     horizon_days: Annotated[
         int, Query(ge=1, le=forecast.MAX_HORIZON_DAYS)
     ] = forecast.DEFAULT_HORIZON_DAYS,

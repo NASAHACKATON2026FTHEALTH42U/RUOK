@@ -124,6 +124,56 @@ describe('modo mock (VITE_USE_MOCKS=true)', () => {
     expect(history.filter((h) => h.id === m.id)).toHaveLength(1)
   })
 
+  it('previsión: la del modelo real para el member de ejemplo; indicador desconocido → 404', async () => {
+    const get = (indicatorId: string) =>
+      unwrap(
+        api.GET('/api/v1/members/{member_id}/forecast', {
+          params: { path: { member_id: 1 }, query: { indicator_id: indicatorId } },
+        }),
+      )
+    const forecast = await get('bp_systolic')
+    expect(forecast).toMatchObject({
+      member_id: 1,
+      indicator_id: 'bp_systolic',
+      unit: 'mmHg',
+      status: 'ok',
+    })
+    expect(forecast.points.length).toBeGreaterThan(0)
+    for (const p of forecast.points) {
+      expect(p.low).toBeLessThanOrEqual(p.value)
+      expect(p.high).toBeGreaterThanOrEqual(p.value)
+    }
+    // Cada punto es posterior al anterior: un paso de la serie por punto.
+    const times = forecast.points.map((p) => Date.parse(p.at))
+    expect(times).toEqual([...times].sort((a, b) => a - b))
+
+    const err = await get('no_existe').catch((e) => e)
+    expect(err).toBeInstanceOf(ApiError)
+    expect(err.status).toBe(404)
+  })
+
+  it('previsión: el horizonte recorta los puntos y uno fuera de 1–14 da 422', async () => {
+    const get = (horizonDays: number) =>
+      unwrap(
+        api.GET('/api/v1/members/{member_id}/forecast', {
+          params: {
+            path: { member_id: 1 },
+            query: { indicator_id: 'bp_systolic', horizon_days: horizonDays },
+          },
+        }),
+      )
+    const short = await get(3)
+    expect(short.horizon_days).toBe(3)
+    expect(short.points).toHaveLength(3)
+    expect((await get(14)).points).toHaveLength(7) // el ejemplo solo tiene 7 días calculados
+
+    for (const bad of [0, 15, 2.5]) {
+      const err = await get(bad).catch((e) => e)
+      expect(err).toBeInstanceOf(ApiError)
+      expect(err.status).toBe(422)
+    }
+  })
+
   it('SOS: crear (idempotente), escalar y resolver', async () => {
     const id = newId()
     const create = () =>

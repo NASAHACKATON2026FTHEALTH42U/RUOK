@@ -13,7 +13,8 @@ Cada permiso tiene dos comprobaciones:
    - el resto de roles, a los members y datos de **su** ``env_id``.
 
 ``responder`` y ``psych`` leen el historial y las alertas de su entorno.
-TODO(BE-17): limitarlo a lo ENTREGADO por el enlace (estado as-of).
+TODO(BE-17): limitarlo a lo ENTREGADO por el enlace (estado as-of). La previsión
+(FS-09) usa ``history:read`` y tiene hoy el mismo límite.
 """
 
 from __future__ import annotations

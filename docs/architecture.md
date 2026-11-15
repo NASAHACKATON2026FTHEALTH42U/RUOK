@@ -76,8 +76,8 @@ RUOK/
 │   │   ├── data/               environments.json, indicators.json, systems.json,
 │   │   │                       interventions.json, protocols.json
 │   │   ├── auth/               security.py (hash, JWT), permissions.py (matriz)
-│   │   ├── services/           hoy: assessment, member_assessment, trends, catalog, environments,
-│   │   │                       app_state. Llegan: alerts, liveness, comm_link, gamification,
+│   │   ├── services/           hoy: assessment, member_assessment, trends, forecast, catalog,
+│   │   │                       environments, app_state. Llegan: alerts, liveness, comm_link, gamification,
 │   │   │                       routine, events (event_log + SSE), devices
 │   │   ├── routers/            hoy: health, auth, catalog, members, alerts, game, realtime
 │   │   │                       (+ deps.py); se pueden dividir por dominio al implementarlos

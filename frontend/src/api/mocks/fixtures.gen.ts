@@ -9213,54 +9213,55 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": 1,
     "history_days": 30,
     "current_status": "normal",
+    "last_value_unusual": false,
     "points": [
       {
         "at": "2026-11-15T09:33:30.350583Z",
         "value": 84.03,
-        "low": 78.28,
-        "high": 89.78,
+        "low": 78.13,
+        "high": 89.93,
         "status": "normal"
       },
       {
         "at": "2026-11-16T09:33:30.350583Z",
         "value": 84.15,
-        "low": 78.36,
-        "high": 89.95,
+        "low": 78.21,
+        "high": 90.1,
         "status": "normal"
       },
       {
         "at": "2026-11-17T09:33:30.350583Z",
         "value": 84.25,
-        "low": 78.4,
-        "high": 90.11,
+        "low": 78.25,
+        "high": 90.26,
         "status": "normal"
       },
       {
         "at": "2026-11-18T09:33:30.350583Z",
         "value": 84.33,
-        "low": 78.41,
-        "high": 90.26,
+        "low": 78.26,
+        "high": 90.41,
         "status": "normal"
       },
       {
         "at": "2026-11-19T09:33:30.350583Z",
         "value": 84.39,
-        "low": 78.39,
-        "high": 90.4,
+        "low": 78.24,
+        "high": 90.55,
         "status": "normal"
       },
       {
         "at": "2026-11-20T09:33:30.350583Z",
         "value": 84.44,
-        "low": 78.35,
-        "high": 90.54,
+        "low": 78.2,
+        "high": 90.69,
         "status": "normal"
       },
       {
         "at": "2026-11-21T09:33:30.350583Z",
         "value": 84.48,
-        "low": 78.29,
-        "high": 90.68,
+        "low": 78.14,
+        "high": 90.83,
         "status": "normal"
       }
     ],
@@ -9278,59 +9279,60 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": 1,
     "history_days": 30,
     "current_status": "critical",
+    "last_value_unusual": false,
     "points": [
       {
         "at": "2026-11-15T10:00:00Z",
         "value": 143.73,
-        "low": 133.91,
-        "high": 153.56,
+        "low": 133.66,
+        "high": 153.81,
         "status": "critical"
       },
       {
         "at": "2026-11-16T10:00:00Z",
         "value": 145.65,
-        "low": 131.76,
-        "high": 159.55,
+        "low": 131.41,
+        "high": 159.9,
         "status": "critical"
       },
       {
         "at": "2026-11-17T10:00:00Z",
         "value": 147.19,
-        "low": 130.17,
-        "high": 164.21,
+        "low": 129.74,
+        "high": 164.64,
         "status": "critical"
       },
       {
         "at": "2026-11-18T10:00:00Z",
         "value": 148.42,
-        "low": 128.77,
-        "high": 168.07,
+        "low": 128.27,
+        "high": 168.57,
         "status": "critical"
       },
       {
         "at": "2026-11-19T10:00:00Z",
         "value": 149.4,
-        "low": 127.43,
-        "high": 171.37,
+        "low": 126.87,
+        "high": 171.93,
         "status": "critical"
       },
       {
         "at": "2026-11-20T10:00:00Z",
         "value": 150.19,
-        "low": 126.12,
-        "high": 174.26,
+        "low": 125.51,
+        "high": 174.86,
         "status": "critical"
       },
       {
         "at": "2026-11-21T10:00:00Z",
         "value": 150.82,
-        "low": 124.82,
-        "high": 176.81,
+        "low": 124.16,
+        "high": 177.47,
         "status": "critical"
       }
     ],
     "change": null,
-    "backtest_mae": 9.75
+    "backtest_mae": 9.94
   },
   "bp_diastolic": {
     "member_id": 1,
@@ -9343,54 +9345,55 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": 1,
     "history_days": 30,
     "current_status": "normal",
+    "last_value_unusual": false,
     "points": [
       {
         "at": "2026-11-15T08:30:56.022220Z",
-        "value": 68.78,
-        "low": 66.46,
-        "high": 71.1,
-        "status": "normal"
-      },
-      {
-        "at": "2026-11-16T08:30:56.022220Z",
-        "value": 68.78,
-        "low": 66.44,
-        "high": 71.11,
-        "status": "normal"
-      },
-      {
-        "at": "2026-11-17T08:30:56.022220Z",
-        "value": 68.78,
-        "low": 66.43,
-        "high": 71.13,
-        "status": "normal"
-      },
-      {
-        "at": "2026-11-18T08:30:56.022220Z",
-        "value": 68.78,
-        "low": 66.42,
-        "high": 71.14,
-        "status": "normal"
-      },
-      {
-        "at": "2026-11-19T08:30:56.022220Z",
-        "value": 68.78,
-        "low": 66.41,
-        "high": 71.15,
-        "status": "normal"
-      },
-      {
-        "at": "2026-11-20T08:30:56.022220Z",
         "value": 68.78,
         "low": 66.4,
         "high": 71.16,
         "status": "normal"
       },
       {
-        "at": "2026-11-21T08:30:56.022220Z",
+        "at": "2026-11-16T08:30:56.022220Z",
         "value": 68.78,
         "low": 66.39,
         "high": 71.17,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-17T08:30:56.022220Z",
+        "value": 68.78,
+        "low": 66.37,
+        "high": 71.19,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-18T08:30:56.022220Z",
+        "value": 68.78,
+        "low": 66.36,
+        "high": 71.2,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-19T08:30:56.022220Z",
+        "value": 68.78,
+        "low": 66.35,
+        "high": 71.21,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T08:30:56.022220Z",
+        "value": 68.78,
+        "low": 66.34,
+        "high": 71.22,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-21T08:30:56.022220Z",
+        "value": 68.78,
+        "low": 66.33,
+        "high": 71.23,
         "status": "normal"
       }
     ],
@@ -9408,54 +9411,55 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": 1,
     "history_days": 30,
     "current_status": "normal",
+    "last_value_unusual": false,
     "points": [
       {
         "at": "2026-11-15T04:14:44.945317Z",
         "value": 97.79,
-        "low": 97.04,
-        "high": 98.53,
+        "low": 97.02,
+        "high": 98.55,
         "status": "normal"
       },
       {
         "at": "2026-11-16T04:14:44.945317Z",
         "value": 97.78,
-        "low": 97.04,
-        "high": 98.53,
+        "low": 97.02,
+        "high": 98.55,
         "status": "normal"
       },
       {
         "at": "2026-11-17T04:14:44.945317Z",
         "value": 97.78,
-        "low": 97.03,
-        "high": 98.54,
+        "low": 97.02,
+        "high": 98.55,
         "status": "normal"
       },
       {
         "at": "2026-11-18T04:14:44.945317Z",
         "value": 97.78,
-        "low": 97.03,
-        "high": 98.54,
+        "low": 97.01,
+        "high": 98.56,
         "status": "normal"
       },
       {
         "at": "2026-11-19T04:14:44.945317Z",
         "value": 97.78,
-        "low": 97.03,
-        "high": 98.54,
+        "low": 97.01,
+        "high": 98.56,
         "status": "normal"
       },
       {
         "at": "2026-11-20T04:14:44.945317Z",
         "value": 97.78,
-        "low": 97.02,
-        "high": 98.55,
+        "low": 97.0,
+        "high": 98.56,
         "status": "normal"
       },
       {
         "at": "2026-11-21T04:14:44.945317Z",
         "value": 97.78,
-        "low": 97.02,
-        "high": 98.55,
+        "low": 97.0,
+        "high": 98.57,
         "status": "normal"
       }
     ],
@@ -9473,54 +9477,55 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": 1,
     "history_days": 30,
     "current_status": "normal",
+    "last_value_unusual": false,
     "points": [
       {
         "at": "2026-11-15T05:16:01.516209Z",
         "value": 3.99,
-        "low": 3.62,
-        "high": 4.36,
+        "low": 3.61,
+        "high": 4.37,
         "status": "normal"
       },
       {
         "at": "2026-11-16T05:16:01.516209Z",
         "value": 3.99,
-        "low": 3.62,
-        "high": 4.36,
+        "low": 3.61,
+        "high": 4.37,
         "status": "normal"
       },
       {
         "at": "2026-11-17T05:16:01.516209Z",
         "value": 3.99,
-        "low": 3.62,
-        "high": 4.36,
+        "low": 3.61,
+        "high": 4.37,
         "status": "normal"
       },
       {
         "at": "2026-11-18T05:16:01.516209Z",
         "value": 3.99,
         "low": 3.61,
-        "high": 4.37,
+        "high": 4.38,
         "status": "normal"
       },
       {
         "at": "2026-11-19T05:16:01.516209Z",
         "value": 3.99,
-        "low": 3.61,
-        "high": 4.37,
+        "low": 3.6,
+        "high": 4.38,
         "status": "normal"
       },
       {
         "at": "2026-11-20T05:16:01.516209Z",
         "value": 3.99,
-        "low": 3.61,
-        "high": 4.37,
+        "low": 3.6,
+        "high": 4.38,
         "status": "normal"
       },
       {
         "at": "2026-11-21T05:16:01.516209Z",
         "value": 3.99,
-        "low": 3.61,
-        "high": 4.37,
+        "low": 3.6,
+        "high": 4.38,
         "status": "normal"
       }
     ],
@@ -9538,59 +9543,60 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": 1,
     "history_days": 30,
     "current_status": "normal",
+    "last_value_unusual": false,
     "points": [
       {
         "at": "2026-11-15T04:38:19.478569Z",
-        "value": 36.54,
-        "low": 36.31,
-        "high": 36.78,
-        "status": "normal"
-      },
-      {
-        "at": "2026-11-16T04:38:19.478569Z",
-        "value": 36.54,
-        "low": 36.28,
-        "high": 36.81,
-        "status": "normal"
-      },
-      {
-        "at": "2026-11-17T04:38:19.478569Z",
-        "value": 36.54,
-        "low": 36.25,
+        "value": 36.58,
+        "low": 36.34,
         "high": 36.83,
         "status": "normal"
       },
       {
-        "at": "2026-11-18T04:38:19.478569Z",
-        "value": 36.54,
-        "low": 36.23,
-        "high": 36.86,
+        "at": "2026-11-16T04:38:19.478569Z",
+        "value": 36.58,
+        "low": 36.31,
+        "high": 36.85,
         "status": "normal"
       },
       {
-        "at": "2026-11-19T04:38:19.478569Z",
-        "value": 36.54,
-        "low": 36.21,
+        "at": "2026-11-17T04:38:19.478569Z",
+        "value": 36.58,
+        "low": 36.28,
         "high": 36.88,
         "status": "normal"
       },
       {
-        "at": "2026-11-20T04:38:19.478569Z",
-        "value": 36.54,
-        "low": 36.19,
+        "at": "2026-11-18T04:38:19.478569Z",
+        "value": 36.58,
+        "low": 36.26,
         "high": 36.9,
         "status": "normal"
       },
       {
+        "at": "2026-11-19T04:38:19.478569Z",
+        "value": 36.58,
+        "low": 36.24,
+        "high": 36.93,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T04:38:19.478569Z",
+        "value": 36.58,
+        "low": 36.22,
+        "high": 36.95,
+        "status": "normal"
+      },
+      {
         "at": "2026-11-21T04:38:19.478569Z",
-        "value": 36.54,
-        "low": 36.17,
-        "high": 36.92,
+        "value": 36.58,
+        "low": 36.2,
+        "high": 36.97,
         "status": "normal"
       }
     ],
     "change": null,
-    "backtest_mae": 0.19
+    "backtest_mae": 0.18
   },
   "glucose": {
     "member_id": 1,
@@ -9603,6 +9609,7 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": null,
     "history_days": 0,
     "current_status": "unknown",
+    "last_value_unusual": false,
     "points": [],
     "change": null,
     "backtest_mae": null
@@ -9618,54 +9625,55 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": 1,
     "history_days": 30,
     "current_status": "warning",
+    "last_value_unusual": true,
     "points": [
       {
         "at": "2026-11-15T10:00:00Z",
-        "value": 214.37,
-        "low": 189.51,
-        "high": 239.24,
+        "value": 218.6,
+        "low": 193.1,
+        "high": 244.09,
         "status": "normal"
       },
       {
         "at": "2026-11-16T10:00:00Z",
-        "value": 214.37,
-        "low": 189.38,
-        "high": 239.36,
+        "value": 218.59,
+        "low": 192.97,
+        "high": 244.21,
         "status": "normal"
       },
       {
         "at": "2026-11-17T10:00:00Z",
-        "value": 214.37,
-        "low": 189.25,
-        "high": 239.48,
+        "value": 218.59,
+        "low": 192.84,
+        "high": 244.33,
         "status": "normal"
       },
       {
         "at": "2026-11-18T10:00:00Z",
-        "value": 214.36,
-        "low": 189.13,
-        "high": 239.6,
+        "value": 218.59,
+        "low": 192.71,
+        "high": 244.46,
         "status": "normal"
       },
       {
         "at": "2026-11-19T10:00:00Z",
-        "value": 214.36,
-        "low": 189.01,
-        "high": 239.72,
+        "value": 218.58,
+        "low": 192.59,
+        "high": 244.58,
         "status": "normal"
       },
       {
         "at": "2026-11-20T10:00:00Z",
-        "value": 214.36,
-        "low": 188.88,
-        "high": 239.84,
+        "value": 218.58,
+        "low": 192.46,
+        "high": 244.71,
         "status": "normal"
       },
       {
         "at": "2026-11-21T10:00:00Z",
-        "value": 214.36,
-        "low": 188.76,
-        "high": 239.96,
+        "value": 218.58,
+        "low": 192.34,
+        "high": 244.83,
         "status": "normal"
       }
     ],
@@ -9687,59 +9695,60 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": 1,
     "history_days": 30,
     "current_status": "critical",
+    "last_value_unusual": false,
     "points": [
       {
         "at": "2026-11-15T09:55:00Z",
         "value": 3.1,
-        "low": 2.11,
-        "high": 4.09,
+        "low": 2.09,
+        "high": 4.11,
         "status": "critical"
       },
       {
         "at": "2026-11-16T09:55:00Z",
         "value": 2.78,
-        "low": 1.27,
-        "high": 4.29,
+        "low": 1.23,
+        "high": 4.33,
         "status": "critical"
       },
       {
         "at": "2026-11-17T09:55:00Z",
         "value": 2.52,
-        "low": 0.55,
-        "high": 4.5,
+        "low": 0.5,
+        "high": 4.55,
         "status": "critical"
       },
       {
         "at": "2026-11-18T09:55:00Z",
         "value": 2.32,
         "low": 0.0,
-        "high": 4.73,
+        "high": 4.79,
         "status": "critical"
       },
       {
         "at": "2026-11-19T09:55:00Z",
         "value": 2.16,
         "low": 0.0,
-        "high": 4.97,
+        "high": 5.04,
         "status": "critical"
       },
       {
         "at": "2026-11-20T09:55:00Z",
         "value": 2.02,
         "low": 0.0,
-        "high": 5.22,
+        "high": 5.3,
         "status": "critical"
       },
       {
         "at": "2026-11-21T09:55:00Z",
         "value": 1.92,
         "low": 0.0,
-        "high": 5.48,
+        "high": 5.57,
         "status": "critical"
       }
     ],
     "change": null,
-    "backtest_mae": 1.15
+    "backtest_mae": 1.24
   },
   "vision_changes": {
     "member_id": 1,
@@ -9752,6 +9761,7 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": null,
     "history_days": 0,
     "current_status": "unknown",
+    "last_value_unusual": false,
     "points": [],
     "change": null,
     "backtest_mae": null
@@ -9767,6 +9777,7 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": null,
     "history_days": 0,
     "current_status": "unknown",
+    "last_value_unusual": false,
     "points": [],
     "change": null,
     "backtest_mae": null
@@ -9782,6 +9793,7 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": null,
     "history_days": 0,
     "current_status": "unknown",
+    "last_value_unusual": false,
     "points": [],
     "change": null,
     "backtest_mae": null
@@ -9797,6 +9809,7 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": null,
     "history_days": 0,
     "current_status": "unknown",
+    "last_value_unusual": false,
     "points": [],
     "change": null,
     "backtest_mae": null
@@ -9812,54 +9825,55 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": 1,
     "history_days": 30,
     "current_status": "normal",
+    "last_value_unusual": false,
     "points": [
       {
         "at": "2026-11-15T06:26:18.206621Z",
         "value": 1.95,
-        "low": 1.58,
-        "high": 2.32,
+        "low": 1.57,
+        "high": 2.33,
         "status": "normal"
       },
       {
         "at": "2026-11-16T06:26:18.206621Z",
         "value": 1.95,
-        "low": 1.58,
-        "high": 2.32,
+        "low": 1.57,
+        "high": 2.33,
         "status": "normal"
       },
       {
         "at": "2026-11-17T06:26:18.206621Z",
         "value": 1.95,
-        "low": 1.58,
-        "high": 2.33,
+        "low": 1.57,
+        "high": 2.34,
         "status": "normal"
       },
       {
         "at": "2026-11-18T06:26:18.206621Z",
         "value": 1.95,
-        "low": 1.58,
-        "high": 2.33,
+        "low": 1.57,
+        "high": 2.34,
         "status": "normal"
       },
       {
         "at": "2026-11-19T06:26:18.206621Z",
         "value": 1.95,
-        "low": 1.58,
-        "high": 2.33,
+        "low": 1.57,
+        "high": 2.34,
         "status": "normal"
       },
       {
         "at": "2026-11-20T06:26:18.206621Z",
         "value": 1.95,
-        "low": 1.57,
-        "high": 2.33,
+        "low": 1.56,
+        "high": 2.34,
         "status": "normal"
       },
       {
         "at": "2026-11-21T06:26:18.206621Z",
         "value": 1.95,
-        "low": 1.57,
-        "high": 2.33,
+        "low": 1.56,
+        "high": 2.34,
         "status": "normal"
       }
     ],
@@ -9877,54 +9891,55 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": 1,
     "history_days": 30,
     "current_status": "normal",
+    "last_value_unusual": false,
     "points": [
       {
         "at": "2026-11-15T09:16:31.086323Z",
         "value": 4.03,
         "low": 3.66,
-        "high": 4.4,
+        "high": 4.41,
         "status": "normal"
       },
       {
         "at": "2026-11-16T09:16:31.086323Z",
         "value": 4.03,
-        "low": 3.66,
-        "high": 4.41,
+        "low": 3.65,
+        "high": 4.42,
         "status": "normal"
       },
       {
         "at": "2026-11-17T09:16:31.086323Z",
         "value": 4.03,
-        "low": 3.66,
-        "high": 4.41,
+        "low": 3.65,
+        "high": 4.42,
         "status": "normal"
       },
       {
         "at": "2026-11-18T09:16:31.086323Z",
         "value": 4.03,
-        "low": 3.66,
-        "high": 4.41,
+        "low": 3.65,
+        "high": 4.42,
         "status": "normal"
       },
       {
         "at": "2026-11-19T09:16:31.086323Z",
         "value": 4.03,
-        "low": 3.66,
-        "high": 4.41,
+        "low": 3.65,
+        "high": 4.42,
         "status": "normal"
       },
       {
         "at": "2026-11-20T09:16:31.086323Z",
         "value": 4.03,
-        "low": 3.66,
-        "high": 4.41,
+        "low": 3.65,
+        "high": 4.42,
         "status": "normal"
       },
       {
         "at": "2026-11-21T09:16:31.086323Z",
         "value": 4.03,
-        "low": 3.65,
-        "high": 4.42,
+        "low": 3.64,
+        "high": 4.43,
         "status": "normal"
       }
     ],
@@ -9942,26 +9957,27 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": 1,
     "history_days": 30,
     "current_status": "normal",
+    "last_value_unusual": false,
     "points": [
       {
         "at": "2026-11-15T06:58:53.450517Z",
         "value": 2.0,
-        "low": 1.63,
-        "high": 2.37,
+        "low": 1.62,
+        "high": 2.38,
         "status": "normal"
       },
       {
         "at": "2026-11-16T06:58:53.450517Z",
         "value": 2.0,
-        "low": 1.63,
-        "high": 2.37,
+        "low": 1.62,
+        "high": 2.38,
         "status": "normal"
       },
       {
         "at": "2026-11-17T06:58:53.450517Z",
         "value": 2.0,
-        "low": 1.63,
-        "high": 2.37,
+        "low": 1.62,
+        "high": 2.38,
         "status": "normal"
       },
       {
@@ -9974,22 +9990,22 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
       {
         "at": "2026-11-19T06:58:53.450517Z",
         "value": 2.0,
-        "low": 1.62,
-        "high": 2.38,
+        "low": 1.61,
+        "high": 2.39,
         "status": "normal"
       },
       {
         "at": "2026-11-20T06:58:53.450517Z",
         "value": 2.0,
-        "low": 1.62,
-        "high": 2.38,
+        "low": 1.61,
+        "high": 2.39,
         "status": "normal"
       },
       {
         "at": "2026-11-21T06:58:53.450517Z",
         "value": 2.0,
-        "low": 1.62,
-        "high": 2.38,
+        "low": 1.61,
+        "high": 2.39,
         "status": "normal"
       }
     ],
@@ -10007,54 +10023,55 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": 1,
     "history_days": 30,
     "current_status": "normal",
+    "last_value_unusual": false,
     "points": [
       {
         "at": "2026-11-15T08:30:59.412608Z",
         "value": 3.96,
         "low": 3.59,
-        "high": 4.33,
+        "high": 4.34,
         "status": "normal"
       },
       {
         "at": "2026-11-16T08:30:59.412608Z",
         "value": 3.96,
-        "low": 3.59,
-        "high": 4.34,
+        "low": 3.58,
+        "high": 4.35,
         "status": "normal"
       },
       {
         "at": "2026-11-17T08:30:59.412608Z",
         "value": 3.96,
-        "low": 3.59,
-        "high": 4.34,
+        "low": 3.58,
+        "high": 4.35,
         "status": "normal"
       },
       {
         "at": "2026-11-18T08:30:59.412608Z",
         "value": 3.96,
-        "low": 3.59,
-        "high": 4.34,
+        "low": 3.58,
+        "high": 4.35,
         "status": "normal"
       },
       {
         "at": "2026-11-19T08:30:59.412608Z",
         "value": 3.96,
-        "low": 3.59,
-        "high": 4.34,
+        "low": 3.58,
+        "high": 4.35,
         "status": "normal"
       },
       {
         "at": "2026-11-20T08:30:59.412608Z",
         "value": 3.96,
-        "low": 3.59,
-        "high": 4.34,
+        "low": 3.58,
+        "high": 4.35,
         "status": "normal"
       },
       {
         "at": "2026-11-21T08:30:59.412608Z",
         "value": 3.96,
-        "low": 3.58,
-        "high": 4.35,
+        "low": 3.57,
+        "high": 4.36,
         "status": "normal"
       }
     ],
@@ -10072,26 +10089,27 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": 1,
     "history_days": 30,
     "current_status": "normal",
+    "last_value_unusual": false,
     "points": [
       {
         "at": "2026-11-15T07:43:00.053317Z",
         "value": 4.0,
-        "low": 3.63,
-        "high": 4.37,
+        "low": 3.62,
+        "high": 4.38,
         "status": "normal"
       },
       {
         "at": "2026-11-16T07:43:00.053317Z",
         "value": 4.0,
-        "low": 3.63,
-        "high": 4.37,
+        "low": 3.62,
+        "high": 4.38,
         "status": "normal"
       },
       {
         "at": "2026-11-17T07:43:00.053317Z",
         "value": 4.0,
-        "low": 3.63,
-        "high": 4.37,
+        "low": 3.62,
+        "high": 4.38,
         "status": "normal"
       },
       {
@@ -10104,22 +10122,22 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
       {
         "at": "2026-11-19T07:43:00.053317Z",
         "value": 4.0,
-        "low": 3.62,
-        "high": 4.38,
+        "low": 3.61,
+        "high": 4.39,
         "status": "normal"
       },
       {
         "at": "2026-11-20T07:43:00.053317Z",
         "value": 4.0,
-        "low": 3.62,
-        "high": 4.38,
+        "low": 3.61,
+        "high": 4.39,
         "status": "normal"
       },
       {
         "at": "2026-11-21T07:43:00.053317Z",
         "value": 4.0,
-        "low": 3.62,
-        "high": 4.38,
+        "low": 3.61,
+        "high": 4.39,
         "status": "normal"
       }
     ],
@@ -10137,54 +10155,55 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": 1,
     "history_days": 30,
     "current_status": "normal",
+    "last_value_unusual": false,
     "points": [
       {
         "at": "2026-11-15T07:37:27.240673Z",
         "value": 199.33,
-        "low": 171.95,
-        "high": 226.71,
+        "low": 171.25,
+        "high": 227.4,
         "status": "normal"
       },
       {
         "at": "2026-11-16T07:37:27.240673Z",
         "value": 199.33,
-        "low": 171.81,
-        "high": 226.85,
+        "low": 171.12,
+        "high": 227.54,
         "status": "normal"
       },
       {
         "at": "2026-11-17T07:37:27.240673Z",
         "value": 199.34,
-        "low": 171.68,
-        "high": 226.99,
+        "low": 170.98,
+        "high": 227.69,
         "status": "normal"
       },
       {
         "at": "2026-11-18T07:37:27.240673Z",
         "value": 199.34,
-        "low": 171.55,
-        "high": 227.13,
+        "low": 170.85,
+        "high": 227.83,
         "status": "normal"
       },
       {
         "at": "2026-11-19T07:37:27.240673Z",
         "value": 199.34,
-        "low": 171.42,
-        "high": 227.27,
+        "low": 170.71,
+        "high": 227.97,
         "status": "normal"
       },
       {
         "at": "2026-11-20T07:37:27.240673Z",
         "value": 199.35,
-        "low": 171.29,
-        "high": 227.4,
+        "low": 170.58,
+        "high": 228.11,
         "status": "normal"
       },
       {
         "at": "2026-11-21T07:37:27.240673Z",
         "value": 199.35,
-        "low": 171.16,
-        "high": 227.54,
+        "low": 170.45,
+        "high": 228.25,
         "status": "normal"
       }
     ],
@@ -10202,54 +10221,55 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "step_days": 1,
     "history_days": 30,
     "current_status": "normal",
+    "last_value_unusual": false,
     "points": [
       {
         "at": "2026-11-15T07:14:42.159041Z",
         "value": 1.0,
-        "low": 0.63,
-        "high": 1.37,
+        "low": 0.62,
+        "high": 1.38,
         "status": "normal"
       },
       {
         "at": "2026-11-16T07:14:42.159041Z",
         "value": 1.0,
-        "low": 0.48,
-        "high": 1.52,
+        "low": 0.46,
+        "high": 1.54,
         "status": "normal"
       },
       {
         "at": "2026-11-17T07:14:42.159041Z",
         "value": 1.0,
-        "low": 0.36,
-        "high": 1.64,
+        "low": 0.34,
+        "high": 1.66,
         "status": "normal"
       },
       {
         "at": "2026-11-18T07:14:42.159041Z",
         "value": 1.0,
-        "low": 0.26,
-        "high": 1.74,
+        "low": 0.24,
+        "high": 1.76,
         "status": "normal"
       },
       {
         "at": "2026-11-19T07:14:42.159041Z",
         "value": 1.0,
-        "low": 0.17,
-        "high": 1.83,
+        "low": 0.15,
+        "high": 1.85,
         "status": "normal"
       },
       {
         "at": "2026-11-20T07:14:42.159041Z",
         "value": 1.0,
-        "low": 0.09,
-        "high": 1.91,
+        "low": 0.07,
+        "high": 1.93,
         "status": "normal"
       },
       {
         "at": "2026-11-21T07:14:42.159041Z",
         "value": 1.0,
-        "low": 0.02,
-        "high": 1.98,
+        "low": 0.0,
+        "high": 2.0,
         "status": "normal"
       }
     ],

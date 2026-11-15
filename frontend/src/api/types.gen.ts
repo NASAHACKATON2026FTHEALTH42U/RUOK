@@ -377,7 +377,7 @@ export interface paths {
         };
         /**
          * Previsión estadística de un indicador
-         * @description Valores esperados de los próximos días (modelo de Holt con tendencia amortiguada, ajustado con las mediciones del propio member), intervalo de predicción del 80 % y primer cambio de estado previsto. Informativa: no crea alertas ni cambia el `assessment`. Sin datos suficientes o con el último dato caducado, `status` lo dice y no hay puntos. Un indicador desconocido → 404; la previsión de un indicador conductual privado solo la ve quien puede ver sus detalles (403 para el resto).
+         * @description Valores esperados de los próximos días (modelo de Holt con tendencia amortiguada, ajustado con las mediciones del propio member), intervalo de predicción aproximado del 80 % y primer cambio de estado previsto. Informativa: no crea alertas ni cambia el `assessment`. Sin datos suficientes o con el último dato caducado, `status` lo dice y no hay puntos. Un indicador desconocido → 404; la previsión de un indicador conductual privado solo la ve quien puede ver sus detalles (403 para el resto).
          */
         get: operations["get_forecast_api_v1_members__member_id__forecast_get"];
         put?: never;
@@ -1523,7 +1523,7 @@ export interface components {
              * Format: date-time
              */
             generated_at: string;
-            /** @description `insufficient_data`: menos de 7 días con mediciones en el tramo reciente. `stale`: el último dato ha caducado (`max_age_s`). Solo `ok` trae `points`. */
+            /** @description `insufficient_data`: menos de 7 mediciones a su cadencia en el tramo reciente (o más de la mitad serían huecos). `stale`: el último dato ha caducado (`max_age_s`). Solo `ok` trae `points`. */
             status: components["schemas"]["ForecastStatus"];
             /**
              * Method
@@ -1547,8 +1547,14 @@ export interface components {
              * @default 0
              */
             history_days: number;
-            /** @description Estado del último valor con los rangos del entorno (`unknown` si ha caducado) */
+            /** @description Estado del último valor con los rangos del entorno (`unknown` si ha caducado). Solo mira el valor: no incluye las reglas de tendencia ni las conductuales del `Assessment`. */
             current_status: components["schemas"]["Status"];
+            /**
+             * Last Value Unusual
+             * @description true si la última medición se aparta de lo esperado mucho más que el ruido habitual de la persona: la previsión la trata con cautela hasta que otra la confirme
+             * @default false
+             */
+            last_value_unusual: boolean;
             /** Points */
             points: components["schemas"]["ForecastPoint"][];
             /** @description null si el estado no cambia en el horizonte */
@@ -1592,12 +1598,12 @@ export interface components {
             value: number;
             /**
              * Low
-             * @description Límite inferior del intervalo de predicción del 80 %
+             * @description Límite inferior del intervalo de predicción (aprox. 80 %)
              */
             low: number;
             /**
              * High
-             * @description Límite superior del intervalo de predicción del 80 %
+             * @description Límite superior del intervalo de predicción (aprox. 80 %)
              */
             high: number;
             /** @description Estado del valor esperado con los rangos del entorno */
