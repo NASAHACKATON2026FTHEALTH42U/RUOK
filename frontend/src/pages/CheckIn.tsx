@@ -53,6 +53,8 @@ export default function CheckIn() {
   const [answers, setAnswers] = useState<Answers>({})
   const [note, setNote] = useState('')
   const [phase, setPhase] = useState<Phase>({ kind: 'editing' })
+  // Resultado: la lista «Para cuidarte hoy» empieza plegada.
+  const [careOpen, setCareOpen] = useState(false)
   // Paso actual: 0…n-1 las preguntas; n, la nota y el envío.
   const [step, setStep] = useState(0)
   const stepHeading = useRef<HTMLHeadingElement>(null)
@@ -136,12 +138,34 @@ export default function CheckIn() {
   const care = (interventions.state === 'ready' ? interventions.data : []).filter(
     (i) => i.system_id === 'neuro_behavioral',
   )
+  // Plegado por defecto, para que el resultado quepa en la pantalla; al abrirlo, la lista va en
+  // tarjetas compactas (sin los pasos: se ven al empezar) y con scroll propio.
   const careSection = care.length > 0 && (
-    <section className="space-y-2">
-      <h2 className="font-semibold">Para cuidarte hoy</h2>
-      {care.map((i) => (
-        <InterventionCard key={i.id} intervention={i} />
-      ))}
+    <section>
+      <button
+        type="button"
+        aria-expanded={careOpen}
+        aria-controls="checkin-care"
+        onClick={() => setCareOpen((o) => !o)}
+        className="flex w-full items-center justify-between gap-3 rounded-lg border border-env-border bg-env-surface px-3 py-2 text-left font-semibold hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary"
+      >
+        <span>
+          Para cuidarte hoy <span className="font-normal text-env-muted">({care.length})</span>
+        </span>
+        <span aria-hidden>{careOpen ? '▾' : '▸'}</span>
+      </button>
+      {careOpen && (
+        <ul
+          id="checkin-care"
+          className="mt-2 grid max-h-[max(7rem,calc(100dvh-33rem))] gap-2 overflow-y-auto pr-1 [scrollbar-color:var(--env-border)_transparent] sm:grid-cols-2"
+        >
+          {care.map((i) => (
+            <li key={i.id}>
+              <InterventionCard intervention={i} compact />
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   )
 
@@ -158,9 +182,9 @@ export default function CheckIn() {
 
   if (phase.kind === 'queued') {
     return (
-      <section className="mx-auto max-w-xl space-y-4">
+      <section className="mx-auto max-w-xl space-y-3">
         <h1 className="text-2xl font-semibold">Check-in guardado en el dispositivo</h1>
-        <div className="rounded-xl border border-env-border bg-env-surface p-4" role="status">
+        <div className="rounded-xl border border-env-border bg-env-surface p-3" role="status">
           <p>
             <span aria-hidden>⇡ </span>
             No hay conexión con el servidor. Tus respuestas están guardadas aquí y{' '}
@@ -180,11 +204,11 @@ export default function CheckIn() {
   if (phase.kind === 'sent') {
     const { assessment } = phase.result
     return (
-      <section className="mx-auto max-w-xl space-y-4">
+      <section className="mx-auto max-w-xl space-y-3">
         <h1 className="text-2xl font-semibold">Check-in guardado</h1>
-        <div className="rounded-xl border border-env-border bg-env-surface p-4" role="status">
+        <div className="rounded-xl border border-env-border bg-env-surface p-3" role="status">
           <p>Gracias. Tus respuestas de hoy ya están registradas.</p>
-          <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-env-muted">
+          <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-env-muted">
             Evaluación actualizada:
             <StatusBadge
               status={assessment.overall_status}
