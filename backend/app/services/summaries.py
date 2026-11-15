@@ -6,6 +6,7 @@ LLM. Solo palabras de estado y nombres de sistema: ni cifras clínicas ni detall
 
 from __future__ import annotations
 
+import re
 from datetime import timedelta
 
 from sqlmodel import Session, col, select
@@ -20,6 +21,11 @@ WORD = {
     "critical": "con algo importante que atender",
     "unknown": "sin datos recientes",
 }
+
+
+def _lower_names(names: list[str]) -> str:
+    """Nombres de sistema en minúscula para la frase, salvo las siglas («ojos (SANS)»)."""
+    return _join([re.sub(r"\b(?![A-Z]{2,}\b)\w+", lambda m: m.group(0).lower(), n) for n in names])
 
 
 def _join(items: list[str]) -> str:
@@ -38,7 +44,7 @@ def summary(session: Session, member: models.Member, period: str) -> StatusSumma
     unknown = [names.get(s.system_id, s.system_id) for s in a.systems if s.status == "unknown"]
     parts = [f"En general estoy {WORD.get(a.overall_status, 'sin datos recientes')}."]
     if attention:
-        parts.append(f"Tengo que vigilar: {_join(attention).lower()}.")
+        parts.append(f"Tengo que vigilar: {_lower_names(attention)}.")
     elif a.overall_status == "normal":
         parts.append("Todos los sistemas que mido están en su rango.")
     if period == "week":
@@ -61,5 +67,5 @@ def summary(session: Session, member: models.Member, period: str) -> StatusSumma
     else:
         parts.insert(0, "Así estoy hoy:")
     if unknown and period == "day":
-        parts.append(f"Me falta medir: {_join(unknown).lower()}.")
+        parts.append(f"Me falta medir: {_lower_names(unknown)}.")
     return StatusSummary(member_id=member.id, period=period, text=" ".join(parts), generated_at=now)
