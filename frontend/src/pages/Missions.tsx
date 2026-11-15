@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { serverNow } from '../api/client'
 import {
   useCrewMissions,
@@ -22,6 +21,7 @@ import { TaskItem } from '../components/game/TaskItem'
 import { useVocab } from '../environments/useVocab'
 import { completeTask, joinMission, locallyCompletedTasks, sendKudos } from '../offline/outbox'
 import { useEnvironmentStore } from '../store/environment'
+import { NoMemberSelected } from '../components/ui/NoMemberSelected'
 
 interface Toast {
   id: number
@@ -83,13 +83,7 @@ export default function Missions() {
     return (
       <section>
         {title}
-        <p className="mt-2 text-env-muted">
-          No hay nadie seleccionado.{' '}
-          <Link to="/" className="underline hover:text-env-text">
-            Elige entorno y {vocab.member}
-          </Link>
-          .
-        </p>
+        <NoMemberSelected />
       </section>
     )
   }

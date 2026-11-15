@@ -15,8 +15,8 @@ import { FaceScale } from '../components/behavioral/FaceScale'
 import { InterventionCard } from '../components/behavioral/InterventionCard'
 import { statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
-import { useVocab } from '../environments/useVocab'
 import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox'
+import { NoMemberSelected } from '../components/ui/NoMemberSelected'
 
 type Phase =
   | { kind: 'editing' }
@@ -40,7 +40,6 @@ const ADVANCE_MS = 350
  * envía solo cuando vuelve la conexión, con los mismos UUID (sin duplicados).
  */
 export default function CheckIn() {
-  const vocab = useVocab()
   const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el elegido
   const catalog = useIndicators()
   const interventions = useInterventions()
@@ -76,13 +75,7 @@ export default function CheckIn() {
     return (
       <section>
         {title}
-        <p className="mt-2 text-env-muted">
-          No hay nadie seleccionado.{' '}
-          <Link to="/" className="underline hover:text-env-text">
-            Elige entorno y {vocab.member}
-          </Link>
-          .
-        </p>
+        <NoMemberSelected />
       </section>
     )
   }
