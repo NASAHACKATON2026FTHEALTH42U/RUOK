@@ -8,7 +8,10 @@ interface ClockEnv {
   mission?: Mission | null
 }
 
-/** Reloj de la cabecera HUD: hora del servidor (la demo acelera el reloj) y día de misión. */
+/**
+ * Reloj de la cabecera HUD: hora del servidor (la demo acelera el reloj) y, en misión, el día
+ * ("Sol" en Marte). Sin misión activa, solo la hora.
+ */
 export function HudClock({ env }: { env?: ClockEnv }) {
   const [now, setNow] = useState(() => serverNow())
   useEffect(() => {
@@ -19,17 +22,17 @@ export function HudClock({ env }: { env?: ClockEnv }) {
   const phase = env?.mission ? missionPhase(env.mission, now) : null
   // En Marte el día es un "sol"; en el resto, un día de misión.
   const day =
-    phase?.status === 'active' ? `${env?.id === 'mars' ? 'Sol' : 'Día'} ${phase.day} · ` : ''
+    phase?.status === 'active' ? `${env?.id === 'mars' ? 'Sol' : 'Día'} ${phase.day}` : null
 
   return (
     <div className="text-right">
       <time
         dateTime={now.toISOString()}
-        className="block font-mono text-[19px] leading-tight font-light tabular-nums"
+        className="block font-mono text-[23px] leading-tight font-light tabular-nums"
       >
         {now.toLocaleTimeString('es-ES', { hour12: false })}
       </time>
-      <span className="hud-label block text-[9px] whitespace-nowrap">{day}Hora local</span>
+      {day && <span className="hud-label block text-[10px] whitespace-nowrap">{day}</span>}
     </div>
   )
 }

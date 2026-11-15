@@ -9,8 +9,6 @@ import type { Role } from '../../auth/roles'
 export interface NavItem {
   to: string
   label: string
-  /** Código mono de 3 letras (`ALR`, `CHK`…) para las filas de «Más». */
-  code: string
   icon: IconName
 }
 
@@ -19,19 +17,19 @@ export type IconName = 'panel' | 'measure' | 'missions' | 'more' | 'crew' | 'ale
 export function navItems(vocab: { crew: string; ground: string }): NavItem[] {
   const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
   return [
-    { to: '/dashboard', label: 'Panel', code: 'PNL', icon: 'panel' },
-    { to: '/members', label: cap(vocab.crew), code: 'TRP', icon: 'crew' },
-    { to: '/measure', label: 'Medir', code: 'MED', icon: 'measure' },
-    { to: '/missions', label: 'Misiones', code: 'MSN', icon: 'missions' },
-    { to: '/alerts', label: 'Alertas', code: 'ALR', icon: 'alerts' },
-    { to: '/checkin', label: 'Check-in diario', code: 'CHK', icon: 'list' },
-    { to: '/pvt', label: 'Test de vigilancia', code: 'PVT', icon: 'list' },
-    { to: '/history', label: 'Historial', code: 'HST', icon: 'list' },
-    { to: '/earth', label: 'La Tierra', code: 'ERT', icon: 'list' },
-    { to: '/home', label: 'Mensaje a casa', code: 'MSJ', icon: 'list' },
-    { to: '/ground', label: `Consola de ${vocab.ground}`, code: 'GND', icon: 'alerts' },
-    { to: '/control', label: 'Centro de control', code: 'CTL', icon: 'panel' },
-    { to: '/', label: 'Entornos', code: 'ENV', icon: 'list' },
+    { to: '/dashboard', label: 'Panel', icon: 'panel' },
+    { to: '/members', label: cap(vocab.crew), icon: 'crew' },
+    { to: '/measure', label: 'Medir', icon: 'measure' },
+    { to: '/missions', label: 'Misiones', icon: 'missions' },
+    { to: '/alerts', label: 'Alertas', icon: 'alerts' },
+    { to: '/checkin', label: 'Check-in diario', icon: 'list' },
+    { to: '/pvt', label: 'Test de vigilancia', icon: 'list' },
+    { to: '/history', label: 'Historial', icon: 'list' },
+    { to: '/earth', label: 'La Tierra', icon: 'list' },
+    { to: '/home', label: 'Mensaje a casa', icon: 'list' },
+    { to: '/ground', label: `Consola de ${vocab.ground}`, icon: 'alerts' },
+    { to: '/control', label: 'Centro de control', icon: 'panel' },
+    { to: '/', label: 'Entornos', icon: 'list' },
   ]
 }
 
@@ -46,7 +44,7 @@ const TAB_PREFERENCE: Record<Role, string[]> = {
   admin: ['/', '/control', '/dashboard'],
 }
 
-export const MORE: NavItem = { to: '/more', label: 'Más', code: 'MAS', icon: 'more' }
+export const MORE: NavItem = { to: '/more', label: 'Más', icon: 'more' }
 
 /** Rutas que puede ver el rol, en el orden de `navItems`. */
 export function allowedItems(items: NavItem[], can: (p: Permission) => boolean): NavItem[] {

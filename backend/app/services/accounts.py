@@ -166,15 +166,32 @@ def _member_username(name: str) -> str:
     return _slug(name.split()[-1]) or "member"
 
 
+# Si el vocabulario del entorno no nombra un rol, un nombre genérico en español: nunca el
+# identificador en inglés ("commander", "psych") en la interfaz.
+DEFAULT_ROLE_LABELS = {
+    "member": "persona monitorizada",
+    "medic": "sanitario",
+    "commander": "responsable",
+    "responder": "médico",
+    "psych": "psicólogo",
+    "family": "familia",
+}
+
+
 def _role_label(role: str, vocabulary: dict[str, str]) -> str:
     key = {"responder": "ground", "member": "member"}.get(role, role)
-    return vocabulary.get(key, role)
+    return vocabulary.get(key) or DEFAULT_ROLE_LABELS.get(role, role)
+
+
+def _capitalize(text: str) -> str:
+    """Primera letra en mayúscula sin tocar el resto (``str.capitalize`` haría "Psicólogo bhp")."""
+    return text[:1].upper() + text[1:]
 
 
 def role_label(user: models.UserAccount) -> str:
     """Nombre visible del rol con el vocabulario del entorno del usuario."""
     if user.role == "admin" or user.env_id is None:
-        return "operador" if user.role == "admin" else user.role
+        return "operador" if user.role == "admin" else DEFAULT_ROLE_LABELS.get(user.role, user.role)
     env = environments.get_environment(user.env_id)
     return _role_label(user.role, env.vocabulary if env else {})
 
@@ -237,7 +254,7 @@ def seed_users(
     for env in environments.list_environments():
         for role in STAFF_ROLES:
             label = _role_label(role, env.vocabulary)
-            add(f"{role}-{env.id}", role, env.id, f"{label.capitalize()} ({env.name})")
+            add(f"{role}-{env.id}", role, env.id, f"{_capitalize(label)} ({env.name})")
 
     add("admin", "admin", None, "Operador")
     session.add_all(accounts)

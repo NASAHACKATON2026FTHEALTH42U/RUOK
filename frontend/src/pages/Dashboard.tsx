@@ -13,7 +13,7 @@ import { SystemsRing } from '../components/dashboard/SystemsRing'
 import { BodyLegend } from '../components/body/BodyLegend'
 import { TopBarPortal } from '../components/ui/TopBarPortal'
 import { bySeverity, livenessState } from '../components/ui/status'
-import { StatusLights } from '../components/ui/StatusLights'
+import { StatusHeadline } from '../components/ui/StatusHeadline'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { capitalize, useVocab } from '../environments/useVocab'
 import { useEnvironmentStore } from '../store/environment'
@@ -148,14 +148,6 @@ export default function Dashboard() {
             : 'mb-3 flex flex-wrap items-center gap-2 md:hidden'
         }
       >
-        {/* Estado general con tres iconos que se encienden, sin texto (el nombre accesible y el
-          tooltip lo dicen). Es el peor entre la salud y el liveness: con liveness stale o lost y
-          todo normal, se apagan los tres (nunca verde sin datos). En móvil lo cuenta el anillo (SystemsRing). */}
-        {desktop && (
-          <StatusLights
-            state={live && a.overall_status === 'normal' ? 'unknown' : a.overall_status}
-          />
-        )}
         {live && (
           <StatusBadge status={live} label={formatSinceLabel(a.last_seen_at, serverNow())} />
         )}
@@ -218,9 +210,16 @@ export default function Dashboard() {
             aria-labelledby="dash-systems"
             className="hud-panel @container flex min-h-0 min-w-0 flex-col [grid-area:systems]"
           >
-            <h2 id="dash-systems" className="hud-panel-head">
-              Sistemas
-            </h2>
+            {/* El estado general, en una palabra, en el extremo derecho del título: resume los
+                sistemas. Es el peor entre la salud y el liveness: con liveness stale o lost y todo
+                normal, "Sin datos" (nunca verde sin datos). */}
+            <div className="hud-panel-head">
+              <h2 id="dash-systems">Sistemas</h2>
+              <StatusHeadline
+                state={live && a.overall_status === 'normal' ? 'unknown' : a.overall_status}
+                className="mr-2.5 ml-auto"
+              />
+            </div>
             <BodyLegend
               regions={regions}
               stale={stale}
