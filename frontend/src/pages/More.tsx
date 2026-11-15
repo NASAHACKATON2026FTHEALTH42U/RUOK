@@ -25,10 +25,7 @@ export default function More() {
 
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-3">
-      <header className="flex items-end justify-between gap-3">
-        <h1 className="text-[1.375rem] font-light">Más</h1>
-        <SessionMenu />
-      </header>
+      <h1 className="text-[1.375rem] font-light">Más</h1>
 
       {rest.length > 0 && (
         <nav aria-label="Secciones" className="hud-panel">
@@ -60,6 +57,15 @@ export default function More() {
           <ServerStatus />
           <LinkStatusChip />
           <PendingSyncChip />
+        </div>
+      </section>
+
+      {/* Sesión: quién ha entrado y «Salir», bien visible (en móvil no hay barra superior). */}
+      <section aria-label="Sesión" className="hud-panel">
+        <div className="hud-panel-head">Sesión</div>
+        <div className="flex flex-col gap-3 px-3.5 py-3">
+          <SessionMenu part="user" />
+          <SessionMenu part="logout" block />
         </div>
       </section>
 
