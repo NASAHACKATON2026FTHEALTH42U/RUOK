@@ -1,0 +1,35 @@
+{
+  "total": 28.468,
+  "sentences": [
+    {
+      "text": "Hi! Meet... Are You OK?",
+      "start": 0.0,
+      "end": 2.31
+    },
+    {
+      "text": "Our idea is simple: care for astronauts millions of kilometres from home.",
+      "start": 3.019,
+      "end": 6.803
+    },
+    {
+      "text": "Track health and environment metrics, and catch physical and mental changes early with smart alerts.",
+      "start": 7.407,
+      "end": 12.33
+    },
+    {
+      "text": "Because a mission depends on every crew member, we help manage stress, live together and stay connected.",
+      "start": 13.293,
+      "end": 18.251
+    },
+    {
+      "text": "From a NASA crew in deep space, to hospitals and care homes on Earth.",
+      "start": 18.959,
+      "end": 22.558
+    },
+    {
+      "text": "Because exploring space matters... but caring for those who explore it matters even more.",
+      "start": 23.522,
+      "end": 28.468
+    }
+  ]
+}
