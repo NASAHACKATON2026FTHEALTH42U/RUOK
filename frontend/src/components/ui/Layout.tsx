@@ -40,8 +40,8 @@ export function Layout() {
   const { pathname } = useLocation()
   // Páginas que ocupan justo el alto disponible y reparten el espacio por dentro, sin scroll
   // de página (misiones, La Tierra).
-  const fill = ['/dashboard', '/missions', '/meditation', '/home', '/alerts'].some((p) =>
-    pathname.startsWith(p),
+  const fill = ['/dashboard', '/missions', '/meditation', '/home', '/alerts', '/members'].some(
+    (p) => pathname.startsWith(p),
   )
   const reducedMotion = useReducedMotion()
   const envId = useEnvironmentStore((s) => s.envId)

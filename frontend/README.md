@@ -159,6 +159,7 @@ Todas cuelgan de `Layout`, que pinta la cabecera con el selector de entorno, la 
 | Ruta         | Página              | La implementa |
 | ------------ | ------------------- | ------------- |
 | `/`          | `EnvironmentSelect` | FE-03         |
+| `/members`   | `Members`           | FE-35         |
 | `/dashboard` | `Dashboard`         | FE-07         |
 | `/measure`   | `Measure`           | FE-10         |
 | `/checkin`   | `CheckIn`           | FE-19         |
@@ -340,6 +341,25 @@ Contenido:
 `IndicatorCard` (`components/dashboard/`) es la tarjeta de un indicador (valor, semáforo, tendencia y antigüedad). La usan el panel (variante `tile`) y el `SystemPanel`; con `showTrend` añade la `TrendChart` (FE-08).
 
 **Selector de actividad** (barra lateral y «Más»; solo el member): Normal, EVA (o «actividad de riesgo» en la Tierra) y Sueño. Va en cada heartbeat y cambia cuándo el servidor pregunta «R U OK?» y cuándo da la alerta de "sin contacto". Debajo de los botones, una frase explica qué hace el modo elegido con los tiempos del perfil del entorno (`activityHint()` en `components/liveness/heartbeat.ts`).
+
+## Estado de {crew}: conjunto e individual (FE-35)
+
+`/members` (`src/pages/Members.tsx`) es la vista del staff (medic, commander, admin). Tiene dos modos, con el control **Conjunto | Individual**:
+
+- **Conjunto** (`/members`): una franja con el recuento (críticos, en atención, sin datos, normales, sin contacto y alertas abiertas) y una tarjeta por member, **lo más urgente primero** (`sortByUrgency`: crítico o sin contacto, atención, sin datos, normal).
+  - La densidad depende de cuántos haya (`densityFor`):
+    - hasta 4, **tarjetas ricas**: estado, liveness, última medición, alertas, los sistemas fuera de rango con el indicador que lo explica, y en una línea los que están en rango y los que no tienen datos;
+    - hasta 12, **compactas**: dos líneas;
+    - más, **filas**, sin pedir la evaluación de cada uno.
+  - Con dos filas de tarjetas ricas, se reparten el alto; con una, miden lo que su contenido.
+  - Sin datos frescos, la tarjeta dice «último dato» y lo que está en rango no lleva la marca de normal (nunca verde sin datos).
+  - En móvil, siempre compactas.
+  - Si no caben, hace scroll la lista, no la página (`Layout` en modo `fill`).
+- **Individual** (`/members?vista=individual`): un selector con un botón por member (su estado con icono) y, debajo, **su panel completo** (el mismo `Dashboard`). Clic en una tarjeta del conjunto → individual con ese member.
+  - El member elegido es el **member activo** de toda la app: el mismo que el selector de la barra lateral (`MemberSwitcher`). Si el activo no es de este entorno, se elige el más urgente (`pickIndividual`).
+  - En móvil, el detalle ocupa la pantalla y «← Todos» vuelve al conjunto.
+
+La lógica pura está en `components/members/crewOverview.ts`, con sus tests.
 
 ## Gráfica de tendencia: `TrendChart` (FE-08)
 
