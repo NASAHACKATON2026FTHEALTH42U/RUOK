@@ -10,6 +10,13 @@ import { Modal } from '../ui/Modal'
 import { defaultTarget, roleLabel } from './sos'
 import { Queued, Sent } from './SosDialog'
 
+/**
+ * Resultado (enviado o sin conexión) en móvil: centrado y más grande, como la cuenta atrás. Los
+ * componentes Sent y Queued se comparten con el aviso a control, así que se ajustan desde aquí.
+ */
+const RESULT =
+  'max-sm:text-center max-sm:[&_p]:text-lg max-sm:[&_.text-lg]:text-2xl max-sm:[&_button]:min-h-14 max-sm:[&_button]:text-lg max-sm:[&_ul]:text-left max-sm:[&_ol]:text-left'
+
 /** Segundos para cancelar un SOS pulsado sin querer. */
 export const SOS_COUNTDOWN_S = 3
 
@@ -124,14 +131,19 @@ export function SosEmergency({
         <div
           data-autofocus
           tabIndex={-1}
-          className="flex w-full max-w-md flex-col rounded-2xl border-2 border-st-crit bg-env-bg p-5 shadow-2xl outline-none max-sm:min-h-[calc(100dvh-1.5rem)] sm:p-6"
+          // Tras enviar (o sin conexión), en móvil el mensaje va centrado en la pantalla.
+          className={`flex w-full max-w-md flex-col rounded-2xl border-2 border-st-crit bg-env-bg p-5 shadow-2xl outline-none max-sm:min-h-[calc(100dvh-1.5rem)] sm:p-6 ${
+            phase.kind === 'countdown' || phase.kind === 'sending'
+              ? ''
+              : 'max-sm:justify-center-safe'
+          }`}
         >
           <h2
             id="sos-title"
             className={
               phase.kind === 'countdown' || phase.kind === 'sending'
                 ? 'text-center font-mono text-sm tracking-[0.3em] text-env-muted uppercase max-sm:text-base'
-                : 'text-xl font-semibold'
+                : 'text-xl font-semibold max-sm:text-center max-sm:text-3xl'
             }
           >
             {title}
@@ -216,11 +228,11 @@ export function SosEmergency({
               Enviando la alerta de ayuda…
             </p>
           ) : phase.kind === 'sent' ? (
-            <div id="sos-desc">
+            <div id="sos-desc" className={RESULT}>
               <Sent alert={phase.alert} vocabulary={vocabulary} onClose={onClose} />
             </div>
           ) : phase.kind === 'queued' ? (
-            <div id="sos-desc">
+            <div id="sos-desc" className={RESULT}>
               <Queued
                 memberId={memberId}
                 category="emergency"
