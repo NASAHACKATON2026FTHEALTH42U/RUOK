@@ -61,7 +61,11 @@ export async function mockFetch(request: Request): Promise<Response> {
     )
   }
 
-  const text = request.body ? await request.clone().text() : ''
+  // El cuerpo se lee según el método, no mirando `request.body`: Firefox no implementa esa
+  // propiedad (siempre `undefined`) y allí todas las escrituras llegaban vacías (el login del
+  // modo demo respondía 401).
+  const hasBody = request.method !== 'GET' && request.method !== 'HEAD'
+  const text = hasBody ? await request.clone().text() : ''
   const req: MockRequest = {
     params: route.params,
     query: url.searchParams,

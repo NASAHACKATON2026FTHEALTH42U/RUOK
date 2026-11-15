@@ -4,7 +4,7 @@ import { newId } from '../newId'
 import { createMockEventStream } from './events'
 import { CONTRACT_OPERATIONS } from './fixtures.gen'
 import { resetMockState } from './handlers'
-import { matchRoute } from './mockFetch'
+import { matchRoute, mockFetch } from './mockFetch'
 import { isFallbackActive, setFallbackActive } from './mode'
 
 const NOW = '2026-11-14T10:00:00Z'
@@ -84,6 +84,25 @@ describe('modo mock (VITE_USE_MOCKS=true)', () => {
       expect(tok.user).toMatchObject({ username: d.username, role: d.role, env_id: d.env_id })
       if (d.role === 'member') expect(tok.user.member_id).not.toBeNull()
     }
+  })
+
+  it('lee el cuerpo aunque el navegador no exponga Request.body (Firefox)', async () => {
+    const real = new Request('http://localhost/api/v1/auth/pin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: 'vega', pin: '1234' }),
+    })
+    // Como en Firefox: `body` es undefined, pero `clone().text()` funciona.
+    const firefoxLike = new Proxy(real, {
+      get(target, key) {
+        if (key === 'body') return undefined
+        const value = Reflect.get(target, key, target)
+        return typeof value === 'function' ? value.bind(target) : value
+      },
+    })
+    const res = await mockFetch(firefoxLike)
+    expect(res.status).toBe(200)
+    expect((await res.json()).user.username).toBe('vega')
   })
 
   it('mediciones idempotentes: el mismo UUID no se duplica y aparece en el historial', async () => {
