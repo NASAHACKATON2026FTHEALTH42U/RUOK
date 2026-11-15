@@ -6,7 +6,7 @@ import { useControlScope } from '../../components/control/useControlScope'
 export default function ControlUsers() {
   const { env } = useControlScope()
   return (
-    <section className="flex flex-col gap-4">
+    <section className="flex min-h-0 flex-1 flex-col gap-4">
       <ControlHeader
         title="Usuarios"
         subtitle={`Cuentas de ${env?.name ?? 'el entorno'}: alta y activación.`}
