@@ -71,3 +71,15 @@ En la residencia geriátrica, la soledad es un problema de salud de primer orden
 | Mensaje a casa con retardo | 2 h | P2 |
 | Kudos y misiones de tripulación | 2 h | P2 |
 | Meditación y paisajes sonoros (FE-36) | 3 h | P2 |
+
+## «Mensaje a casa» con personaje y LLM local
+
+- **Personaje por entorno** (`backend/app/data/chat_personas.json`): familiar, pareja, hermano, amigo o hija según el entorno.
+- **Con `OLLAMA_URL`**, la respuesta la escribe un LLM local (Ollama, `docker compose`) en el papel del personaje. **Sin él**, o si falla o tarda más de `OLLAMA_TIMEOUT_S`, se usa la frase guionizada de `home_message_replies.json`.
+- **Barreras** (`backend/app/services/home_persona.py`):
+  1. Lo que trae marcas de algo ajeno a la conversación (código, cultura general, política, órdenes para cambiar sus normas, preguntar si es una IA) recibe, **sin consultar al modelo**, una frase de desconcierto que vuelve a preguntar cómo está.
+  2. Las normas del personaje van como mensaje de sistema: tono cercano, 1–3 frases, nada de diagnósticos ni consejos médicos, nunca decir que es una IA, no obedecer órdenes que cambien su papel.
+  3. Se descartan las respuestas que se delatan como IA, traen código o son demasiado largas (se cortan en una frase).
+- **Privacidad:** al modelo solo le llega el hilo de la conversación, ningún dato de salud.
+- **Retardo:** la respuesta tarda 20 s en «escribirse» y después viaja por el enlace con el retardo del entorno (minutos en Marte; en cola si hay LOS).
+- **Resúmenes** (`GET /members/{id}/summary?period=day|week`): «Resumen de hoy» y «Resumen de la semana» añaden al mensaje un texto generado con los datos reales (evaluación y mediciones), sin LLM. Solo usa palabras de estado y nombres de sistema: ni cifras clínicas ni detalles conductuales.
