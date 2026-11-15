@@ -123,6 +123,7 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 |---|---|---|
 | GET | `/members/{member_id}/tasks?date=YYYY-MM-DD` | Tareas del día (`Task[]`). Por defecto, hoy (UTC, reloj del servidor). Se generan desde `environment.routine` |
 | POST | `/members/{member_id}/tasks/{task_id}/complete` | `{id: uuid, completed_at}`, idempotente. Devuelve `GameState`. El mismo `id` para otra tarea → 409; una tarea ya completada no suma dos veces |
+| POST | `/members/{member_id}/interventions/{intervention_id}/complete` | `{id: uuid, completed_at, alert_id?}`: el member ha hecho todos los pasos de un protocolo de respuesta. Suma los puntos de `protocol` (`task_types.json`) **una vez por alerta y protocolo** (sin alerta, una vez al día), queda como tarea completada del día (`task.completed`), en la línea de tiempo de la alerta (mensaje del member) y en sus notificaciones (`notification.sent` del sistema). Idempotente por `id`. Devuelve `GameState` |
 
 ```jsonc
 // Task — id determinista: t_{date}_{member}_{task_type}, con sufijo _{n} (1..N) si times_per_day > 1

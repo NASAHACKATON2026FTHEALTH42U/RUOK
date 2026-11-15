@@ -22,11 +22,12 @@ from app.schemas import (
     KudosIn,
     Leaderboard,
     MissionJoinIn,
+    ProtocolCompleteIn,
     Slug,
     Task,
     TaskCompleteIn,
 )
-from app.services import crew, environments, gamification, members, routine
+from app.services import crew, environments, gamification, members, protocols, routine
 
 router = APIRouter(tags=["game"], dependencies=[AuthDep], responses={**ERRORS_AUTH, **ERRORS_404})
 
@@ -68,6 +69,30 @@ def complete_task(
     try:
         routine.complete(session, member, task_id, body)
     except routine.TaskNotFound as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except routine.CompletionConflict as exc:
+        raise HTTPException(409, str(exc)) from exc
+    return gamification.game_state(session, member)
+
+
+@router.post(
+    "/members/{member_id}/interventions/{intervention_id}/complete",
+    response_model=GameState,
+    summary="Protocolo de respuesta completado (idempotente por UUID)",
+    description="El member ha hecho todos los pasos de un protocolo. Suma los puntos de "
+    "`protocol` una vez por alerta y protocolo (sin alerta, una vez al día) como tarea "
+    "completada del día (`task.completed`), deja un mensaje en la línea de tiempo de la alerta "
+    "y una notificación del sistema (`notification.sent`). El mismo `id` para otra cosa → 409.",
+    responses=ERRORS_409,
+    dependencies=[Depends(allow_member("game:write"))],
+)
+def complete_protocol(
+    member_id: int, intervention_id: str, body: ProtocolCompleteIn, session: SessionDep
+) -> GameState:
+    member = _member(session, member_id)
+    try:
+        protocols.complete(session, member, intervention_id, body)
+    except protocols.ProtocolNotFound as exc:
         raise HTTPException(404, str(exc)) from exc
     except routine.CompletionConflict as exc:
         raise HTTPException(409, str(exc)) from exc

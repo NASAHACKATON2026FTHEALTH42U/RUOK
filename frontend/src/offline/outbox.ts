@@ -22,6 +22,7 @@ export type MeasurementIn = Schema<'MeasurementIn'>
 export type AlertIn = Schema<'AlertIn'>
 export type TaskCompleteIn = Schema<'TaskCompleteIn'>
 export type GameState = Schema<'GameState'>
+export type ProtocolCompleteIn = Schema<'ProtocolCompleteIn'>
 export type HomeMessageIn = Schema<'HomeMessageIn'>
 export type HomeMessage = Schema<'HomeMessage'>
 export type KudosIn = Schema<'KudosIn'>
@@ -82,6 +83,13 @@ function postTaskComplete(memberId: number, taskId: string, body: TaskCompleteIn
   })
 }
 
+function postProtocolComplete(memberId: number, interventionId: string, body: ProtocolCompleteIn) {
+  return api.POST('/api/v1/members/{member_id}/interventions/{intervention_id}/complete', {
+    params: { path: { member_id: memberId, intervention_id: interventionId } },
+    body,
+  })
+}
+
 function postHomeMessage(memberId: number, message: HomeMessageIn) {
   return api.POST('/api/v1/members/{member_id}/home-messages', {
     params: { path: { member_id: memberId } },
@@ -136,6 +144,15 @@ async function send(
       case 'task_completion': {
         const body = entry.body as { task_id: string; completion: TaskCompleteIn }
         const r = await postTaskComplete(entry.member_id, body.task_id, body.completion)
+        return {
+          status: r.response.status,
+          data: r.data,
+          error: r.error ? JSON.stringify(r.error) : undefined,
+        }
+      }
+      case 'protocol_completion': {
+        const body = entry.body as { intervention_id: string; completion: ProtocolCompleteIn }
+        const r = await postProtocolComplete(entry.member_id, body.intervention_id, body.completion)
         return {
           status: r.response.status,
           data: r.data,
@@ -415,6 +432,30 @@ export function completeTask(
         completed_local: true,
       })
     },
+  )
+}
+
+/**
+ * Protocolo de respuesta hecho entero (todos sus pasos): suma puntos (una vez por alerta), deja
+ * constancia en la alerta y una notificación. Pasa por el outbox como el resto.
+ */
+export function completeProtocol(
+  memberId: number,
+  interventionId: string,
+  alertId: string | null,
+): Promise<SubmitResult<GameState>> {
+  const completion: ProtocolCompleteIn = {
+    id: newId(),
+    completed_at: serverNow().toISOString(),
+    alert_id: alertId,
+  }
+  return submit<GameState>(
+    'protocol_completion',
+    completion.id,
+    memberId,
+    `/members/${memberId}/interventions/${interventionId}/complete`,
+    { intervention_id: interventionId, completion },
+    async () => {},
   )
 }
 

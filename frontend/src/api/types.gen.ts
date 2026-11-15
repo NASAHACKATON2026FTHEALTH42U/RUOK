@@ -573,6 +573,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/members/{member_id}/interventions/{intervention_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Protocolo de respuesta completado (idempotente por UUID)
+         * @description El member ha hecho todos los pasos de un protocolo. Suma los puntos de `protocol` una vez por alerta y protocolo (sin alerta, una vez al día) como tarea completada del día (`task.completed`), deja un mensaje en la línea de tiempo de la alerta y una notificación del sistema (`notification.sent`). El mismo `id` para otra cosa → 409.
+         */
+        post: operations["complete_protocol_api_v1_members__member_id__interventions__intervention_id__complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/members/{member_id}/game": {
         parameters: {
             query?: never;
@@ -2296,6 +2316,28 @@ export interface components {
         PrivacyIn: {
             /** Share Behavioral Details */
             share_behavioral_details: boolean;
+        };
+        /**
+         * ProtocolCompleteIn
+         * @description El member ha hecho todos los pasos de un protocolo de respuesta (una intervención).
+         */
+        ProtocolCompleteIn: {
+            /**
+             * Id
+             * Format: uuid
+             * @description UUID del completado, generado en el cliente
+             */
+            id: string;
+            /**
+             * Completed At
+             * Format: date-time
+             */
+            completed_at: string;
+            /**
+             * Alert Id
+             * @description Alerta a la que responde (los puntos cuentan una vez por alerta)
+             */
+            alert_id?: string | null;
         };
         /** RangeOverride */
         RangeOverride: {
@@ -4456,6 +4498,81 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["TaskCompleteIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameState"];
+                };
+            };
+            /** @description Sin sesión válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rol sin permiso o dato ajeno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Mismo id con contenido distinto */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_protocol_api_v1_members__member_id__interventions__intervention_id__complete_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
+                "x-device-id"?: string | null;
+            };
+            path: {
+                member_id: number;
+                intervention_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProtocolCompleteIn"];
             };
         };
         responses: {

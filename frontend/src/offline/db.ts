@@ -15,6 +15,7 @@ export interface OutboxEntry {
   kind:
     | 'measurement_batch'
     | 'task_completion'
+    | 'protocol_completion'
     | 'alert'
     | 'ruok'
     | 'privacy'

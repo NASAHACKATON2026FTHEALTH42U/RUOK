@@ -25,7 +25,11 @@
     "id": "hydration",
     "title": "Bebe agua",
     "due": "any",
-    "slots": ["morning", "afternoon", "evening"],
+    "slots": [
+      "morning",
+      "afternoon",
+      "evening"
+    ],
     "indicator_id": "hydration_ml"
   },
   {
@@ -33,5 +37,11 @@
     "title": "Test de vigilancia (PVT)",
     "due": "morning",
     "indicator_id": "pvt_mean_rt_ms"
+  },
+  {
+    "id": "protocol",
+    "title": "Protocolo de respuesta",
+    "due": "any",
+    "points": 15
   }
 ]

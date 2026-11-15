@@ -77,6 +77,11 @@ class TaskType(ApiModel):
         default_factory=list,
         description="Momento de cada repetición si times_per_day > 1 (si falta, `due`)",
     )
+    points: int = Field(
+        default=0,
+        ge=0,
+        description="Puntos fijos de los tipos que no planifica el entorno (p. ej. `protocol`)",
+    )
     indicator_id: Slug | None = Field(
         default=None, description="Se autocompleta al llegar una medición de este indicador"
     )

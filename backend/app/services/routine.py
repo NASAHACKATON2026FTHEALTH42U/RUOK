@@ -94,6 +94,11 @@ def _task_types() -> dict[str, TaskType]:
     return {t.id: t for t in items}
 
 
+def task_type(type_id: str) -> TaskType | None:
+    """Un tipo de tarea por su id (p. ej. `protocol`, que no planifica ningún entorno)."""
+    return _task_types().get(type_id)
+
+
 def list_task_types() -> list[TaskType]:
     """Los tipos de tarea (valida el fichero y la rutina de los entornos)."""
     return list(_task_types().values())
@@ -184,6 +189,17 @@ def _add_completion(
                  "date": task.date.isoformat(), "auto": auto},
     )
     return row
+
+
+def add_completion(
+    session: Session,
+    member: models.Member,
+    task: models.Task,
+    completion_id: str,
+    completed_at: datetime,
+) -> models.TaskCompletion:
+    """Completa a mano una tarea recién creada (p. ej. un protocolo de respuesta). Sin commit."""
+    return _add_completion(session, member, task, completion_id, completed_at, auto=False)
 
 
 def _autocomplete_day(session: Session, member: models.Member, day: date) -> list[models.Task]:

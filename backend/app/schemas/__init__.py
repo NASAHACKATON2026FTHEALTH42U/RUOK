@@ -73,6 +73,7 @@ from app.schemas.game import (
     Leaderboard,
     LeaderboardEntry,
     MissionJoinIn,
+    ProtocolCompleteIn,
     Task,
     TaskCompleteIn,
 )
@@ -203,6 +204,7 @@ __all__ = [
     "Status",
     "SystemAssessment",
     "Task",
+    "ProtocolCompleteIn",
     "TaskCompleteIn",
     "TaskType",
     "TokenResponse",

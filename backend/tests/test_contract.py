@@ -56,6 +56,7 @@ CONTRACT_ENDPOINTS = [
     ("get", "/environments/{env_id}/alerts"),
     ("get", "/members/{member_id}/tasks"),
     ("post", "/members/{member_id}/tasks/{task_id}/complete"),
+    ("post", "/members/{member_id}/interventions/{intervention_id}/complete"),
     ("get", "/members/{member_id}/game"),
     ("get", "/environments/{env_id}/leaderboard"),
     ("get", "/events/stream"),

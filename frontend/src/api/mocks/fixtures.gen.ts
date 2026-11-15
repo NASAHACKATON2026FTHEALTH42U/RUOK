@@ -195,6 +195,10 @@ export const CONTRACT_OPERATIONS = [
   ],
   [
     "POST",
+    "/members/{member_id}/interventions/{intervention_id}/complete"
+  ],
+  [
+    "POST",
     "/members/{member_id}/kudos"
   ],
   [

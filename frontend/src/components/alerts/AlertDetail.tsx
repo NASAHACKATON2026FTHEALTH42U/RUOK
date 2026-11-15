@@ -5,7 +5,14 @@ import type { Assessment } from '../../api/useAssessment'
 import type { Intervention } from '../../api/useInterventions'
 import { useAuth } from '../../auth/useAuth'
 import { formatAgo } from '../../lib/time'
-import { ackAlert, escalateAlert, resolveAlert, sendAlertMessage } from '../../offline/outbox'
+import {
+  ackAlert,
+  completeProtocol,
+  escalateAlert,
+  resolveAlert,
+  sendAlertMessage,
+} from '../../offline/outbox'
+import { pushToast } from '../../store/toasts'
 import type { Vocabulary } from '../../store/environment'
 import { ListenButton } from '../behavioral/VoiceControls'
 import { Icon } from '../ui/Icon'
@@ -21,6 +28,10 @@ import {
   statusLabel,
 } from './alertFormat'
 import { roleLabel } from './sos'
+
+/** Colores sutiles para distinguir los protocolos entre sí (identidad, no estado: no se usan los
+ * del semáforo). */
+const PROTOCOL_TINTS = ['#6ea8fe', '#b197fc', '#4fd1c5', '#c9b38a']
 
 interface AlertDetailProps {
   alert: Alert
@@ -66,7 +77,7 @@ export function AlertDetail({
   showDetails = true,
 }: AlertDetailProps) {
   const now = useServerClock()
-  const { can } = useAuth()
+  const { can, role } = useAuth()
   const sev = severityStyle(alert.severity)
   const resolved = alert.status === 'resolved'
   const targets = escalationTargets(ladder, alert.target_role)
@@ -75,12 +86,48 @@ export function AlertDetail({
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState<Set<string>>(new Set())
   const [reply, setReply] = useState('')
+  // Protocolo desplegado y protocolos ya hechos enteros (enviados una sola vez).
+  const [openProtocol, setOpenProtocol] = useState<string | null>(null)
+  const [finished, setFinished] = useState<Set<string>>(new Set())
 
   // Protocolo autónomo: mensaje de escalado del sistema + intervenciones offline del sistema.
   const system = assessment?.systems.find((s) => s.system_id === alert.system_id)
   const autonomous =
     alert.delivery_mode === 'autonomous' || system?.escalation.mode === 'autonomous'
   const steps = interventions.filter((i) => i.system_id === alert.system_id)
+  const shownProtocol = openProtocol ?? steps[0]?.id ?? null
+
+  /** Marca o desmarca un paso; con todos marcados, el protocolo cuenta (puntos y registro). */
+  const toggleStep = (i: Intervention, n: number) => {
+    const key = `${i.id}:${n}`
+    const next = new Set(done)
+    if (next.has(key)) next.delete(key)
+    else next.add(key)
+    setDone(next)
+    const complete = i.steps.every((_, k) => next.has(`${i.id}:${k}`))
+    if (!complete || finished.has(i.id) || role !== 'member') return
+    setFinished((f) => new Set(f).add(i.id))
+    completeProtocol(alert.member_id, i.id, alert.id)
+      .then((r) => {
+        // Enviado: avisa el servidor (notificación «Protocolo completado», con los puntos).
+        // Sin conexión, se avisa aquí de que queda guardado.
+        if (r.status === 'sent') return
+        pushToast({
+          tone: 'success',
+          icon: 'check',
+          label: 'Protocolo completado',
+          title: `«${i.title}»`,
+          body: 'Guardado en el dispositivo: los puntos y el aviso llegarán al sincronizar.',
+        })
+      })
+      .catch(() => {
+        setFinished((f) => {
+          const copy = new Set(f)
+          copy.delete(i.id)
+          return copy
+        })
+      })
+  }
 
   const act = async (fn: () => Promise<unknown>, what?: 'resolved') => {
     setBusy(true)
@@ -185,40 +232,85 @@ export function AlertDetail({
               {system?.escalation.message && (
                 <p className="mt-1 text-sm">{system.escalation.message}</p>
               )}
-              {steps.map((i) => (
-                <div key={i.id} className="mt-3 border border-env-border bg-env-surface p-3">
-                  <p className="font-medium">
-                    {i.title} <span className="text-sm text-env-muted">· {i.duration_min} min</span>
-                  </p>
-                  <ol className="mt-2 space-y-1">
-                    {i.steps.map((s, n) => {
-                      const key = `${i.id}:${n}`
-                      return (
-                        <li key={key}>
-                          <label className="flex min-h-11 items-center gap-2 text-sm">
-                            <input
-                              type="checkbox"
-                              checked={done.has(key)}
-                              onChange={() =>
-                                setDone((d) => {
-                                  const next = new Set(d)
-                                  if (next.has(key)) next.delete(key)
-                                  else next.add(key)
-                                  return next
-                                })
-                              }
-                              className="mt-0.5"
-                            />
-                            <span className={done.has(key) ? 'text-env-muted line-through' : ''}>
-                              {n + 1}. {s}
+              {/* Cada protocolo, desplegable y con un color sutil propio (solo identifica: no es
+                  un estado). Uno abierto cada vez. */}
+              <div className="mt-3 flex flex-col gap-2">
+                {steps.map((i, idx) => {
+                  const tint = PROTOCOL_TINTS[idx % PROTOCOL_TINTS.length]
+                  const open = shownProtocol === i.id
+                  const count = i.steps.filter((_, n) => done.has(`${i.id}:${n}`)).length
+                  const all = count === i.steps.length
+                  return (
+                    <div
+                      key={i.id}
+                      className="border border-env-border"
+                      style={{
+                        boxShadow: `inset 3px 0 0 ${tint}`,
+                        background: `color-mix(in srgb, ${tint} 6%, var(--env-surface))`,
+                      }}
+                    >
+                      <button
+                        type="button"
+                        aria-expanded={open}
+                        onClick={() => setOpenProtocol(open ? '' : i.id)}
+                        className="flex min-h-12 w-full items-center gap-3 px-3.5 py-2.5 text-left hover:bg-env-text/5"
+                      >
+                        <span aria-hidden className="text-env-muted">
+                          {open ? '▾' : '▸'}
+                        </span>
+                        <span className="min-w-0 flex-1 font-medium">
+                          {i.title}{' '}
+                          <span className="text-sm font-normal text-env-muted">
+                            · {i.duration_min} min
+                          </span>
+                        </span>
+                        <span
+                          className={`shrink-0 text-xs tabular-nums ${all ? 'font-semibold text-env-text' : 'text-env-muted'}`}
+                        >
+                          {all || finished.has(i.id) ? (
+                            <span className="inline-flex items-center gap-1">
+                              <Icon name="check" size={14} /> Hecho
                             </span>
-                          </label>
-                        </li>
-                      )
-                    })}
-                  </ol>
-                </div>
-              ))}
+                          ) : (
+                            `${count}/${i.steps.length}`
+                          )}
+                        </span>
+                      </button>
+                      {open && (
+                        <ol className="space-y-1 border-t border-env-border/60 px-3.5 pt-1 pb-2">
+                          {i.steps.map((st, n) => {
+                            const key = `${i.id}:${n}`
+                            return (
+                              <li key={key}>
+                                <label className="flex min-h-11 items-center gap-2.5 text-sm">
+                                  <input
+                                    type="checkbox"
+                                    checked={done.has(key)}
+                                    onChange={() => toggleStep(i, n)}
+                                    className="size-4 shrink-0"
+                                    style={{ accentColor: tint }}
+                                  />
+                                  <span
+                                    className={done.has(key) ? 'text-env-muted line-through' : ''}
+                                  >
+                                    {n + 1}. {st}
+                                  </span>
+                                </label>
+                              </li>
+                            )
+                          })}
+                        </ol>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              {role === 'member' && steps.length > 0 && (
+                <p className="mt-2 text-xs text-env-muted">
+                  Al marcar todos los pasos de un protocolo, suma puntos y queda anotado en la
+                  alerta.
+                </p>
+              )}
               {!system?.escalation.message && steps.length === 0 && (
                 <p className="mt-1 text-sm text-env-muted">
                   No hay pasos guardados para este sistema. Sigue las indicaciones de tu panel.

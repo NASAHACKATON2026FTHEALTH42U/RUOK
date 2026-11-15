@@ -27,6 +27,16 @@ class TaskCompleteIn(ApiModel):
     completed_at: datetime
 
 
+class ProtocolCompleteIn(ApiModel):
+    """El member ha hecho todos los pasos de un protocolo de respuesta (una intervención)."""
+
+    id: UUID = Field(description="UUID del completado, generado en el cliente")
+    completed_at: datetime
+    alert_id: str | None = Field(
+        default=None, description="Alerta a la que responde (los puntos cuentan una vez por alerta)"
+    )
+
+
 class Badge(ApiModel):
     id: Slug
     name: str

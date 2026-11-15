@@ -401,6 +401,16 @@ export const handlers: Record<string, Handler> = {
     }
     return { ...fx.game, points: state.points }
   },
+  // Protocolo de respuesta hecho: en el mock, 15 puntos una vez por alerta (o día) y protocolo.
+  'POST /members/{member_id}/interventions/{intervention_id}/complete': (req) => {
+    const body = req.body as { alert_id?: string | null; completed_at: string }
+    const key = `p_${body.alert_id ?? body.completed_at.slice(0, 10)}_${req.params.intervention_id}`
+    if (!state.completedTasks.has(key)) {
+      state.completedTasks.add(key)
+      state.points += 15
+    }
+    return { ...fx.game, points: state.points }
+  },
   'GET /members/{member_id}/game': () => ({ ...fx.game, points: state.points }),
   'GET /environments/{env_id}/leaderboard': (req) =>
     fx.leaderboardByEnv[req.params.env_id] ?? notFound('Entorno desconocido'),
