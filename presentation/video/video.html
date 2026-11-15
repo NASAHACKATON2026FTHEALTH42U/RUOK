@@ -355,14 +355,21 @@
         el.innerHTML = `<div class="shot"><img src="shots/${s.img}.png"></div><div class="caption"><div class="kicker">${s.kicker}</div><div class="title">${s.title}</div></div>`
         host.appendChild(el)
         const d = s.t1 - s.t0
-        A(el, [{ opacity: 0 }, { opacity: 1, offset: 0.12 / d }, { opacity: 1, offset: 1 - 0.18 / d }, { opacity: 0 }], s.t0, d, 'linear')
+        // Diapositiva: entra por encima de la anterior (que sigue entera debajo) y se retira cuando
+        // la siguiente ya la tapa; así nunca hay dos capturas a medias.
+        const D = d + 0.6
+        A(el, [{ opacity: 0 }, { opacity: 1, offset: 0.35 / D }, { opacity: 1, offset: (D - 0.25) / D }, { opacity: 0 }], s.t0 - 0.1, D, 'ease-in-out')
         const shot = el.querySelector('.shot')
-        A(shot, [{ transform: 'translate(-50%,-46%) scale(0.96)' }, { transform: 'translate(-50%,-50%) scale(1)', offset: 0.25 }, { transform: 'translate(-50%,-50.5%) scale(1.01)' }], s.t0, d)
+        // Como diapositivas: fundido suave y, como mucho, un 1,5 % de acercamiento lineal para que
+        // la imagen no parezca congelada (sin saltos ni desplazamientos).
+        A(shot, [{ transform: 'translate(-50%,-50%)' }, { transform: 'translate(-50%,-50%)' }], s.t0, d, 'linear')
         const img = el.querySelector('img')
-        img.style.transformOrigin = s.origin
-        A(img, [{ transform: `scale(${s.zoom[0]})` }, { transform: `scale(${s.zoom[1]})` }], s.t0, d, 'cubic-bezier(.3,.1,.3,1)')
+        img.style.transformOrigin = '50% 50%'
+        A(img, [{ transform: 'scale(1)' }, { transform: 'scale(1.015)' }], s.t0, d, 'linear')
         const cap = el.querySelector('.caption')
-        A(cap, [{ opacity: 0, transform: 'translateX(-30px)' }, { opacity: 1, transform: 'none' }], s.t0 + 0.15, 0.4)
+        // El rótulo sale antes de que entre el siguiente y entra cuando la captura ya está.
+        const dc = d - 0.1
+        A(cap, [{ opacity: 0, transform: 'translateX(-24px)' }, { opacity: 1, transform: 'none', offset: 0.35 / dc }, { opacity: 1, transform: 'none', offset: (dc - 0.2) / dc }, { opacity: 0, transform: 'none' }], s.t0 + 0.2, dc, 'ease-out')
       }
 
       // En la Tierra: residencia y hospital, lado a lado (21,35–24 s)
