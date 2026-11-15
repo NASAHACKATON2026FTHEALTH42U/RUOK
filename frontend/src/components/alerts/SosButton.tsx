@@ -65,7 +65,8 @@ export function SosButton({
       {variant === 'sidebar' ? (
         <button
           {...common}
-          className="hud-btn hud-btn-danger-solid !h-16 w-full shrink-0 !text-2xl !font-semibold !tracking-[0.35em] shadow-lg hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text [@media(max-height:800px)]:!h-14"
+          // 1,5 rem hasta el menú: el hueco de la barra (0,75 rem; 0,5 en pantallas bajas) + este margen.
+          className="hud-btn hud-btn-danger-solid mb-3 !h-16 w-full shrink-0 !text-2xl !font-semibold !tracking-[0.35em] shadow-lg hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text [@media(max-height:800px)]:mb-4 [@media(max-height:800px)]:!h-14"
         >
           SOS
         </button>
