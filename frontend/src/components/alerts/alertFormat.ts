@@ -1,5 +1,6 @@
 /** Formato y reglas puras del panel de alertas (FE-14, docs/alerts-and-escalation.md). */
 import type { Schema } from '../../api/client'
+import type { IconGlyph } from '../ui/Icon'
 import type { Status } from '../ui/status'
 
 const CATEGORY: Record<Schema<'AlertCategory'>, string> = {
@@ -28,17 +29,18 @@ const STATUS: Record<Schema<'AlertStatus'>, string> = {
 }
 export const statusLabel = (s: Schema<'AlertStatus'>) => STATUS[s] ?? s
 
-const EVENT: Record<Schema<'AlertEventType'>, { icon: string; label: string }> = {
-  created: { icon: '✚', label: 'Creada' },
-  updated: { icon: '↻', label: 'Actualizada' },
-  escalated: { icon: '⇡', label: 'Escalada' },
-  queued: { icon: '⏳', label: 'En cola del enlace' },
-  delivered: { icon: '✓', label: 'Entregada' },
-  acknowledged: { icon: '👁', label: 'Recibida por el equipo' },
-  message: { icon: '💬', label: 'Mensaje' },
-  resolved: { icon: '■', label: 'Resuelta' },
+const EVENT: Record<Schema<'AlertEventType'>, { icon: IconGlyph; label: string }> = {
+  created: { icon: 'plus', label: 'Creada' },
+  updated: { icon: 'refresh', label: 'Actualizada' },
+  escalated: { icon: 'escalate', label: 'Escalada' },
+  queued: { icon: 'hourglass', label: 'En cola del enlace' },
+  delivered: { icon: 'check', label: 'Entregada' },
+  acknowledged: { icon: 'eye', label: 'Recibida por el equipo' },
+  message: { icon: 'message', label: 'Mensaje' },
+  resolved: { icon: 'stop', label: 'Resuelta' },
 }
-export const eventStyle = (t: Schema<'AlertEventType'>) => EVENT[t] ?? { icon: '·', label: t }
+export const eventStyle = (t: Schema<'AlertEventType'>): { icon: IconGlyph; label: string } =>
+  EVENT[t] ?? { icon: 'refresh', label: t }
 
 const ACTOR: Record<Schema<'Actor'>, string> = {
   system: 'sistema',

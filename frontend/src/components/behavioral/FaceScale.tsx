@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import type { Indicator } from '../../api/useIndicators'
+import { Icon } from '../ui/Icon'
 import { faceFor } from './checkin'
 
 interface FaceScaleProps {
@@ -11,7 +12,7 @@ interface FaceScaleProps {
 /**
  * Una pregunta del check-in: escala 1–5 con caras (`role="radiogroup"`). La pregunta y sus
  * extremos salen de `measurement_instructions` del catálogo. Las caras siguen la polaridad
- * del indicador (`higher_is_worse`) y siempre van con el número: nunca solo emoji o color.
+ * del indicador (`higher_is_worse`) y siempre van con el número: nunca solo cara o color.
  * Pulsar la opción elegida la quita.
  */
 export function FaceScale({ indicator, value, onChange }: FaceScaleProps) {
@@ -45,8 +46,8 @@ export function FaceScale({ indicator, value, onChange }: FaceScaleProps) {
                   : 'border-env-border bg-env-bg hover:border-env-text'
               }`}
             >
-              <span aria-hidden className="text-2xl leading-none lg:text-4xl">
-                {faceFor(n, indicator.higher_is_worse)}
+              <span className="[&>svg]:h-7 [&>svg]:w-7 lg:[&>svg]:h-10 lg:[&>svg]:w-10">
+                <Icon name={faceFor(n, indicator.higher_is_worse)} />
               </span>
               <span className="mt-1 text-xs font-semibold tabular-nums lg:text-sm">{n}</span>
             </button>

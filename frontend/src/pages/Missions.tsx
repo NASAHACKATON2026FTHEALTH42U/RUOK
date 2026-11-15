@@ -22,6 +22,7 @@ import { useVocab } from '../environments/useVocab'
 import { completeTask, joinMission, locallyCompletedTasks, sendKudos } from '../offline/outbox'
 import { useEnvironmentStore } from '../store/environment'
 import { NoMemberSelected } from '../components/ui/NoMemberSelected'
+import { Icon } from '../components/ui/Icon'
 
 interface Toast {
   id: number
@@ -200,7 +201,7 @@ export default function Missions() {
             <p className="mt-1 font-display text-2xl font-semibold sm:text-3xl">
               {current ? (
                 <>
-                  <span aria-hidden>🔥 </span>
+                  <Icon name="flame" size={22} className="mr-1.5 text-env-primary" />
                   {current.streak_days}{' '}
                   <span className="font-sans text-base font-normal text-env-muted">
                     {current.streak_days === 1 ? 'día' : 'días'}
@@ -277,7 +278,7 @@ export default function Missions() {
                     className="border border-env-primary/50 bg-env-primary/10 px-3 py-1 text-sm"
                     title={`Conseguida el ${new Date(b.earned_at).toLocaleDateString('es-ES')}`}
                   >
-                    <span aria-hidden>🏅 </span>
+                    <Icon name="medal" size={16} className="mr-1.5 text-env-primary" />
                     {b.name}
                   </li>
                 ))}

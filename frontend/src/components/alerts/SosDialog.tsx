@@ -22,6 +22,7 @@ import {
   type AlertSeverity,
 } from './sos'
 import { AutoTextarea } from '../ui/AutoTextarea'
+import { Icon } from '../ui/Icon'
 
 type Phase =
   | { kind: 'form' }
@@ -141,7 +142,7 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
                 </div>
                 {category === 'psychological' && (
                   <p className="mt-2 text-sm text-env-muted">
-                    🔒 Confidencial: solo lo verá{' '}
+                    <Icon name="lock" size={15} /> Confidencial: solo lo verá{' '}
                     {vocabulary.psych ?? 'el equipo de apoyo psicológico'}.
                   </p>
                 )}
