@@ -54,6 +54,21 @@ body {
   @apply bg-env-bg text-env-text antialiased;
 }
 
+/* Las gráficas del detalle de un sistema aparecen con un fundido corto al llegar los datos. */
+@keyframes trends-fade {
+  from {
+    opacity: 0;
+  }
+}
+.trends-fade {
+  animation: trends-fade 0.25s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .trends-fade {
+    animation: none;
+  }
+}
+
 /* Colores de serie de las gráficas con varias líneas (SystemTrends). Orden fijo, validado con
    el validador de la skill dataviz contra los fondos de los temas: pasa separación para
    daltonismo y contraste ≥ 3:1 en oscuro; en claro, cuatro quedan por debajo de 3:1, así que la

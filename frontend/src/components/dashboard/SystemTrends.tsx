@@ -38,6 +38,9 @@ export interface TrendSeries {
   range: Ranges
 }
 
+/** Alto de cada gráfica: más alta cuando es la única del bloque. */
+const plotHeight = (tall: boolean) => (tall ? 220 : 130)
+
 const unitLabel = (unit: string) => (unit === '1-5' ? 'escala 1-5' : unit || 'sin unidad')
 
 /** Indicadores agrupados por unidad, en orden de aparición: cada grupo comparte eje Y. */
@@ -78,8 +81,31 @@ export function SystemTrends({ series }: { series: TrendSeries[] }) {
         <PeriodSwitch days={days} onChange={setDays} />
       </div>
 
+      {/* Esqueleto con la MISMA forma que tendrá el contenido (una caja por gráfica, con su alto,
+          su título, su leyenda y su «Ver datos»): al llegar los datos la ventana no cambia de
+          tamaño. */}
       {data.state === 'loading' && (
-        <div className="mt-2 h-40 animate-pulse rounded-md bg-env-bg" aria-busy="true" />
+        <div
+          className={`mt-2 grid gap-x-4 gap-y-3 ${groups.length > 1 ? 'md:grid-cols-2' : ''}`}
+          aria-busy="true"
+        >
+          {groups.map((g) => (
+            <div key={g.map((x) => x.id).join(',')} className="min-w-0">
+              <div className="h-4" />
+              <div
+                className="mt-1 animate-pulse rounded-md bg-env-bg"
+                style={{ height: plotHeight(groups.length === 1) }}
+              />
+              {/* La leyenda real, invisible, para reservar justo sus líneas. */}
+              {g.length > 1 && (
+                <div className="invisible" aria-hidden="true">
+                  <Legend group={g} value={() => formatValue(0, g[0].unit)} />
+                </div>
+              )}
+              <div className="mt-1 h-4" />
+            </div>
+          ))}
+        </div>
       )}
       {data.state === 'error' && (
         <p className="mt-2 text-sm text-env-muted">
@@ -90,7 +116,9 @@ export function SystemTrends({ series }: { series: TrendSeries[] }) {
         </p>
       )}
       {data.state === 'ready' && (
-        <div className={`mt-2 grid gap-x-4 gap-y-3 ${groups.length > 1 ? 'md:grid-cols-2' : ''}`}>
+        <div
+          className={`trends-fade mt-2 grid gap-x-4 gap-y-3 ${groups.length > 1 ? 'md:grid-cols-2' : ''}`}
+        >
           {groups.map((g) => (
             <GroupPlot
               key={g.map((s) => s.id).join(',')}
@@ -103,6 +131,25 @@ export function SystemTrends({ series }: { series: TrendSeries[] }) {
         </div>
       )}
     </figure>
+  )
+}
+
+/** Leyenda: trazo del color + nombre y último valor en texto (el color nunca va solo). */
+function Legend({ group, value }: { group: TrendSeries[]; value: (id: string) => string }) {
+  return (
+    <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
+      {group.map((s, i) => (
+        <li key={s.id} className="flex items-center gap-1.5">
+          <span
+            aria-hidden
+            className="inline-block h-0.5 w-3 shrink-0"
+            style={{ background: SERIES[i] }}
+          />
+          <span>{s.name}</span>
+          <span className="text-env-muted tabular-nums">{value(s.id)}</span>
+        </li>
+      ))}
+    </ul>
   )
 }
 
@@ -145,7 +192,7 @@ function GroupPlot({
         <p className="mt-1 text-sm text-env-muted">Sin mediciones en los últimos {days} días.</p>
       ) : (
         <>
-          <div style={{ height: tall ? 220 : 130 }} aria-hidden="true" className="mt-1">
+          <div style={{ height: plotHeight(tall) }} aria-hidden="true" className="mt-1">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={rows}
@@ -230,24 +277,7 @@ function GroupPlot({
             </ResponsiveContainer>
           </div>
 
-          {/* Leyenda (solo con varias series): trazo del color + nombre y último valor en texto. */}
-          {!single && (
-            <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
-              {group.map((s, i) => (
-                <li key={s.id} className="flex items-center gap-1.5">
-                  <span
-                    aria-hidden
-                    className="inline-block h-0.5 w-3 shrink-0"
-                    style={{ background: SERIES[i] }}
-                  />
-                  <span>{s.name}</span>
-                  <span className="text-env-muted tabular-nums">
-                    {formatValue(last(s.id), unit)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
+          {!single && <Legend group={group} value={(id) => formatValue(last(id), unit)} />}
 
           <details className="mt-1 text-xs">
             <summary className="cursor-pointer text-env-muted hover:text-env-text">
