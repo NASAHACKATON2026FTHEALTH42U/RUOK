@@ -24,6 +24,7 @@ import Missions from './pages/Missions'
 import More from './pages/More'
 import NotFound from './pages/NotFound'
 import Pvt from './pages/Pvt'
+import Cognition from './pages/Cognition'
 import Settings from './pages/Settings'
 import { LanguageSync } from './i18n/LanguageSync'
 import { useLangStore } from './i18n/lang'
@@ -49,6 +50,7 @@ const router = createBrowserRouter([
           { path: '/measure', element: guard('/measure', <Measure />) },
           { path: '/checkin', element: guard('/checkin', <CheckIn />) },
           { path: '/pvt', element: guard('/pvt', <Pvt />) },
+          { path: '/cognition', element: guard('/cognition', <Cognition />) },
           { path: '/meditation', element: guard('/meditation', <Meditation />) },
           // La antigua galería «La Tierra» (FE-25) es ahora Meditación (FE-36).
           { path: '/earth', element: <Navigate to="/meditation" replace /> },

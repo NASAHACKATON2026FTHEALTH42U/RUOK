@@ -44,6 +44,7 @@ export const ROUTE_PERMISSIONS: Record<string, Permission> = {
   '/dashboard': 'view:dashboard',
   '/measure': 'view:measure',
   '/checkin': 'view:checkin',
+  '/cognition': 'view:checkin', // tests cognitivos (FE-39), como el PVT
   '/pvt': 'view:checkin', // el test PVT va con el check-in (docs/auth-and-roles.md)
   '/meditation': 'view:checkin', // Meditación (FE-36): bienestar del member, como el check-in
   '/home': 'view:home-messages', // Mensaje a casa (FE-23): el hilo es solo del member

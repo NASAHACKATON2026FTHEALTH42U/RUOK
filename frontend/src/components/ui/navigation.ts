@@ -26,6 +26,7 @@ export function navItems(vocab: { crew: string; ground: string }): NavItem[] {
     { to: '/alerts', label: translate('Alertas'), icon: 'alerts' },
     { to: '/checkin', label: translate('Check-in diario'), icon: 'list' },
     { to: '/pvt', label: translate('Test de vigilancia'), icon: 'list' },
+    { to: '/cognition', label: translate('Tests cognitivos'), icon: 'list' },
     { to: '/history', label: translate('Historial'), icon: 'list' },
     { to: '/meditation', label: translate('Meditación'), icon: 'meditation' },
     { to: '/home', label: translate('Mensaje a casa'), icon: 'list' },

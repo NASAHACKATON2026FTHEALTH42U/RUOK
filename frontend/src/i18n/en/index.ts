@@ -1,3 +1,9 @@
+import { cog_bart } from './cog_bart'
+import { cog_digits } from './cog_digits'
+import { cog_emotion } from './cog_emotion'
+import { cog_line } from './cog_line'
+import { cog_matrix } from './cog_matrix'
+import { cognition } from './cognition'
 import { alerts } from './alerts'
 import { behavioral } from './behavioral'
 import { control } from './control'
@@ -18,4 +24,10 @@ export const EN: Record<string, string> = {
   ...behavioral,
   ...game,
   ...control,
+  ...cog_bart,
+  ...cog_digits,
+  ...cog_emotion,
+  ...cog_line,
+  ...cog_matrix,
+  ...cognition,
 }
