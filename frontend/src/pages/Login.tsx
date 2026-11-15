@@ -16,7 +16,7 @@ import {
   shortDisplayName,
 } from '../components/auth/demoUsers'
 import { useVocab } from '../environments/useVocab'
-import { LanguageSwitch } from '../i18n/LanguageSwitch'
+import { LANGS, useLangStore, type Lang } from '../i18n/lang'
 import { useT } from '../i18n/t'
 import { useEnvironmentStore } from '../store/environment'
 
@@ -55,6 +55,8 @@ export default function Login() {
   const envList = envs.state === 'ready' ? envs.data : NO_ENVS
   const envName = envList.find((e) => e.id === envId)?.name
   const selectEnvironment = useEnvironmentStore((s) => s.selectEnvironment)
+  const lang = useLangStore((s) => s.lang)
+  const setLang = useLangStore((s) => s.setLang)
   const [username, setUsername] = useState(previous?.username ?? '')
   const [secret, setSecret] = useState('')
   const [error, setError] = useState<LoginError | null>(null)
@@ -93,17 +95,20 @@ export default function Login() {
 
   return (
     <div className="hud-grid flex min-h-full flex-col">
+      {/* Fondo vivo (decorativo): franjas de luz por la rejilla, barrido vertical y halo. */}
+      <div aria-hidden className="grid-fx">
+        <span className="grid-fx-band grid-fx-login" />
+        <span className="grid-fx-band grid-fx-login-slow" />
+        <span className="grid-fx-scan" />
+      </div>
+      <div aria-hidden className="login-glow" />
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-3.5 pt-4 pb-4 md:max-w-xl md:px-6 lg:max-w-5xl lg:justify-center lg:py-8">
         {/* Rejilla con áreas: en móvil, una columna (marca, acceso, entorno y usuarios, y el SOS
             abajo del todo). En escritorio, la marca centrada arriba y dos bloques que empiezan y
             acaban a la misma altura: acceso con el SOS debajo | entorno y usuarios. */}
         <div className="mt-2 grid flex-1 grid-rows-[auto_auto_auto_1fr] gap-3 [grid-template-areas:'head'_'form'_'side'_'sos'] lg:mt-4 lg:flex-none lg:grid-cols-2 lg:grid-rows-[auto_1fr_auto] lg:gap-x-8 lg:gap-y-4 lg:[grid-template-areas:'head_head'_'form_side'_'sos_side']">
           {/* Marca y saludo, centrados */}
-          <div className="relative flex flex-col items-center text-center [grid-area:head]">
-            {/* Idioma: se puede cambiar antes de entrar (FE-38). */}
-            <div className="absolute top-0 right-0 z-10">
-              <LanguageSwitch compact />
-            </div>
+          <div className="flex flex-col items-center text-center [grid-area:head]">
             <RuokRings />
             <h1 className="mt-1 text-[1.875rem] leading-tight font-light lg:text-[2.125rem]">
               {t('Hola de nuevo,')} <span className="text-env-primary">{vocab.member}.</span>
@@ -170,25 +175,43 @@ export default function Login() {
 
           {/* Entorno y usuarios demo (en escritorio, el panel de usuarios llega hasta abajo) */}
           <div className="flex flex-col gap-3 [grid-area:side] lg:[&>section]:flex-1">
-            {envList.length > 0 && (
-              <label className="hud-panel flex items-center gap-3 py-1.5 pr-[22px] pl-3.5">
-                <span className="hud-label shrink-0">{t('Entorno')}</span>
+            {/* Entorno e idioma (FE-38): mismo panel y estilo; el idioma se puede cambiar antes de
+                entrar. */}
+            <div className="hud-panel divide-y divide-env-border/60">
+              {envList.length > 0 && (
+                <label className="flex items-center gap-3 py-1.5 pr-[22px] pl-3.5">
+                  <span className="hud-label w-20 shrink-0">{t('Entorno')}</span>
+                  <select
+                    value={envId ?? ''}
+                    onChange={(e) => {
+                      const next = envList.find((x) => x.id === e.target.value)
+                      if (next) selectEnvironment(next)
+                    }}
+                    className="hud-input min-w-0 flex-1 !border-0 !bg-transparent !pl-1 !font-sans !text-[0.9375rem]"
+                  >
+                    {envList.map((e) => (
+                      <option key={e.id} value={e.id}>
+                        {e.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <label className="flex items-center gap-3 py-1.5 pr-[22px] pl-3.5">
+                <span className="hud-label w-20 shrink-0">{t('Idioma')}</span>
                 <select
-                  value={envId ?? ''}
-                  onChange={(e) => {
-                    const next = envList.find((x) => x.id === e.target.value)
-                    if (next) selectEnvironment(next)
-                  }}
+                  value={lang}
+                  onChange={(e) => setLang(e.target.value as Lang)}
                   className="hud-input min-w-0 flex-1 !border-0 !bg-transparent !pl-1 !font-sans !text-[0.9375rem]"
                 >
-                  {envList.map((e) => (
-                    <option key={e.id} value={e.id}>
-                      {e.name}
+                  {LANGS.map((l) => (
+                    <option key={l.id} value={l.id} lang={l.id}>
+                      {l.label}
                     </option>
                   ))}
                 </select>
               </label>
-            )}
+            </div>
 
             {/* Plegada en un botón en el escaparate público y en móvil. */}
             {demoUsers.length > 0 && !showDemo && (

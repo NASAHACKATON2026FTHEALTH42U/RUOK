@@ -150,96 +150,194 @@ export function InterventionPlayer({
     return () => window.clearTimeout(timer)
   }, [done])
 
+  const total = steps.length
+  const nextStep = done ? null : steps[index + 1]
+  // Progreso del paso con cuenta atrás (anillo alrededor del número).
+  const stepProgress =
+    left !== null && step?.seconds ? Math.min(1, (step.seconds - left + 1) / step.seconds) : 0
+  const RING = 2 * Math.PI * 46
+
   return (
     // Modal bloqueante: hasta terminar (botón o Escape) no se puede usar nada más.
     <Modal labelledBy="intervention-title" onClose={onClose}>
-      <div className="flex min-h-full flex-col bg-env-bg text-env-text">
-        <div className="flex items-center justify-between gap-3 p-4">
-          <h2 id="intervention-title" className="font-semibold">
-            {intervention.title}
-          </h2>
-          <div className="flex flex-wrap items-center justify-end gap-2">
+      <div className="guided relative isolate flex min-h-full flex-col overflow-hidden bg-env-bg text-env-text">
+        {/* Fondo vivo (decorativo): auroras del color del entorno que se mueven despacio y la
+            rejilla del HUD. Sin movimiento si el sistema lo pide. */}
+        <div aria-hidden className="guided-bg pointer-events-none absolute inset-0 -z-10">
+          <span className="guided-aurora guided-aurora-a" />
+          <span className="guided-aurora guided-aurora-b" />
+          <span className="hud-grid absolute inset-0 opacity-60" />
+        </div>
+
+        <header className="flex flex-col gap-3 px-[clamp(1rem,3vw,2rem)] pt-[clamp(0.75rem,2vw,1.5rem)] sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="hud-label text-[0.6875rem]">
+              {done ? t('Hecho') : t('Paso {n} de {of}', { n: index + 1, of: total })}
+            </p>
+            <h2
+              id="intervention-title"
+              className="truncate font-display text-[clamp(1.05rem,0.9rem+0.8vw,1.5rem)] font-semibold"
+            >
+              {intervention.title}
+            </h2>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
             {voiceReady && <VoiceToggle compact />}
             {toolbar}
             <button
               data-autofocus
               type="button"
               onClick={onClose}
-              className=" border border-env-border px-3 py-1.5 text-sm hover:border-env-text"
+              className="hud-btn !h-10 px-4 !text-xs max-sm:ml-auto"
             >
               {done ? t('Cerrar') : t('Terminar')}
             </button>
           </div>
-        </div>
-        <div className="mx-4 h-1 overflow-hidden rounded-full bg-env-border" aria-hidden>
-          <div
-            className="h-full bg-env-primary transition-[width]"
-            style={{
-              width: `${(Math.min(index, steps.length) / Math.max(steps.length, 1)) * 100}%`,
-            }}
-          />
-        </div>
+        </header>
 
-        <div className="flex flex-1 flex-col items-center justify-center gap-8 p-6 text-center">
+        {/* Un segmento por paso: hechos, el actual (que se llena) y los que faltan. */}
+        <ol
+          aria-hidden
+          className="mt-3 flex gap-1 px-[clamp(1rem,3vw,2rem)]"
+          style={{ ['--n' as string]: total }}
+        >
+          {steps.map((_, i) => (
+            <li key={i} className="h-1 flex-1 overflow-hidden bg-env-border/70">
+              <span
+                className="block h-full bg-env-primary transition-[width] duration-500"
+                style={{
+                  width:
+                    i < index || done
+                      ? '100%'
+                      : i === index
+                        ? `${Math.max(stepProgress, 0.12) * 100}%`
+                        : '0%',
+                }}
+              />
+            </li>
+          ))}
+        </ol>
+
+        <div className="flex flex-1 flex-col items-center justify-center gap-[clamp(1.25rem,4vh,2.5rem)] px-[clamp(1rem,4vw,3rem)] py-6 text-center">
           {done ? (
             <motion.div
-              initial={reduce ? false : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35 }}
+              initial={reduce ? false : { opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.45, ease: 'easeOut' }}
+              className="flex flex-col items-center gap-4"
             >
-              <p className="font-display text-5xl font-bold">{t('Hecho')}</p>
-              <p className="mt-3 text-lg text-env-muted">
+              <span className="guided-done grid size-[clamp(5rem,14vw,7.5rem)] place-items-center rounded-full border-2 border-env-primary text-env-primary">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="size-1/2"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="M5 12.5l4.5 4.5L19 7.5" />
+                </svg>
+              </span>
+              <p className="font-display text-[clamp(2.25rem,1.6rem+3vw,4rem)] font-bold">
+                {t('Hecho')}
+              </p>
+              <p className="max-w-xl text-[clamp(1rem,0.9rem+0.5vw,1.25rem)] text-env-muted">
                 {t('Bien hecho. Puedes repetirla cuando lo necesites.')}
               </p>
             </motion.div>
           ) : (
             <>
-              {phase && (
-                <motion.div
-                  aria-hidden
-                  className="h-48 w-48 rounded-full bg-env-primary/25 ring-4 ring-env-primary"
-                  initial={{ scale: 0.55 }}
-                  animate={{ scale: reduce ? 0.8 : scale }}
+              {/* Orbe: en los pasos de respiración crece al inhalar y encoge al exhalar; en el
+                  resto, late despacio para acompañar. Con anillos que se expanden. */}
+              <div
+                aria-hidden
+                className="relative grid size-[clamp(9rem,26vmin,15rem)] place-items-center"
+              >
+                <span className="guided-ripple" />
+                <span className="guided-ripple guided-ripple-2" />
+                <motion.span
+                  className={`guided-orb absolute inset-[12%] rounded-full ${phase ? '' : 'guided-orb-idle'}`}
+                  initial={{ scale: 0.6 }}
+                  animate={{ scale: reduce ? 0.85 : phase ? scale : 0.8 }}
                   transition={{
-                    duration: reduce ? 0 : (step?.seconds ?? 1),
+                    duration: reduce ? 0 : phase ? (step?.seconds ?? 1) : 0.6,
                     ease: 'easeInOut',
                   }}
                 />
-              )}
-              <div aria-live="polite" className="w-full max-w-3xl">
-                {/* Cada paso entra con un fundido corto (sin movimiento si se pide menos). */}
+                {left !== null ? (
+                  <svg viewBox="0 0 100 100" className="relative size-full -rotate-90">
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="46"
+                      fill="none"
+                      stroke="var(--env-border)"
+                      strokeWidth="2"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="46"
+                      fill="none"
+                      stroke="var(--env-primary)"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeDasharray={RING}
+                      strokeDashoffset={RING * (1 - stepProgress)}
+                      className="transition-[stroke-dashoffset] duration-1000 ease-linear"
+                    />
+                  </svg>
+                ) : null}
+                {left !== null && (
+                  <span
+                    className="absolute font-display text-[clamp(2rem,1.4rem+3vw,3.5rem)] font-bold tabular-nums"
+                    aria-label={t('Quedan {n} segundos', { n: left })}
+                  >
+                    {left}
+                  </span>
+                )}
+                {left === null && phase === null && (
+                  <span className="absolute font-display text-[clamp(1.5rem,1.1rem+2vw,2.5rem)] font-semibold tabular-nums text-env-primary">
+                    {index + 1}
+                  </span>
+                )}
+              </div>
+
+              <div aria-live="polite" className="w-full max-w-[min(48rem,92vw)]">
+                {phase && (
+                  <p className="hud-label mb-2 text-[clamp(0.7rem,0.65rem+0.25vw,0.85rem)] text-env-primary">
+                    {phase === 'in' ? t('Inhala') : phase === 'out' ? t('Exhala') : t('Mantén')}
+                  </p>
+                )}
+                {/* Cada paso entra con un fundido corto (sin movimiento si se pide menos). Letra
+                    fluida: crece con la pantalla sin saltos entre móvil y escritorio. */}
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.p
                     key={index}
-                    initial={reduce ? false : { opacity: 0, y: 14 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={reduce ? undefined : { opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3, ease: 'easeOut' }}
-                    className="text-[clamp(1.75rem,4.2vw,3rem)] leading-tight font-semibold text-balance"
+                    initial={reduce ? false : { opacity: 0, y: 16, filter: 'blur(4px)' }}
+                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    exit={reduce ? undefined : { opacity: 0, y: -12, filter: 'blur(4px)' }}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                    className="text-[clamp(1.5rem,1.05rem+2.4vw,3rem)] leading-[1.2] font-medium tracking-[-0.01em] text-balance"
                   >
                     {step?.text}
                   </motion.p>
                 </AnimatePresence>
                 {step?.cycle && (
-                  <p className="mt-3 text-base text-env-muted">
+                  <p className="mt-3 text-[clamp(0.9rem,0.85rem+0.3vw,1.1rem)] text-env-muted">
                     {t('Ciclo {n} de {of}', { n: step.cycle.n, of: step.cycle.of })}
                   </p>
                 )}
               </div>
-              {left !== null && (
-                <p
-                  className="text-5xl font-bold tabular-nums"
-                  aria-label={t('Quedan {n} segundos', { n: left })}
-                >
-                  {left}
-                </p>
-              )}
-              <div className="flex gap-3">
+
+              <div className="flex flex-wrap justify-center gap-3">
                 {left !== null && (
                   <button
                     type="button"
                     onClick={() => setPaused((p) => !p)}
-                    className="border border-env-border px-6 py-3 text-lg hover:border-env-text"
+                    className="hud-btn !h-12 min-w-32 px-6"
                   >
                     {paused ? t('Seguir') : t('Pausa')}
                   </button>
@@ -247,7 +345,7 @@ export function InterventionPlayer({
                 <button
                   type="button"
                   onClick={next}
-                  className="relative overflow-hidden bg-env-primary px-6 py-3 text-lg font-medium text-env-primary-text"
+                  className="hud-btn hud-btn-primary relative !h-12 min-w-40 overflow-hidden px-6"
                 >
                   {/* Barra que se llena en los 3 s antes de avanzar solo. */}
                   {autoAdvance && !reduce && (
@@ -261,12 +359,20 @@ export function InterventionPlayer({
                     />
                   )}
                   <span className="relative">
-                    {index === steps.length - 1 ? t('Terminar') : t('Siguiente')}
+                    {index === total - 1 ? t('Terminar') : t('Siguiente')}
                   </span>
                 </button>
               </div>
               {autoAdvance && (
-                <p className="-mt-4 text-sm text-env-muted">{t('Pasa solo en 3 s si no pulsas')}</p>
+                <p className="-mt-2 text-sm text-env-muted">{t('Pasa solo en 3 s si no pulsas')}</p>
+              )}
+
+              {/* Lo que viene: anticipa el siguiente paso (atenuado). */}
+              {nextStep && (
+                <p className="max-w-[min(40rem,90vw)] truncate text-[clamp(0.85rem,0.8rem+0.25vw,1rem)] text-env-muted">
+                  <span className="hud-label mr-2 text-[0.6875rem]">{t('Después')}</span>
+                  {nextStep.text}
+                </p>
               )}
             </>
           )}

@@ -95,4 +95,9 @@ export const behavioral: Record<string, string> = {
   'En tránsito · llegando': 'In transit · arriving',
   'Entregado en casa{at}': 'Delivered home{at}',
   'Recibido{at}': 'Received{at}',
+  'Paso {n} de {of}': 'Step {n} of {of}',
+  Inhala: 'Breathe in',
+  Exhala: 'Breathe out',
+  Mantén: 'Hold',
+  Después: 'Next',
 }
