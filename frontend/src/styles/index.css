@@ -497,19 +497,8 @@ html[data-hud] body {
     animation-direction: reverse;
     animation-duration: 60s;
   }
-  /* Nombres que usa el login (FE-27): mismo giro que .hud-spin */
-  .ruok-spin {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: hud-spin 24s linear infinite;
-  }
-  .ruok-spin-reverse {
-    animation-direction: reverse;
-    animation-duration: 60s;
-  }
   @media (prefers-reduced-motion: reduce) {
-    .hud-spin,
-    .ruok-spin {
+    .hud-spin {
       animation: none;
     }
   }
