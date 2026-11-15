@@ -15,6 +15,9 @@ const MATRIX: Record<Permission, Role[]> = {
   'view:missions': ['member', 'medic', 'commander', 'admin'],
   'view:alerts': ['member', 'medic', 'commander', 'responder', 'psych', 'family', 'admin'],
   'view:ground': ['responder', 'psych', 'admin'],
+  // «Mensaje a casa»: el doc también da acceso a `family` (recibe/responde), que aún no
+  // existe en el backend (BE-22: home:read y home:write solo para member y admin).
+  'view:home-messages': ['member', 'admin'],
   'view:control': ['admin'],
   'action:sos': ['member', 'medic', 'commander', 'family', 'admin'],
   'action:measure-others': ['medic', 'admin'],
