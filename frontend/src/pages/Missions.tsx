@@ -220,7 +220,7 @@ export default function Missions() {
         <div className="flex flex-col gap-3 md:gap-4 lg:min-h-0 lg:flex-1">
           <section
             aria-labelledby="tasks-title"
-            className="hud-panel flex flex-col lg:max-h-[50%] lg:min-h-0 lg:shrink-0"
+            className="hud-panel flex flex-col lg:max-h-[50%] lg:min-h-0 lg:shrink-0 2xl:max-h-none 2xl:flex-1"
           >
             <h2 id="tasks-title" className="hud-panel-head">
               Tareas de hoy
@@ -260,7 +260,22 @@ export default function Missions() {
 
           {/* Hasta 1536 px, los kudos van aquí, bajo las tareas, y se estiran hasta abajo. */}
           <div className="flex min-h-0 flex-col lg:flex-1 2xl:hidden">{kudosPanel}</div>
+        </div>
 
+        <div className="flex flex-col gap-3 [scrollbar-color:var(--env-border)_transparent] md:gap-4 lg:min-h-0 lg:overflow-y-auto">
+          {board.state === 'ready' && (
+            <CrewBoard board={board.data} crewWord={vocab.crew} memberId={memberId} />
+          )}
+
+          {crewMissions.state === 'ready' && crewMissions.data.length > 0 && (
+            <CrewMissions
+              missions={crewMissions.data}
+              memberId={memberId}
+              canJoin={canAct}
+              busyId={joining}
+              onJoin={(m) => void onJoin(m)}
+            />
+          )}
           {current && current.badges.length > 0 && (
             <section aria-labelledby="badges-title" className="hud-panel shrink-0">
               <h2 id="badges-title" className="hud-panel-head">
@@ -279,22 +294,6 @@ export default function Missions() {
                 ))}
               </ul>
             </section>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-3 [scrollbar-color:var(--env-border)_transparent] md:gap-4 lg:min-h-0 lg:overflow-y-auto">
-          {board.state === 'ready' && (
-            <CrewBoard board={board.data} crewWord={vocab.crew} memberId={memberId} />
-          )}
-
-          {crewMissions.state === 'ready' && crewMissions.data.length > 0 && (
-            <CrewMissions
-              missions={crewMissions.data}
-              memberId={memberId}
-              canJoin={canAct}
-              busyId={joining}
-              onJoin={(m) => void onJoin(m)}
-            />
           )}
         </div>
 

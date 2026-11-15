@@ -55,46 +55,55 @@ export function CrewKudos({ kudos, members, memberId, canSend, onSend }: CrewKud
         </span>
       </h2>
       {canSend && mates.length > 0 && (
+        // El mensaje ocupa todo el ancho (es lo que se escribe); debajo, para quién y «Dar kudos».
         <form
-          className="grid gap-2 border-b border-env-border/60 px-4 py-3 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)_auto]"
+          className="flex flex-col gap-2 border-b border-env-border/60 px-4 py-3"
           onSubmit={(e) => {
             e.preventDefault()
             void submit()
           }}
         >
-          <label className="flex min-w-0 flex-col gap-1">
-            <span className="sr-only">Para</span>
-            <select
-              value={to}
-              onChange={(e) => setTo(e.target.value === '' ? '' : Number(e.target.value))}
-              className={field}
-            >
-              <option value="">Para…</option>
-              {mates.map((m) => (
-                <option key={m.member_id} value={m.member_id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex min-w-0 flex-col gap-1">
+          <label className="flex flex-col gap-1">
             <span className="sr-only">Qué le agradeces</span>
-            <input
-              type="text"
+            <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  void submit()
+                }
+              }}
               maxLength={KUDOS_MAX}
-              placeholder="Gracias por…"
-              className={field}
+              rows={2}
+              placeholder="Gracias por ayudarme con…"
+              className={`${field} min-h-[4.5rem] resize-none py-2.5 leading-snug [field-sizing:content]`}
             />
           </label>
-          <button
-            type="submit"
-            disabled={to === '' || !text || busy}
-            className="hud-btn hud-btn-primary !h-11 px-4 disabled:opacity-60"
-          >
-            {busy ? 'Enviando…' : 'Dar kudos'}
-          </button>
+          <div className="flex gap-2">
+            <label className="flex min-w-0 flex-1 flex-col">
+              <span className="sr-only">Para</span>
+              <select
+                value={to}
+                onChange={(e) => setTo(e.target.value === '' ? '' : Number(e.target.value))}
+                className={field}
+              >
+                <option value="">Para…</option>
+                {mates.map((m) => (
+                  <option key={m.member_id} value={m.member_id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="submit"
+              disabled={to === '' || !text || busy}
+              className="hud-btn hud-btn-primary !h-11 shrink-0 px-4 disabled:opacity-60"
+            >
+              {busy ? 'Enviando…' : 'Dar kudos'}
+            </button>
+          </div>
         </form>
       )}
 
