@@ -55,5 +55,7 @@ export function MemberActivitySelector({ compact = false }: { compact?: boolean 
   const envs = useEnvironments()
   if (role !== 'member') return null
   const env = envs.state === 'ready' ? envs.data.find((e) => e.id === envId) : undefined
-  return <ActivitySelector isSpace={env?.kind === 'space'} compact={compact} />
+  return (
+    <ActivitySelector isSpace={env?.kind === 'space'} liveness={env?.liveness} compact={compact} />
+  )
 }

@@ -311,13 +311,18 @@ Contenido:
 `/dashboard` (`src/pages/Dashboard.tsx`) muestra el panel del member activo (`memberId` del store). Sin member, enlaza a `/` para elegirlo.
 
 - **Cabecera:** `StatusBadge` con el estado general (`overall_status`), el liveness si no es `active` ("Sin datos desde hace X min") y la frescura de los datos ("Actualizado hace…"). El estado del enlace está en la cabecera global (FE-17).
-- **Izquierda:** `BodyFigure` (fija al hacer scroll en escritorio).
-- **Derecha:** cuadrícula de `IndicatorCard` con todos los indicadores de la evaluación, **ordenados por gravedad** (`bySeverity`: crítico, atención, sin datos, normal). Clic en una tarjeta → `SystemPanel` de su sistema.
-- En móvil, todo en una columna.
+- **Sin scroll en tableta y escritorio.** La página ocupa el alto disponible (`Layout` en modo `fill`) y el bloque se centra en vertical; si una pantalla muy baja no da para todo, la página hace scroll como cualquier otra.
+- **Desde 1024 px, tres columnas centradas:** panel `SYS.01 Sistemas` (`BodyLegend` con `rows`: el nombre y debajo su estado) | `BodyFigure` | panel `IND.02 Indicadores`.
+- **Indicadores en celdas** (`IndicatorCard` con `tile`): el nombre arriba y, debajo, el símbolo de estado y el valor; 2 por fila (3 desde 1280 px), **ordenados por gravedad** (`bySeverity`: crítico, atención, sin datos, normal). Con 16 indicadores (entornos espaciales) son 6–8 filas. Clic en una celda → `SystemPanel` de su sistema.
+- **Tableta (768–1023 px):** el cuerpo a la izquierda y, a la derecha, los indicadores y debajo los sistemas (en dos columnas).
+- **Fase de misión** (entornos espaciales): `MissionPhaseBar` con `compact`, en una línea a todo el ancho.
+- **Móvil:** anillo de sistemas y lista `SYS.01` (`SystemsRing`).
 
 **Refresco cada 15 s.** `useAssessment(memberId, 15_000)` usa `useLoad({ refreshMs })`, que recarga en segundo plano sin volver al esqueleto de carga. Si un refresco falla, se mantienen los últimos datos y la cabecera avisa **"No se pudo actualizar: los datos pueden estar desfasados"** (nunca se finge que están al día).
 
-`IndicatorCard` (`components/dashboard/`) es la tarjeta de un indicador (valor, semáforo, tendencia y antigüedad). La usan la cuadrícula y el `SystemPanel`; con `showTrend` añade la `TrendChart` (FE-08).
+`IndicatorCard` (`components/dashboard/`) es la tarjeta de un indicador (valor, semáforo, tendencia y antigüedad). La usan el panel (variante `tile`) y el `SystemPanel`; con `showTrend` añade la `TrendChart` (FE-08).
+
+**Selector de actividad** (`ACT.01`, barra lateral y «Más»; solo el member): Normal, EVA (o «actividad de riesgo» en la Tierra) y Sueño. Va en cada heartbeat y cambia cuándo el servidor pregunta «R U OK?» y cuándo da la alerta de "sin contacto". Debajo de los botones, una frase explica qué hace el modo elegido con los tiempos del perfil del entorno (`activityHint()` en `components/liveness/heartbeat.ts`).
 
 ## Gráfica de tendencia: `TrendChart` (FE-08)
 

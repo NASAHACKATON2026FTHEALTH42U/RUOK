@@ -1,4 +1,5 @@
 import type { Schema } from '../../api/client'
+import { formatDelay } from '../ui/link'
 
 /**
  * Lógica pura del heartbeat (FE-15, docs/offline-and-liveness.md §2). Los umbrales de
@@ -12,6 +13,7 @@ export const HEARTBEAT_MS = 15_000
 export type Activity = Schema<'Activity'>
 export type DeviceKind = Schema<'DeviceKind'>
 export type HeartbeatIn = Schema<'HeartbeatIn'>
+export type LivenessThresholds = Schema<'LivenessThresholds'>
 
 /**
  * Tipo de dispositivo para el registro de dispositivos (`/control`): pantalla táctil
@@ -58,4 +60,33 @@ export function activityOptions(isSpace: boolean): { id: Activity; label: string
     { id: 'eva', label: isSpace ? 'EVA' : 'Actividad de riesgo' },
     { id: 'sleep', label: 'Sueño' },
   ]
+}
+
+/**
+ * Qué cambia al elegir cada actividad, en una frase para el selector. Los tiempos salen del
+ * perfil del entorno (`environment.liveness`); sin perfil cargado, la frase va sin números.
+ * Al pasar a "sin señal" (stale) el sistema pregunta «R U OK?»; si nadie responde o se pierde
+ * la señal (lost), salta la alerta de "sin contacto" (docs/offline-and-liveness.md).
+ */
+export function activityHint(
+  activity: Activity,
+  isSpace: boolean,
+  liveness?: LivenessThresholds,
+): string {
+  switch (activity) {
+    case 'normal':
+      return liveness
+        ? `Si tu dispositivo pasa ${formatDelay(liveness.stale_after_s)} sin dar señal, te preguntamos «R U OK?». Si no respondes, salta una alerta.`
+        : 'Si tu dispositivo deja de dar señal, te preguntamos «R U OK?». Si no respondes, salta una alerta.'
+    case 'eva': {
+      const what = isSpace ? 'Salida al exterior (EVA)' : 'Actividad de riesgo'
+      return liveness
+        ? `${what}: se vigila más de cerca. La pregunta llega a los ${formatDelay(liveness.eva_stale_after_s)} sin señal y la alerta, a los ${formatDelay(liveness.eva_lost_after_s)}.`
+        : `${what}: se vigila más de cerca y los avisos llegan mucho antes.`
+    }
+    case 'sleep':
+      return liveness
+        ? `Para dormir: se espera ×${liveness.sleep_factor} (${formatDelay(liveness.stale_after_s * liveness.sleep_factor)} sin señal) antes de preguntar, para no despertarte.`
+        : 'Para dormir: se espera más antes de preguntar, para no despertarte.'
+  }
 }
