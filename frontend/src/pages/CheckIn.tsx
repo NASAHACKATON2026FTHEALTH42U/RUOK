@@ -13,6 +13,9 @@ import {
 } from '../components/behavioral/checkin'
 import { FaceScale } from '../components/behavioral/FaceScale'
 import { InterventionCard } from '../components/behavioral/InterventionCard'
+import { useVoiceAvailable, useVoicePref } from '../components/behavioral/useVoice'
+import { VoiceNote, VoiceToggle } from '../components/behavioral/VoiceControls'
+import { speak, stopSpeaking } from '../components/behavioral/voiceGuide'
 import { CaseFeedbackFor } from '../components/alerts/CaseFeedbackNote'
 import { statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
@@ -32,6 +35,10 @@ const btnSecondary = 'rounded-lg border border-env-border px-4 py-2 hover:border
 /** Pausa tras elegir una respuesta antes de pasar a la siguiente (se ve la opción marcada). */
 const ADVANCE_MS = 350
 
+/** Lo que dice la voz guía de una pregunta: la misma frase que se ve en pantalla. */
+const spokenQuestion = (q: { name: string; measurement_instructions: string[] }) =>
+  q.measurement_instructions[0] ?? q.name
+
 /**
  * Check-in diario conductual "R U OK?" (FE-19). Seis escalas 1–5 con caras (ánimo, estrés,
  * energía, soledad, calidad del sueño y relación con el equipo) y una nota opcional.
@@ -40,6 +47,9 @@ const ADVANCE_MS = 350
  * envío. Así cabe en el móvil sin scroll y se hace en menos de 30 s. Se envía como UN lote de mediciones con
  * `source: "checkin"` por el outbox (FE-11): sin red queda guardado en el dispositivo y se
  * envía solo cuando vuelve la conexión, con los mismos UUID (sin duplicados).
+ *
+ * Voz guía (FE-37): con la «Voz guía» encendida, cada pregunta se lee al llegar a ella (tras
+ * responder la anterior o al saltar de paso) y al encender la voz; al abrir la página, no.
  */
 export default function CheckIn() {
   const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el elegido
@@ -70,6 +80,19 @@ export default function CheckIn() {
     }
     stepHeading.current?.focus()
   }, [step])
+
+  // Voz guía: la pregunta nueva al cambiar de paso (no al abrir la página).
+  const voiceReady = useVoiceAvailable(questions.map(spokenQuestion))
+  const voice = useVoicePref() && voiceReady
+  const spokenStep = useRef(step)
+  useEffect(() => {
+    if (spokenStep.current === step) return
+    spokenStep.current = step
+    stopSpeaking()
+    const q = questions[step]
+    if (voice && q) void speak(spokenQuestion(q))
+  }, [step, voice, questions])
+  useEffect(() => () => stopSpeaking(), [])
 
   const title = <h1 className="text-2xl font-semibold">R U OK?</h1>
 
@@ -245,9 +268,18 @@ export default function CheckIn() {
       className="mx-auto my-auto w-full max-w-xl space-y-4 lg:max-w-3xl lg:space-y-6"
       noValidate
     >
-      <div>
-        {title}
-        <p className="text-env-muted">¿Cómo estás hoy? {total} preguntas rápidas.</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          {title}
+          <p className="text-env-muted">¿Cómo estás hoy? {total} preguntas rápidas.</p>
+        </div>
+        {voiceReady && (
+          <VoiceToggle
+            onToggle={(on) => {
+              if (on && question) void speak(spokenQuestion(question))
+            }}
+          />
+        )}
       </div>
 
       {/* Progreso: un segmento por pregunta más el de envío. Se puede saltar a una ya vista. */}
@@ -380,6 +412,7 @@ export default function CheckIn() {
           </button>
         )}
       </div>
+      <VoiceNote texts={questions.map(spokenQuestion)} className="text-center" />
     </form>
   )
 }
