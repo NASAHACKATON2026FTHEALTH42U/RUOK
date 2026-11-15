@@ -8,7 +8,7 @@ import {
   type Liveness,
   type Status,
 } from '../ui/status'
-import { StatusHeadline } from '../ui/StatusHeadline'
+import { StatusIcon } from '../ui/StatusBadge'
 
 /**
  * Panel principal en móvil con el estilo HUD (docs/design/hud-style.md §6): saludo, el cuerpo en
@@ -156,9 +156,20 @@ export function SystemsRing({
           />
         </div>
         <div className="flex min-w-0 flex-col justify-between gap-3 py-1">
-          <div>
-            <p className="hud-label">Estado general</p>
-            <StatusHeadline state={headline} className="mt-1.5 !text-xl" />
+          {/* Estado general como icono (forma y color según el estado; nunca solo color) con la
+              palabra en pequeño. */}
+          <div role="status" aria-live="polite" className="flex items-center gap-3">
+            <StatusIcon
+              glyph={statusStyle(headline).glyph}
+              color={statusStyle(headline).color}
+              size={44}
+            />
+            <p className="min-w-0">
+              <span className="hud-label block">Estado general</span>
+              <span className="block text-sm font-semibold tracking-wide uppercase">
+                {statusStyle(headline).label}
+              </span>
+            </p>
           </div>
           {urgent ? (
             <>
