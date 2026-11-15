@@ -178,3 +178,16 @@ def test_units_and_seed_display_names_in_english(client, vega_auth):
                 if u["role"] == "medic" and u["env_id"] == "mars"]
     assert staff and es_staff and staff != es_staff
     assert "Marte" not in staff[0]
+
+
+def test_stored_fixed_summaries_are_read_in_the_reader_language():
+    from app import i18n, models
+    from app.services import events
+
+    row = models.EventLog(id=1, type="alert.created", summary="Sin contacto con el member")
+    assert events.to_schema(row).summary == "Sin contacto con el member"
+    i18n.set_lang("en")
+    try:
+        assert events.to_schema(row).summary == "No contact with the member"
+    finally:
+        i18n.set_lang("es")
