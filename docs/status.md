@@ -1,72 +1,51 @@
 # Estado del proyecto
 
-> Foto del **sábado 14/11, por la tarde** (actualizada tras mergear BE-06, FE-11, FE-13 y FE-27). Actualízala en cada hito (o pídeselo a Claude: "actualiza docs/status.md"). Fuente: GitHub Issues/PRs y revisión del código. El detalle de cada pieza está en [`backend.md`](backend.md) y [`frontend/README.md`](../frontend/README.md).
+> Foto del **domingo 15/11, de madrugada**. Actualízala en cada hito (o pídeselo a Claude: "actualiza docs/status.md"). Fuente: GitHub Issues/PRs y revisión del código. El detalle de cada pieza está en [`backend.md`](backend.md) y [`frontend/README.md`](../frontend/README.md).
 
-**27 de 81 issues cerradas.** Bloques 📜 Contrato y 🫀 Dashboard completos. **PRs abiertas:** #110 (BE-05, members), #118 (BE-12 parte 1, liveness) y #119 (FE-19, check-in).
+**79 de 83 issues cerradas.** El MVP está integrado: **todos los endpoints del contrato son reales** (ya no hay stubs) y el front cubre todas las vistas del guion de demo.
+
+## Qué queda
+
+| Issue | Estado | Qué falta |
+|---|---|---|
+| FE-24 #56 (kudos y misiones de tripulación) | **PR #197** en revisión, CI en verde | Mergear |
+| FE-33 #81 (vistas móviles) | Auditoría a 375 px hecha y objetivos táctiles corregidos (**PR #198**) | Probar en Android Chrome e iOS Safari reales |
+| FS-08 #73 (red local) | Scripts y docs hechos (`scripts/lan.sh`, `make lan`) | **Prueba física** con 2 móviles sin internet y anotar el resultado en la issue |
+| CNT-04 #59 (pitch) | Guion en [`demo-script.md`](demo-script.md); borrador de slides | Vídeo de respaldo, ensayos y envío a Space Apps |
+
+**Para la presentación:** revisar con alguien con criterio sanitario los textos marcados como *diseño* en [`sources.md`](sources.md) (protocolos, intervenciones) y verificar las citas marcadas como "de memoria" (S24, S28).
 
 ## Hecho
 
-| Componente | Issues cerradas | Qué hay |
+| Componente | Issues | Qué hay |
 |---|---|---|
-| ⚙️ Setup | FS-01, BE-01, FE-01 | Monorepo, FastAPI con `/health` y SQLite WAL, reloj inyectable, Vite + React + TS. **CI con 3 jobs funcionando** (FS-05 sigue abierta solo por la protección de `main`) |
-| 📜 Contrato | FS-02, FS-03, FS-04 | Contrato v0 con 44 endpoints, schemas en `backend/app/schemas/`, tipos TS generados (`npm run gen:api`), cliente tipado, **modo mock completo** (`?mocks=1`) |
-| 🗄️ BD | BE-02 | Las 15 tablas e índices de [`data-model.md`](data-model.md) |
-| 📚 Config | BE-03, BE-04 | `environments.json`, `indicators.json` y `systems.json`, con validación cruzada. Endpoints **reales** |
-| 🧠 Motor | BE-08, BE-09, BE-10 (+ BE-11 parte 1) | Evaluación por indicador, por sistema y global, tendencias y línea base, composición del `Assessment`. **Como servicio: el endpoint aún no lo usa** |
-| 🔐 Auth | FS-06 | Diseño validado ([`auth-and-roles.md`](auth-and-roles.md)) |
-| 🎨 UI | FE-02, FE-03, FE-04 | Temas por entorno, vocabulario (`useVocab`), selección de entorno y member, `StatusBadge` |
-| 🫀 Dashboard | FE-05 … FE-09 | BodyFigure, SystemPanel, layout del dashboard, IndicatorCard y TrendChart, historial |
-| 📝 Formularios | FE-10 | Formularios guiados de medición |
-| 🌐 API | BE-06 | `POST`/`GET /members/{id}/measurements`: lotes idempotentes, atómicos, 409 y filtros. **Real** |
-| 📴 Offline | FE-30, FE-11 | `device_id` e IndexedDB `ruok-<device_id>` por dispositivo o pestaña; **outbox persistente** con sincronización, backoff y contador de pendientes |
-| 🚨 Alertas | FE-13 | Botón **Pedir ayuda / SOS** por el outbox, con protocolo offline |
-| 🔐 Auth | FE-27 | Pantalla de login (contraseña, PIN, usuarios demo), sesión en `kv.auth`, vista inicial por rol. **El backend de auth (BE-25, BE-26) sigue en stub** |
+| ⚙️ Setup | FS-01, BE-01, FE-01, FS-05, BE-24 | Monorepo, CI con 3 jobs, `make demo` y `docker compose up` (FastAPI sirve la API y el build del front en un puerto) |
+| 📜 Contrato | FS-02, FS-03, FS-04 | Contrato en [`api-contract.md`](api-contract.md), schemas Pydantic, tipos TS generados (`npm run gen:api`), cliente tipado y **modo mock completo** (`?mocks=1`) generado desde la API real |
+| 🗄️ BD | BE-02, BE-07 | 16 tablas SQLModel, SQLite en WAL, **seed determinista** de 30 días y escenarios de demo (`mars_sleep_bp`, `eva_no_contact`, `geriatric_fall_risk`) |
+| 📚 Config | BE-03, BE-04, BE-33, BE-34, CNT-01, CNT-02, CNT-03 | Catálogos JSON validados al arrancar: entornos, indicadores, sistemas, protocolos, intervenciones, tipos de tarea, insignias. Umbrales y textos con fuente en [`sources.md`](sources.md) |
+| 🌐 API | BE-05, BE-06 | Members y mediciones por lotes (idempotentes por UUID, atómicas) |
+| 🧠 Motor | BE-08 … BE-11, BE-31 | Evaluación por indicador, sistema y global, tendencias, línea base y escalado según el retardo |
+| 💓 Liveness | BE-12, BE-16, FE-15 | Heartbeat, `overall_status` = peor entre salud y liveness, check-in "R U OK?" y alerta `no_contact` |
+| 🚨 Alertas | BE-14, BE-15, BE-17, BE-35, FE-13, FE-14, FE-16 | Alertas automáticas con deduplicación y escalera, SOS manual (también sin sesión), consola `/ground` as-of |
+| 📡 Enlace | BE-13, BE-32, FE-17 | Enlace simulado con retardo y LOS (store-and-forward persistente), fast-forward con reloj persistente |
+| 🔐 Auth | FS-06, BE-25 … BE-27, BE-36, FE-27, FE-28, FS-07 | Login local (contraseña y PIN), JWT, matriz de roles validada en el backend, gestión de usuarios en `/control` |
+| 📶 Tiempo real | BE-28, BE-29, FE-29, FE-30 | Bitácora `event_log` + SSE, registro de dispositivos, IndexedDB por dispositivo |
+| 🛰️ Control | BE-30, FE-31, FE-32 | Centro de control `/control`: panorama de entornos, eventos en vivo, dispositivos, demo y QR de red local |
+| 📴 Offline | FE-11, FE-12 | Outbox persistente con sincronización y backoff; semáforo provisional sin conexión |
+| 🎨 UI | FE-02 … FE-04, FE-26, FE-34 | Temas por entorno, vocabulario, `StatusBadge`, **estilo HUD** ([`design/hud-style.md`](design/hud-style.md)) |
+| 🫀 Dashboard | FE-05 … FE-09 | Figura del cuerpo, anillo de sistemas, panel de sistema, tarjetas de indicador, tendencias e historial |
+| 📝 Formularios | FE-10, FE-19, FE-22 | Medición guiada, check-in diario y test PVT |
+| 🎮 Juego | BE-18, BE-19, BE-23, BE-37, FE-18 | Rutina diaria desde el perfil del entorno, puntos, racha, insignias, leaderboard cooperativo, kudos y misiones de grupo (backend) |
+| 🧘 Conductual | BE-20, BE-21, BE-22, FE-20, FE-21, FE-23, FE-25 | Reglas frente a la línea base, privacidad de los detalles, intervenciones, barra de fase de misión, "Mensaje a casa", galería de la Tierra |
 
-## Endpoints: reales y stubs
+## Endpoints
 
-| Real | Stub (datos de ejemplo de `backend/app/stubs.py`) |
-|---|---|
-| `GET /health` | auth y usuarios (BE-25, BE-26, FS-07) |
-| `GET /environments`, `/environments/{id}` (BE-03) | heartbeat y R U OK (BE-12 **PR #118**, BE-16) |
-| `GET /indicators`, `/indicators/{id}`, `/systems` (BE-04) | en el resumen de members: `liveness` (BE-12), `overall_status` (BE-11) y `open_alerts` (BE-14) |
-| `GET /environments/{id}/members`, `GET /members/{id}`, `PATCH /members/{id}/privacy` (BE-05, **PR #110**) | |
-| `POST`/`GET /members/{id}/measurements` (BE-06) | `GET /members/{id}/assessment` (BE-11: el servicio existe, falta conectarlo) |
-| `POST /demo/fast-forward` (a medias: no persiste el reloj, BE-32) | alertas y consola ground (BE-14, BE-15, BE-17) |
-| | intervenciones (BE-21) · *rutina y juego: reales (BE-18, BE-19)* |
-| | eventos SSE, dispositivos, control y network-info (BE-28, BE-29, BE-30) |
-| | enlace y demo (BE-13, BE-07) |
+Todos los del contrato son reales. `backend/app/stubs.py` solo queda como datos de apoyo para el exportador de mocks y algunos tests; **ningún router lo usa**. Swagger en `/docs`.
 
-**Consecuencia:** con el backend arrancado, el front muestra **el catálogo real y el resto de datos de ejemplo**. Para enseñar la app completa hoy, usa el **modo mock** (`?mocks=1`).
+## Cómo comprobar el estado
 
-## P0 pendientes (ruta crítica)
-
-| Issue | Estado |
-|---|---|
-| BE-11 #18 (assessment endpoint) | En curso (bryanfajardo2712-arch). Bloquea BE-12, BE-14 y BE-30 |
-| BE-05 #12 (members) | PR #110 lista para mergear |
-| BE-12 #33 (liveness) | Parte 1 en PR #118 |
-| **BE-31 #111, BE-33 #112, BE-35 #113** (nuevas, de la revisión) | **Sin asignar.** Bloquean BE-12, BE-14 y BE-16 |
-| BE-07 #14 (seed), BE-25 #66 y BE-26 #67 (auth: el login del front ya existe y espera al back), BE-13 #30 (enlace), BE-14 #31 (alertas), BE-28 #75 (eventos SSE) | **Sin asignar** |
-| FS-05 #60 | CI hecha; falta proteger `main` (requiere repo público) |
-| FS-08 #73 | Comandos documentados; **falta la prueba real con 2 móviles** |
-| CNT-01 #11 | Tabla de umbrales provisional en [`sources.md`](sources.md); faltan las fuentes |
-
-**Sin ninguna issue cerrada todavía:** 📡 Enlace, 💓 Liveness, 🎮 Juego, 🧘 Conductual, 📶 Tiempo real, 🛰️ Control y 🎤 Pitch. La mayoría de las issues de front del Hito 2 están asignadas en bloque a xddaso y AlbertoSanzAlonso.
-
-## Inconsistencias de código detectadas en la revisión
-
-La revisión del 14/11 encontró estos problemas. Los docs ya describen el comportamiento correcto; el código todavía no. **P0 = hay que resolverlas antes que las issues que bloquean.**
-
-| Prio | Problema | Issue | Bloquea a |
-|---|---|---|---|
-| **P0** | El escalado a `crew` (a bordo) sale con el retardo de tierra (840 s en Marte); debe ser `realtime` y 0 s | **#111 BE-31** | BE-14 |
-| **P0** | Faltan umbrales en `environments.json`: `lost` en EVA, factor de sueño, check-in matinal, tiempo para escalar un warning persistente | **#112 BE-33** | BE-12, BE-14, BE-16 |
-| **P0** | `Alert.target_role` y `delivery_mode` admiten null en la BD, pero el contrato los exige | **#113 BE-35** | BE-14 |
-| **P0** | El stub del assessment contradice al motor y su test exige `autonomous` en un `warning` | tareas añadidas a **#18 BE-11** (en curso) | — |
-| ~~P0~~ | ~~El banner del fallback decía que lo registrado "se guarda para enviarlo" sin outbox persistente~~ | **Resuelto** al mergear FE-11 (#107): ahora es cierto | — |
-| P1 | `/demo/fast-forward` y `/demo/reset` no persisten el reloj | #114 BE-32 | — |
-| P1 | `threshold_overrides` con un indicador inexistente se ignora sin avisar; faltan textos de `vocabulary` para roles de la escalera | #115 BE-34 | FE-14 |
-| P1 | Colores fijos, chip verde, doble badge, `serverNow()` en el dashboard, `getDb()` sin `catch` | #116 FE-34 | — |
-| P0 | `overall_status` no combina salud y liveness; liveness por defecto `active` | tarea añadida a #33 BE-12 | — |
-| P1 | Indicadores conductuales no activos en ningún entorno; privacidad de sus valores | tareas añadidas a #28 BE-20 | — |
-| P1 | `X-Device-Id` mal formado da 422 incluso en un SOS | tarea añadida a #69 BE-27 | — |
+```bash
+make test                      # ruff + pytest del backend y lint + build + tests del front
+gh issue list --state open     # lo que queda
+gh pr list                     # lo que está en revisión
+```

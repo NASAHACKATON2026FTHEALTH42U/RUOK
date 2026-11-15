@@ -27,6 +27,17 @@ Presentación: **domingo 16:00**.
 | [demo-script.md](demo-script.md) | Supervisor + todos | Guion de la demo y plan B |
 | [sources.md](sources.md) | Supervisor | Referencias NASA HRP / ESA y otras fuentes |
 
+## Wiki de GitHub
+
+La wiki es una **copia** de esta carpeta para leerla en GitHub; la fuente de verdad sigue siendo `docs/`. Se regenera con:
+
+```bash
+python3 scripts/github/build_wiki.py --publish     # clona la wiki, regenera las páginas y hace push
+python3 scripts/github/build_wiki.py --out ./wiki  # solo genera los ficheros, para revisarlos
+```
+
+⚠️ GitHub solo ofrece wiki en repos **privados** con un plan de pago. Con la organización en el plan Free hace falta que el repo sea público. Además, la primera página hay que crearla una vez desde la web (pestaña *Wiki* → *Create the first page*) para que exista el repositorio de la wiki.
+
 ## Reglas de oro
 0. **Nunca hagas push directo a `main`.** Todo entra por PR con la CI en verde. Lee [`LEEME.txt`](../LEEME.txt).
 

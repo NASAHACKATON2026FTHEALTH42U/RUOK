@@ -29,7 +29,7 @@ presentation/   slides y capturas (los vídeos van al Drive)
 | gh (opcional) | reciente | ver "Herramientas" en [`CLAUDE.md`](CLAUDE.md) |
 
 ## Estado actual
-Qué está hecho, qué endpoints son reales y qué queda: [`docs/status.md`](docs/status.md). Resumen: **el front ya tiene selección de entorno, dashboard con cuerpo y semáforo, historial y formularios de medición. En el backend son reales el catálogo (entornos, indicadores, sistemas) y el motor de evaluación como servicio, y el resto de endpoints aún devuelve datos de ejemplo (stubs).** Para ver la app completa hoy, usa el **modo mock** (`?mocks=1`).
+Qué está hecho y qué queda: [`docs/status.md`](docs/status.md). Resumen: **el MVP está integrado.** Todos los endpoints del contrato son reales (motor de evaluación, alertas y escalado, enlace simulado, liveness, login y roles, tiempo real, centro de control, rutina y juego) y el front cubre todas las vistas del guion de demo. Sin backend, la app completa se puede ver en **modo mock** (`?mocks=1`).
 
 ## Arrancar en local
 Usa **dos terminales**, una para el backend y otra para el frontend.
@@ -64,6 +64,12 @@ cd frontend && npm run dev -- --host
 ```
 Montaje de la red sin internet y checklist: [`docs/control-center-and-devices.md`](docs/control-center-and-devices.md).
 
-**Todo junto en un proceso (modo "a bordo")**: **pendiente de BE-24 (#39)**. FastAPI servirá el build del front y habrá `docker compose up`. Todavía no existe `docker-compose.yml`.
+**Todo junto en un proceso (modo "a bordo", BE-24).** FastAPI sirve la API y el build del front en el puerto 8000, escuchando en `0.0.0.0` para los móviles de la red local:
+```bash
+make demo            # instala, compila el front y arranca en http://localhost:8000
+docker compose up    # lo mismo en un contenedor (la BD SQLite se conserva en un volumen)
+make lan             # diagnóstico de la red local: IPs, puertos, firewall y /health
+make test            # lo mismo que la CI
+```
 
 > ⚠️ Prototipo de hackathon: **no es un dispositivo médico**.

@@ -46,7 +46,7 @@ app = FastAPI(
     title="RUOK API",
     version="0.1.0",
     description="Servidor de a bordo de R U OK?. Contrato: docs/api-contract.md. "
-    "Los endpoints marcados STUB(FS-02) devuelven datos de ejemplo hasta su issue.",
+    "Todos los endpoints son reales; el modo mock del front se genera desde ellos.",
     lifespan=lifespan,
 )
 
