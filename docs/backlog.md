@@ -16,7 +16,7 @@ Cada issue pertenece a **un componente**: la parte del sistema que resuelve. Apa
 | 🗄️ **BD** | `comp:db` | Base de datos (modelos SQLModel, tablas, seed) | BE-02, BE-07, BE-35 |
 | 📚 **Config** | `comp:config` | Catálogos y configuración JSON (entornos, indicadores, textos) | BE-03, BE-04, CNT-01, CNT-02, BE-33, CNT-03, BE-34 |
 | 🌐 **API** | `comp:api` | Endpoints REST | BE-05, BE-06 |
-| 🧠 **Motor** | `comp:engine` | Motor de evaluación (umbrales, tendencias) | BE-08, BE-09, BE-10, BE-11, BE-31, FS-09 |
+| 🧠 **Motor** | `comp:engine` | Motor de evaluación (umbrales, tendencias) | BE-08, BE-09, BE-10, BE-11, BE-31, FS-09, FS-10 |
 | 🚨 **Alertas** | `comp:alerts` | Alertas y escalado (SOS, consola ground) | BE-14, BE-15, BE-17, FE-13, FE-14, FE-16 |
 | 📡 **Enlace** | `comp:link` | Enlace simulado con Tierra (retardo, LOS) | BE-13, FE-17 |
 | 💓 **Liveness** | `comp:liveness` | Liveness (heartbeat, R U OK?) | BE-12, BE-16, FE-15 |
@@ -113,7 +113,7 @@ MVP integrado: alertas, offline, liveness, gamificación, consola ground.
 | FE-20 | 🧘 Conductual | [#49](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/49) Tarjetas de intervención | frontend | P1 | BE-21 | — |
 | FE-21 | 🧘 Conductual | [#50](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/50) Barra de fase de misión y aviso del tercer cuarto | frontend | P1 | FE-02 | — |
 | CNT-03 | 📚 Config | [#51](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/51) Contenido de las intervenciones y los protocolos autónomos | content | P1 | CNT-01 | — |
-| BE-27 | 🔐 Auth | [#69](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/69) Autorización por rol y propiedad en todos los endpoints | backend | P1 | BE-26, BE-05, BE-06, BE-15, BE-17 | FS-07 |
+| BE-27 | 🔐 Auth | [#69](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/69) Autorización por rol y propiedad en todos los endpoints | backend | P1 | BE-26, BE-05, BE-06, BE-15, BE-17 | FS-07, FS-10 |
 | FE-28 | 🔐 Auth | [#70](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/70) Guards de rutas y menús según el rol | frontend | P1 | FE-27, FE-07 | FE-16, FE-17, FE-31, FS-07, FE-35 |
 | BE-29 | 📶 Tiempo real | [#76](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/76) Registro de dispositivos | backend | P1 | BE-02, BE-12 | BE-30 |
 | BE-30 | 🛰️ Control | [#77](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/77) Endpoints del centro de control y descubrimiento en red | backend | P1 | BE-11, BE-12, BE-13, BE-29 | FE-31 |
@@ -142,7 +142,15 @@ P2 y pulido. Lo no terminado a las 11:00 se corta.
 | FE-26 | 🎨 UI | [#58](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/58) Pulido de animaciones, responsive y disclaimer médico | frontend | P1 | FE-07 | — |
 | CNT-04 | 🎤 Pitch | [#59](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/59) Guion, slides, vídeo y envío a Space Apps | content | P1 | — | — |
 | FE-35 | 🎨 UI | [#210](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/210) Admin como cuenta de supervisión (selector de member, alertas del entorno, estados vacíos útiles) | frontend | P2 | FE-27, FE-28, FE-14 | — |
-| FS-09 | 🧠 Motor | [#227](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/227) Previsión de valores esperados por indicador (modelo Holt amortiguado, 100 % local) | fullstack | P2 | BE-10, BE-06, FE-09 | — |
+| FS-09 | 🧠 Motor | [#227](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/227) Previsión de valores esperados por indicador (modelo Holt amortiguado, 100 % local) | fullstack | P2 | BE-10, BE-06, FE-09 | FS-10 |
+
+## Roadmap (después de la demo)
+
+Diseño cerrado, sin implementar antes de la presentación.
+
+| ID | Componente | Issue | Área | Prio | Depende de | Bloquea |
+|---|---|---|---|---|---|---|
+| FS-10 | 🧠 Motor | [#234](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/234) Asistente local sobre un member y su previsión (LLM pequeño a bordo, 100 % local) | fullstack | P2 | FS-09, BE-27 | — |
 
 ## Ruta crítica (P0)
 

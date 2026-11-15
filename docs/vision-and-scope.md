@@ -55,7 +55,7 @@ El Human Research Program (HRP) identifica **5 peligros**:
 ## Fuera de alcance (roadmap del pitch)
 - Wearables reales y streaming continuo de constantes.
 - Frecuencia cardiaca por cámara (rPPG) y análisis de imagen (ecografía).
-- Asistente con IA (LLM local a bordo).
+- Asistente con IA (LLM local a bordo): diseño cerrado en [assistant.md](assistant.md) (issue FS-10).
 - Replicación entre los dispositivos de la tripulación.
 - SSO / 2FA, cifrado extremo a extremo y app nativa. *(El login local con roles **sí** entra en el MVP: [auth-and-roles.md](auth-and-roles.md).)*
 - Certificación como dispositivo médico.
