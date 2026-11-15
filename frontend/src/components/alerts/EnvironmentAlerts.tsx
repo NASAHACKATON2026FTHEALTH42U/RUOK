@@ -4,7 +4,7 @@ import { useEnvironmentAlerts } from '../../api/useAlerts'
 import { useMembers } from '../../api/useMembers'
 import { useVocab } from '../../environments/useVocab'
 import { formatAgo } from '../../lib/time'
-import { StatusBadge } from '../ui/StatusBadge'
+import { AlertRowBody } from './AlertRowBody'
 import { categoryLabel, severityStyle, statusLabel } from './alertFormat'
 import { roleLabel } from './sos'
 
@@ -59,19 +59,23 @@ export function EnvironmentAlerts({
             <button
               type="button"
               onClick={() => onSelect(a.memberId, a.id, a.status === 'resolved')}
-              className={`flex w-full flex-col gap-0.5 px-3.5 py-2.5 text-left hover:bg-env-primary/5 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary ${a.status === 'resolved' ? 'opacity-60' : ''}`}
+              className={`flex w-full flex-col gap-1.5 px-4 py-3.5 text-left hover:bg-env-primary/5 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary ${a.status === 'resolved' ? 'opacity-60' : ''}`}
             >
-              <span className="flex items-start justify-between gap-2">
-                <span className="min-w-0">
-                  <span className="block font-medium">{a.memberName}</span>
-                  <span className="block text-sm">{categoryLabel(a.category)}</span>
-                </span>
-                <StatusBadge status={sev.status} label={sev.label} size="sm" />
-              </span>
-              <span className="truncate text-xs text-env-muted">
-                {a.origin === 'auto' ? 'Automática' : 'Manual'} · {statusLabel(a.status)} · a{' '}
-                {roleLabel(a.target_role, vocab)} · {formatAgo(a.created_at, now)}
-              </span>
+              <AlertRowBody
+                title={
+                  <>
+                    <span className="block">{a.memberName}</span>
+                    <span className="block text-sm font-normal text-env-muted">
+                      {categoryLabel(a.category)}
+                    </span>
+                  </>
+                }
+                status={sev.status}
+                severityLabel={sev.label}
+                state={`${statusLabel(a.status)} · ${a.origin === 'auto' ? 'Automática' : 'Manual'}`}
+                ago={formatAgo(a.created_at, now)}
+                target={`a ${roleLabel(a.target_role, vocab)}`}
+              />
             </button>
           </li>
         )

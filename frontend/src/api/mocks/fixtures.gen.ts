@@ -273,7 +273,8 @@ export const environments: Schema<'Environment'>[] = [
       "sleep_quality",
       "crew_relation",
       "pvt_mean_rt_ms",
-      "pvt_lapses"
+      "pvt_lapses",
+      "vision_changes"
     ],
     "routine": [
       {
@@ -349,7 +350,8 @@ export const environments: Schema<'Environment'>[] = [
       "sleep_quality",
       "crew_relation",
       "pvt_mean_rt_ms",
-      "pvt_lapses"
+      "pvt_lapses",
+      "vision_changes"
     ],
     "routine": [
       {
@@ -435,7 +437,8 @@ export const environments: Schema<'Environment'>[] = [
       "sleep_quality",
       "crew_relation",
       "pvt_mean_rt_ms",
-      "pvt_lapses"
+      "pvt_lapses",
+      "vision_changes"
     ],
     "routine": [
       {
@@ -1798,7 +1801,7 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "share_behavioral_details": false,
       "last_seen_at": "2026-11-14T10:00:00Z",
       "liveness": "active",
-      "overall_status": "normal",
+      "overall_status": "warning",
       "open_alerts": 0,
       "last_measurement_at": "2026-11-14T09:10:46.069797Z"
     },
@@ -1822,7 +1825,7 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "share_behavioral_details": false,
       "last_seen_at": "2026-11-14T10:00:00Z",
       "liveness": "active",
-      "overall_status": "normal",
+      "overall_status": "warning",
       "open_alerts": 0,
       "last_measurement_at": "2026-11-14T09:43:26.383471Z"
     }
@@ -1837,7 +1840,7 @@ export const membersByEnv: Record<string, Schema<'MemberSummary'>[]> = {
       "last_seen_at": "2026-11-14T10:00:00Z",
       "liveness": "active",
       "overall_status": "critical",
-      "open_alerts": 3,
+      "open_alerts": 4,
       "last_measurement_at": "2026-11-14T10:00:00Z"
     },
     {
@@ -2435,6 +2438,59 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         }
       },
       {
+        "system_id": "eyes",
+        "status": "warning",
+        "indicators": [
+          {
+            "indicator_id": "vision_changes",
+            "last_value": 2.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T05:54:24.848592Z",
+            "status": "warning",
+            "trend": "insufficient_data",
+            "baseline": 2.0,
+            "range": {
+              "normal": [
+                1.0,
+                1.9
+              ],
+              "warning": [
+                2.0,
+                3.5
+              ]
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "id": "rec_eyes_warning_1",
+            "text": "Anota qué notas (visión borrosa, puntos ciegos, dolor de cabeza) y en qué ojo",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_eyes_warning_2",
+            "text": "Repite la autoevaluación mañana a la misma hora",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_eyes_warning_3",
+            "text": "Coméntalo con el responsable médico en la próxima consulta",
+            "priority": 3,
+            "intervention_id": null
+          }
+        ],
+        "escalation": {
+          "level": 0,
+          "target_role": "self",
+          "mode": "realtime",
+          "delay_s": 0,
+          "message": "Ojos en aviso: has notado cambios en la visión.",
+          "protocol_id": "proto_eyes_warning"
+        }
+      },
+      {
         "system_id": "radiation",
         "status": "unknown",
         "indicators": [
@@ -2904,6 +2960,59 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
         }
       },
       {
+        "system_id": "eyes",
+        "status": "warning",
+        "indicators": [
+          {
+            "indicator_id": "vision_changes",
+            "last_value": 2.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T05:54:24.848592Z",
+            "status": "warning",
+            "trend": "insufficient_data",
+            "baseline": 2.0,
+            "range": {
+              "normal": [
+                1.0,
+                1.9
+              ],
+              "warning": [
+                2.0,
+                3.5
+              ]
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "id": "rec_eyes_warning_1",
+            "text": "Anota qué notas (visión borrosa, puntos ciegos, dolor de cabeza) y en qué ojo",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_eyes_warning_2",
+            "text": "Repite la autoevaluación mañana a la misma hora",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_eyes_warning_3",
+            "text": "Coméntalo con el responsable médico en la próxima consulta",
+            "priority": 3,
+            "intervention_id": null
+          }
+        ],
+        "escalation": {
+          "level": 0,
+          "target_role": "self",
+          "mode": "realtime",
+          "delay_s": 0,
+          "message": "Ojos en aviso: has notado cambios en la visión.",
+          "protocol_id": "proto_eyes_warning"
+        }
+      },
+      {
         "system_id": "radiation",
         "status": "unknown",
         "indicators": [
@@ -3370,6 +3479,59 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           "delay_s": 0,
           "message": "Neuro-conductual en estado crítico: no lo lleves a solas, pide apoyo hoy.",
           "protocol_id": "proto_neuro_behavioral_critical"
+        }
+      },
+      {
+        "system_id": "eyes",
+        "status": "warning",
+        "indicators": [
+          {
+            "indicator_id": "vision_changes",
+            "last_value": 2.0,
+            "unit": "1-5",
+            "taken_at": "2026-11-14T05:54:24.848592Z",
+            "status": "warning",
+            "trend": "insufficient_data",
+            "baseline": 2.0,
+            "range": {
+              "normal": [
+                1.0,
+                1.9
+              ],
+              "warning": [
+                2.0,
+                3.5
+              ]
+            }
+          }
+        ],
+        "recommendations": [
+          {
+            "id": "rec_eyes_warning_1",
+            "text": "Anota qué notas (visión borrosa, puntos ciegos, dolor de cabeza) y en qué ojo",
+            "priority": 1,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_eyes_warning_2",
+            "text": "Repite la autoevaluación mañana a la misma hora",
+            "priority": 2,
+            "intervention_id": null
+          },
+          {
+            "id": "rec_eyes_warning_3",
+            "text": "Coméntalo con el responsable médico en la próxima consulta",
+            "priority": 3,
+            "intervention_id": null
+          }
+        ],
+        "escalation": {
+          "level": 0,
+          "target_role": "self",
+          "mode": "realtime",
+          "delay_s": 0,
+          "message": "Ojos en aviso: has notado cambios en la visión.",
+          "protocol_id": "proto_eyes_warning"
         }
       },
       {
@@ -4431,6 +4593,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-10-17T06:15:29.614592Z"
+  },
+  {
+    "id": "ab255ee4-dc81-5f14-ab15-c9b7821dcd8d",
+    "indicator_id": "vision_changes",
+    "value": 2.0,
+    "taken_at": "2026-10-17T06:22:48.094902Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "1-5",
+    "received_at": "2026-10-17T06:23:32.094902Z"
   },
   {
     "id": "9ac0498b-2a48-5f7a-9bd7-444bed92a8e6",
@@ -5575,6 +5748,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-10-24T06:08:36.975815Z"
+  },
+  {
+    "id": "926b750c-f650-58e3-b0d9-a0f2bef8ffc2",
+    "indicator_id": "vision_changes",
+    "value": 1.0,
+    "taken_at": "2026-10-24T06:37:36.684044Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "1-5",
+    "received_at": "2026-10-24T06:38:13.684044Z"
   },
   {
     "id": "d5aa3db4-8bce-5e32-859f-69ec10b8f896",
@@ -6754,6 +6938,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-10-31T06:45:17.383521Z"
   },
   {
+    "id": "b5cb0df1-e0e6-5509-94f9-44a82339deb0",
+    "indicator_id": "vision_changes",
+    "value": 2.0,
+    "taken_at": "2026-10-31T06:45:34.984219Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "1-5",
+    "received_at": "2026-10-31T06:46:36.984219Z"
+  },
+  {
     "id": "c3bcab19-1d45-5278-be38-c35ebf519807",
     "indicator_id": "pvt_mean_rt_ms",
     "value": 205.0,
@@ -7885,6 +8080,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "member_id": 1,
     "unit": "1-5",
     "received_at": "2026-11-07T05:52:01.886236Z"
+  },
+  {
+    "id": "68f275fa-af6b-52d2-a9f8-8928ae096a92",
+    "indicator_id": "vision_changes",
+    "value": 2.0,
+    "taken_at": "2026-11-07T06:34:13.364598Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "1-5",
+    "received_at": "2026-11-07T06:34:41.364598Z"
   },
   {
     "id": "bec067d0-bc0c-5829-a875-0d9acb20026d",
@@ -9042,6 +9248,17 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-11-14T05:16:36.516209Z"
   },
   {
+    "id": "529f725f-35e5-506c-b8b1-855d5021373c",
+    "indicator_id": "vision_changes",
+    "value": 2.0,
+    "taken_at": "2026-11-14T05:54:24.848592Z",
+    "source": "manual",
+    "note": null,
+    "member_id": 1,
+    "unit": "1-5",
+    "received_at": "2026-11-14T05:54:38.848592Z"
+  },
+  {
     "id": "481f381c-71d6-55cd-b3fa-373047f9c3c8",
     "indicator_id": "stress",
     "value": 2.0,
@@ -9751,8 +9968,8 @@ export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
     "method": "holt_damped",
     "horizon_days": 7,
     "step_days": null,
-    "history_days": 0,
-    "current_status": "unknown",
+    "history_days": 5,
+    "current_status": "warning",
     "last_value_unusual": false,
     "points": [],
     "change": null,
@@ -10398,6 +10615,41 @@ export const alerts: Schema<'Alert'>[] = [
     ]
   },
   {
+    "id": "b08b158c-1009-5ef0-a075-a16cda274fce",
+    "member_id": 1,
+    "env_id": "mars",
+    "origin": "auto",
+    "authenticated": true,
+    "created_by_user_id": null,
+    "category": "indicator",
+    "severity": "warning",
+    "system_id": "eyes",
+    "indicator_ids": [
+      "vision_changes"
+    ],
+    "message": "Ojos en aviso: has notado cambios en la visión.",
+    "level": 0,
+    "target_role": "self",
+    "delivery_mode": "realtime",
+    "delay_s": 0,
+    "eta": null,
+    "delivered_at": null,
+    "status": "open",
+    "created_at": "2026-11-14T10:00:00Z",
+    "updated_at": "2026-11-14T10:00:00Z",
+    "events": [
+      {
+        "type": "created",
+        "actor": "system",
+        "at": "2026-11-14T10:00:00Z",
+        "payload": {
+          "severity": "warning",
+          "system_id": "eyes"
+        }
+      }
+    ]
+  },
+  {
     "id": "138f8f59-0ba6-5e49-88f1-9b2e6b60899f",
     "member_id": 1,
     "env_id": "mars",
@@ -10504,7 +10756,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "share_behavioral_details": false,
         "last_seen_at": "2026-11-14T10:00:00Z",
         "liveness": "active",
-        "overall_status": "normal",
+        "overall_status": "warning",
         "open_alerts": 0,
         "last_measurement_at": "2026-11-14T09:10:46.069797Z"
       },
@@ -10528,7 +10780,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "share_behavioral_details": false,
         "last_seen_at": "2026-11-14T10:00:00Z",
         "liveness": "active",
-        "overall_status": "normal",
+        "overall_status": "warning",
         "open_alerts": 0,
         "last_measurement_at": "2026-11-14T09:43:26.383471Z"
       }
@@ -10555,7 +10807,7 @@ export const groundByEnv: Record<string, Schema<'GroundView'>> = {
         "last_seen_at": "2026-11-14T10:00:00Z",
         "liveness": "active",
         "overall_status": "critical",
-        "open_alerts": 3,
+        "open_alerts": 4,
         "last_measurement_at": "2026-11-14T10:00:00Z"
       },
       {
@@ -11169,6 +11421,23 @@ export const events: Schema<'Event'>[] = [
     "member_id": 1,
     "user_id": null,
     "device_id": null,
+    "ref_id": "b08b158c-1009-5ef0-a075-a16cda274fce",
+    "summary": "Alerta automática (warning): eyes",
+    "payload": {
+      "category": "indicator",
+      "severity": "warning",
+      "level": 0,
+      "target_role": "self"
+    }
+  },
+  {
+    "id": 11,
+    "type": "alert.created",
+    "at": "2026-11-14T10:00:00Z",
+    "env_id": "mars",
+    "member_id": 1,
+    "user_id": null,
+    "device_id": null,
     "ref_id": "6b44b3eb-fa65-56f1-8baa-886b991fab7f",
     "summary": "Alerta automática (critical): neuro_behavioral",
     "payload": {
@@ -11179,7 +11448,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 11,
+    "id": 12,
     "type": "alert.escalated",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -11197,7 +11466,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 12,
+    "id": 13,
     "type": "link.queued",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -11214,7 +11483,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 13,
+    "id": 14,
     "type": "alert.escalated",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -11232,7 +11501,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 14,
+    "id": 15,
     "type": "measurement.created",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -11248,7 +11517,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 15,
+    "id": 16,
     "type": "measurement.created",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -11264,7 +11533,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 16,
+    "id": 17,
     "type": "alert.created",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -11281,7 +11550,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 17,
+    "id": 18,
     "type": "device.registered",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -11296,7 +11565,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 18,
+    "id": 19,
     "type": "heartbeat",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -11311,7 +11580,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 19,
+    "id": 20,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "iss",
@@ -11329,7 +11598,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 20,
+    "id": 21,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "iss",
@@ -11347,7 +11616,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 21,
+    "id": 22,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "iss",
@@ -11365,7 +11634,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 22,
+    "id": 23,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "iss",
@@ -11383,7 +11652,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 23,
+    "id": 24,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "iss",
@@ -11401,7 +11670,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 24,
+    "id": 25,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "iss",
@@ -11419,7 +11688,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 25,
+    "id": 26,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "moon",
@@ -11437,7 +11706,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 26,
+    "id": 27,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "moon",
@@ -11455,7 +11724,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 27,
+    "id": 28,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "moon",
@@ -11473,7 +11742,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 28,
+    "id": 29,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "moon",
@@ -11491,7 +11760,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 29,
+    "id": 30,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "moon",
@@ -11509,7 +11778,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 30,
+    "id": 31,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "moon",
@@ -11527,7 +11796,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 31,
+    "id": 32,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -11545,7 +11814,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 32,
+    "id": 33,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -11563,7 +11832,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 33,
+    "id": 34,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -11581,7 +11850,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 34,
+    "id": 35,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -11599,7 +11868,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 35,
+    "id": 36,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -11617,7 +11886,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 36,
+    "id": 37,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "mars",
@@ -11635,7 +11904,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 37,
+    "id": 38,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "earth",
@@ -11653,7 +11922,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 38,
+    "id": 39,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "earth",
@@ -11671,7 +11940,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 39,
+    "id": 40,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "earth",
@@ -11689,7 +11958,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 40,
+    "id": 41,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "hospital",
@@ -11707,7 +11976,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 41,
+    "id": 42,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "hospital",
@@ -11725,7 +11994,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 42,
+    "id": 43,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "hospital",
@@ -11743,7 +12012,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 43,
+    "id": 44,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -11761,7 +12030,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 44,
+    "id": 45,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -11779,7 +12048,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 45,
+    "id": 46,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -11797,7 +12066,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 46,
+    "id": 47,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -11815,7 +12084,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 47,
+    "id": 48,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -11833,7 +12102,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 48,
+    "id": 49,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -11851,7 +12120,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 49,
+    "id": 50,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -11869,7 +12138,7 @@ export const events: Schema<'Event'>[] = [
     }
   },
   {
-    "id": 50,
+    "id": 51,
     "type": "task.completed",
     "at": "2026-11-14T10:00:00Z",
     "env_id": "geriatric",
@@ -11986,7 +12255,7 @@ export const controlOverview: Schema<'ControlOverview'> = {
           "share_behavioral_details": false,
           "last_seen_at": "2026-11-14T10:00:00Z",
           "liveness": "active",
-          "overall_status": "normal",
+          "overall_status": "warning",
           "open_alerts": 0,
           "last_measurement_at": "2026-11-14T09:10:46.069797Z"
         },
@@ -12010,7 +12279,7 @@ export const controlOverview: Schema<'ControlOverview'> = {
           "share_behavioral_details": false,
           "last_seen_at": "2026-11-14T10:00:00Z",
           "liveness": "active",
-          "overall_status": "normal",
+          "overall_status": "warning",
           "open_alerts": 0,
           "last_measurement_at": "2026-11-14T09:43:26.383471Z"
         }
@@ -12045,7 +12314,7 @@ export const controlOverview: Schema<'ControlOverview'> = {
           "last_seen_at": "2026-11-14T10:00:00Z",
           "liveness": "active",
           "overall_status": "critical",
-          "open_alerts": 3,
+          "open_alerts": 4,
           "last_measurement_at": "2026-11-14T10:00:00Z"
         },
         {
@@ -12086,7 +12355,7 @@ export const controlOverview: Schema<'ControlOverview'> = {
         }
       ],
       "open_alerts": {
-        "warning": 1,
+        "warning": 2,
         "critical": 2,
         "emergency": 0
       },
@@ -12280,8 +12549,8 @@ export const controlOverview: Schema<'ControlOverview'> = {
     }
   ],
   "metrics": {
-    "measurements_last_hour": 35,
-    "open_alerts": 3,
+    "measurements_last_hour": 36,
+    "open_alerts": 4,
     "active_devices": 1,
     "avg_alert_response_s": null
   }
