@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { serverNow } from '../api/client'
 import { useHomeMessages } from '../api/useHomeMessages'
 import { useLink } from '../api/useLink'
@@ -15,9 +14,9 @@ import {
   type Tone,
 } from '../components/behavioral/homeMessages'
 import { describeLink, formatDelay, hhmm } from '../components/ui/link'
-import { useVocab } from '../environments/useVocab'
 import { pendingHomeMessages, sendHomeMessage, useOutboxStore } from '../offline/outbox'
 import { useEnvironmentStore } from '../store/environment'
+import { NoMemberSelected } from '../components/ui/NoMemberSelected'
 
 /** Clase del color de cada tono. El estado nunca va solo con color: lleva icono y texto. */
 const TONE_CLASS: Record<Tone, string> = {
@@ -41,7 +40,6 @@ const focusRing =
  * reloj del servidor (`serverNow()`), así que siguen al fast-forward de la demo.
  */
 export default function HomeMessages() {
-  const vocab = useVocab()
   const memberId = useActiveMemberId()
   const envId = useEnvironmentStore((s) => s.envId)
   const messages = useHomeMessages(memberId, envId)
@@ -95,13 +93,7 @@ export default function HomeMessages() {
     return (
       <section className="mx-auto flex max-w-xl flex-col gap-3">
         {title}
-        <p className="text-env-muted">
-          No hay nadie seleccionado.{' '}
-          <Link to="/" className="underline hover:text-env-text">
-            Elige entorno y {vocab.member}
-          </Link>
-          .
-        </p>
+        <NoMemberSelected className="" />
       </section>
     )
   }

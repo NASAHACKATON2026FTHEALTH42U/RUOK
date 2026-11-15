@@ -17,6 +17,7 @@ import { LivenessGuard, MemberActivitySelector } from '../liveness/LivenessGuard
 import { EnvironmentSelector } from './EnvironmentSelector'
 import { HudClock } from './HudClock'
 import { LinkStatusChip } from './LinkStatusChip'
+import { MemberSwitcher } from './MemberSwitcher'
 import { MockBanner } from './MockBanner'
 import { NavIcon } from './NavIcon'
 import { allowedItems, navItems, tabsFor } from './navigation'
@@ -108,6 +109,8 @@ export function Layout() {
             <PendingSyncChip />
             <ServerStatus quiet />
             {can('action:change-environment') && <EnvironmentSelector />}
+            {/* Quien supervisa (admin, medic, commander) cambia de member desde cualquier página (FE-35). */}
+            <MemberSwitcher />
             {/* Aviso siempre visible en escritorio; en móvil va en «Más» y en el login. */}
             <p className="mt-2 text-[0.75rem] leading-snug text-env-muted">
               Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye

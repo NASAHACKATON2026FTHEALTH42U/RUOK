@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { countdown, escalationTargets, severityStyle, sortAlerts } from './alertFormat'
+import {
+  countdown,
+  escalationTargets,
+  mergeMemberAlerts,
+  severityStyle,
+  sortAlerts,
+} from './alertFormat'
 
 describe('escalationTargets', () => {
   it('solo niveles por encima del actual, sin self', () => {
@@ -50,5 +56,42 @@ describe('sortAlerts', () => {
       },
     ]
     expect(sortAlerts(list).map((x) => x.id)).toEqual(['c', 'b', 'a'])
+  })
+})
+
+describe('mergeMemberAlerts', () => {
+  const a = (
+    id: string,
+    severity: 'warning' | 'critical' | 'emergency',
+    status = 'open',
+    at = '2026-11-14T10:00:00Z',
+  ) => ({
+    id,
+    severity,
+    status,
+    created_at: at,
+  })
+
+  it('junta las alertas de todos los members con su nombre, las graves primero', () => {
+    const merged = mergeMemberAlerts([
+      { memberId: 1, memberName: 'Vega', alerts: [a('v1', 'warning')] },
+      {
+        memberId: 2,
+        memberName: 'Okafor',
+        alerts: [a('o1', 'emergency'), a('o2', 'critical', 'resolved')],
+      },
+      { memberId: 3, memberName: 'Haddad', alerts: [] },
+    ])
+    expect(merged.map((x) => [x.id, x.memberName])).toEqual([
+      ['o1', 'Okafor'],
+      ['v1', 'Vega'],
+      ['o2', 'Okafor'],
+    ])
+    expect(merged[1].memberId).toBe(1)
+  })
+
+  it('sin members o sin alertas, lista vacía', () => {
+    expect(mergeMemberAlerts([])).toEqual([])
+    expect(mergeMemberAlerts([{ memberId: 1, memberName: 'Vega', alerts: [] }])).toEqual([])
   })
 })

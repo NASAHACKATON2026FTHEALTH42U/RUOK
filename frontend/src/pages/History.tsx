@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { useAssessment } from '../api/useAssessment'
 import { useEnvironments } from '../api/useEnvironments'
 import { useIndicators } from '../api/useIndicators'
@@ -15,10 +15,10 @@ import {
   type Period,
   type Ranges,
 } from '../components/dashboard/trend'
-import { useVocab } from '../environments/useVocab'
 import { classify, mergeRanges, type Ranges as FullRanges } from '../offline/provisional'
 import { useEnvironmentStore } from '../store/environment'
 import { useActiveMemberId } from '../auth/useAuth'
+import { NoMemberSelected } from '../components/ui/NoMemberSelected'
 
 /** Cada cuánto se recarga la serie, para que aparezcan las mediciones nuevas. */
 const REFRESH_MS = 15_000
@@ -41,7 +41,6 @@ const VALUE_STATUS = {
  * - **Escritorio (≥ md):** además, la gráfica de tendencia; en ≥ lg, gráfica y tabla en dos columnas.
  */
 export default function History() {
-  const vocab = useVocab()
   // Un member, siempre los suyos; el resto de roles, el member elegido (FE-28).
   const memberId = useActiveMemberId()
   const envId = useEnvironmentStore((s) => s.envId)
@@ -123,13 +122,7 @@ export default function History() {
     return (
       <section className="mx-auto flex max-w-xl flex-col gap-3">
         {title}
-        <p className="text-env-muted">
-          No hay nadie seleccionado.{' '}
-          <Link to="/" className="underline hover:text-env-text">
-            Elige entorno y {vocab.member}
-          </Link>
-          .
-        </p>
+        <NoMemberSelected className="" />
       </section>
     )
   }

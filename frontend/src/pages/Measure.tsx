@@ -12,10 +12,10 @@ import { IndicatorField } from '../components/measure/IndicatorField'
 import { emptyValue, parseValue, type RawValue } from '../components/measure/measureForm'
 import { statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
-import { useVocab } from '../environments/useVocab'
 import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox'
 import { useEnvironmentStore } from '../store/environment'
 import { useActiveMemberId, useAuth } from '../auth/useAuth'
+import { NoMemberSelected } from '../components/ui/NoMemberSelected'
 
 /** Sistema cuyas escalas (ánimo, estrés…) se registran con el check-in diario, no con este formulario. */
 const CHECKIN_SYSTEM = 'neuro_behavioral'
@@ -42,7 +42,6 @@ type Phase =
  * propio (horas de sueño) tienen su tarjeta aparte.
  */
 export default function Measure() {
-  const vocab = useVocab()
   // Un member, siempre los suyos; el resto de roles, el member elegido (FE-28).
   const memberId = useActiveMemberId()
   const { can } = useAuth()
@@ -89,13 +88,7 @@ export default function Measure() {
     return (
       <section>
         {title}
-        <p className="mt-2 text-env-muted">
-          No hay nadie seleccionado.{' '}
-          <Link to="/" className="underline hover:text-env-text">
-            Elige entorno y {vocab.member}
-          </Link>
-          .
-        </p>
+        <NoMemberSelected />
       </section>
     )
   }

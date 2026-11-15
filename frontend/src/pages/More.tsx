@@ -3,6 +3,7 @@ import { useAuth } from '../auth/useAuth'
 import { SessionMenu } from '../components/auth/SessionMenu'
 import { MemberActivitySelector } from '../components/liveness/LivenessGuard'
 import { EnvironmentSelector } from '../components/ui/EnvironmentSelector'
+import { MemberSwitcher } from '../components/ui/MemberSwitcher'
 import { LinkStatusChip } from '../components/ui/LinkStatusChip'
 import { ChevronIcon } from '../components/ui/NavIcon'
 import { allowedItems, navItems, tabsFor } from '../components/ui/navigation'
@@ -62,6 +63,11 @@ export default function More() {
         {can('action:change-environment') && (
           <div className="border-t border-hud-row px-3.5 py-3 text-sm">
             <EnvironmentSelector />
+          </div>
+        )}
+        {can('view:members') && (
+          <div className="border-t border-hud-row px-3.5 py-3 text-sm">
+            <MemberSwitcher />
           </div>
         )}
       </section>

@@ -16,8 +16,8 @@ import { PvtRunner } from '../components/behavioral/PvtRunner'
 import { formatValue } from '../components/dashboard/format'
 import { statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
-import { useVocab } from '../environments/useVocab'
 import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox'
+import { NoMemberSelected } from '../components/ui/NoMemberSelected'
 
 type Phase =
   | { kind: 'intro' }
@@ -49,7 +49,6 @@ function exitFullscreen() {
  * y los lapsos como mediciones con `source: "pvt"` por el outbox (FE-11).
  */
 export default function Pvt() {
-  const vocab = useVocab()
   const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el elegido
   const catalog = useIndicators()
   const [phase, setPhase] = useState<Phase>({ kind: 'intro' })
@@ -67,13 +66,7 @@ export default function Pvt() {
     return (
       <section>
         {title}
-        <p className="mt-2 text-env-muted">
-          No hay nadie seleccionado.{' '}
-          <Link to="/" className="underline hover:text-env-text">
-            Elige entorno y {vocab.member}
-          </Link>
-          .
-        </p>
+        <NoMemberSelected />
       </section>
     )
   }
