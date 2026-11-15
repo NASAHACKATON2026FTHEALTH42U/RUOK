@@ -394,6 +394,15 @@ export function duckSoundscape(on: boolean): void {
   duck.gain.setTargetAtTime(on ? 0.3 : 1, ctx.currentTime, 0.25)
 }
 
+/**
+ * Crea o despierta el contexto de audio. Hay que llamarlo dentro del gesto del usuario (un clic):
+ * Safari en iPhone no deja sonar un contexto creado fuera de él, y la voz guía suena después,
+ * cuando el audio ya está descargado.
+ */
+export function unlockAudio(): void {
+  audio()
+}
+
 /** Contexto de audio y salida para la voz guía (null si no hay audio). */
 export function voiceOutput(): { ctx: AudioContext; out: GainNode } | null {
   const c = audio()

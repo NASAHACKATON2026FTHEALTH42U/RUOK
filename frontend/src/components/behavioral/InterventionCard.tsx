@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Intervention } from '../../api/useInterventions'
 import { InterventionPlayer } from './InterventionPlayer'
+import { unlockAudio } from './soundscapes'
 
 interface InterventionCardProps {
   intervention: Intervention
@@ -27,7 +28,10 @@ export function InterventionCard({ intervention, compact = false }: Intervention
         </p>
         <button
           type="button"
-          onClick={() => setPlaying(true)}
+          onClick={() => {
+            unlockAudio() // dentro del clic, para que la voz guía pueda sonar en el iPhone
+            setPlaying(true)
+          }}
           className="shrink-0 rounded-md bg-env-primary px-3 py-1.5 text-sm font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
         >
           Empezar

@@ -3,6 +3,10 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import type { Intervention } from '../../api/useInterventions'
 import { Modal } from '../ui/Modal'
 import { breathPhase, expandSteps } from './intervention'
+import { useVoiceAvailable, useVoicePref } from './useVoice'
+import { VOICE_NOTE } from './voice'
+import { VoiceToggle } from './VoiceControls'
+import { speak, stopSpeaking } from './voiceGuide'
 
 interface InterventionPlayerProps {
   intervention: Intervention
@@ -11,6 +15,10 @@ interface InterventionPlayerProps {
   onStepChange?: (index: number, done: boolean) => void
   /** Controles extra en la cabecera (p. ej. cambiar de paisaje sonoro sin salir). */
   toolbar?: ReactNode
+  /** Espera antes de la primera frase de la voz guía (p. ej. tras la campana). */
+  voiceDelayMs?: number
+  /** Con la voz guía activa, una frase sin audio (p. ej. la meditación toca la campana). */
+  onVoiceMissing?: () => void
 }
 
 /** Escala del círculo según la fase: inhala crece, exhala encoge, mantén se queda (null). */
@@ -26,12 +34,17 @@ function targetScale(text: string | undefined): number | null {
  * cuenta atrás en los pasos con tiempo (avanza solo), "Siguiente" en los manuales y, en
  * los de respiración, un círculo que crece al inhalar y encoge al exhalar (sin animación si
  * el sistema pide movimiento reducido). Todo en local: funciona sin conexión.
+ *
+ * Voz guía (FE-37): si hay audio para sus pasos, la cabecera tiene el interruptor «Voz guía» y,
+ * con él encendido, cada paso se lee al mostrarse; la voz se para al cambiar de paso o al salir.
  */
 export function InterventionPlayer({
   intervention,
   onClose,
   onStepChange,
   toolbar,
+  voiceDelayMs = 400,
+  onVoiceMissing,
 }: InterventionPlayerProps) {
   const steps = useMemo(() => expandSteps(intervention.steps), [intervention.steps])
   const [index, setIndex] = useState(0)
@@ -73,6 +86,33 @@ export function InterventionPlayer({
     onStepRef.current?.(index, done)
   }, [index, done])
 
+  // Voz guía: cada paso se lee al mostrarse (el primero, tras `voiceDelayMs`).
+  const texts = useMemo(() => steps.map((s) => s.text), [steps])
+  const voiceReady = useVoiceAvailable(texts)
+  const voiceOn = useVoicePref()
+  const voice = voiceReady && voiceOn
+  const missingRef = useRef(onVoiceMissing)
+  missingRef.current = onVoiceMissing
+  // Solo se marca al sonar de verdad (en el doble montaje del modo estricto no llega a sonar).
+  const spoken = useRef(false)
+  useEffect(() => {
+    const text = steps[index]?.text
+    if (!voice || done || !text) return
+    const t = window.setTimeout(
+      () => {
+        spoken.current = true
+        void speak(text).then((ok) => {
+          if (!ok) missingRef.current?.()
+        })
+      },
+      spoken.current ? 150 : voiceDelayMs,
+    )
+    return () => {
+      window.clearTimeout(t)
+      stopSpeaking()
+    }
+  }, [voice, done, index, steps, voiceDelayMs])
+
   const next = () => goTo(index + 1)
 
   return (
@@ -84,6 +124,7 @@ export function InterventionPlayer({
             {intervention.title}
           </h2>
           <div className="flex flex-wrap items-center justify-end gap-2">
+            {voiceReady && <VoiceToggle compact />}
             {toolbar}
             <button
               data-autofocus
@@ -161,6 +202,7 @@ export function InterventionPlayer({
             </>
           )}
         </div>
+        {voiceReady && <p className="px-4 pb-4 text-center text-xs text-env-muted">{VOICE_NOTE}</p>}
       </div>
     </Modal>
   )

@@ -13,6 +13,10 @@ import {
   type PvtSummary,
 } from '../components/behavioral/pvt'
 import { PvtRunner } from '../components/behavioral/PvtRunner'
+import { emphasize } from '../components/behavioral/voice'
+import { ListenButton, VoiceNote } from '../components/behavioral/VoiceControls'
+import { stopSpeaking } from '../components/behavioral/voiceGuide'
+import voiceTexts from '../components/behavioral/voiceTexts.json'
 import { CaseFeedbackFor } from '../components/alerts/CaseFeedbackNote'
 import { formatValue } from '../components/dashboard/format'
 import { statusStyle } from '../components/ui/status'
@@ -113,27 +117,35 @@ export default function Pvt() {
   }
 
   const start = (mode: PvtMode) => {
+    stopSpeaking() // la voz guía nunca suena durante la prueba
     void enterFullscreen()
     setPhase({ kind: 'running', mode })
   }
 
   if (phase.kind === 'intro') {
+    // Las instrucciones salen de voiceTexts.json: son las mismas frases que tiene la voz guía.
+    const [lead, ...howTo] = voiceTexts.pvt
     return (
       <section className="mx-auto my-auto w-full max-w-xl space-y-4 lg:max-w-3xl lg:space-y-6">
         {title}
         <div className="space-y-2 rounded-xl border border-env-border bg-env-surface p-4 text-sm lg:space-y-3 lg:p-6 lg:text-lg">
-          <p>Mide tu tiempo de reacción, un marcador objetivo de fatiga.</p>
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <p>{lead}</p>
+            <ListenButton texts={voiceTexts.pvt} label="Escuchar instrucciones" />
+          </div>
           <ol className="list-decimal space-y-1 pl-5">
-            <li>La pantalla espera un rato al azar (entre 2 y 10 s).</li>
-            <li>
-              Cuando cambie de color y diga <strong>¡Pulsa!</strong>, toca la pantalla lo antes
-              posible (o la barra espaciadora).
-            </li>
-            <li>No pulses antes de tiempo: cuenta como falso inicio.</li>
+            {howTo.map((text) => (
+              <li key={text}>
+                {emphasize(text).map((part, i) =>
+                  part.strong ? <strong key={i}>{part.text}</strong> : part.text,
+                )}
+              </li>
+            ))}
           </ol>
           <p className="text-env-muted">
             Una respuesta de más de {LAPSE_MS} ms es un <em>lapso</em> de atención.
           </p>
+          <VoiceNote texts={voiceTexts.pvt} />
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {(Object.keys(PVT_MODES) as PvtMode[]).map((m) => (
