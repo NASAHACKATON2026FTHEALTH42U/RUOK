@@ -162,7 +162,7 @@ export default function Dashboard() {
           </span>
         )}
         <span
-          className={`${desktop ? 'text-xs' : 'text-[11px]'} font-mono text-env-muted`}
+          className={`${desktop ? 'text-xs' : 'text-[0.75rem]'} font-mono text-env-muted`}
           role={desktop ? 'status' : undefined}
         >
           {/* Solo el aviso de fallo: los datos pueden estar desfasados. */}
@@ -189,7 +189,7 @@ export default function Dashboard() {
         )}
       </header>
 
-      {/* Móvil: anillo de sistemas y lista SYS.01 (estilo HUD, maqueta Main). */}
+      {/* Móvil: anillo de sistemas y lista de sistemas (estilo HUD, maqueta Main). */}
       <SystemsRing
         regions={regions}
         stale={stale}

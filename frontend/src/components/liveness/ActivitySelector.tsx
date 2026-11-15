@@ -39,12 +39,12 @@ export function ActivitySelector({
               onClick={() => setActivity(o.id as Activity)}
               key={o.id}
               title={activityHint(o.id, isSpace, liveness)}
-              // En la barra lateral (compact), letra más pequeña para que «Actividad de riesgo» quepa;
-              // por debajo de 1024 px la barra es más estrecha y la letra, aún menor.
+              // En la barra lateral (compact), sin espaciado entre letras: «Actividad de riesgo» cabe
+              // en dos líneas con una letra legible (11 px como mínimo).
               className={`relative flex min-h-11 min-w-0 cursor-pointer items-center justify-center border px-1 text-center font-mono uppercase focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-env-primary ${
                 compact
-                  ? 'text-[7.5px] leading-tight tracking-normal lg:text-[9px] lg:tracking-[0.06em]'
-                  : 'text-[11px] tracking-[0.1em]'
+                  ? 'text-[0.6875rem] leading-tight tracking-normal'
+                  : 'text-[0.75rem] tracking-[0.1em]'
               } ${
                 on
                   ? 'border-env-primary bg-env-primary/12 text-env-text'

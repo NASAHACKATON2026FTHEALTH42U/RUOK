@@ -27,7 +27,7 @@ export default function More() {
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-3">
       <header className="flex items-end justify-between gap-3">
-        <h1 className="text-[22px] font-light">Más</h1>
+        <h1 className="text-[1.375rem] font-light">Más</h1>
         <SessionMenu />
       </header>
 
@@ -54,9 +54,7 @@ export default function More() {
       <MemberActivitySelector />
 
       <section aria-label="Estado del dispositivo" className="hud-panel">
-        <div className="hud-panel-head">
-          <b>NET.02</b>Conexión
-        </div>
+        <div className="hud-panel-head">Conexión</div>
         <div className="flex flex-wrap items-center gap-2 px-3.5 py-3 text-xs">
           <ServerStatus />
           <LinkStatusChip />

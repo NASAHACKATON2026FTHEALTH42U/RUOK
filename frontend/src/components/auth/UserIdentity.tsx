@@ -56,7 +56,7 @@ export function UserIdentity() {
         {initials(name)}
       </span>
       <span className="min-w-0 leading-tight">
-        <span className="block truncate text-[15px] font-medium text-env-text">{name}</span>
+        <span className="block truncate text-[0.9375rem] font-medium text-env-text">{name}</span>
         {line && <span className="block truncate text-xs text-env-muted">{line}</span>}
       </span>
     </span>

@@ -15,7 +15,7 @@ interface BodyLegendProps {
   /** En columna, cada sistema a todo el ancho (columna de sistemas del panel). */
   vertical?: boolean
   /**
-   * Filas del panel `SYS.01`: el nombre y, debajo, el estado (todas las filas iguales, quepa o
+   * Filas del panel «Sistemas»: el nombre y, debajo, el estado (todas las filas iguales, quepa o
    * no el nombre en una línea), separadas por líneas y sin cajas redondeadas.
    * `className` va a la lista (p. ej. dos columnas en tableta).
    */

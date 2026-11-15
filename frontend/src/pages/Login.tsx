@@ -92,10 +92,10 @@ export default function Login() {
     <div className="hud-grid flex min-h-full flex-col">
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-3.5 pt-4 pb-4 md:max-w-xl md:px-6 lg:max-w-5xl lg:justify-center lg:py-8">
         <div className="flex justify-between px-1">
-          <span className="hud-label text-[9px] lg:text-[10px]">
+          <span className="hud-label text-[0.6875rem]">
             Nodo{envName ? `.${envName}` : ''} / Servidor a bordo
           </span>
-          <span className="hud-label text-[9px] lg:text-[10px]">Sin internet · Local</span>
+          <span className="hud-label text-[0.6875rem]">Sin internet · Local</span>
         </div>
 
         <div className="mt-2 lg:mt-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-10">
@@ -104,7 +104,7 @@ export default function Login() {
             <RuokRings />
 
             <div className="mt-1 text-center">
-              <h1 className="text-[30px] leading-tight font-light lg:text-[34px]">
+              <h1 className="text-[1.875rem] leading-tight font-light lg:text-[2.125rem]">
                 Hola de nuevo, <span className="text-env-primary">{vocab.member}.</span>
               </h1>
               <p className="mt-0.5 text-sm text-env-muted">
@@ -127,7 +127,7 @@ export default function Login() {
               }}
             >
               <div className="hud-head">
-                <b>AUTH.01</b>Acceso
+                Acceso
                 {envName && <span className="hud-chip mr-[22px]">{envName}</span>}
               </div>
               <div className="flex flex-col gap-3 px-3.5 pt-3 pb-3.5">
@@ -171,16 +171,14 @@ export default function Login() {
           <div className="mt-3 flex flex-1 flex-col gap-3 lg:mt-0">
             {envList.length > 0 && (
               <label className="hud-panel flex items-center gap-3 py-1.5 pr-[22px] pl-3.5">
-                <span className="hud-label shrink-0">
-                  <b className="font-normal text-env-primary">ENV.02</b> Entorno
-                </span>
+                <span className="hud-label shrink-0">Entorno</span>
                 <select
                   value={envId ?? ''}
                   onChange={(e) => {
                     const next = envList.find((x) => x.id === e.target.value)
                     if (next) selectEnvironment(next)
                   }}
-                  className="hud-input min-w-0 flex-1 !border-0 !bg-transparent !px-1 !font-sans !text-[15px]"
+                  className="hud-input min-w-0 flex-1 !border-0 !bg-transparent !px-1 !font-sans !text-[0.9375rem]"
                 >
                   {envList.map((e) => (
                     <option key={e.id} value={e.id}>
@@ -205,7 +203,7 @@ export default function Login() {
             {demoUsers.length > 0 && showDemo && (
               <section className="hud-panel" aria-label="Usuarios de la demo">
                 <div className="hud-head">
-                  <b>DEMO.03</b>Usuarios
+                  Usuarios
                   <span className="hud-chip mr-[22px]">Un toque para entrar</span>
                 </div>
                 <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2">
@@ -224,7 +222,7 @@ export default function Login() {
                             ? shortDisplayName(u.display_name, envName)
                             : capitalize(u.role_label)}
                         </span>
-                        <span className="hud-label text-[9px]">
+                        <span className="hud-label text-[0.6875rem]">
                           {u.role === 'member'
                             ? u.role_label
                             : (ROLE_GROUP[u.role] ?? u.role_label)}

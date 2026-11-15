@@ -102,6 +102,14 @@ html[data-theme-ready] :is(body, header, footer, nav a, select) {
  * (p. ej. outline-none en las zonas del cuerpo, que tienen su propio resaltado) manden.
  */
 @layer base {
+  /* Escala del texto: el tamaño base (el del navegador, normalmente 16 px) se mantiene hasta
+     1440 px de ancho y crece hasta 1,1875 veces (~19 px) en pantallas grandes. Todo lo que va en
+     rem (texto y espacios) se adapta al espacio disponible, y respeta el tamaño que elija el
+     usuario en su navegador. */
+  html {
+    font-size: clamp(100%, calc(100% + (100vw - 1440px) * 0.006), 118.75%);
+  }
+
   /* Cursor de mano en todo lo pulsable; "no permitido" si está desactivado. */
   button:not(:disabled),
   [role='button']:not([aria-disabled='true']),
@@ -242,7 +250,7 @@ html[data-hud] body {
     gap: 10px;
     padding: 11px 14px 10px;
     border-bottom: 1px solid var(--color-hud-line);
-    font: 400 11px var(--font-mono);
+    font: 400 0.75rem var(--font-mono);
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--env-text);
@@ -262,7 +270,7 @@ html[data-hud] body {
     gap: 6px;
     padding: 3px 7px;
     border: 1px solid currentColor;
-    font: 400 10px var(--font-mono);
+    font: 400 0.6875rem var(--font-mono);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     white-space: nowrap;
@@ -288,7 +296,7 @@ html[data-hud] body {
     background: color-mix(in srgb, var(--env-bg) 60%, transparent);
     border: 1px solid var(--env-border);
     color: var(--env-text);
-    font: 400 16px var(--font-mono);
+    font: 400 1rem var(--font-mono);
     padding: 0 12px;
   }
   .hud-input:focus {
@@ -296,7 +304,7 @@ html[data-hud] body {
   }
 
   .hud-label {
-    font: 400 10px var(--font-mono);
+    font: 400 0.6875rem var(--font-mono);
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--env-muted);
@@ -322,7 +330,7 @@ html[data-hud] body {
     min-height: 44px;
     padding: 0 14px;
     border-bottom: 1px solid var(--color-hud-row);
-    font: 400 15px var(--font-sans);
+    font: 400 0.9375rem var(--font-sans);
     /* Texto del tema: en los temas claros (hospital, residencia) el gris claro del HUD no se lee. */
     color: var(--env-text);
   }
@@ -377,7 +385,7 @@ html[data-hud] body {
     border: 1px solid var(--env-primary);
     background: rgba(95, 212, 232, 0.07);
     color: var(--env-text);
-    font: 500 12px var(--font-mono);
+    font: 500 0.75rem var(--font-mono);
     letter-spacing: 0.16em;
     text-transform: uppercase;
     clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
@@ -461,7 +469,7 @@ html[data-hud] body {
     padding: 11px 0 8px;
     /* Etiquetas largas ("Centro de control") pasan a dos líneas: centradas, no a la izquierda. */
     text-align: center;
-    font: 400 10px var(--font-mono);
+    font: 400 0.6875rem var(--font-mono);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--env-muted);

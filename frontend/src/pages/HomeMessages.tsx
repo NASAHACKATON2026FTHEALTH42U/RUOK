@@ -129,7 +129,7 @@ export default function HomeMessages() {
 
   return (
     // Ocupa el alto disponible (Layout `fill`): solo la conversación tiene scroll.
-    <section className="mx-auto flex min-h-0 w-full max-w-xl flex-1 flex-col gap-2.5 md:gap-3 lg:max-w-3xl">
+    <section className="mx-auto flex min-h-0 w-full max-w-xl flex-1 flex-col gap-2.5 md:gap-3 lg:max-w-5xl">
       {title}
 
       <section
@@ -137,7 +137,7 @@ export default function HomeMessages() {
         className="hud-panel flex min-h-0 flex-1 flex-col"
       >
         <div className="hud-panel-head shrink-0">
-          <b>COM.01</b>Conversación
+          Conversación
           {/* El chip ya lleva su cuadrito: el estado lo dice el texto, no solo el color. */}
           <span
             role="status"
@@ -209,7 +209,7 @@ export default function HomeMessages() {
           maxLength={MAX_LENGTH}
           rows={2}
           placeholder="Escribe a casa…"
-          className={`hud-input !h-auto resize-none !py-2.5 !font-sans !text-[15px] leading-snug ${focusRing}`}
+          className={`hud-input !h-auto resize-none !py-2.5 !font-sans !text-[0.9375rem] leading-snug ${focusRing}`}
         />
         {error && (
           <p role="alert" className="text-sm text-st-crit">
@@ -217,7 +217,7 @@ export default function HomeMessages() {
           </p>
         )}
         <div className="flex items-center gap-3">
-          <span className="font-mono text-[11px] text-env-muted" aria-live="off">
+          <span className="font-mono text-[0.75rem] text-env-muted" aria-live="off">
             {draft.length}/{MAX_LENGTH}
           </span>
           <button
@@ -249,11 +249,11 @@ function Bubble({ item, now }: { item: ThreadItem; now: Date }) {
       <p className="hud-label mb-1">
         {mine ? 'Tú' : (item.sender ?? 'Casa')} · {hhmm(item.sentAt)}
       </p>
-      <p className="text-[15px] leading-snug break-words whitespace-pre-wrap text-env-text">
+      <p className="text-[0.9375rem] leading-snug break-words whitespace-pre-wrap text-env-text">
         {item.text}
       </p>
       <p
-        className={`mt-1.5 flex items-start gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase ${TONE_CLASS[state.tone]}`}
+        className={`mt-1.5 flex items-start gap-1.5 font-mono text-[0.6875rem] tracking-[0.08em] uppercase ${TONE_CLASS[state.tone]}`}
       >
         <span aria-hidden>{state.icon}</span>
         <span>{state.label}</span>

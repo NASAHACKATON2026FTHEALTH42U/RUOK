@@ -175,7 +175,7 @@ export default function CheckIn() {
 
   if (phase.kind === 'queued') {
     return (
-      <section className="mx-auto max-w-xl space-y-3">
+      <section className="mx-auto my-auto w-full max-w-xl space-y-3 lg:max-w-3xl">
         <h1 className="text-2xl font-semibold">Check-in guardado en el dispositivo</h1>
         <div className="rounded-xl border border-env-border bg-env-surface p-3" role="status">
           <p>
@@ -197,7 +197,7 @@ export default function CheckIn() {
   if (phase.kind === 'sent') {
     const { assessment } = phase.result
     return (
-      <section className="mx-auto max-w-xl space-y-3">
+      <section className="mx-auto my-auto w-full max-w-xl space-y-3 lg:max-w-3xl">
         <h1 className="text-2xl font-semibold">Check-in guardado</h1>
         <div className="rounded-xl border border-env-border bg-env-surface p-3" role="status">
           <p>Gracias. Tus respuestas de hoy ya están registradas.</p>
@@ -234,7 +234,11 @@ export default function CheckIn() {
   }
 
   return (
-    <form onSubmit={submit} className="mx-auto max-w-xl space-y-4" noValidate>
+    <form
+      onSubmit={submit}
+      className="mx-auto my-auto w-full max-w-xl space-y-4 lg:max-w-3xl lg:space-y-6"
+      noValidate
+    >
       <div>
         {title}
         <p className="text-env-muted">¿Cómo estás hoy? {total} preguntas rápidas.</p>
