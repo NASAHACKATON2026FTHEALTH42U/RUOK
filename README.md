@@ -1,5 +1,7 @@
 # RUOK — R U OK?
 
+> 🇬🇧 [Read in English](README.en.md)
+
 Biometría en tiempo real para astronautas, con aplicaciones duales en la sanidad terrestre.
 
 Prototipo para el **NASA Space Apps Challenge 2026**, reto *Create Health Monitoring Software for Astronauts on Space Missions*.

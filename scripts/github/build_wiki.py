@@ -55,6 +55,22 @@ PAGES: dict[str, str] = {
     "docs/demo-script.md": "Guion-de-demo",
     "docs/sources.md": "Fuentes",
     "README.md": "Puesta-en-marcha",
+    # Versión en inglés (docs/en/, README.en.md): páginas propias, con nombres que no chocan.
+    "docs/en/README.md": "English",
+    "README.en.md": "Getting-started",
+    "docs/en/status.md": "Status",
+    "docs/en/vision-and-scope.md": "Vision-and-Scope",
+    "docs/en/architecture.md": "Architecture",
+    "docs/en/backend.md": "Backend-Guide",
+    "docs/en/data-model.md": "Data-Model",
+    "docs/en/auth-and-roles.md": "Auth-and-Roles",
+    "docs/en/control-center-and-devices.md": "Control-Center-and-Devices",
+    "docs/en/environments.md": "Environments",
+    "docs/en/alerts-and-escalation.md": "Alerts-and-Escalation",
+    "docs/en/offline-and-liveness.md": "Offline-and-Liveness",
+    "docs/en/behavioral-health.md": "Behavioral-Health",
+    "docs/en/team-and-schedule.md": "Team-and-Schedule",
+    "docs/en/demo-script.md": "Demo-Script",
 }
 
 # Índice lateral: grupos de páginas.
@@ -66,6 +82,11 @@ SIDEBAR: list[tuple[str, list[str]]] = [
                        "Centro-de-control-y-dispositivos"]),
     ("Desarrollo", ["Backend", "Frontend", "Backlog"]),
     ("Equipo y demo", ["Equipo-y-cronograma", "Guion-de-demo", "Fuentes"]),
+    ("🇬🇧 English", ["English", "Getting-started", "Status", "Vision-and-Scope",
+                    "Architecture", "Data-Model", "Auth-and-Roles", "Environments",
+                    "Alerts-and-Escalation", "Offline-and-Liveness", "Behavioral-Health",
+                    "Control-Center-and-Devices", "Backend-Guide", "Team-and-Schedule",
+                    "Demo-Script"]),
 ]
 
 _LINK = re.compile(r"(?<!!)\[([^\]]*)\]\(([^)\s]+)\)")
@@ -116,9 +137,15 @@ def build(out: Path) -> list[str]:
         if not src.exists():
             print(f"  ! falta {source}: se omite", file=sys.stderr)
             continue
+        english = source.startswith("docs/en/") or source == "README.en.md"
         banner = (
-            f"> 📄 Generado desde [`{source}`]({BLOB}{source}). No edites esta página: cambia "
-            "el fichero del repo y regenera la wiki (`scripts/github/build_wiki.py`).\n\n"
+            f"> 📄 Generated from [`{source}`]({BLOB}{source}). Do not edit this page: change "
+            "the repo file and rebuild the wiki (`scripts/github/build_wiki.py`). "
+            "🇪🇸 [Versión en español](Home)\n\n"
+            if english
+            else f"> 📄 Generado desde [`{source}`]({BLOB}{source}). No edites esta página: "
+            "cambia el fichero del repo y regenera la wiki (`scripts/github/build_wiki.py`). "
+            "🇬🇧 [English version](English)\n\n"
         )
         (out / f"{page}.md").write_text(
             banner + convert(src.read_text(encoding="utf-8"), source), encoding="utf-8"
