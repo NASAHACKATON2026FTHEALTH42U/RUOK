@@ -9,6 +9,11 @@ interface ImportMetaEnv {
   readonly VITE_USE_MOCKS?: string
   /** 'true' = si el servidor no responde, las lecturas usan datos de ejemplo (plan B). */
   readonly VITE_MOCK_FALLBACK?: string
+  /**
+   * 'true' = escaparate público (demo de Vercel): en modo mock no se pinta el banner de datos de
+   * ejemplo y los usuarios demo del login van plegados en un botón.
+   */
+  readonly VITE_SHOWCASE?: string
 }
 
 interface ImportMeta {

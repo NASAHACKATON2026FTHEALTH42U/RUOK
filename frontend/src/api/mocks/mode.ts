@@ -52,6 +52,15 @@ export function initMockModeFromUrl(search = globalThis.location?.search ?? ''):
   if (value !== null) setMockMode(value !== '0' && value !== 'false')
 }
 
+/**
+ * Escaparate público (`VITE_SHOWCASE=true`, lo activa `vercel.json`): el front va entero en modo
+ * mock y se presenta limpio, sin el banner amarillo ni la lista de usuarios demo desplegada.
+ * No afecta al aviso de "servidor sin conexión" (fallback), que nunca se oculta.
+ */
+export function isShowcase(): boolean {
+  return import.meta.env.VITE_SHOWCASE === 'true'
+}
+
 export function isMockFallbackEnabled(): boolean {
   return import.meta.env.VITE_MOCK_FALLBACK === 'true'
 }

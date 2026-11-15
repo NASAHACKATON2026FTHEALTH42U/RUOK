@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api, unwrap } from '../api/client'
+import { isShowcase } from '../api/mocks/mode'
 import { useEnvironments } from '../api/useEnvironments'
 import { useLoad } from '../api/useLoad'
 import { homeFor } from '../auth/roles'
@@ -78,6 +79,8 @@ export default function Login() {
   const [secret, setSecret] = useState('')
   const [error, setError] = useState<LoginError | null>(null)
   const [busy, setBusy] = useState(false)
+  // Usuarios demo a la vista, salvo en el escaparate público (plegados hasta que se pidan).
+  const [showDemo, setShowDemo] = useState(() => !isShowcase())
   // Se reintenta cada 10 s: si se abrió sin servidor, los usuarios demo aparecen al volver.
   const demo = useLoad(() => unwrap(api.GET('/api/v1/auth/demo-users')), [], { refreshMs: 10_000 })
   const expired = params.get('expired') === '1'
@@ -204,7 +207,18 @@ export default function Login() {
           </div>
         </form>
 
-        {demo.state === 'ready' && demo.data.length > 0 && (
+        {/* Escaparate público: la lista va plegada en un botón, para que el login salga limpio. */}
+        {demo.state === 'ready' && demo.data.length > 0 && !showDemo && (
+          <button
+            type="button"
+            aria-expanded={false}
+            onClick={() => setShowDemo(true)}
+            className="hud-btn mt-3 w-full"
+          >
+            Usuarios demo ({demo.data.length})
+          </button>
+        )}
+        {demo.state === 'ready' && demo.data.length > 0 && showDemo && (
           <section className="hud-panel mt-3" aria-label="Usuarios de la demo">
             <div className="hud-head">
               <b>DEMO.02</b>Usuarios
