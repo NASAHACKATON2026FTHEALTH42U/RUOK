@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Assessment } from '../../api/useAssessment'
 import type { Indicator } from '../../api/useIndicators'
 import { useInterventions } from '../../api/useInterventions'
 import type { BodySystem } from '../../api/useSystems'
 import { InterventionCard } from '../behavioral/InterventionCard'
+import { Modal } from '../ui/Modal'
 import { StatusBadge } from '../ui/StatusBadge'
 import { IndicatorCard } from './IndicatorCard'
 import { SystemTrends } from './SystemTrends'
@@ -41,7 +42,6 @@ export function SystemPanel({
   provisionalIds,
   onClose,
 }: SystemPanelProps) {
-  const closeRef = useRef<HTMLButtonElement>(null)
   const titleId = `system-panel-${system.id}`
   const byId = new Map(indicators.map((i) => [i.id, i]))
   const recommendations = [...(assessed?.recommendations ?? [])].sort(
@@ -112,116 +112,106 @@ export function SystemPanel({
   ].filter((x) => x !== null)
   const current = sections.find((x) => x.id === open)
 
-  useEffect(() => {
-    closeRef.current?.focus()
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-3 md:p-8">
-      {/* Clic fuera = cerrar */}
-      <motion.button
-        type="button"
-        aria-label="Cerrar el detalle"
-        tabIndex={-1}
-        onClick={onClose}
-        className="absolute inset-0 h-full w-full cursor-default bg-black/40"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      />
+    // Modal bloqueante: hasta cerrarlo (✕ o Escape) no se puede usar nada más. El fondo oscuro
+    // lo pinta el propio panel, con fundido (el `::backdrop` no se puede animar al salir).
+    <Modal labelledBy={titleId} onClose={onClose} backdrop={false}>
+      <div className="flex min-h-full items-center justify-center p-3 md:p-8">
+        <motion.div
+          aria-hidden
+          className="fixed inset-0 bg-black/40"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        />
 
-      <motion.aside
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-env-border bg-env-bg p-5 shadow-2xl md:p-6"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        transition={{ type: 'tween', duration: 0.2 }}
-      >
-        <header className="flex items-start justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <h2 id={titleId} className="text-2xl font-semibold">
-              {system.name}
-            </h2>
-            <StatusBadge status={stale ? 'stale' : (assessed?.status ?? 'unknown')} size="sm" />
-          </div>
-          <button
-            ref={closeRef}
-            type="button"
-            onClick={onClose}
-            className="rounded-md px-2 py-1 text-env-muted hover:bg-env-surface hover:text-env-text focus-visible:outline-2 focus-visible:outline-env-primary"
-            aria-label="Cerrar"
-          >
-            ✕
-          </button>
-        </header>
+        <motion.div
+          className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-env-border bg-env-bg p-5 shadow-2xl md:p-6"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ type: 'tween', duration: 0.2 }}
+        >
+          <header className="flex items-start justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h2 id={titleId} className="text-2xl font-semibold">
+                {system.name}
+              </h2>
+              <StatusBadge status={stale ? 'stale' : (assessed?.status ?? 'unknown')} size="sm" />
+            </div>
+            <button
+              data-autofocus
+              type="button"
+              onClick={onClose}
+              className="rounded-md px-2 py-1 text-env-muted hover:bg-env-surface hover:text-env-text focus-visible:outline-2 focus-visible:outline-env-primary"
+              aria-label="Cerrar"
+            >
+              ✕
+            </button>
+          </header>
 
-        {/* Las secciones plegadas (indicadores, recomendaciones, intervenciones) se abren SOBRE
+          {/* Las secciones plegadas (indicadores, recomendaciones, intervenciones) se abren SOBRE
             este bloque, ocupando justo su hueco y con scroll propio: no empujan el contenido ni
             se salen de la ventana. */}
-        <section className={`relative mt-4 ${current ? 'min-h-48' : ''}`}>
-          {!assessed || assessed.indicators.length === 0 ? (
-            <p className="text-sm text-env-muted">Todavía no hay mediciones de este sistema.</p>
-          ) : (
-            <SystemTrends
-              series={assessed.indicators.map((ind) => ({
-                id: ind.indicator_id,
-                name: byId.get(ind.indicator_id)?.name ?? ind.indicator_id,
-                unit: ind.unit,
-                range: ind.range,
-              }))}
-            />
+          <section className={`relative mt-4 ${current ? 'min-h-48' : ''}`}>
+            {!assessed || assessed.indicators.length === 0 ? (
+              <p className="text-sm text-env-muted">Todavía no hay mediciones de este sistema.</p>
+            ) : (
+              <SystemTrends
+                series={assessed.indicators.map((ind) => ({
+                  id: ind.indicator_id,
+                  name: byId.get(ind.indicator_id)?.name ?? ind.indicator_id,
+                  unit: ind.unit,
+                  range: ind.range,
+                }))}
+              />
+            )}
+            {current && (
+              <div
+                id={`${titleId}-extra`}
+                role="region"
+                aria-label={current.label}
+                className="absolute inset-0 z-10 overflow-y-auto rounded-lg border border-env-border bg-env-bg p-3 [scrollbar-color:var(--env-border)_transparent]"
+              >
+                {current.content}
+              </div>
+            )}
+          </section>
+
+          {sections.length > 0 && (
+            <div className="mt-3">
+              <div className="flex flex-wrap gap-2">
+                {sections.map((sec) => (
+                  <button
+                    key={sec.id}
+                    type="button"
+                    aria-expanded={open === sec.id}
+                    aria-controls={open === sec.id ? `${titleId}-extra` : undefined}
+                    onClick={() => setOpen(open === sec.id ? null : sec.id)}
+                    className={`rounded-lg border px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
+                      open === sec.id
+                        ? 'border-env-text bg-env-surface'
+                        : 'border-env-border text-env-muted hover:border-env-text hover:text-env-text'
+                    }`}
+                  >
+                    <span aria-hidden>{open === sec.id ? '▾ ' : '▸ '}</span>
+                    {sec.label} ({sec.count})
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
-          {current && (
-            <div
-              id={`${titleId}-extra`}
-              role="region"
-              aria-label={current.label}
-              className="absolute inset-0 z-10 overflow-y-auto rounded-lg border border-env-border bg-env-bg p-3 [scrollbar-color:var(--env-border)_transparent]"
+
+          {canMeasure && (
+            <Link
+              to={`/measure?system=${encodeURIComponent(system.id)}`}
+              className="mx-auto mt-4 block max-w-sm rounded-lg bg-env-primary px-4 py-2 text-center font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
             >
-              {current.content}
-            </div>
+              Medir ahora
+            </Link>
           )}
-        </section>
-
-        {sections.length > 0 && (
-          <div className="mt-3">
-            <div className="flex flex-wrap gap-2">
-              {sections.map((sec) => (
-                <button
-                  key={sec.id}
-                  type="button"
-                  aria-expanded={open === sec.id}
-                  aria-controls={open === sec.id ? `${titleId}-extra` : undefined}
-                  onClick={() => setOpen(open === sec.id ? null : sec.id)}
-                  className={`rounded-lg border px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
-                    open === sec.id
-                      ? 'border-env-text bg-env-surface'
-                      : 'border-env-border text-env-muted hover:border-env-text hover:text-env-text'
-                  }`}
-                >
-                  <span aria-hidden>{open === sec.id ? '▾ ' : '▸ '}</span>
-                  {sec.label} ({sec.count})
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {canMeasure && (
-          <Link
-            to={`/measure?system=${encodeURIComponent(system.id)}`}
-            className="mx-auto mt-4 block max-w-sm rounded-lg bg-env-primary px-4 py-2 text-center font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
-          >
-            Medir ahora
-          </Link>
-        )}
-      </motion.aside>
-    </div>
+        </motion.div>
+      </div>
+    </Modal>
   )
 }

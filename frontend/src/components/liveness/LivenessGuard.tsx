@@ -5,6 +5,7 @@ import { useAuth } from '../../auth/useAuth'
 import { useVocab } from '../../environments/useVocab'
 import { useEnvironmentStore } from '../../store/environment'
 import { SosDialog } from '../alerts/SosDialog'
+import { SosEmergency } from '../alerts/SosEmergency'
 import { ActivitySelector } from './ActivitySelector'
 import { RuokModal } from './RuokModal'
 import { useHeartbeat } from './useHeartbeat'
@@ -12,36 +13,53 @@ import { useHeartbeat } from './useHeartbeat'
 /**
  * Liveness del dispositivo (FE-15). Solo en la sesión de un `member` (es SU dispositivo el que
  * da señales de vida): heartbeat cada 15 s y modal "R U OK?" cuando el servidor lo pide.
- * "Necesito ayuda" puede abrir el diálogo SOS (FE-13). Va montado siempre en el Layout; el
- * selector de actividad va aparte (`MemberActivitySelector`), en «Más» y en la barra lateral.
+ * "Necesito ayuda" sin conexión envía el SOS al momento (FE-13); con conexión, el servidor crea
+ * la alerta y se pueden añadir detalles con el aviso a control. Va montado siempre en el Layout;
+ * el selector de actividad va aparte (`MemberActivitySelector`), en «Más» y en la barra lateral.
  */
 export function LivenessGuard() {
   const { role, user } = useAuth()
   const memberId = role === 'member' ? (user?.member_id ?? null) : null
   const { checkinRequired, answered } = useHeartbeat(memberId)
-  const [sosOpen, setSosOpen] = useState(false)
-  const closeSos = useCallback(() => setSosOpen(false), [])
+  const [help, setHelp] = useState<'sos' | 'notice' | null>(null)
+  const closeHelp = useCallback(() => setHelp(null), [])
 
   const envId = useEnvironmentStore((s) => s.envId)
   const envs = useEnvironments()
   const env = envs.state === 'ready' ? envs.data.find((e) => e.id === envId) : undefined
   const vocabulary = useVocab()
   const interventions = useInterventions()
+  const offline = interventions.state === 'ready' ? interventions.data : []
 
   if (memberId === null) return null
 
   return (
     <>
       {checkinRequired && (
-        <RuokModal memberId={memberId} onAnswered={answered} onOpenSos={() => setSosOpen(true)} />
+        <RuokModal
+          memberId={memberId}
+          onAnswered={answered}
+          onSendSos={() => setHelp('sos')}
+          onAddDetails={() => setHelp('notice')}
+        />
       )}
-      {sosOpen && (
+      {help === 'sos' && (
+        <SosEmergency
+          memberId={memberId}
+          env={env}
+          vocabulary={vocabulary}
+          interventions={offline}
+          delayS={0}
+          onClose={closeHelp}
+        />
+      )}
+      {help === 'notice' && (
         <SosDialog
           memberId={memberId}
           env={env}
           vocabulary={vocabulary}
-          interventions={interventions.state === 'ready' ? interventions.data : []}
-          onClose={closeSos}
+          interventions={offline}
+          onClose={closeHelp}
         />
       )}
     </>

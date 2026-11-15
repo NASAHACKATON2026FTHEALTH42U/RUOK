@@ -473,6 +473,16 @@ html[data-hud] body {
     background: linear-gradient(rgba(95, 212, 232, 0.1), transparent);
   }
 
+  /* Barra de la cuenta atrás del SOS (SosEmergency): se vacía en los segundos del aviso. */
+  @keyframes sos-countdown {
+    from {
+      width: 100%;
+    }
+    to {
+      width: 0%;
+    }
+  }
+
   @keyframes hud-spin {
     to {
       transform: rotate(360deg);

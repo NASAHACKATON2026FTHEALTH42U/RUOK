@@ -2,7 +2,7 @@ import { useActivityStore } from '../../store/activity'
 import { activityHint, activityOptions, type Activity, type LivenessThresholds } from './heartbeat'
 
 /**
- * Selector de actividad (FE-15), con el estilo HUD de «Más» (panel `ACT.01`). Va en cada
+ * Selector de actividad (FE-15), con el estilo HUD de «Más». Va en cada
  * heartbeat: en EVA los umbrales de "sin contacto" son mucho más estrictos y en sueño, más
  * relajados (los aplica el servidor). Marcar "Sueño" evita falsas alarmas cuando se bloquea
  * la pantalla del móvil. Las opciones son botones con `aria-pressed`: se recorren con Tab.
@@ -25,7 +25,7 @@ export function ActivitySelector({
     <fieldset className="hud-panel w-full">
       <legend className="sr-only">Actividad actual</legend>
       <div className="hud-panel-head" aria-hidden="true">
-        <b>ACT.01</b>Actividad
+        Actividad
         {!compact && <span className="hud-chip text-st-ok">Ajusta los avisos</span>}
       </div>
       <div className={`grid grid-cols-3 gap-1.5 pt-2.5 pb-3 ${compact ? 'px-2' : 'px-3.5'}`}>
@@ -63,7 +63,7 @@ export function ActivitySelector({
           compact ? 'px-2' : 'px-3.5'
         }`}
       >
-        {activityHint(activity, isSpace, liveness)}
+        {activityHint(activity, isSpace, liveness, { short: compact })}
       </p>
     </fieldset>
   )

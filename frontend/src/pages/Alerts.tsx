@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { NoticeButton } from '../components/alerts/SosButton'
 import { serverNow } from '../api/client'
 import { useMemberAlerts } from '../api/useAlerts'
 import { useAssessment } from '../api/useAssessment'
@@ -77,7 +78,10 @@ export default function Alerts() {
 
   return (
     <section className="space-y-4">
-      {title}
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        {title}
+        <NoticeButton />
+      </header>
       {alerts.state === 'loading' && (
         <div className="h-32 animate-pulse rounded-xl bg-env-surface" />
       )}
@@ -95,7 +99,9 @@ export default function Alerts() {
         </p>
       )}
       {alerts.state === 'ready' && list.length === 0 && (
-        <p className="text-env-muted">No hay alertas. Si necesitas ayuda, pulsa "Pedir ayuda".</p>
+        <p className="text-env-muted">
+          No hay alertas. En una emergencia, pulsa SOS; para lo demás, «Enviar aviso a control».
+        </p>
       )}
 
       {list.length > 0 && (

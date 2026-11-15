@@ -22,9 +22,9 @@ El corte lo marca `environment.external_from_level`: el índice del primer nivel
 4. **Deduplicación.** Hay como máximo una alerta abierta por `member_id + system_id` (o por categoría). Si la situación empeora, la alerta se actualiza (`updated`) y no se crea otra.
 5. Si la situación vuelve a `normal` de forma sostenida, la alerta se propone para resolver; no se cierra sola sin dejar rastro.
 
-## Alertas manuales (Pedir ayuda / SOS)
-- El botón **"Pedir ayuda"** está siempre visible.
-- Se elige la categoría:
+## Alertas manuales (SOS y avisos a control)
+- El botón **SOS** está siempre visible y no tiene formulario: avisa de que **se enviará la alerta de ayuda si no se cancela en 3 s** y después la envía sola (`emergency`, al siguiente nivel de la escalera del entorno). También funciona sin sesión.
+- Para lo que no es una emergencia está **"Enviar aviso a control"**, con un formulario. Se elige la categoría:
   - `symptom` (síntoma);
   - `physical` (malestar físico);
   - `psychological` ("Necesito hablar", que va por un canal **confidencial**);

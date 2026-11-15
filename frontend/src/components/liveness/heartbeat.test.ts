@@ -71,6 +71,15 @@ describe('activityHint', () => {
     expect(activityHint('eva', false, liveness)).toMatch(/^Actividad de riesgo/)
   })
 
+  it('versión corta para la barra lateral, con los mismos tiempos', () => {
+    expect(activityHint('normal', true, liveness, { short: true })).toBe(
+      'Sin señal 5 min: «R U OK?». Sin respuesta: alerta.',
+    )
+    expect(activityHint('eva', true, liveness, { short: true })).toContain('a los 30 s sin señal')
+    expect(activityHint('eva', false, liveness, { short: true })).toMatch(/^Riesgo:/)
+    expect(activityHint('sleep', true, liveness, { short: true })).toContain('×3 (15 min)')
+  })
+
   it('sin perfil cargado, sin números', () => {
     for (const a of ['normal', 'eva', 'sleep'] as const) {
       expect(activityHint(a, true)).not.toMatch(/\d/)

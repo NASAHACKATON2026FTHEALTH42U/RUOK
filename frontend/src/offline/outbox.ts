@@ -65,7 +65,7 @@ export type MeasurementBatchResult = NonNullable<
   Awaited<ReturnType<typeof postMeasurements>>['data']
 >
 
-/** Alerta creada (SOS / Pedir ayuda): estado, destino, modo de entrega y ETA. */
+/** Alerta creada (SOS o aviso a control): estado, destino, modo de entrega y ETA. */
 export type AlertResult = NonNullable<Awaited<ReturnType<typeof postAlert>>['data']>
 
 function postAlert(memberId: number, alert: AlertIn) {

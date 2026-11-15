@@ -36,7 +36,7 @@ El Human Research Program (HRP) identifica **5 peligros**:
    - dosis de radiación.
 4. Gráficas de 7 y 30 días con las bandas de umbral sombreadas.
 5. Motor de evaluación: umbrales con ajustes por entorno, tendencias, línea base personal, frescura de datos, recomendaciones y escalado.
-6. Alertas automáticas y botón **Pedir ayuda / SOS** manual, con un enlace simulado con la Tierra que aplica el retardo del entorno.
+6. Alertas automáticas y botón **SOS** manual (y avisos a control con más detalle), con un enlace simulado con la Tierra que aplica el retardo del entorno.
 7. Heartbeat y check-in "R U OK?", con alerta de "sin contacto".
 8. Funcionamiento sin conexión: outbox en el dispositivo y sincronización idempotente.
 9. Módulo de aislamiento: check-in diario, intervenciones, "Necesito hablar" y privacidad.

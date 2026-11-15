@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Intervention } from '../../api/useInterventions'
+import { Modal } from '../ui/Modal'
 import { breathPhase, expandSteps } from './intervention'
 
 interface InterventionPlayerProps {
@@ -29,18 +30,10 @@ export function InterventionPlayer({ intervention, onClose }: InterventionPlayer
   const [paused, setPaused] = useState(false)
   const [scale, setScale] = useState(() => targetScale(steps[0]?.text) ?? 0.55)
   const reduce = useReducedMotion()
-  const closeRef = useRef<HTMLButtonElement>(null)
 
   const done = index >= steps.length
   const step = done ? null : steps[index]
   const phase = step ? breathPhase(step.text) : null
-
-  useEffect(() => {
-    closeRef.current?.focus()
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
 
   /** Pasa al paso `n`: reinicia la cuenta atrás y el objetivo del círculo. */
   const goTo = useCallback(
@@ -63,86 +56,89 @@ export function InterventionPlayer({ intervention, onClose }: InterventionPlayer
   const next = () => goTo(index + 1)
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="intervention-title"
-      className="fixed inset-0 z-[70] flex flex-col bg-env-bg text-env-text"
-    >
-      <div className="flex items-center justify-between gap-3 p-4">
-        <h2 id="intervention-title" className="font-semibold">
-          {intervention.title}
-        </h2>
-        <button
-          ref={closeRef}
-          type="button"
-          onClick={onClose}
-          className="rounded-lg border border-env-border px-3 py-1.5 text-sm hover:border-env-text"
-        >
-          {done ? 'Cerrar' : 'Terminar'}
-        </button>
-      </div>
-      <div className="mx-4 h-1 overflow-hidden rounded-full bg-env-border" aria-hidden>
-        <div
-          className="h-full bg-env-primary transition-[width]"
-          style={{ width: `${(Math.min(index, steps.length) / Math.max(steps.length, 1)) * 100}%` }}
-        />
-      </div>
+    // Modal bloqueante: hasta terminar (botón o Escape) no se puede usar nada más.
+    <Modal labelledBy="intervention-title" onClose={onClose}>
+      <div className="flex min-h-full flex-col bg-env-bg text-env-text">
+        <div className="flex items-center justify-between gap-3 p-4">
+          <h2 id="intervention-title" className="font-semibold">
+            {intervention.title}
+          </h2>
+          <button
+            data-autofocus
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-env-border px-3 py-1.5 text-sm hover:border-env-text"
+          >
+            {done ? 'Cerrar' : 'Terminar'}
+          </button>
+        </div>
+        <div className="mx-4 h-1 overflow-hidden rounded-full bg-env-border" aria-hidden>
+          <div
+            className="h-full bg-env-primary transition-[width]"
+            style={{
+              width: `${(Math.min(index, steps.length) / Math.max(steps.length, 1)) * 100}%`,
+            }}
+          />
+        </div>
 
-      <div className="flex flex-1 flex-col items-center justify-center gap-8 p-6 text-center">
-        {done ? (
-          <>
-            <p className="text-4xl font-bold">Hecho</p>
-            <p className="text-env-muted">Bien hecho. Puedes repetirla cuando lo necesites.</p>
-          </>
-        ) : (
-          <>
-            {phase && (
-              <motion.div
-                aria-hidden
-                className="h-48 w-48 rounded-full bg-env-primary/25 ring-4 ring-env-primary"
-                initial={{ scale: 0.55 }}
-                animate={{ scale: reduce ? 0.8 : scale }}
-                transition={{
-                  duration: reduce ? 0 : (step?.seconds ?? 1),
-                  ease: 'easeInOut',
-                }}
-              />
-            )}
-            <div aria-live="polite">
-              <p className="text-3xl font-semibold">{step?.text}</p>
-              {step?.cycle && (
-                <p className="mt-2 text-sm text-env-muted">
-                  Ciclo {step.cycle.n} de {step.cycle.of}
+        <div className="flex flex-1 flex-col items-center justify-center gap-8 p-6 text-center">
+          {done ? (
+            <>
+              <p className="text-4xl font-bold">Hecho</p>
+              <p className="text-env-muted">Bien hecho. Puedes repetirla cuando lo necesites.</p>
+            </>
+          ) : (
+            <>
+              {phase && (
+                <motion.div
+                  aria-hidden
+                  className="h-48 w-48 rounded-full bg-env-primary/25 ring-4 ring-env-primary"
+                  initial={{ scale: 0.55 }}
+                  animate={{ scale: reduce ? 0.8 : scale }}
+                  transition={{
+                    duration: reduce ? 0 : (step?.seconds ?? 1),
+                    ease: 'easeInOut',
+                  }}
+                />
+              )}
+              <div aria-live="polite">
+                <p className="text-3xl font-semibold">{step?.text}</p>
+                {step?.cycle && (
+                  <p className="mt-2 text-sm text-env-muted">
+                    Ciclo {step.cycle.n} de {step.cycle.of}
+                  </p>
+                )}
+              </div>
+              {left !== null && (
+                <p
+                  className="text-5xl font-bold tabular-nums"
+                  aria-label={`Quedan ${left} segundos`}
+                >
+                  {left}
                 </p>
               )}
-            </div>
-            {left !== null && (
-              <p className="text-5xl font-bold tabular-nums" aria-label={`Quedan ${left} segundos`}>
-                {left}
-              </p>
-            )}
-            <div className="flex gap-3">
-              {left !== null && (
+              <div className="flex gap-3">
+                {left !== null && (
+                  <button
+                    type="button"
+                    onClick={() => setPaused((p) => !p)}
+                    className="rounded-lg border border-env-border px-5 py-2.5 hover:border-env-text"
+                  >
+                    {paused ? 'Seguir' : 'Pausa'}
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => setPaused((p) => !p)}
-                  className="rounded-lg border border-env-border px-5 py-2.5 hover:border-env-text"
+                  onClick={next}
+                  className="rounded-lg bg-env-primary px-5 py-2.5 font-medium text-env-primary-text"
                 >
-                  {paused ? 'Seguir' : 'Pausa'}
+                  {index === steps.length - 1 ? 'Terminar' : 'Siguiente'}
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={next}
-                className="rounded-lg bg-env-primary px-5 py-2.5 font-medium text-env-primary-text"
-              >
-                {index === steps.length - 1 ? 'Terminar' : 'Siguiente'}
-              </button>
-            </div>
-          </>
-        )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </Modal>
   )
 }

@@ -7,6 +7,7 @@ import {
   type PvtMode,
   type PvtSummary,
 } from './pvt'
+import { Modal } from '../ui/Modal'
 
 /** Cuánto se muestra el resultado de cada respuesta antes de la siguiente espera. */
 const FEEDBACK_MS = 800
@@ -114,68 +115,77 @@ export function PvtRunner({ mode, onFinish, onCancel }: PvtRunnerProps) {
   const progress = 1 - remainingMs / durationMs
 
   return (
-    <div
-      className={`fixed inset-0 z-50 flex touch-manipulation flex-col select-none ${
-        view.kind === 'stimulus'
-          ? 'bg-env-primary text-env-primary-text'
-          : 'bg-env-bg text-env-text'
-      }`}
-      onPointerDown={(e) => {
-        if ((e.target as HTMLElement).closest('[data-pvt-cancel]')) return
-        e.preventDefault()
-        respond()
-      }}
-      onContextMenu={(e) => e.preventDefault()}
-    >
-      <div className="flex items-center justify-between gap-3 p-4 text-sm">
-        <span className="tabular-nums" aria-label={`Quedan ${secs} segundos`}>
-          ⏱ {secs} s
-        </span>
-        <button
-          type="button"
-          data-pvt-cancel
-          onClick={onCancel}
-          className="rounded-lg border border-current/40 px-3 py-1.5"
-        >
-          Cancelar
-        </button>
-      </div>
-      <div className="mx-4 h-1 overflow-hidden rounded-full bg-env-border" aria-hidden>
-        <div className="h-full bg-env-text/60" style={{ width: `${progress * 100}%` }} />
-      </div>
-
+    // Modal bloqueante: hasta acabar o cancelar (botón o Escape) no se puede usar nada más.
+    // El foco va al lienzo (no al botón Cancelar), para que la barra espaciadora responda.
+    <Modal labelledBy="pvt-title" onClose={onCancel}>
       <div
-        className="flex flex-1 flex-col items-center justify-center p-6 text-center"
-        aria-live="assertive"
+        data-autofocus
+        tabIndex={-1}
+        className={`flex min-h-full touch-manipulation flex-col outline-none select-none ${
+          view.kind === 'stimulus'
+            ? 'bg-env-primary text-env-primary-text'
+            : 'bg-env-bg text-env-text'
+        }`}
+        onPointerDown={(e) => {
+          if ((e.target as HTMLElement).closest('[data-pvt-cancel]')) return
+          e.preventDefault()
+          respond()
+        }}
+        onContextMenu={(e) => e.preventDefault()}
       >
-        {view.kind === 'waiting' && (
-          <>
-            <span aria-hidden className="h-24 w-24 rounded-full border-4 border-env-border" />
-            <p className="mt-6 text-lg text-env-muted">
-              Espera… pulsa en cuanto cambie la pantalla
-            </p>
-          </>
-        )}
-        {view.kind === 'stimulus' && <p className="text-5xl font-bold">¡Pulsa!</p>}
-        {view.kind === 'feedback' && (
-          <>
-            <p className="text-5xl font-bold tabular-nums">{view.rt} ms</p>
-            <p className="mt-2 text-env-muted">
-              {classifyResponse(view.rt) === 'lapse'
-                ? 'Lapso (más de 500 ms)'
-                : classifyResponse(view.rt) === 'false_start'
-                  ? 'Demasiado rápido: falso inicio'
-                  : 'Bien'}
-            </p>
-          </>
-        )}
-        {view.kind === 'early' && (
-          <>
-            <p className="text-3xl font-bold">Demasiado pronto</p>
-            <p className="mt-2 text-env-muted">Falso inicio: espera a que cambie la pantalla</p>
-          </>
-        )}
+        <h2 id="pvt-title" className="sr-only">
+          Test de vigilancia
+        </h2>
+        <div className="flex items-center justify-between gap-3 p-4 text-sm">
+          <span className="tabular-nums" aria-label={`Quedan ${secs} segundos`}>
+            ⏱ {secs} s
+          </span>
+          <button
+            type="button"
+            data-pvt-cancel
+            onClick={onCancel}
+            className="rounded-lg border border-current/40 px-3 py-1.5"
+          >
+            Cancelar
+          </button>
+        </div>
+        <div className="mx-4 h-1 overflow-hidden rounded-full bg-env-border" aria-hidden>
+          <div className="h-full bg-env-text/60" style={{ width: `${progress * 100}%` }} />
+        </div>
+
+        <div
+          className="flex flex-1 flex-col items-center justify-center p-6 text-center"
+          aria-live="assertive"
+        >
+          {view.kind === 'waiting' && (
+            <>
+              <span aria-hidden className="h-24 w-24 rounded-full border-4 border-env-border" />
+              <p className="mt-6 text-lg text-env-muted">
+                Espera… pulsa en cuanto cambie la pantalla
+              </p>
+            </>
+          )}
+          {view.kind === 'stimulus' && <p className="text-5xl font-bold">¡Pulsa!</p>}
+          {view.kind === 'feedback' && (
+            <>
+              <p className="text-5xl font-bold tabular-nums">{view.rt} ms</p>
+              <p className="mt-2 text-env-muted">
+                {classifyResponse(view.rt) === 'lapse'
+                  ? 'Lapso (más de 500 ms)'
+                  : classifyResponse(view.rt) === 'false_start'
+                    ? 'Demasiado rápido: falso inicio'
+                    : 'Bien'}
+              </p>
+            </>
+          )}
+          {view.kind === 'early' && (
+            <>
+              <p className="text-3xl font-bold">Demasiado pronto</p>
+              <p className="mt-2 text-env-muted">Falso inicio: espera a que cambie la pantalla</p>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </Modal>
   )
 }

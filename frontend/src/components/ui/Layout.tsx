@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from 'framer-motion'
+import { Fragment } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useEnvironments } from '../../api/useEnvironments'
 import { homeFor } from '../../auth/roles'
@@ -61,25 +62,23 @@ export function Layout() {
     <div className="flex h-dvh flex-col">
       <MockBanner />
 
-      {/* Cabecera móvil: logo, reloj y SOS siempre visible */}
+      {/* Cabecera móvil: logo y reloj. El SOS va en la barra inferior, al alcance del pulgar. */}
       <header className="flex shrink-0 items-center justify-between gap-3 border-b border-hud-line px-[18px] pt-3.5 pb-3 md:hidden">
         {logo}
-        <div className="flex items-center gap-2.5">
-          <HudClock env={env} />
-          <SosButton variant="header" />
-        </div>
+        <HudClock env={env} />
       </header>
 
       <div className="flex min-h-0 flex-1">
         {/* Barra lateral de escritorio */}
         <aside
           aria-label="Menú principal"
-          className="hidden w-52 shrink-0 flex-col gap-3 overflow-y-auto border-r border-hud-line px-3 py-4 lg:w-64 lg:px-4 [scrollbar-width:none] md:flex [&::-webkit-scrollbar]:hidden"
+          // En pantallas bajas (≤ 800 px de alto), menos aire para que quepa todo sin scroll.
+          className="hidden w-52 shrink-0 flex-col gap-3 overflow-y-auto border-r border-hud-line px-3 py-4 lg:w-64 lg:px-4 [scrollbar-width:none] md:flex [&::-webkit-scrollbar]:hidden [@media(max-height:800px)]:gap-2 [@media(max-height:800px)]:py-3"
         >
+          {/* SOS: lo primero del menú, arriba a la izquierda y siempre a la vista. */}
+          <SosButton variant="sidebar" />
+
           <nav aria-label="Secciones" className="hud-panel">
-            <div className="hud-panel-head">
-              <b>NAV.01</b>Secciones
-            </div>
             <ul>
               {allowed.map((item) => (
                 <li key={item.to}>
@@ -87,7 +86,7 @@ export function Layout() {
                     to={item.to}
                     end
                     className={({ isActive }) =>
-                      `hud-row !min-h-10 !text-sm ${isActive ? 'is-active' : 'hover:text-env-text'}`
+                      `hud-row !min-h-10 !text-sm [@media(max-height:800px)]:!min-h-9 ${isActive ? 'is-active' : 'hover:text-env-text'}`
                     }
                   >
                     <span className="w-8 font-mono text-[10px] text-env-muted">{item.code}</span>
@@ -126,8 +125,8 @@ export function Layout() {
         <div className="bg-grid flex min-w-0 flex-1 flex-col">
           {/* Barra superior de escritorio, con el estilo de la de fase de misión: identidad,
               usuario y el resumen de la página (TopBarPortal: estado general, avisos…) a la
-              izquierda; reloj, SOS y «Salir» pegados a la derecha. Fuera
-              del área con scroll, para que el SOS esté siempre a la vista. */}
+              izquierda; reloj y «Salir» pegados a la derecha. El SOS va arriba del menú
+              lateral. */}
           <div className="hidden shrink-0 px-4 pt-4 md:block lg:px-6">
             <div
               className={`mx-auto flex w-full flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-env-border bg-env-surface px-3 py-2.5 lg:gap-x-5 lg:px-4 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
@@ -143,7 +142,6 @@ export function Layout() {
               <div className="max-lg:ml-auto">
                 <HudClock env={env} />
               </div>
-              <SosButton variant="header" />
               <SessionMenu part="logout" />
             </div>
           </div>
@@ -169,18 +167,21 @@ export function Layout() {
         </div>
       </div>
 
-      {/* Pestañas móviles: 3 del rol + «Más» */}
+      {/* Pestañas móviles: 3 del rol + «Más», con el SOS en el centro */}
       <nav aria-label="Principal" className="hud-tabs shrink-0 md:hidden">
-        {tabs.map((t) => (
-          <NavLink
-            key={t.to}
-            to={t.to}
-            end
-            className="hud-tab focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary"
-          >
-            <NavIcon name={t.icon} />
-            {t.to === '/members' ? t.label.slice(0, 11) : t.label}
-          </NavLink>
+        {tabs.map((t, i) => (
+          <Fragment key={t.to}>
+            {/* SOS en el centro de la barra (entre la 2.ª y la 3.ª pestaña) */}
+            {i === Math.floor(tabs.length / 2) && <SosButton variant="tab" />}
+            <NavLink
+              to={t.to}
+              end
+              className="hud-tab focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary"
+            >
+              <NavIcon name={t.icon} />
+              {t.to === '/members' ? t.label.slice(0, 11) : t.label}
+            </NavLink>
+          </Fragment>
         ))}
       </nav>
 
