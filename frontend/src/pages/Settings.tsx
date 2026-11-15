@@ -44,7 +44,7 @@ export default function Settings() {
         </label>
       </section>
 
-      <p className="px-1 text-xs text-env-muted">
+      <p className="px-1 text-sm text-env-muted">
         {t('Estos ajustes se guardan en este dispositivo.')}
       </p>
     </section>

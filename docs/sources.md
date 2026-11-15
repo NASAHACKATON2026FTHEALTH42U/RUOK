@@ -42,6 +42,8 @@
 | S33 | Gardner E. S., McKenzie E. (1985), *Forecasting trends in time series*. Management Science 31(10):1237–1246. [doi:10.1287/mnsc.31.10.1237](https://doi.org/10.1287/mnsc.31.10.1237) | Tendencia amortiguada (φ): la previsión se frena en vez de dispararse |
 | S34 | Gelper S., Fried R., Croux C. (2010), *Robust forecasting with exponential and Holt–Winters smoothing*. Journal of Forecasting 29(3):285–300. [doi:10.1002/for.1125](https://doi.org/10.1002/for.1125) | Previsión robusta a valores sueltos: error recortado y pérdida de Huber con una σ robusta |
 
+> **Rango habitual personal** (`services/personal_range.py`, `data/personal_ranges.json`): media ± max(k × desviación típica, ratio × |media|) de las mediciones del propio member en la ventana reciente. Es una **regla estadística de diseño, no un umbral clínico**: solo informa ("por encima/debajo de tu rango habitual") y no cambia el semáforo ni crea alertas.
+>
 > La previsión es una **estimación estadística, no un diagnóstico**: no crea alertas ni cambia el estado del semáforo. No usa ningún umbral propio: el estado de cada valor previsto sale de los rangos de la tabla de abajo (los mismos del motor).
 
 ## Tabla de umbrales (CNT-01)

@@ -135,4 +135,7 @@ export const measure: Record<string, string> = {
   Bien: 'Good',
   'Demasiado pronto': 'Too early',
   'Falso inicio: espera a que cambie la pantalla': 'False start: wait for the screen to change',
+  'Rangos de referencia': 'Reference ranges',
+  'Tu valor: {value} · {status}': 'Your value: {value} · {status}',
+  ' o ': ' or ',
 }

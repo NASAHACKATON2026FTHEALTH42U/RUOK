@@ -87,7 +87,7 @@ export function EnvironmentConfig({ env }: { env: Environment | undefined }) {
                   .join(', ')}
               </p>
             )}
-            <p className="text-xs text-env-muted">
+            <p className="text-sm text-env-muted">
               {t('Solo lectura: los perfiles se editan en backend/app/data/environments.json.')}
             </p>
           </div>

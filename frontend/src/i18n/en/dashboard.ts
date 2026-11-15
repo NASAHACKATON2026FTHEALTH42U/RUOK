@@ -197,4 +197,16 @@ export const dashboard: Record<string, string> = {
   'Página siguiente': 'Next page',
   'Página {page} / {pages} · 1 medición': 'Page {page} / {pages} · 1 measurement',
   'Página {page} / {pages} · {n} mediciones': 'Page {page} / {pages} · {n} measurements',
+
+  // Rango habitual personal (IndicatorCard, TrendChart)
+  'Tu rango habitual: {range}': 'Your usual range: {range}',
+  'Tu rango habitual': 'Your usual range',
+  'Por encima de tu rango habitual': 'Above your usual range',
+  'Por debajo de tu rango habitual': 'Below your usual range',
+
+  // SystemTrends: eje Y por indicador
+  'Eje Y': 'Y axis',
+  Automático: 'Automatic',
+  '% del rango': '% of range',
+  '{n} con otra unidad, ocultos': '{n} with another unit, hidden',
 }

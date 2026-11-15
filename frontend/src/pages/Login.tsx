@@ -243,7 +243,7 @@ export default function Login() {
                             ? shortDisplayName(u.display_name, envName)
                             : capitalize(u.role_label)}
                         </span>
-                        <span className="hud-label text-[0.6875rem]">
+                        <span className="hud-label">
                           {u.role === 'member'
                             ? u.role_label
                             : ROLE_GROUP[u.role]
@@ -261,7 +261,7 @@ export default function Login() {
           {/* SOS y aviso médico: abajo del todo (en escritorio, bajo el acceso) */}
           <div className="flex flex-col gap-2.5 self-end pt-1 [grid-area:sos]">
             <SosButton variant="inline" />
-            <p className="text-center text-xs leading-snug text-env-muted">
+            <p className="text-center text-sm leading-snug text-env-muted">
               {t('Prototipo de autoevaluación.')}{' '}
               <strong>{t('No es un dispositivo médico')}</strong>{' '}
               {t('ni sustituye el criterio de un profesional sanitario.')}

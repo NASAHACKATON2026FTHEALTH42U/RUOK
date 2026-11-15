@@ -283,7 +283,7 @@ export default function Alerts() {
                             <span className="flex items-baseline justify-between gap-3">
                               <span className="font-medium">{p.title || t('Notificación')}</span>
                               <span
-                                className="shrink-0 text-[0.6875rem] font-semibold tracking-[0.12em] uppercase"
+                                className="shrink-0 text-xs font-semibold tracking-[0.12em] uppercase"
                                 style={{ color: tone }}
                               >
                                 {p.level === 'critical'

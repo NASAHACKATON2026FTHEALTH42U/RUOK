@@ -9,6 +9,37 @@ import { TrendChart } from './TrendChart'
 
 export type IndicatorAssessment = Assessment['systems'][number]['indicators'][number]
 
+/**
+ * Rango habitual del member y si el último valor se sale de él (informativo: no cambia el
+ * semáforo). Flecha + texto, nunca solo color.
+ */
+function PersonalRangeInfo({ indicator }: { indicator: IndicatorAssessment }) {
+  const t = useT()
+  const pr = indicator.personal_range
+  if (!pr) return null
+  const flag = indicator.personal_flag
+  const outside = flag === 'above' || flag === 'below'
+  return (
+    <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-env-muted">
+      <span>
+        {t('Tu rango habitual: {range}', {
+          range: `${formatValue(pr[0], '')}–${formatValue(pr[1], indicator.unit)}`,
+        })}
+      </span>
+      {outside && (
+        <span className="inline-flex items-center gap-1 border border-st-warn/60 px-1.5 text-env-text">
+          <span aria-hidden className="text-st-warn">
+            {flag === 'above' ? '▲' : '▼'}
+          </span>
+          {flag === 'above'
+            ? t('Por encima de tu rango habitual')
+            : t('Por debajo de tu rango habitual')}
+        </span>
+      )}
+    </span>
+  )
+}
+
 interface IndicatorCardProps {
   indicator: IndicatorAssessment
   /** Nombre del catálogo `/indicators` (si no está, se muestra el id). */
@@ -120,6 +151,7 @@ export function IndicatorCard({
           {indicator.taken_at ? formatAgo(indicator.taken_at, serverNow()) : t('Nunca medido')}
         </span>
       </span>
+      <PersonalRangeInfo indicator={indicator} />
     </>
   )
   // La celda no lleva borde propio: la rejilla del panel dibuja las líneas.
@@ -150,6 +182,7 @@ export function IndicatorCard({
           name={name ?? indicator.indicator_id}
           unit={indicator.unit}
           range={indicator.range}
+          personalRange={indicator.personal_range}
         />
       )}
     </div>

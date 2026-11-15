@@ -180,7 +180,7 @@ export function MeasurementInjector({
           </div>
         </div>
       </div>
-      <p className="-mt-1 text-xs text-env-muted">
+      <p className="-mt-1 text-sm text-env-muted">
         {indicator && ranges
           ? t('Normal en {env}: {low}–{high} {unit}', {
               env: env.name,

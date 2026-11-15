@@ -89,7 +89,7 @@ export function RuokRings() {
       <RuokEmblem size={104} />
       <span className="flex flex-col gap-2.5">
         <Wordmark className="text-[1.875rem] tracking-[0.05em]" />
-        <span className="hud-label text-[0.6875rem] tracking-[0.32em]">{t('Salud en misión')}</span>
+        <span className="hud-label tracking-[0.32em]">{t('Salud en misión')}</span>
       </span>
     </div>
   )

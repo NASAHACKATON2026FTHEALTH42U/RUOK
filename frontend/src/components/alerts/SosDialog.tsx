@@ -144,7 +144,7 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
                       }`}
                     >
                       <span className="block font-medium">{t(c.label)}</span>
-                      <span className="block text-xs text-env-muted">{t(c.hint)}</span>
+                      <span className="block text-sm text-env-muted">{t(c.hint)}</span>
                     </button>
                   ))}
                 </div>

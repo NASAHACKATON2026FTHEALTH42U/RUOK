@@ -2061,7 +2061,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 101.0,
                 130.0
               ]
-            }
+            },
+            "personal_range": [
+              74.79,
+              90.25
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "bp_systolic",
@@ -2080,7 +2085,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 130.0,
                 180.0
               ]
-            }
+            },
+            "personal_range": [
+              85.6,
+              135.24
+            ],
+            "personal_flag": "above"
           },
           {
             "indicator_id": "bp_diastolic",
@@ -2099,7 +2109,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 80.0,
                 120.0
               ]
-            }
+            },
+            "personal_range": [
+              65.88,
+              72.81
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "spo2",
@@ -2118,7 +2133,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 90.0,
                 94.0
               ]
-            }
+            },
+            "personal_range": [
+              93.0,
+              102.79
+            ],
+            "personal_flag": "within"
           }
         ],
         "recommendations": [
@@ -2177,7 +2197,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 30.0,
                 119.0
               ]
-            }
+            },
+            "personal_range": [
+              196.94,
+              247.73
+            ],
+            "personal_flag": "below"
           }
         ],
         "recommendations": [
@@ -2230,7 +2255,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 38.0,
                 39.5
               ]
-            }
+            },
+            "personal_range": [
+              34.86,
+              38.53
+            ],
+            "personal_flag": "within"
           }
         ],
         "recommendations": [],
@@ -2264,7 +2294,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 800.0,
                 1499.0
               ]
-            }
+            },
+            "personal_range": [
+              2511.73,
+              3336.55
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "weight_kg",
@@ -2279,7 +2314,9 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 45.0,
                 110.0
               ]
-            }
+            },
+            "personal_range": null,
+            "personal_flag": null
           }
         ],
         "recommendations": [],
@@ -2313,7 +2350,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 1.5,
                 2.9
               ]
-            }
+            },
+            "personal_range": [
+              3.6,
+              4.33
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "sleep_hours",
@@ -2332,7 +2374,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 4.0,
                 6.9
               ]
-            }
+            },
+            "personal_range": [
+              5.33,
+              10.7
+            ],
+            "personal_flag": "below"
           },
           {
             "indicator_id": "stress",
@@ -2351,7 +2398,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 3.1,
                 4.5
               ]
-            }
+            },
+            "personal_range": [
+              1.42,
+              2.44
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "energy",
@@ -2370,7 +2422,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 1.5,
                 2.9
               ]
-            }
+            },
+            "personal_range": [
+              3.67,
+              4.4
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "loneliness",
@@ -2389,7 +2446,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 3.1,
                 4.5
               ]
-            }
+            },
+            "personal_range": [
+              1.9,
+              2.1
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "sleep_quality",
@@ -2408,7 +2470,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 1.5,
                 2.9
               ]
-            }
+            },
+            "personal_range": [
+              3.42,
+              4.44
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "crew_relation",
@@ -2427,7 +2494,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 1.5,
                 2.9
               ]
-            }
+            },
+            "personal_range": [
+              3.8,
+              4.2
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "pvt_mean_rt_ms",
@@ -2446,7 +2518,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 355.0,
                 500.0
               ]
-            }
+            },
+            "personal_range": [
+              161.76,
+              236.24
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "pvt_lapses",
@@ -2465,7 +2542,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 3.0,
                 6.0
               ]
-            }
+            },
+            "personal_range": [
+              0.56,
+              1.58
+            ],
+            "personal_flag": "within"
           }
         ],
         "recommendations": [
@@ -2530,7 +2612,9 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 2.0,
                 3.5
               ]
-            }
+            },
+            "personal_range": null,
+            "personal_flag": null
           }
         ],
         "recommendations": [
@@ -2583,7 +2667,9 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 300.0,
                 600.0
               ]
-            }
+            },
+            "personal_range": null,
+            "personal_flag": null
           }
         ],
         "recommendations": [],
@@ -2632,7 +2718,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 101.0,
                 130.0
               ]
-            }
+            },
+            "personal_range": [
+              74.79,
+              90.25
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "bp_systolic",
@@ -2651,7 +2742,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 130.0,
                 180.0
               ]
-            }
+            },
+            "personal_range": [
+              85.6,
+              135.24
+            ],
+            "personal_flag": "above"
           },
           {
             "indicator_id": "bp_diastolic",
@@ -2670,7 +2766,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 80.0,
                 120.0
               ]
-            }
+            },
+            "personal_range": [
+              65.88,
+              72.81
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "spo2",
@@ -2689,7 +2790,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 90.0,
                 94.0
               ]
-            }
+            },
+            "personal_range": [
+              93.0,
+              102.79
+            ],
+            "personal_flag": "within"
           }
         ],
         "recommendations": [
@@ -2748,7 +2854,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 30.0,
                 119.0
               ]
-            }
+            },
+            "personal_range": [
+              196.94,
+              247.73
+            ],
+            "personal_flag": "below"
           }
         ],
         "recommendations": [
@@ -2801,7 +2912,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 38.0,
                 39.5
               ]
-            }
+            },
+            "personal_range": [
+              34.86,
+              38.53
+            ],
+            "personal_flag": "within"
           }
         ],
         "recommendations": [],
@@ -2835,7 +2951,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 800.0,
                 1499.0
               ]
-            }
+            },
+            "personal_range": [
+              2511.73,
+              3336.55
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "weight_kg",
@@ -2850,7 +2971,9 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 45.0,
                 110.0
               ]
-            }
+            },
+            "personal_range": null,
+            "personal_flag": null
           }
         ],
         "recommendations": [],
@@ -2884,7 +3007,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 1.5,
                 2.9
               ]
-            }
+            },
+            "personal_range": [
+              3.6,
+              4.33
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "sleep_hours",
@@ -2903,7 +3031,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 4.0,
                 6.9
               ]
-            }
+            },
+            "personal_range": [
+              5.33,
+              10.7
+            ],
+            "personal_flag": "below"
           },
           {
             "indicator_id": "stress",
@@ -2922,7 +3055,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 3.1,
                 4.5
               ]
-            }
+            },
+            "personal_range": [
+              1.42,
+              2.44
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "energy",
@@ -2941,7 +3079,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 1.5,
                 2.9
               ]
-            }
+            },
+            "personal_range": [
+              3.67,
+              4.4
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "loneliness",
@@ -2960,7 +3103,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 3.1,
                 4.5
               ]
-            }
+            },
+            "personal_range": [
+              1.9,
+              2.1
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "sleep_quality",
@@ -2979,7 +3127,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 1.5,
                 2.9
               ]
-            }
+            },
+            "personal_range": [
+              3.42,
+              4.44
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "crew_relation",
@@ -2998,7 +3151,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 1.5,
                 2.9
               ]
-            }
+            },
+            "personal_range": [
+              3.8,
+              4.2
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "pvt_mean_rt_ms",
@@ -3017,7 +3175,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 355.0,
                 500.0
               ]
-            }
+            },
+            "personal_range": [
+              161.76,
+              236.24
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "pvt_lapses",
@@ -3036,7 +3199,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 3.0,
                 6.0
               ]
-            }
+            },
+            "personal_range": [
+              0.56,
+              1.58
+            ],
+            "personal_flag": "within"
           }
         ],
         "recommendations": [
@@ -3101,7 +3269,9 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 2.0,
                 3.5
               ]
-            }
+            },
+            "personal_range": null,
+            "personal_flag": null
           }
         ],
         "recommendations": [
@@ -3154,7 +3324,9 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 300.0,
                 600.0
               ]
-            }
+            },
+            "personal_range": null,
+            "personal_flag": null
           }
         ],
         "recommendations": [],
@@ -3203,7 +3375,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 101.0,
                 130.0
               ]
-            }
+            },
+            "personal_range": [
+              74.79,
+              90.25
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "bp_systolic",
@@ -3222,7 +3399,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 130.0,
                 140.0
               ]
-            }
+            },
+            "personal_range": [
+              85.6,
+              135.24
+            ],
+            "personal_flag": "above"
           },
           {
             "indicator_id": "bp_diastolic",
@@ -3241,7 +3423,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 80.0,
                 120.0
               ]
-            }
+            },
+            "personal_range": [
+              65.88,
+              72.81
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "spo2",
@@ -3260,7 +3447,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 90.0,
                 94.0
               ]
-            }
+            },
+            "personal_range": [
+              93.0,
+              102.79
+            ],
+            "personal_flag": "within"
           }
         ],
         "recommendations": [
@@ -3319,7 +3511,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 30.0,
                 119.0
               ]
-            }
+            },
+            "personal_range": [
+              196.94,
+              247.73
+            ],
+            "personal_flag": "below"
           }
         ],
         "recommendations": [
@@ -3372,7 +3569,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 38.0,
                 39.5
               ]
-            }
+            },
+            "personal_range": [
+              34.86,
+              38.53
+            ],
+            "personal_flag": "within"
           }
         ],
         "recommendations": [],
@@ -3406,7 +3608,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 800.0,
                 1499.0
               ]
-            }
+            },
+            "personal_range": [
+              2511.73,
+              3336.55
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "weight_kg",
@@ -3421,7 +3628,9 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 45.0,
                 110.0
               ]
-            }
+            },
+            "personal_range": null,
+            "personal_flag": null
           }
         ],
         "recommendations": [],
@@ -3455,7 +3664,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 1.5,
                 2.9
               ]
-            }
+            },
+            "personal_range": [
+              3.6,
+              4.33
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "sleep_hours",
@@ -3474,7 +3688,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 4.0,
                 6.9
               ]
-            }
+            },
+            "personal_range": [
+              5.33,
+              10.7
+            ],
+            "personal_flag": "below"
           },
           {
             "indicator_id": "stress",
@@ -3493,7 +3712,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 3.1,
                 4.5
               ]
-            }
+            },
+            "personal_range": [
+              1.42,
+              2.44
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "energy",
@@ -3512,7 +3736,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 1.5,
                 2.9
               ]
-            }
+            },
+            "personal_range": [
+              3.67,
+              4.4
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "loneliness",
@@ -3531,7 +3760,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 3.1,
                 4.5
               ]
-            }
+            },
+            "personal_range": [
+              1.9,
+              2.1
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "sleep_quality",
@@ -3550,7 +3784,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 1.5,
                 2.9
               ]
-            }
+            },
+            "personal_range": [
+              3.42,
+              4.44
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "crew_relation",
@@ -3569,7 +3808,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 1.5,
                 2.9
               ]
-            }
+            },
+            "personal_range": [
+              3.8,
+              4.2
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "pvt_mean_rt_ms",
@@ -3588,7 +3832,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 355.0,
                 500.0
               ]
-            }
+            },
+            "personal_range": [
+              161.76,
+              236.24
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "pvt_lapses",
@@ -3607,7 +3856,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 3.0,
                 6.0
               ]
-            }
+            },
+            "personal_range": [
+              0.56,
+              1.58
+            ],
+            "personal_flag": "within"
           }
         ],
         "recommendations": [
@@ -3672,7 +3926,9 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 2.0,
                 3.5
               ]
-            }
+            },
+            "personal_range": null,
+            "personal_flag": null
           }
         ],
         "recommendations": [
@@ -3725,7 +3981,9 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 300.0,
                 600.0
               ]
-            }
+            },
+            "personal_range": null,
+            "personal_flag": null
           }
         ],
         "recommendations": [],
@@ -3774,7 +4032,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 101.0,
                 130.0
               ]
-            }
+            },
+            "personal_range": [
+              74.79,
+              90.25
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "bp_systolic",
@@ -3793,7 +4056,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 130.0,
                 180.0
               ]
-            }
+            },
+            "personal_range": [
+              85.6,
+              135.24
+            ],
+            "personal_flag": "above"
           },
           {
             "indicator_id": "bp_diastolic",
@@ -3812,7 +4080,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 80.0,
                 120.0
               ]
-            }
+            },
+            "personal_range": [
+              65.88,
+              72.81
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "spo2",
@@ -3831,7 +4104,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 90.0,
                 94.0
               ]
-            }
+            },
+            "personal_range": [
+              93.0,
+              102.79
+            ],
+            "personal_flag": "within"
           }
         ],
         "recommendations": [
@@ -3890,7 +4168,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 30.0,
                 119.0
               ]
-            }
+            },
+            "personal_range": [
+              196.94,
+              247.73
+            ],
+            "personal_flag": "below"
           }
         ],
         "recommendations": [
@@ -3943,7 +4226,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 38.0,
                 39.5
               ]
-            }
+            },
+            "personal_range": [
+              34.86,
+              38.53
+            ],
+            "personal_flag": "within"
           }
         ],
         "recommendations": [],
@@ -3977,7 +4265,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 800.0,
                 1499.0
               ]
-            }
+            },
+            "personal_range": [
+              2511.73,
+              3336.55
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "weight_kg",
@@ -3992,7 +4285,9 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 45.0,
                 110.0
               ]
-            }
+            },
+            "personal_range": null,
+            "personal_flag": null
           }
         ],
         "recommendations": [],
@@ -4026,7 +4321,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 1.5,
                 2.9
               ]
-            }
+            },
+            "personal_range": [
+              3.6,
+              4.33
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "sleep_hours",
@@ -4045,7 +4345,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 4.0,
                 6.9
               ]
-            }
+            },
+            "personal_range": [
+              5.33,
+              10.7
+            ],
+            "personal_flag": "below"
           }
         ],
         "recommendations": [
@@ -4125,7 +4430,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 101.0,
                 130.0
               ]
-            }
+            },
+            "personal_range": [
+              74.79,
+              90.25
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "bp_systolic",
@@ -4144,7 +4454,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 130.0,
                 180.0
               ]
-            }
+            },
+            "personal_range": [
+              85.6,
+              135.24
+            ],
+            "personal_flag": "above"
           },
           {
             "indicator_id": "bp_diastolic",
@@ -4163,7 +4478,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 80.0,
                 120.0
               ]
-            }
+            },
+            "personal_range": [
+              65.88,
+              72.81
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "spo2",
@@ -4182,7 +4502,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 90.0,
                 94.0
               ]
-            }
+            },
+            "personal_range": [
+              93.0,
+              102.79
+            ],
+            "personal_flag": "within"
           }
         ],
         "recommendations": [
@@ -4241,7 +4566,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 38.0,
                 39.5
               ]
-            }
+            },
+            "personal_range": [
+              34.86,
+              38.53
+            ],
+            "personal_flag": "within"
           }
         ],
         "recommendations": [],
@@ -4275,7 +4605,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 800.0,
                 1499.0
               ]
-            }
+            },
+            "personal_range": [
+              2511.73,
+              3336.55
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "weight_kg",
@@ -4290,7 +4625,9 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 45.0,
                 110.0
               ]
-            }
+            },
+            "personal_range": null,
+            "personal_flag": null
           }
         ],
         "recommendations": [],
@@ -4324,7 +4661,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 1.5,
                 2.9
               ]
-            }
+            },
+            "personal_range": [
+              3.6,
+              4.33
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "sleep_hours",
@@ -4343,7 +4685,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 4.0,
                 6.9
               ]
-            }
+            },
+            "personal_range": [
+              5.33,
+              10.7
+            ],
+            "personal_flag": "below"
           }
         ],
         "recommendations": [
@@ -4423,7 +4770,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 101.0,
                 130.0
               ]
-            }
+            },
+            "personal_range": [
+              74.79,
+              90.25
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "bp_systolic",
@@ -4442,7 +4794,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 130.0,
                 180.0
               ]
-            }
+            },
+            "personal_range": [
+              85.6,
+              135.24
+            ],
+            "personal_flag": "above"
           },
           {
             "indicator_id": "bp_diastolic",
@@ -4461,7 +4818,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 80.0,
                 120.0
               ]
-            }
+            },
+            "personal_range": [
+              65.88,
+              72.81
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "spo2",
@@ -4480,7 +4842,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 90.0,
                 94.0
               ]
-            }
+            },
+            "personal_range": [
+              93.0,
+              102.79
+            ],
+            "personal_flag": "within"
           }
         ],
         "recommendations": [
@@ -4539,7 +4906,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 37.8,
                 39.5
               ]
-            }
+            },
+            "personal_range": [
+              34.86,
+              38.53
+            ],
+            "personal_flag": "within"
           }
         ],
         "recommendations": [],
@@ -4573,7 +4945,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 800.0,
                 1499.0
               ]
-            }
+            },
+            "personal_range": [
+              2511.73,
+              3336.55
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "weight_kg",
@@ -4588,7 +4965,9 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 45.0,
                 110.0
               ]
-            }
+            },
+            "personal_range": null,
+            "personal_flag": null
           }
         ],
         "recommendations": [],
@@ -4622,7 +5001,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 1.5,
                 2.9
               ]
-            }
+            },
+            "personal_range": [
+              3.6,
+              4.33
+            ],
+            "personal_flag": "within"
           },
           {
             "indicator_id": "sleep_hours",
@@ -4641,7 +5025,12 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
                 4.0,
                 6.9
               ]
-            }
+            },
+            "personal_range": [
+              5.33,
+              10.7
+            ],
+            "personal_flag": "below"
           }
         ],
         "recommendations": [

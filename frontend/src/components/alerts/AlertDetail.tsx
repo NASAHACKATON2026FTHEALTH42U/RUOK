@@ -325,7 +325,7 @@ export function AlertDetail({
                 })}
               </div>
               {role === 'member' && steps.length > 0 && (
-                <p className="mt-2 text-xs text-env-muted">
+                <p className="mt-2 text-sm text-env-muted">
                   {t(
                     'Al marcar todos los pasos de un protocolo, suma puntos y queda anotado en la alerta.',
                   )}

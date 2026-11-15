@@ -250,7 +250,13 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
     "system_id": "cardiovascular", "status": "warning",
     "indicators": [{ "indicator_id": "bp_systolic", "last_value": 142, "unit": "mmHg",
                      "taken_at": "...", "status": "warning", "trend": "rising",
-                     "baseline": 118, "range": { "normal": [90, 129] } }],
+                     "baseline": 118, "range": { "normal": [90, 129] },
+                     "personal_range": [112.5, 124.1],   // rango habitual del member (o null): media ± max(k·DE,
+                                                          // ratio·|media|) de sus mediciones de los últimos window_days,
+                                                          // sin la última; null con < min_points (personal_ranges.json)
+                     "personal_flag": "above" }],         // within | above | below | null: último valor vs personal_range.
+                                                          // Informativo: NO cambia status, alertas ni escalado. null si el
+                                                          // dato ha caducado. Estadístico, no clínico (sources.md)
     "recommendations": [{ "id": "rec_bp_repeat", "text": "Repite en reposo en 15 min", "priority": 1,
                          "intervention_id": null }],
     "escalation": { "level": 0, "target_role": "self", "mode": "realtime",     // level = índice en escalation_ladder.

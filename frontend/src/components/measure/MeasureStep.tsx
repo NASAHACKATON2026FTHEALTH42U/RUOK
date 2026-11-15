@@ -5,6 +5,12 @@ import { ListenButton } from '../behavioral/VoiceControls'
 import { STATUS_COLORS } from '../ui/status'
 import { allowsDecimal, applyKey, type RawValue } from './measureForm'
 import { NumericKeypad } from './NumericKeypad'
+import { RangeScale } from './RangeScale'
+import { useEnvironments } from '../../api/useEnvironments'
+import { useAssessment } from '../../api/useAssessment'
+import { useActiveMemberId } from '../../auth/useAuth'
+import { mergeRanges, type Ranges } from '../../offline/provisional'
+import { useEnvironmentStore } from '../../store/environment'
 
 interface MeasureStepProps {
   indicator: Indicator
@@ -37,6 +43,32 @@ export function MeasureStep({ indicator, value, error, onChange }: MeasureStepPr
     if (typeof matchMedia === 'function' && matchMedia('(pointer: fine)').matches)
       ref.current?.focus()
   }, [indicator.id])
+
+  // Rangos de referencia del indicador con los ajustes del entorno (los mismos que el semáforo).
+  const envId = useEnvironmentStore((s) => s.envId)
+  const envs = useEnvironments()
+  const env = envs.state === 'ready' ? envs.data.find((e) => e.id === envId) : undefined
+  const ranges = mergeRanges(
+    indicator.ranges as Ranges,
+    env?.threshold_overrides?.[indicator.id] as Ranges | undefined,
+  )
+  // Rango habitual de esta persona (su propia historia), si ya hay datos suficientes.
+  const memberId = useActiveMemberId()
+  const assessment = useAssessment(memberId)
+  const personal =
+    assessment.state === 'ready'
+      ? assessment.data.systems
+          .flatMap((sys) => sys.indicators)
+          .find((i) => i.indicator_id === indicator.id)?.personal_range
+      : undefined
+  const typed =
+    'text' in value
+      ? value.text.trim() === ''
+        ? null
+        : Number(value.text.replace(',', '.'))
+      : value.hours === '' && value.minutes === ''
+        ? null
+        : Number(value.hours || 0) + Number(value.minutes || 0) / 60
 
   const invalidStyle = invalid ? { borderColor: STATUS_COLORS.critical } : undefined
 
@@ -167,6 +199,15 @@ export function MeasureStep({ indicator, value, error, onChange }: MeasureStepPr
             {error}
           </p>
         )}
+        {/* Dónde cae el valor: normal, aviso o crítico (FE-10). */}
+        <RangeScale
+          ranges={ranges}
+          unit={unit}
+          min={input.min}
+          max={input.max}
+          value={typed !== null && Number.isFinite(typed) ? typed : null}
+          personal={personal ?? null}
+        />
       </div>
       {keypad}
     </div>

@@ -42,10 +42,10 @@ export function ActivitySelector({
               key={o.id}
               title={activityHint(o.id, isSpace, liveness)}
               // En la barra lateral (compact), sin espaciado entre letras: «Actividad de riesgo» cabe
-              // en dos líneas con una letra legible (11 px como mínimo).
+              // en dos líneas con una letra legible (12 px como mínimo).
               className={`relative flex min-h-11 min-w-0 cursor-pointer items-center justify-center border px-1 text-center font-mono uppercase focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-env-primary ${
                 compact
-                  ? 'text-[0.6875rem] leading-tight tracking-normal'
+                  ? 'text-xs leading-tight tracking-normal'
                   : 'text-[0.75rem] tracking-[0.1em]'
               } ${
                 on
@@ -61,7 +61,7 @@ export function ActivitySelector({
       {/* Qué hace el modo elegido. Se anuncia al cambiarlo (lectores de pantalla). */}
       <p
         aria-live="polite"
-        className={`border-t border-env-border/60 pt-2 pb-2.5 text-xs leading-snug text-env-muted ${
+        className={`border-t border-env-border/60 pt-2 pb-2.5 text-[0.8125rem] leading-snug text-env-muted ${
           compact ? 'px-2' : 'px-3.5'
         }`}
       >

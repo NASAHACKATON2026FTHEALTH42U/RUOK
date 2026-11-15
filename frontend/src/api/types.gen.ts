@@ -1835,6 +1835,19 @@ export interface components {
                     number
                 ];
             };
+            /**
+             * Personal Range
+             * @description Rango habitual del member [low, high]: media ± max(k·DE, ratio·|media|) de sus mediciones recientes (personal_ranges.json). Estadístico, no clínico; null sin datos
+             */
+            personal_range: [
+                number,
+                number
+            ] | null;
+            /**
+             * Personal Flag
+             * @description Último valor frente a personal_range. Informativo: no cambia status ni alertas. null sin rango o sin dato reciente
+             */
+            personal_flag: ("within" | "above" | "below") | null;
         };
         /** IndicatorInput */
         IndicatorInput: {

@@ -156,7 +156,7 @@ export function LinkPanel({
           }
         />
       </fieldset>
-      <p className="mt-3 text-xs text-env-muted">
+      <p className="mt-3 text-sm text-env-muted">
         {t(
           'Lo que va a {ground} espera en la cola mientras no hay enlace y llega con el retardo del entorno.',
           { ground: groundLabel },
@@ -231,7 +231,7 @@ export function ClockPanel({
           </button>
         ))}
       </div>
-      <p className="mt-2 text-xs text-env-muted">
+      <p className="mt-2 text-sm text-env-muted">
         {t('Afecta a todo el servidor: datos que caducan, tareas del día y falta de contacto.')}
       </p>
       <div className="mt-4 border-t border-env-border/60 pt-4">

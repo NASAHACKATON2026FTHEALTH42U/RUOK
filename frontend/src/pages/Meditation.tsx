@@ -273,7 +273,7 @@ export default function Meditation() {
               </li>
             ))}
           </ul>
-          <p className="border-t border-env-border/60 px-4 py-3 text-xs text-env-muted lg:px-6">
+          <p className="border-t border-env-border/60 px-4 py-3 text-sm text-env-muted lg:px-6">
             {t(
               'Si vas a dormir, marca «Sueño» en Actividad: el sistema esperará más antes de preguntarte «R U OK?».',
             )}

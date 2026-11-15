@@ -190,7 +190,7 @@ export function OperatorMessageForm({
         {memberId !== null
           ? (targets[0]?.name ?? '…')
           : t('todo {crew} ({n})', { crew: vocabulary.crew, n: recipients.length })}
-        <span className="block text-xs text-env-muted">
+        <span className="block text-sm text-env-muted">
           {t('Se cambia en el selector de {member} de la barra lateral.', {
             member: vocabulary.member,
           })}

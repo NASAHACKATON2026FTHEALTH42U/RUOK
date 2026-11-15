@@ -1,6 +1,7 @@
 """Members (astronauta, paciente, residente), mediciones, evaluación y liveness."""
 
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import Field
@@ -82,6 +83,16 @@ class IndicatorAssessment(ApiModel):
         default=None, description="Línea base personal (primeros 7 días)"
     )
     range: dict[str, Range] = Field(description="Rangos aplicados (ya con los ajustes del entorno)")
+    personal_range: Range | None = Field(
+        default=None,
+        description="Rango habitual del member [low, high]: media ± max(k·DE, ratio·|media|) de "
+        "sus mediciones recientes (personal_ranges.json). Estadístico, no clínico; null sin datos",
+    )
+    personal_flag: Literal["within", "above", "below"] | None = Field(
+        default=None,
+        description="Último valor frente a personal_range. Informativo: no cambia status ni "
+        "alertas. null sin rango o sin dato reciente",
+    )
 
 
 class Recommendation(ApiModel):

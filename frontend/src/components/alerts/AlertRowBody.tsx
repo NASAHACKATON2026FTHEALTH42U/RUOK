@@ -30,12 +30,12 @@ export function AlertRowBody({
         <span className="min-w-0 leading-snug font-medium">{title}</span>
         <StatusBadge status={status} label={severityLabel} size="sm" className="shrink-0" />
       </span>
-      <span className="flex items-baseline justify-between gap-3 text-xs text-env-muted">
+      <span className="flex items-baseline justify-between gap-3 text-[0.8125rem] text-env-muted">
         <span className="truncate">{state}</span>
         <span className="shrink-0 tabular-nums">{ago}</span>
       </span>
       {target && (
-        <span className="flex items-center gap-1.5 text-xs text-env-text/80">
+        <span className="flex items-center gap-1.5 text-[0.8125rem] text-env-text/80">
           <Icon name="escalate" size={13} className="rotate-90 text-env-muted" />
           <span className="truncate">{target}</span>
         </span>

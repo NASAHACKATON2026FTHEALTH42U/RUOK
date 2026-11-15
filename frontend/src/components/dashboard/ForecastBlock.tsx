@@ -54,7 +54,9 @@ export function ForecastBlock({ forecast }: { forecast: LoadResult<Forecast | nu
             )}
             {summary.text}
           </p>
-          {data.status === 'ok' && <p className="text-xs text-env-muted">{forecastNote(data)}</p>}
+          {data.status === 'ok' && (
+            <p className="text-[0.8125rem] text-env-muted">{forecastNote(data)}</p>
+          )}
         </>
       )}
     </section>

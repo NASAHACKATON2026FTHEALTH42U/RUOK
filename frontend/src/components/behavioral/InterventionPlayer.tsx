@@ -171,7 +171,7 @@ export function InterventionPlayer({
 
         <header className="flex flex-col gap-3 px-[clamp(1rem,3vw,2rem)] pt-[clamp(0.75rem,2vw,1.5rem)] sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <p className="hud-label text-[0.6875rem]">
+            <p className="hud-label">
               {done ? t('Hecho') : t('Paso {n} de {of}', { n: index + 1, of: total })}
             </p>
             <h2
@@ -307,7 +307,7 @@ export function InterventionPlayer({
 
               <div aria-live="polite" className="w-full max-w-[min(48rem,92vw)]">
                 {phase && (
-                  <p className="hud-label mb-2 text-[clamp(0.7rem,0.65rem+0.25vw,0.85rem)] text-env-primary">
+                  <p className="hud-label mb-2 text-[clamp(0.75rem,0.7rem+0.25vw,0.875rem)] text-env-primary">
                     {phase === 'in' ? t('Inhala') : phase === 'out' ? t('Exhala') : t('Mantén')}
                   </p>
                 )}
@@ -370,7 +370,7 @@ export function InterventionPlayer({
               {/* Lo que viene: anticipa el siguiente paso (atenuado). */}
               {nextStep && (
                 <p className="max-w-[min(40rem,90vw)] truncate text-[clamp(0.85rem,0.8rem+0.25vw,1rem)] text-env-muted">
-                  <span className="hud-label mr-2 text-[0.6875rem]">{t('Después')}</span>
+                  <span className="hud-label mr-2">{t('Después')}</span>
                   {nextStep.text}
                 </p>
               )}
@@ -378,7 +378,7 @@ export function InterventionPlayer({
           )}
         </div>
         {voiceReady && (
-          <p className="px-4 pb-4 text-center text-xs text-env-muted">{t(VOICE_NOTE)}</p>
+          <p className="px-4 pb-4 text-center text-sm text-env-muted">{t(VOICE_NOTE)}</p>
         )}
       </div>
     </Modal>

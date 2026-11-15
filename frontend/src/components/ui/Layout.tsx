@@ -132,7 +132,7 @@ export function Layout() {
             <PendingSyncChip />
             <ServerStatus quiet />
             {/* Aviso siempre visible en escritorio; en móvil va en «Más» y en el login. */}
-            <p className="mt-2 text-[0.75rem] leading-snug text-env-muted">
+            <p className="mt-2 text-[0.8125rem] leading-snug text-env-muted">
               {t('Prototipo de autoevaluación.')}{' '}
               <strong>{t('No es un dispositivo médico')}</strong>{' '}
               {t('ni sustituye el criterio de un profesional sanitario.')}

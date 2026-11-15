@@ -39,7 +39,7 @@ export function HudClock({ env }: { env?: ClockEnv }) {
       >
         {now.toLocaleTimeString(dateLocale(), { hour12: false })}
       </time>
-      {day && <span className="hud-label block text-[0.6875rem] whitespace-nowrap">{day}</span>}
+      {day && <span className="hud-label block whitespace-nowrap">{day}</span>}
     </div>
   )
 }

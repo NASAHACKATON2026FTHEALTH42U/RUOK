@@ -166,7 +166,7 @@ export default function HomeMessages() {
             {linkText.short}
           </span>
         </div>
-        <p className="shrink-0 border-b border-hud-line px-3.5 py-2 text-xs text-env-muted">
+        <p className="shrink-0 border-b border-hud-line px-3.5 py-2 text-sm text-env-muted">
           {hint}
         </p>
 
@@ -182,7 +182,7 @@ export default function HomeMessages() {
           </p>
         )}
         {messages.state === 'ready' && messages.refreshFailed && (
-          <p role="status" className="shrink-0 px-3.5 pt-2 text-xs text-st-none">
+          <p role="status" className="shrink-0 px-3.5 pt-2 text-sm text-st-none">
             {t('Sin conexión con el servidor de a bordo: la conversación puede estar desfasada.')}
           </p>
         )}
@@ -293,7 +293,7 @@ function Bubble({ item, now }: { item: ThreadItem; now: Date }) {
         {item.text}
       </p>
       <p
-        className={`mt-1.5 flex items-start gap-1.5 font-mono text-[0.6875rem] tracking-[0.08em] uppercase ${TONE_CLASS[state.tone]}`}
+        className={`mt-1.5 flex items-start gap-1.5 font-mono text-xs tracking-[0.08em] uppercase ${TONE_CLASS[state.tone]}`}
       >
         <span aria-hidden>{state.icon}</span>
         <span>{state.label}</span>

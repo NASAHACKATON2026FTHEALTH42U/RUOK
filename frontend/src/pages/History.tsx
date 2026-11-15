@@ -123,6 +123,17 @@ export default function History() {
     return out
   }, [assessment, indicatorId, indicator])
 
+  // Rango habitual del member (informativo, estadístico): solo si el indicador está evaluado.
+  const personalRange = useMemo(
+    () =>
+      assessment.state === 'ready'
+        ? (assessment.data.systems
+            .flatMap((s) => s.indicators)
+            .find((i) => i.indicator_id === indicatorId)?.personal_range ?? null)
+        : null,
+    [assessment, indicatorId],
+  )
+
   // Para colorear cada fila: catálogo + ajustes del entorno, con los límites críticos incluidos
   // (las mismas reglas que el motor, offline/provisional.ts). Sin rangos, nada se colorea.
   const fullRange: FullRanges | null = useMemo(() => {
@@ -241,7 +252,9 @@ export default function History() {
                 ` · ${t('previsión {n} días', { n: expected.horizon_days })}`}
               {unit && ` · ${unit === '1-5' ? t('escala 1-5') : unit}`}
             </p>
-            {predicted && <ForecastLegend />}
+            {(predicted || personalRange) && (
+              <ForecastLegend forecast={predicted} personal={!!personalRange} />
+            )}
           </div>
           <div className="flex min-h-64 flex-1 flex-col p-3.5 [&>*]:flex-1">
             {/* La gráfica espera a la previsión: así no cambia de escala al llegar. */}
@@ -259,6 +272,7 @@ export default function History() {
                 days={days}
                 height="100%"
                 forecast={expected}
+                personalRange={personalRange}
               />
             )}
             {series.state === 'error' && (

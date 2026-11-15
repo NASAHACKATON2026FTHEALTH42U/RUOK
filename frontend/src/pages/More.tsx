@@ -71,7 +71,7 @@ export default function More() {
         </div>
       </section>
 
-      <p className="px-1 text-center text-xs text-env-muted">
+      <p className="px-1 text-center text-sm text-env-muted">
         {t('Prototipo de autoevaluación.')} <strong>{t('No es un dispositivo médico')}</strong>{' '}
         {t('ni sustituye el criterio de un profesional sanitario.')}
         {device.mode === 'tab' && (

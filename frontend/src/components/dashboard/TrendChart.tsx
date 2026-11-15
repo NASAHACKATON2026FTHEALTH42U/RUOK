@@ -45,6 +45,18 @@ const FORECAST_WIDTH = 1.5
 const FORECAST_DASH = '5 4'
 const FORECAST_BAND_OPACITY = 0.2
 
+/**
+ * Rango habitual del member (`IndicatorAssessment.personal_range`): lavado suave del color
+ * primario del entorno con borde discontinuo, para no confundirlo con las bandas del semáforo.
+ * Es una referencia estadística personal, no un umbral clínico.
+ */
+const PERSONAL_COLOR = 'var(--env-primary)'
+const PERSONAL_OPACITY = 0.14
+const PERSONAL_DASH = '3 3'
+
+/** `[low, high]` (el OpenAPI lo genera como `number[]`). */
+export type PersonalRange = number[]
+
 /** Selector de periodo 7 d / 30 d. */
 export function PeriodSwitch({
   days,
@@ -94,6 +106,8 @@ interface TrendPlotProps {
    * estado la gráfica es la de siempre (sin datos = desconocido).
    */
   forecast?: Forecast | null
+  /** Rango habitual del member (`IndicatorAssessment.personal_range`); sin él no se dibuja. */
+  personalRange?: PersonalRange | null
 }
 
 /**
@@ -105,7 +119,15 @@ interface TrendPlotProps {
  * línea discontinua desde el último dato, su rango probable (el intervalo de predicción, de
  * ≈ 80 %) como banda gris y una línea vertical marca «ahora». Acompáñala de `ForecastLegend`.
  */
-export function TrendPlot({ points, unit, range, days, height = 144, forecast }: TrendPlotProps) {
+export function TrendPlot({
+  points,
+  unit,
+  range,
+  days,
+  height = 144,
+  forecast,
+  personalRange,
+}: TrendPlotProps) {
   const t = useT()
   const now = serverNow().getTime()
   const rows = withForecast(points, forecast)
@@ -138,6 +160,18 @@ export function TrendPlot({ points, unit, range, days, height = 144, forecast }:
               ifOverflow="hidden"
             />
           ))}
+          {personalRange && (
+            <ReferenceArea
+              y1={personalRange[0]}
+              y2={personalRange[1]}
+              fill={PERSONAL_COLOR}
+              fillOpacity={PERSONAL_OPACITY}
+              stroke={PERSONAL_COLOR}
+              strokeOpacity={0.5}
+              strokeDasharray={PERSONAL_DASH}
+              ifOverflow="hidden"
+            />
+          )}
           <CartesianGrid vertical={false} stroke="var(--env-border)" strokeOpacity={0.6} />
           <XAxis
             dataKey="t"
@@ -270,15 +304,19 @@ export function TrendPlot({ points, unit, range, days, height = 144, forecast }:
 
 /**
  * Leyenda de la gráfica con previsión: qué es dato, qué es estimación y qué cubre la banda (la
- * identidad no depende solo del trazo). Como la gráfica, es `aria-hidden`.
+ * identidad no depende solo del trazo). Con `personal`, añade el rango habitual; con
+ * `forecast={false}`, quita las entradas de la previsión. Como la gráfica, es `aria-hidden`.
  */
-export function ForecastLegend() {
+export function ForecastLegend({
+  forecast = true,
+  personal = false,
+}: { forecast?: boolean; personal?: boolean } = {}) {
   const t = useT()
   const key = 'h-2 w-4 shrink-0'
   return (
     <ul
       aria-hidden="true"
-      className="flex flex-wrap items-center gap-x-3.5 gap-y-1 text-xs text-env-muted"
+      className="flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[13px] text-env-muted"
     >
       <li className="inline-flex items-center gap-1.5">
         <svg viewBox="0 0 16 8" className={key}>
@@ -286,26 +324,53 @@ export function ForecastLegend() {
         </svg>
         {t('Medido')}
       </li>
-      <li className="inline-flex items-center gap-1.5">
-        <svg viewBox="0 0 16 8" className={key}>
-          <line
-            x1="0"
-            y1="4"
-            x2="16"
-            y2="4"
-            stroke={FORECAST_COLOR}
-            strokeWidth={FORECAST_WIDTH}
-            strokeDasharray={FORECAST_DASH}
-          />
-        </svg>
-        {t('Previsión')}
-      </li>
-      <li className="inline-flex items-center gap-1.5">
-        <svg viewBox="0 0 16 8" className={key}>
-          <rect width="16" height="8" fill={FORECAST_COLOR} fillOpacity={FORECAST_BAND_OPACITY} />
-        </svg>
-        {t('Rango probable (≈ 80 %)')}
-      </li>
+      {forecast && (
+        <>
+          <li className="inline-flex items-center gap-1.5">
+            <svg viewBox="0 0 16 8" className={key}>
+              <line
+                x1="0"
+                y1="4"
+                x2="16"
+                y2="4"
+                stroke={FORECAST_COLOR}
+                strokeWidth={FORECAST_WIDTH}
+                strokeDasharray={FORECAST_DASH}
+              />
+            </svg>
+            {t('Previsión')}
+          </li>
+          <li className="inline-flex items-center gap-1.5">
+            <svg viewBox="0 0 16 8" className={key}>
+              <rect
+                width="16"
+                height="8"
+                fill={FORECAST_COLOR}
+                fillOpacity={FORECAST_BAND_OPACITY}
+              />
+            </svg>
+            {t('Rango probable (≈ 80 %)')}
+          </li>
+        </>
+      )}
+      {personal && (
+        <li className="inline-flex items-center gap-1.5">
+          <svg viewBox="0 0 16 8" className={key}>
+            <rect
+              x="0.5"
+              y="0.5"
+              width="15"
+              height="7"
+              fill={PERSONAL_COLOR}
+              fillOpacity={PERSONAL_OPACITY}
+              stroke={PERSONAL_COLOR}
+              strokeOpacity={0.5}
+              strokeDasharray={PERSONAL_DASH}
+            />
+          </svg>
+          {t('Tu rango habitual')}
+        </li>
+      )}
     </ul>
   )
 }
@@ -316,13 +381,15 @@ interface TrendChartProps {
   unit: string
   /** Rangos ya ajustados al entorno (`IndicatorAssessment.range`). */
   range: Ranges
+  /** Rango habitual del member (`IndicatorAssessment.personal_range`). */
+  personalRange?: PersonalRange | null
 }
 
 /**
  * Serie temporal compacta de un indicador (7 o 30 días) para las tarjetas: carga sus datos,
  * selector de periodo, TrendPlot y tabla de datos desplegable.
  */
-export function TrendChart({ indicatorId, name, unit, range }: TrendChartProps) {
+export function TrendChart({ indicatorId, name, unit, range, personalRange }: TrendChartProps) {
   const t = useT()
   const memberId = useEnvironmentStore((s) => s.memberId)
   const [days, setDays] = useState<Period>(7)
@@ -358,8 +425,19 @@ export function TrendChart({ indicatorId, name, unit, range }: TrendChartProps) 
       {series.state === 'ready' && points.length > 0 && (
         <>
           <div className="mt-2">
-            <TrendPlot points={points} unit={unit} range={range} days={days} />
+            <TrendPlot
+              points={points}
+              unit={unit}
+              range={range}
+              days={days}
+              personalRange={personalRange}
+            />
           </div>
+          {personalRange && (
+            <div className="mt-1">
+              <ForecastLegend forecast={false} personal />
+            </div>
+          )}
           <details className="mt-1 text-xs">
             <summary className="cursor-pointer text-env-muted hover:text-env-text">
               {t('Ver datos ({n})', { n: points.length })}

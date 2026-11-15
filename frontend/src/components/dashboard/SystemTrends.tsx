@@ -15,7 +15,7 @@ import { translate, useT } from '../../i18n/t'
 import { useEnvironmentStore } from '../../store/environment'
 import { STATUS_COLORS } from '../ui/status'
 import { formatValue } from './format'
-import { PeriodSwitch } from './TrendChart'
+import { ForecastLegend, PeriodSwitch } from './TrendChart'
 import {
   bands,
   commonUnit,
@@ -48,7 +48,12 @@ export interface TrendSeries {
   unit: string
   /** Rangos ya ajustados al entorno (`IndicatorAssessment.range`). */
   range: Ranges
+  /** Rango habitual del member (`IndicatorAssessment.personal_range`), si lo hay. */
+  personalRange?: number[] | null
 }
+
+/** Rango habitual en la gráfica: el mismo estilo que en TrendChart (primario suave, discontinuo). */
+const PERSONAL_COLOR = 'var(--env-primary)'
 
 const unitLabel = (unit: string) =>
   unit === '1-5' ? translate('escala 1-5') : unit || translate('sin unidad')
@@ -62,6 +67,9 @@ const unitLabel = (unit: string) =>
  * - Unidades distintas: escala común, el % del rango normal de cada indicador (0–100 % = normal).
  *   Mezclar unidades en un eje, o usar dos ejes, falsearía la lectura. El valor real va en el
  *   tooltip y en la tabla.
+ * - Con un indicador elegido en «Eje Y» (o pulsando su línea), el eje pasa a su escala: valores
+ *   reales y su unidad, marcas ajustadas a sus datos, sus bandas y su rango habitual. Las líneas
+ *   con otra unidad se ocultan; las de la misma unidad quedan atenuadas.
  * Periodo común, tooltip con todas las series y tabla de datos desplegable (el color nunca va
  * solo).
  */
@@ -76,6 +84,9 @@ export function SystemTrends({ series, initial }: { series: TrendSeries[]; initi
   // Se cargan todas las series del sistema: cambiar la selección no vuelve a pedir datos.
   const data = useMeasurementsMany(memberId, ids, days)
   const selected = series.filter((s) => s.id in slots)
+  // Indicador que manda en el eje Y (null = automático). Si se quita de la gráfica, se olvida.
+  const [axisId, setAxisId] = useState<string | null>(null)
+  const focus = axisId && axisId in slots ? axisId : null
   const last = (id: string) =>
     data.state === 'ready' ? (data.data[id] ?? []).at(-1)?.value : undefined
 
@@ -155,7 +166,14 @@ export function SystemTrends({ series, initial }: { series: TrendSeries[]; initi
         </p>
       )}
       {data.state === 'ready' && (
-        <Plot selected={selected} slots={slots} data={data.data} days={days} />
+        <Plot
+          selected={selected}
+          slots={slots}
+          data={data.data}
+          days={days}
+          focus={focus}
+          onFocus={setAxisId}
+        />
       )}
     </figure>
   )
@@ -166,17 +184,29 @@ function Plot({
   slots,
   data,
   days,
+  focus,
+  onFocus,
 }: {
   selected: TrendSeries[]
   slots: Slots
   data: Record<string, { taken_at: string; value: number }[]>
   days: Period
+  /** Indicador elegido para el eje Y (null = automático). */
+  focus: string | null
+  onFocus: (id: string | null) => void
 }) {
   const t = useT()
+  // Línea bajo el puntero: se engrosa para que se vea que se puede pulsar.
+  const [hovered, setHovered] = useState<string | null>(null)
   const now = serverNow().getTime()
-  const unit = commonUnit(selected.map((s) => s.unit))
-  const normalized = unit === null
   const single = selected.length === 1
+  // Con un indicador elegido (o uno solo en la gráfica), el eje es el suyo: valores reales.
+  const focused = selected.find((s) => s.id === focus) ?? (single ? selected[0] : null)
+  const unit = focused ? focused.unit : commonUnit(selected.map((s) => s.unit))
+  const normalized = unit === null
+  // Líneas que se pueden dibujar en ese eje: con otra unidad, se ocultan.
+  const drawn = focused ? selected.filter((s) => s.unit === focused.unit) : selected
+  const personal = focused?.personalRange?.length === 2 ? focused.personalRange : null
   // Filas por instante: { t, [indicador]: valor dibujado, [indicador + RAW]: valor real }, para
   // un tooltip con todas las series.
   const byT = new Map<number, Record<string, number>>()
@@ -187,23 +217,51 @@ function Plot({
       if (y === null) continue
       const at = Date.parse(m.taken_at)
       byT.set(at, { ...(byT.get(at) ?? { t: at }), [s.id]: y, [s.id + RAW]: m.value })
-      points.push({ t: at, value: y })
+      if (drawn.includes(s)) points.push({ t: at, value: y })
     }
   }
   const rows = [...byT.values()].sort((a, b) => a.t - b.t)
   // Bandas: con escala común, la franja normal (0–100 %); con valores reales, las del indicador
   // si solo hay uno (con varios, cada uno tiene las suyas).
-  const range: Ranges = normalized ? { normal: [0, 100] } : single ? selected[0].range : {}
-  const domain = yDomain(points, range)
+  const range: Ranges = normalized ? { normal: [0, 100] } : focused ? focused.range : {}
+  // Las marcas se ajustan a los datos dibujados, a las bandas y al rango habitual.
+  const domain = yDomain(
+    personal ? [...points, { t: now, value: personal[0] }, { t: now, value: personal[1] }] : points,
+    range,
+  )
   const caption = normalized
     ? t('Escala común: % del rango normal de cada indicador (0–100 % = normal)')
-    : single
-      ? `${selected[0].name} · ${unitLabel(unit)}`
+    : focused
+      ? `${focused.name} · ${unitLabel(unit)}`
       : unitLabel(unit)
+  const axisLabel = normalized ? t('% del rango') : unitLabel(unit)
+  const hidden = selected.length - drawn.length
 
   return (
     <div className="mt-2 min-w-0">
-      <p className="text-sm text-env-muted">{caption}</p>
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <p className="text-sm text-env-muted">
+          {caption}
+          {hidden > 0 && ` · ${t('{n} con otra unidad, ocultos', { n: hidden })}`}
+        </p>
+        {selected.length > 1 && (
+          <label className="inline-flex items-center gap-2 text-sm text-env-muted">
+            {t('Eje Y')}
+            <select
+              value={focus ?? ''}
+              onChange={(e) => onFocus(e.target.value || null)}
+              className="border border-env-border bg-env-bg px-2 py-1 text-sm text-env-text focus-visible:outline-2 focus-visible:outline-env-primary"
+            >
+              <option value="">{t('Automático')}</option>
+              {selected.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+      </div>
       {rows.length === 0 ? (
         <p className="mt-1 text-sm text-env-muted">
           {t('Sin mediciones en los últimos {n} días.', { n: days })}
@@ -214,7 +272,8 @@ function Plot({
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={rows}
-                margin={{ top: 6, right: 8, bottom: 0, left: -18 }}
+                // Hueco arriba para la etiqueta del eje Y (unidad o «% del rango»).
+                margin={{ top: 22, right: 8, bottom: 0, left: -18 }}
                 accessibilityLayer={false}
               >
                 {bands(range).map((b) => (
@@ -228,6 +287,18 @@ function Plot({
                     ifOverflow="hidden"
                   />
                 ))}
+                {personal && (
+                  <ReferenceArea
+                    y1={personal[0]}
+                    y2={personal[1]}
+                    fill={PERSONAL_COLOR}
+                    fillOpacity={0.14}
+                    stroke={PERSONAL_COLOR}
+                    strokeOpacity={0.5}
+                    strokeDasharray="3 3"
+                    ifOverflow="hidden"
+                  />
+                )}
                 <CartesianGrid vertical={false} stroke="var(--env-border)" strokeOpacity={0.6} />
                 <XAxis
                   dataKey="t"
@@ -235,7 +306,7 @@ function Plot({
                   scale="time"
                   domain={[now - days * DAY_MS, now]}
                   tickFormatter={formatDay}
-                  tick={{ fill: 'var(--env-muted)', fontSize: 11 }}
+                  tick={{ fill: 'var(--env-muted)', fontSize: 12 }}
                   axisLine={{ stroke: 'var(--env-border)' }}
                   tickLine={false}
                   minTickGap={24}
@@ -244,11 +315,19 @@ function Plot({
                   domain={domain}
                   ticks={yTicks(domain)}
                   tickFormatter={normalized ? (v: number) => `${v} %` : undefined}
-                  tick={{ fill: 'var(--env-muted)', fontSize: 11 }}
+                  tick={{ fill: 'var(--env-muted)', fontSize: 12 }}
                   axisLine={false}
                   tickLine={false}
                   width={normalized ? 60 : 48}
                   allowDecimals={false}
+                  label={{
+                    value: axisLabel,
+                    position: 'top',
+                    offset: 10,
+                    textAnchor: 'start',
+                    fill: 'var(--env-muted)',
+                    fontSize: 12,
+                  }}
                 />
                 <Tooltip
                   cursor={{ stroke: 'var(--env-muted)', strokeWidth: 1 }}
@@ -281,13 +360,40 @@ function Plot({
                     )
                   }}
                 />
-                {selected.map((s) => (
+                {/* Zona de clic ancha e invisible bajo cada línea: la línea es fina, pero se puede
+                    pulsar (y señalar) sin apuntar al píxel. */}
+                {selected.length > 1 &&
+                  drawn.map((s) => (
+                    <Line
+                      key={`hit-${s.id}`}
+                      type="monotone"
+                      dataKey={s.id}
+                      stroke="transparent"
+                      strokeWidth={22}
+                      connectNulls
+                      dot={false}
+                      activeDot={false}
+                      legendType="none"
+                      tooltipType="none"
+                      isAnimationActive={false}
+                      style={{ cursor: 'pointer', pointerEvents: 'stroke' }}
+                      onClick={() => onFocus(focus === s.id ? null : s.id)}
+                      onMouseEnter={() => setHovered(s.id)}
+                      onMouseLeave={() => setHovered(null)}
+                    />
+                  ))}
+                {drawn.map((s) => (
                   <Line
                     key={s.id}
                     type="monotone"
                     dataKey={s.id}
                     stroke={SERIES[slots[s.id]]}
-                    strokeWidth={2}
+                    // Con un indicador elegido, las demás líneas de su unidad quedan atenuadas.
+                    strokeOpacity={focus && s.id !== focus ? 0.35 : 1}
+                    // Pulsar una línea pone el eje en su escala (otra vez: vuelve a automático).
+                    onClick={() => selected.length > 1 && onFocus(focus === s.id ? null : s.id)}
+                    style={selected.length > 1 ? { cursor: 'pointer' } : undefined}
+                    strokeWidth={hovered === s.id || focus === s.id ? 3.5 : 2}
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     connectNulls
@@ -308,6 +414,11 @@ function Plot({
               </LineChart>
             </ResponsiveContainer>
           </div>
+          {personal && (
+            <div className="mt-1">
+              <ForecastLegend forecast={false} personal />
+            </div>
+          )}
 
           <details className="mt-2 text-sm">
             <summary className="cursor-pointer text-env-muted hover:text-env-text">

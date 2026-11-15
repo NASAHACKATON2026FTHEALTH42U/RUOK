@@ -225,7 +225,7 @@ export default function Missions() {
             <p className="mt-1 font-display text-2xl font-semibold tabular-nums sm:text-3xl">
               {progress.done} / {progress.total}
             </p>
-            <p className="text-xs text-env-muted">
+            <p className="text-sm text-env-muted">
               {t('{done} de {total} puntos del día', {
                 done: progress.points,
                 total: progress.totalPoints,

@@ -709,7 +709,7 @@ textarea {
     gap: 10px;
     padding: 11px 14px 10px;
     border-bottom: 1px solid var(--color-hud-line);
-    font: 400 0.75rem var(--font-mono);
+    font: 400 0.8125rem var(--font-mono);
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--env-text);
@@ -729,7 +729,7 @@ textarea {
     gap: 6px;
     padding: 3px 7px;
     border: 1px solid currentColor;
-    font: 400 0.6875rem var(--font-mono);
+    font: 400 0.75rem var(--font-mono);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     white-space: nowrap;
@@ -763,7 +763,7 @@ textarea {
   }
 
   .hud-label {
-    font: 400 0.6875rem var(--font-mono);
+    font: 400 0.75rem var(--font-mono);
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--env-muted);
@@ -847,8 +847,8 @@ textarea {
     transition:
       background-color 140ms ease-out,
       box-shadow 140ms ease-out;
-    font: 500 0.75rem var(--font-mono);
-    letter-spacing: 0.16em;
+    font: 500 0.8125rem var(--font-mono);
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
   }
@@ -962,8 +962,8 @@ textarea {
     padding: 11px 0 8px;
     /* Etiquetas largas ("Centro de control") pasan a dos líneas: centradas, no a la izquierda. */
     text-align: center;
-    font: 400 0.6875rem var(--font-mono);
-    letter-spacing: 0.12em;
+    font: 400 0.75rem var(--font-mono);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--env-muted);
     border-top: 2px solid transparent;

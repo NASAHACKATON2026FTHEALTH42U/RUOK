@@ -67,7 +67,7 @@ export function TaskItem({ task, pending, onComplete, busy }: TaskItemProps) {
 
       <div className="min-w-0 flex-1">
         <p className={`font-medium ${done ? 'text-env-muted line-through' : ''}`}>{task.title}</p>
-        <p className="text-xs text-env-muted">
+        <p className="text-sm text-env-muted">
           {t('{due} · {n} puntos', { due: formatDue(task.due), n: task.points })}
           {pending && (
             <span title={t('Se enviará al volver la conexión')}>

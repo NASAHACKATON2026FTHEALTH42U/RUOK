@@ -31,7 +31,7 @@ export function CrewMissions({ missions, memberId, canJoin, busyId, onJoin }: Cr
                 <p className="text-sm font-medium">
                   {m.title} <span className="font-normal text-env-muted">· {m.points} pts</span>
                 </p>
-                <p className="text-xs text-env-muted">
+                <p className="text-sm text-env-muted">
                   {m.completed && <span aria-hidden>✓ </span>}
                   {s.label}
                 </p>

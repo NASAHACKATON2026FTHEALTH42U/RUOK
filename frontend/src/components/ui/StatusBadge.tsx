@@ -25,9 +25,9 @@ export function StatusBadge({ status, label, size = 'md', className = '' }: Stat
     <span
       className={`inline-flex items-center border bg-env-surface font-mono font-normal whitespace-nowrap text-env-text uppercase ${
         size === 'xs'
-          ? 'gap-1 px-1 py-px text-[0.625rem] tracking-[0.06em]'
+          ? 'gap-1 px-1 py-px text-xs tracking-[0.04em]'
           : size === 'sm'
-            ? 'gap-1.5 px-1.5 py-0.5 text-[0.6875rem] tracking-[0.1em]'
+            ? 'gap-1.5 px-1.5 py-0.5 text-xs tracking-[0.1em]'
             : 'gap-1.5 px-2 py-1 text-[0.75rem] tracking-[0.1em]'
       } ${className}`}
       style={{ borderColor: s.color, ...(s.striped ? { backgroundImage: STRIPES } : {}) }}

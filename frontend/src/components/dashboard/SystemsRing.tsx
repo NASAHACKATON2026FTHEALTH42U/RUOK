@@ -234,7 +234,7 @@ export function SystemsRing({
                     <i style={{ width: `${BAR[r.status]}%` }} />
                   </span>
                   <span
-                    className={`w-[72px] shrink-0 text-right font-mono text-[0.6875rem] tracking-[0.08em] uppercase ${ST_CLASS[r.status]}`}
+                    className={`min-w-[72px] shrink-0 text-right font-mono text-xs whitespace-nowrap tracking-[0.08em] uppercase ${ST_CLASS[r.status]}`}
                   >
                     {r.status === 'normal' ? t('Nominal') : t(s.label)}
                   </span>

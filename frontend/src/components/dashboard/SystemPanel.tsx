@@ -192,6 +192,7 @@ export function SystemPanel({
                     name: byId.get(ind.indicator_id)?.name ?? ind.indicator_id,
                     unit: ind.unit,
                     range: ind.range,
+                    personalRange: ind.personal_range,
                   }))}
                 initial={focusIndicatorId ? [focusIndicatorId] : undefined}
               />

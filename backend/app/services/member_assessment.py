@@ -27,7 +27,7 @@ from app.schemas.members import (
     IndicatorAssessment,
     SystemAssessment,
 )
-from app.services import behavioral, catalog, environments, measurements
+from app.services import behavioral, catalog, environments, measurements, personal_range
 from app.services.assessment import (
     _as_dict,
     build_escalation,
@@ -65,7 +65,7 @@ _RANGE_KEYS = ("normal", "warning")
 def build_indicator_assessment(
     indicator: Any, env: Any, series: Iterable[Any], now: datetime
 ) -> IndicatorAssessment:
-    """Estado, último valor, tendencia y línea base de un indicador."""
+    """Estado, último valor, tendencia, línea base y rango habitual de un indicador."""
     ind = _as_dict(indicator)
     points = _points(series)
     taken_at, last_value = points[-1] if points else (None, None)
@@ -75,6 +75,7 @@ def build_indicator_assessment(
         status, points, higher_is_worse=ind.get("higher_is_worse", True)
     )
     ranges = merge_ranges(ind, env)
+    personal = personal_range.personal_range(ind["id"], points, now)
     return IndicatorAssessment(
         indicator_id=ind["id"],
         last_value=last_value,
@@ -84,6 +85,11 @@ def build_indicator_assessment(
         trend=trend(points, now),
         baseline=baseline(points, now),
         range={k: tuple(ranges[k]) for k in _RANGE_KEYS if ranges.get(k) is not None},
+        # Informativo: no cambia el status. Un dato caducado (unknown) no se compara.
+        personal_range=personal,
+        personal_flag=None
+        if status == Status.unknown
+        else personal_range.personal_flag(last_value, personal),
     )
 
 

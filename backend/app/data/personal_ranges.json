@@ -1,0 +1,7 @@
+{
+  "window_days": 30,
+  "min_points": 7,
+  "k_sd": 2.0,
+  "min_band_ratio": 0.05,
+  "skip_indicators": ["radiation_dose"]
+}

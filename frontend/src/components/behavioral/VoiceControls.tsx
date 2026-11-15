@@ -156,5 +156,5 @@ export function VoiceNote({
   const available = useVoiceAvailable(texts)
   const t = useT()
   if (!available) return null
-  return <p className={`text-xs text-env-muted ${className}`}>{t(VOICE_NOTE)}</p>
+  return <p className={`text-sm text-env-muted ${className}`}>{t(VOICE_NOTE)}</p>
 }

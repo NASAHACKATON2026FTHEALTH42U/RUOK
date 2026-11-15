@@ -59,7 +59,7 @@ function ToastCard({ toast, onClose }: { toast: Toast; onClose: () => void }) {
         </span>
         <div className="min-w-0 flex-1">
           <p
-            className="text-[0.6875rem] font-semibold tracking-[0.12em] uppercase"
+            className="text-xs font-semibold tracking-[0.12em] uppercase"
             style={{ color: 'var(--tone)' }}
           >
             {toast.label}
@@ -68,7 +68,7 @@ function ToastCard({ toast, onClose }: { toast: Toast; onClose: () => void }) {
           {toast.body && (
             <p className="mt-1 text-[0.9375rem] leading-snug text-env-text/90">{toast.body}</p>
           )}
-          {toast.meta && <p className="mt-1.5 text-xs text-env-muted">{toast.meta}</p>}
+          {toast.meta && <p className="mt-1.5 text-sm text-env-muted">{toast.meta}</p>}
           {(toast.actions?.length || toast.sound) && (
             <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
               {toast.actions?.map((a) => {

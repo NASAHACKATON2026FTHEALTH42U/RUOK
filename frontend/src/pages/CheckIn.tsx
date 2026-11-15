@@ -399,7 +399,7 @@ export default function CheckIn() {
       </fieldset>
 
       {isReview && (
-        <p className="text-xs text-env-muted">
+        <p className="text-sm text-env-muted">
           {t(
             'Tus respuestas son privadas: fuera de tu perfil solo se ve un semáforo agregado, salvo que decidas compartirlas o haya una emergencia.',
           )}

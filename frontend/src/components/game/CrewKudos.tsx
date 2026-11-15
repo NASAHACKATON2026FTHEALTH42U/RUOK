@@ -127,7 +127,7 @@ export function CrewKudos({ kudos, members, memberId, canSend, onSend }: CrewKud
               <p className="text-[0.9375rem] leading-snug break-words">
                 {t('«{message}»', { message: k.message })}
               </p>
-              <p className="text-xs text-env-muted">
+              <p className="text-sm text-env-muted">
                 <span className="text-env-text">
                   {memberName(k.from_member_id, names, memberId)}
                 </span>{' '}
