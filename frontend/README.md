@@ -314,6 +314,13 @@ Contenido:
 - Botón **"Medir ahora"** → `/measure?system=<id>` (formulario de FE-10).
 - Con liveness `stale` o `lost`, los estados se muestran como "Sin datos recientes", igual que la figura.
 
+## Tipografía y escala (FE-26)
+
+- **Escala:** la base del texto (16 px) crece hasta ~19 px por encima de 1440 px de ancho (`html { font-size: clamp(...) }`); todo lo que va en `rem` se adapta. Mínimos legibles: 11 px; 12 px títulos de panel y etiquetas.
+- **Entornos espaciales** (`data-hud`): texto en **Exo 2** y títulos cortos en **Orbitron** (`font-display`: título de página, tarjetas de «Medir», palabra de estado). En la Tierra, Saira. Fuentes empaquetadas con `@fontsource` (sin internet).
+- **Logo animado:** el segmento de acento recorre el anillo a saltos (uno por sistema) y el anillo punteado gira despacio; quietos con «reducir movimiento».
+- **Tarjetas de «Medir»:** un dibujo de línea muy sutil de cada sistema (`components/measure/SystemArt.tsx`) asoma por la derecha detrás del texto.
+
 ## Dashboard (FE-07)
 
 `/dashboard` (`src/pages/Dashboard.tsx`) muestra el panel del member activo (`memberId` del store). Sin member, enlaza a `/` para elegirlo.
