@@ -1,19 +1,18 @@
 # Estado del proyecto
 
-> Foto del **domingo 15/11, de madrugada**. Actualízala en cada hito (o pídeselo a Claude: "actualiza docs/status.md"). Fuente: GitHub Issues/PRs y revisión del código. El detalle de cada pieza está en [`backend.md`](backend.md) y [`frontend/README.md`](../frontend/README.md).
+> Foto del **domingo 15/11, 11:30** (tras el freeze). Actualízala en cada hito (o pídeselo a Claude: "actualiza docs/status.md"). Fuente: GitHub Issues/PRs y revisión del código. El detalle de cada pieza está en [`backend.md`](backend.md) y [`frontend/README.md`](../frontend/README.md).
 
 **79 de 83 issues cerradas.** El MVP está integrado: **todos los endpoints del contrato son reales** (ya no hay stubs) y el front cubre todas las vistas del guion de demo.
 
 ## Qué queda
 
-| Issue | Estado | Qué falta |
+| Issue / PR | Estado | Qué falta |
 |---|---|---|
-| FE-24 #56 (kudos y misiones de tripulación) | **PR #197** en revisión, CI en verde | Mergear |
-| FE-33 #81 (vistas móviles) | Auditoría a 375 px hecha y objetivos táctiles corregidos (**PR #198**) | Probar en Android Chrome e iOS Safari reales |
-| FS-08 #73 (red local) | Scripts y docs hechos (`scripts/lan.sh`, `make lan`) | **Prueba física** con 2 móviles sin internet y anotar el resultado en la issue |
-| CNT-04 #59 (pitch) | Guion en [`demo-script.md`](demo-script.md); borrador de slides | Vídeo de respaldo, ensayos y envío a Space Apps |
-
-**Para la presentación:** revisar con alguien con criterio sanitario los textos marcados como *diseño* en [`sources.md`](sources.md) (protocolos, intervenciones) y verificar las citas marcadas como "de memoria" (S24, S28).
+| PR #233 y PR #237 (pulido final, LLM local, notificaciones, docs) | CI en verde, apiladas | Mergear en orden: #233 y después #237 |
+| FE-33 #81 (vistas móviles) | Auditoría a 375 px: sin scroll horizontal y objetivos táctiles de 44 px | Probar en Android Chrome e iOS Safari reales |
+| FS-08 #73 (red local) | QR, `make lan` y hotspot (`scripts/lan.sh hotspot`); un móvil ya se conectó por la wifi | **Prueba física** con 2 móviles sin internet y anotar el resultado en la issue |
+| FS-10 #234, #236 (asistente local) | El LLM local ya responde en «Mensaje a casa» (Ollama, opcional) | Probar el modelo en la máquina de la demo; decidir el modelo mínimo |
+| CNT-04 #59 (pitch) | Guion en [`demo-script.md`](demo-script.md) y pitch de 30 s en [`presentation/pitch-30s.md`](../presentation/pitch-30s.md) | Grabar el vídeo, ensayos y envío a Space Apps |
 
 ## Hecho
 
@@ -31,6 +30,9 @@
 | 🔐 Auth | FS-06, BE-25 … BE-27, BE-36, FE-27, FE-28, FS-07 | Login local (usuario y contraseña), JWT, matriz de roles validada en el backend, gestión de usuarios en `/control` |
 | 📶 Tiempo real | BE-28, BE-29, FE-29, FE-30 | Bitácora `event_log` + SSE, registro de dispositivos, IndexedDB por dispositivo |
 | 🛰️ Control | BE-30, FE-31, FE-32 | Centro de control `/control`: panorama de entornos, eventos en vivo, dispositivos, demo y QR de red local |
+| 🛰️ Operador | FE-28, FE-31, FE-32 | Menú propio (sin funciones de usuario) y **un solo selector de entorno y member** en la barra lateral. Secciones: Centro de control, **Simulación** (alertas y notificaciones personalizadas, mediciones provocadas, escenarios, enlace, contacto y reloj), Usuarios, Dispositivos (con el QR) y **Registro** de incidencias y eventos |
+| 💬 Chat | FE-23 | «Mensaje a casa» con **personaje según el entorno** y **LLM local** (Ollama, opcional, con barreras para no salirse del contexto) y resúmenes de hoy y de la semana con datos reales |
+| 🔔 Avisos | FE-29, FE-31 | Notificaciones personalizadas con historial; avisos en vivo con icono por tipo; el stream se recupera solo tras un corte |
 | 📴 Offline | FE-11, FE-12 | Outbox persistente con sincronización y backoff; semáforo provisional sin conexión |
 | 🎨 UI | FE-02 … FE-04, FE-26, FE-34 | Temas por entorno, vocabulario, `StatusBadge`, **estilo HUD** ([`design/hud-style.md`](design/hud-style.md)) |
 | 🫀 Dashboard | FE-05 … FE-09 | Figura del cuerpo, anillo de sistemas, panel de sistema, tarjetas de indicador, tendencias e historial |

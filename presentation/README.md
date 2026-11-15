@@ -5,3 +5,4 @@ Responsable: **Supervisor** (CNT-04).
 - Slides y capturas: aquí.
 - **Vídeos (`*.mp4`, `*.mov`): fuera de git**, por el límite de tamaño de GitHub. Súbelos al Drive del equipo y deja el enlace en este README.
 - Guion: [`docs/demo-script.md`](../docs/demo-script.md).
+- **Pitch en vídeo de 30 s** (guion en español e inglés, planos y tarjeta del equipo): [`pitch-30s.md`](pitch-30s.md).
