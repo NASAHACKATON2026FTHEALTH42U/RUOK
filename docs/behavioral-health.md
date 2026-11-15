@@ -32,7 +32,7 @@ Responde al peligro HRP **Isolation & Confinement**. Se apoya en la literatura d
   - "Durante N días" = N días seguidos con datos, contando desde el último; un día sin datos corta la racha. "En aumento" = la media diaria sube respecto al día anterior (la misma racha que la regla de 3 días de BE-10).
   - Con datos caducados o sin línea base (menos de 7 días de historia), ninguna regla se cumple: sin datos no se afirma nada.
   - En ISS, Luna y Marte se evalúan los 8 indicadores del check-in y del PVT. En los entornos terrestres, solo `mood` (por ahora).
-- **Fase de misión:** barra de progreso y aviso proactivo del **"fenómeno del tercer cuarto"**, el bajón de moral que se observa en misiones largas.
+- **Fase de misión:** el día de misión se ve en el reloj de la cabecera. La barra de progreso con el aviso del **"fenómeno del tercer cuarto"** (el bajón de moral de las misiones largas) se quitó del panel: no se usaba.
 - **Índice de cohesión de la tripulación:** agregado y anónimo.
 
 ## Actuar (contramedidas, todas offline)
@@ -66,7 +66,7 @@ En la residencia geriátrica, la soledad es un problema de salud de primer orden
 | Indicadores conductuales y regla de línea base | 2–3 h | P1 |
 | Tarjetas de intervención | 1 h + contenido | P1 |
 | "Necesito hablar" y privacidad | 1,5 h | P1 |
-| Barra de fase de misión | 1 h | P1 |
+| Barra de fase de misión | 1 h | Retirada del panel |
 | Test PVT (móvil) | 2–3 h | P1 (lo usa la demo) |
 | Mensaje a casa con retardo | 2 h | P2 |
 | Kudos y misiones de tripulación | 2 h | P2 |

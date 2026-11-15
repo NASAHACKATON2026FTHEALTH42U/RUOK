@@ -27,7 +27,7 @@ El **perfil de entorno** es el núcleo de RUOK. Es un JSON (`backend/app/data/en
 - **`liveness`**: umbrales de heartbeat (normal, EVA, sueño) y el timeout del "R U OK?".
 - **`routine`**: tareas diarias para la gamificación. Por ejemplo, el ejercicio resistivo en el espacio y el paseo o la hidratación en geriatría. Cada elemento elige un `task_type` de `backend/app/data/task_types.json` (título, momento del día `due`/`slots` e `indicator_id` que la autocompleta al medir) y fija `times_per_day` y `points`. La app valida al arrancar que todos los tipos e indicadores existen (BE-18).
 - **`vocabulary`** y **`theme`**: textos y aspecto visual (cielo marciano, regolito lunar, hospital claro…).
-- **`mission`**: fechas de inicio y fin, para la barra de fase de misión y el aviso del "tercer cuarto".
+- **`mission`**: fechas de inicio y fin, para el día de misión que muestra el reloj de la cabecera.
 
 ## Estado de los datos (BE-03)
 

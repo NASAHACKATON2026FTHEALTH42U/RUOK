@@ -311,18 +311,19 @@ Contenido:
 `/dashboard` (`src/pages/Dashboard.tsx`) muestra el panel del member activo (`memberId` del store). Sin member, enlaza a `/` para elegirlo.
 
 - **Cabecera:** `StatusBadge` con el estado general (`overall_status`), el liveness si no es `active` ("Sin datos desde hace X min") y la frescura de los datos ("Actualizado hace…"). El estado del enlace está en la cabecera global (FE-17).
-- **Sin scroll en tableta y escritorio.** La página ocupa el alto disponible (`Layout` en modo `fill`) y el bloque se centra en vertical; si una pantalla muy baja no da para todo, la página hace scroll como cualquier otra.
-- **Desde 1024 px, tres columnas centradas:** panel `SYS.01 Sistemas` (`BodyLegend` con `rows`: el nombre y debajo su estado) | `BodyFigure` | panel `IND.02 Indicadores`.
-- **Indicadores en celdas** (`IndicatorCard` con `tile`): el nombre arriba y, debajo, el símbolo de estado y el valor; 2 por fila (3 desde 1280 px), **ordenados por gravedad** (`bySeverity`: crítico, atención, sin datos, normal). Con 16 indicadores (entornos espaciales) son 6–8 filas. Clic en una celda → `SystemPanel` de su sistema.
-- **Tableta (768–1023 px):** el cuerpo a la izquierda y, a la derecha, los indicadores y debajo los sistemas (en dos columnas).
-- **Fase de misión** (entornos espaciales): `MissionPhaseBar` con `compact`, en una línea a todo el ancho.
-- **Móvil:** anillo de sistemas y lista `SYS.01` (`SystemsRing`).
+- **Tableta y escritorio: ocupa todo el hueco, sin scroll.** La página llena el alto disponible (`Layout` en modo `fill`) y, en el panel, también el ancho (modo `wide`, hasta 1800 px). La rejilla es `.dash-grid` (`styles/index.css`) dentro de `.dash-fill`, un contenedor de tamaño: las medidas usan unidades de contenedor (`cqh`/`cqw`).
+- **Ancho (≥ 56rem de hueco, ~1280 px):** tres paneles a alto completo: **Sistemas** (`BodyLegend` con `rows`: el nombre y debajo su estado) | **cuerpo** | **Indicadores**.
+- **Estrecho (tableta, también 1024 px con menú):** arriba el cuerpo y los sistemas (dos columnas si caben); abajo, los indicadores a todo el ancho.
+- **Cuerpo en su panel, recortado por las rodillas** (`BodyFigure` con `crop={0.71}` y `fill`): todas las zonas que se pueden pulsar quedan dentro (las piernas, de los huesos, por los muslos). La figura se encaja sin deformarse y su columna mide lo justo para ese alto (`--body-ratio` en el CSS, que tiene que cuadrar con `crop`). El cartel de cada zona va en un portal (`position: fixed`) para que el recorte del panel no lo corte.
+- **Las celdas reparten el alto y el texto crece con ellas.** Cada celda de indicador o sistema es un contenedor (`.dash-cell`) y su texto escala con `clamp()` y `cqw`/`cqh` entre un mínimo legible y un máximo (`dash-tile-label`, `dash-tile-value`, `dash-sys-name`). Si una pantalla muy baja no da, la lista hace scroll dentro de su panel, nunca la página.
+- **Indicadores en celdas** (`IndicatorCard` con `tile`): el nombre y, debajo, el símbolo de estado y el valor; 2, 3 o 4 por fila según el ancho del panel, **ordenados por gravedad** (`bySeverity`: crítico, atención, sin datos, normal). Clic en una celda → `SystemPanel` de su sistema.
+- **Móvil:** anillo de sistemas y lista de sistemas (`SystemsRing`).
 
 **Refresco cada 15 s.** `useAssessment(memberId, 15_000)` usa `useLoad({ refreshMs })`, que recarga en segundo plano sin volver al esqueleto de carga. Si un refresco falla, se mantienen los últimos datos y la cabecera avisa **"No se pudo actualizar: los datos pueden estar desfasados"** (nunca se finge que están al día).
 
 `IndicatorCard` (`components/dashboard/`) es la tarjeta de un indicador (valor, semáforo, tendencia y antigüedad). La usan el panel (variante `tile`) y el `SystemPanel`; con `showTrend` añade la `TrendChart` (FE-08).
 
-**Selector de actividad** (`ACT.01`, barra lateral y «Más»; solo el member): Normal, EVA (o «actividad de riesgo» en la Tierra) y Sueño. Va en cada heartbeat y cambia cuándo el servidor pregunta «R U OK?» y cuándo da la alerta de "sin contacto". Debajo de los botones, una frase explica qué hace el modo elegido con los tiempos del perfil del entorno (`activityHint()` en `components/liveness/heartbeat.ts`).
+**Selector de actividad** (barra lateral y «Más»; solo el member): Normal, EVA (o «actividad de riesgo» en la Tierra) y Sueño. Va en cada heartbeat y cambia cuándo el servidor pregunta «R U OK?» y cuándo da la alerta de "sin contacto". Debajo de los botones, una frase explica qué hace el modo elegido con los tiempos del perfil del entorno (`activityHint()` en `components/liveness/heartbeat.ts`).
 
 ## Gráfica de tendencia: `TrendChart` (FE-08)
 

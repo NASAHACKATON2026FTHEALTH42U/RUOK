@@ -514,3 +514,60 @@ html[data-hud] body {
     }
   }
 }
+
+/* Panel (FE-07) en tableta y escritorio: ocupa todo el hueco, sin scroll. `.dash-fill` es un
+   contenedor de tamaño, así que dentro `cqh`/`cqw` miden el hueco real (sin cabecera ni menú).
+   - Estrecho (< 56rem, tableta): arriba el cuerpo y los sistemas; abajo, los indicadores.
+   - Ancho: sistemas | cuerpo | indicadores, los tres a alto completo.
+   El cuerpo se ve recortado por las rodillas (BodyFigure con crop 0.71: 887 × 1259,5, ancho/alto
+   0,7043 = --body-ratio) y su columna mide lo justo para ese alto. */
+@layer components {
+  .dash-fill {
+    container: dash / size;
+  }
+  .dash-grid {
+    --gap: 1rem;
+    --body-ratio: 0.7043;
+    --body-h: calc((100cqh - var(--gap)) * 0.5);
+    display: grid;
+    height: 100%;
+    gap: var(--gap);
+    grid-template-columns: min(calc(var(--body-h) * var(--body-ratio)), 55cqw) minmax(0, 1fr);
+    grid-template-rows: var(--body-h) minmax(0, 1fr);
+    grid-template-areas:
+      'body systems'
+      'indicators indicators';
+  }
+  @container dash (min-width: 56rem) {
+    .dash-grid {
+      --gap: 1.25rem;
+      grid-template-columns:
+        minmax(13rem, 1fr) min(calc(100cqh * var(--body-ratio)), 44cqw)
+        minmax(0, 1.9fr);
+      grid-template-rows: minmax(0, 1fr);
+      grid-template-areas: 'systems body indicators';
+    }
+  }
+
+  /* Celdas de indicadores y sistemas: cada una es un contenedor y su texto crece con ella
+     (cqw/cqh), entre un mínimo legible y un máximo. */
+  .dash-cell {
+    container-type: size;
+  }
+  .dash-tile-label {
+    font-size: clamp(0.8125rem, min(7.5cqw, 16cqh), 1.125rem);
+    line-height: 1.25;
+  }
+  .dash-tile-value {
+    font-size: clamp(1.125rem, min(12cqw, 28cqh), 2.25rem);
+    line-height: 1.1;
+  }
+  .dash-tile-icon svg {
+    width: 0.75em;
+    height: 0.75em;
+  }
+  .dash-sys-name {
+    font-size: clamp(0.875rem, min(6.6cqw, 20cqh), 1.3125rem);
+    line-height: 1.25;
+  }
+}

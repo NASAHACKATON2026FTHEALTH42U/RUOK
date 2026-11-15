@@ -38,7 +38,7 @@ export function BodyLegend({
     return (
       <ul className={`grid ${className}`} aria-label="Sistemas">
         {regions.map((r) => (
-          <li key={r.systemId} className="border-r border-b border-env-border/60">
+          <li key={r.systemId} className="dash-cell border-r border-b border-env-border/60">
             <button
               type="button"
               onClick={() => onSelectSystem?.(r.systemId)}
@@ -47,14 +47,17 @@ export function BodyLegend({
               onFocus={() => onHoverSystem?.(r.systemId)}
               onBlur={() => onHoverSystem?.(null)}
               aria-pressed={selectedSystemId === r.systemId}
-              className={`flex h-full min-h-11 w-full flex-col items-start justify-center gap-1 px-3 py-2 text-left text-sm focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary ${
+              className={`flex h-full min-h-11 w-full flex-col items-start justify-center gap-[0.45em] px-[clamp(0.75rem,6cqw,1.25rem)] py-1 text-left focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary ${
                 selectedSystemId === r.systemId
                   ? 'bg-env-primary/10 shadow-[inset_2px_0_0_var(--env-primary)]'
                   : 'hover:bg-env-primary/10'
               }`}
             >
-              <span className="min-w-0">{r.name}</span>
-              <StatusBadge status={stale ? 'stale' : r.status} size="sm" />
+              <span className="dash-sys-name min-w-0">{r.name}</span>
+              <StatusBadge
+                status={stale ? 'stale' : r.status}
+                className="!text-[clamp(10px,min(5cqw,14cqh),13px)]"
+              />
             </button>
           </li>
         ))}
