@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { NoticeButton } from '../components/alerts/SosButton'
 import { serverNow } from '../api/client'
@@ -20,6 +20,8 @@ import {
 } from '../components/alerts/alertFormat'
 import { roleLabel } from '../components/alerts/sos'
 import { OperatorMessageButton } from '../components/control/OperatorMessageForm'
+import { ScrollHint } from '../components/ui/ScrollHint'
+import { revealSection } from '../components/ui/scroll'
 import { useVocab } from '../environments/useVocab'
 import { formatAgo } from '../lib/time'
 import { useEnvironmentStore } from '../store/environment'
@@ -47,6 +49,11 @@ export default function Alerts() {
   // Notificaciones personalizadas recibidas (las guarda el servidor 7 días): se pueden repasar.
   const notifications = useNotifications(memberId)
   const [showNotes, setShowNotes] = useState(false)
+  // Panel con scroll de la lista y las secciones plegables: al desplegar una, se lleva a la vista
+  // y, si queda más por debajo, el pie lo indica (ScrollHint).
+  const listRef = useRef<HTMLDivElement>(null)
+  const resolvedRef = useRef<HTMLDivElement>(null)
+  const notesRef = useRef<HTMLDivElement>(null)
   const ladder = (envs.state === 'ready'
     ? envs.data.find((e) => e.id === envId)?.escalation_ladder
     : null) ?? ['self', 'crew', 'ground']
@@ -178,7 +185,7 @@ export default function Alerts() {
         // Lista y detalle miden lo que su contenido y, como mucho, el hueco: si no caben, el
         // scroll es suyo y no de la página. En móvil, la lista con su propio scroll y el detalle
         // debajo.
-        <div className="grid gap-4 md:min-h-0 md:flex-1 md:grid-cols-[minmax(260px,340px)_1fr] md:items-start lg:grid-cols-[minmax(300px,420px)_1fr] lg:gap-6">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:min-h-0 md:flex-1 md:grid-cols-[minmax(260px,340px)_1fr] md:items-start lg:grid-cols-[minmax(300px,420px)_1fr] lg:gap-6">
           <section
             aria-labelledby="alerts-list-title"
             className="hud-panel flex max-h-[45dvh] min-h-0 flex-col md:max-h-full"
@@ -189,7 +196,10 @@ export default function Alerts() {
                 {open.length}
               </span>
             </h2>
-            <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
+            <div
+              ref={listRef}
+              className="min-h-0 flex-1 overflow-y-auto [scrollbar-color:var(--env-border)_transparent]"
+            >
               {open.length === 0 && (
                 <p className="px-3.5 py-3 text-sm text-env-muted">No hay alertas abiertas.</p>
               )}
@@ -197,11 +207,14 @@ export default function Alerts() {
                 {open.map(row)}
               </ul>
               {resolved.length > 0 && (
-                <div className="border-t border-env-border">
+                <div ref={resolvedRef} className="border-t border-env-border">
                   <button
                     type="button"
                     aria-expanded={showResolved}
-                    onClick={() => setShowResolved((v) => !v)}
+                    onClick={() => {
+                      if (!showResolved) revealSection(resolvedRef.current)
+                      setShowResolved((v) => !v)
+                    }}
                     className="flex w-full items-center justify-between gap-2 min-h-11 px-3.5 py-2.5 text-left text-sm text-env-muted hover:text-env-text"
                   >
                     <span>
@@ -225,11 +238,14 @@ export default function Alerts() {
                 </div>
               )}
               {notes.length > 0 && (
-                <div className="border-t border-env-border">
+                <div ref={notesRef} className="border-t border-env-border">
                   <button
                     type="button"
                     aria-expanded={showNotes}
-                    onClick={() => setShowNotes((v) => !v)}
+                    onClick={() => {
+                      if (!showNotes) revealSection(notesRef.current)
+                      setShowNotes((v) => !v)
+                    }}
                     className="flex min-h-11 w-full items-center gap-2 px-3.5 py-2.5 text-left text-sm text-env-muted hover:text-env-text"
                   >
                     {showNotes ? '▾' : '▸'} Notificaciones ({notes.length})
@@ -280,6 +296,7 @@ export default function Alerts() {
                   )}
                 </div>
               )}
+              <ScrollHint target={listRef} />
             </div>
           </section>
           {current && (
