@@ -11,7 +11,7 @@ interface ImportMetaEnv {
   readonly VITE_MOCK_FALLBACK?: string
   /**
    * 'true' = escaparate público (demo de Vercel): en modo mock no se pinta el banner de datos de
-   * ejemplo y los usuarios demo del login van plegados en un botón.
+   * ejemplo.
    */
   readonly VITE_SHOWCASE?: string
 }

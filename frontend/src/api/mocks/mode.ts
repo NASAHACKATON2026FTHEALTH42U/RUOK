@@ -54,7 +54,7 @@ export function initMockModeFromUrl(search = globalThis.location?.search ?? ''):
 
 /**
  * Escaparate público (`VITE_SHOWCASE=true`, lo activa `vercel.json`): el front va entero en modo
- * mock y se presenta limpio, sin el banner amarillo ni la lista de usuarios demo desplegada.
+ * mock y se presenta limpio, sin el banner amarillo de datos de ejemplo.
  * No afecta al aviso de "servidor sin conexión" (fallback), que nunca se oculta.
  */
 export function isShowcase(): boolean {
