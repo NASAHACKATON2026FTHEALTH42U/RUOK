@@ -2,14 +2,25 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { serverNow } from '../api/client'
-import { useGame, useLeaderboard, useTasks, type Game, type Task } from '../api/useGame'
-import { useActiveMemberId } from '../auth/useAuth'
+import {
+  useCrewMissions,
+  useGame,
+  useKudos,
+  useLeaderboard,
+  useTasks,
+  type CrewMission,
+  type Game,
+  type Task,
+} from '../api/useGame'
+import { useActiveMemberId, useAuth } from '../auth/useAuth'
 import { AnimatedNumber } from '../components/game/AnimatedNumber'
 import { CrewBoard } from '../components/game/CrewBoard'
+import { CrewKudos } from '../components/game/CrewKudos'
+import { CrewMissions } from '../components/game/CrewMissions'
 import { dayProgress, sortTasks, withLocalCompletions } from '../components/game/game'
 import { TaskItem } from '../components/game/TaskItem'
 import { useVocab } from '../environments/useVocab'
-import { completeTask, locallyCompletedTasks } from '../offline/outbox'
+import { completeTask, joinMission, locallyCompletedTasks, sendKudos } from '../offline/outbox'
 import { useEnvironmentStore } from '../store/environment'
 
 interface Toast {
@@ -33,6 +44,12 @@ export default function Missions() {
   const tasks = useTasks(memberId)
   const game = useGame(memberId)
   const board = useLeaderboard(envId)
+  // Kudos y misiones de tripulación (FE-24): los da el member (o el admin en su nombre).
+  const { role } = useAuth()
+  const canAct = role === 'member' || role === 'admin'
+  const kudos = useKudos(envId)
+  const crewMissions = useCrewMissions(envId)
+  const [joining, setJoining] = useState<string | null>(null)
 
   // Completadas en este dispositivo (también las aún sin enviar) y las que quedaron en cola.
   const [local, setLocal] = useState<Set<string>>(new Set())
@@ -114,8 +131,42 @@ export default function Missions() {
     }
   }
 
+  const onKudos = async (toMemberId: number, message: string) => {
+    try {
+      const r = await sendKudos(memberId, toMemberId, message)
+      toast(r.status === 'sent' ? 'Kudos enviado' : 'Kudos guardado · pendiente de sincronizar')
+      kudos.refresh()
+      board.refresh()
+      return true
+    } catch (err) {
+      toast(`No se ha podido enviar: ${err instanceof Error ? err.message : String(err)}`)
+      return false
+    }
+  }
+
+  const onJoin = async (mission: CrewMission) => {
+    setJoining(mission.id)
+    try {
+      const r = await joinMission(memberId, mission.id)
+      if (r.status === 'sent') {
+        toast(
+          r.result.completed
+            ? `¡Misión completada! +${mission.points} puntos para todos`
+            : `Te has apuntado a «${mission.title}»`,
+        )
+      } else toast('Apuntado · pendiente de sincronizar')
+      crewMissions.refresh()
+      board.refresh()
+    } catch (err) {
+      toast(`No se ha podido apuntar: ${err instanceof Error ? err.message : String(err)}`)
+    } finally {
+      setJoining(null)
+    }
+  }
+
   return (
-    // Ocupa el alto disponible (Layout `fill`): solo la lista de tareas tiene scroll.
+    // Ocupa el alto disponible (Layout `fill`): las tareas y la columna de la tripulación
+    // tienen cada una su scroll.
     <section className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col gap-3 md:gap-4 lg:max-w-5xl">
       {title}
 
@@ -200,7 +251,7 @@ export default function Missions() {
           )}
         </section>
 
-        <div className="flex shrink-0 flex-col gap-3 md:gap-4 lg:min-h-0 lg:overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1 [scrollbar-color:var(--env-border)_transparent] md:gap-4">
           {current && current.badges.length > 0 && (
             <section>
               <h2 className="mb-2 font-semibold">Insignias</h2>
@@ -221,6 +272,26 @@ export default function Missions() {
 
           {board.state === 'ready' && (
             <CrewBoard board={board.data} crewWord={vocab.crew} memberId={memberId} />
+          )}
+
+          {crewMissions.state === 'ready' && crewMissions.data.length > 0 && (
+            <CrewMissions
+              missions={crewMissions.data}
+              memberId={memberId}
+              canJoin={canAct}
+              busyId={joining}
+              onJoin={(m) => void onJoin(m)}
+            />
+          )}
+
+          {kudos.state === 'ready' && board.state === 'ready' && (
+            <CrewKudos
+              kudos={kudos.data}
+              members={board.data.members}
+              memberId={memberId}
+              canSend={canAct}
+              onSend={onKudos}
+            />
           )}
         </div>
       </div>

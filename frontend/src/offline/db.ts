@@ -12,7 +12,15 @@ export type OutboxStatus = 'pending' | 'sending' | 'failed'
 export interface OutboxEntry {
   /** UUID del recurso (el mismo que va en el cuerpo y en la PK de SQLite). */
   id: string
-  kind: 'measurement_batch' | 'task_completion' | 'alert' | 'ruok' | 'privacy' | 'home_message'
+  kind:
+    | 'measurement_batch'
+    | 'task_completion'
+    | 'alert'
+    | 'ruok'
+    | 'privacy'
+    | 'home_message'
+    | 'kudos'
+    | 'mission_join'
   method: 'POST' | 'PATCH'
   path: string
   body: unknown
