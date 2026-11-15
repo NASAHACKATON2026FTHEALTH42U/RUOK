@@ -76,7 +76,7 @@ from app.schemas.game import (
     Task,
     TaskCompleteIn,
 )
-from app.schemas.home import HomeMessage, HomeMessageIn
+from app.schemas.home import HomeMessage, HomeMessageIn, StatusSummary
 from app.schemas.link import LinkMessage, LinkStatus
 from app.schemas.members import (
     Assessment,
@@ -142,6 +142,7 @@ __all__ = [
     "DemoLinkIn",
     "DemoUser",
     "HomeMessage",
+    "StatusSummary",
     "HomeMessageIn",
     "Device",
     "DeviceKind",

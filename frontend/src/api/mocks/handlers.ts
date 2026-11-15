@@ -419,6 +419,15 @@ export const handlers: Record<string, Handler> = {
         }
       })
   },
+  'GET /members/{member_id}/summary': (req) => ({
+    member_id: Number(req.params.member_id),
+    period: req.query.get('period') === 'week' ? 'week' : 'day',
+    text:
+      req.query.get('period') === 'week'
+        ? 'Esta semana me he medido 9 veces en 5 de los últimos 7 días. En general estoy bien.'
+        : 'Así estoy hoy: En general estoy bien. Todos los sistemas que mido están en su rango.',
+    generated_at: nowIso(),
+  }),
   'POST /members/{member_id}/home-messages': (req) => {
     const { id, text } = body<Schema<'HomeMessageIn'>>(req)
     const memberId = Number(req.params.member_id)

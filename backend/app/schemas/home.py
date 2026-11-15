@@ -25,3 +25,12 @@ class HomeMessage(ApiModel):
     eta: datetime
     delivered_at: datetime | None = None
     state: Literal["queued", "in_transit", "delivered"]
+
+
+class StatusSummary(ApiModel):
+    """Resumen en texto del estado de hoy o de la semana, para contárselo a casa."""
+
+    member_id: int
+    period: Literal["day", "week"]
+    text: str = Field(description="Resumen en lenguaje llano, con los datos reales (sin LLM)")
+    generated_at: datetime

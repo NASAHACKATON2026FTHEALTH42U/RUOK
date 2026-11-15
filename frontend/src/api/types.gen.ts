@@ -710,6 +710,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/members/{member_id}/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resumen en texto del estado de hoy o de la semana
+         * @description Para contárselo a casa: se genera con los datos reales (evaluación y mediciones), sin LLM. Solo palabras de estado y nombres de sistema.
+         */
+        get: operations["get_summary_api_v1_members__member_id__summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/events": {
         parameters: {
             query?: never;
@@ -2364,6 +2384,29 @@ export interface components {
          * @enum {string}
          */
         Status: "normal" | "warning" | "critical" | "unknown";
+        /**
+         * StatusSummary
+         * @description Resumen en texto del estado de hoy o de la semana, para contárselo a casa.
+         */
+        StatusSummary: {
+            /** Member Id */
+            member_id: number;
+            /**
+             * Period
+             * @enum {string}
+             */
+            period: "day" | "week";
+            /**
+             * Text
+             * @description Resumen en lenguaje llano, con los datos reales (sin LLM)
+             */
+            text: string;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+        };
         /** SystemAssessment */
         SystemAssessment: {
             /**
@@ -4919,6 +4962,69 @@ export interface operations {
             };
             /** @description Mismo id con contenido distinto */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_summary_api_v1_members__member_id__summary_get: {
+        parameters: {
+            query?: {
+                period?: "day" | "week";
+            };
+            header?: {
+                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
+                "x-device-id"?: string | null;
+            };
+            path: {
+                member_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusSummary"];
+                };
+            };
+            /** @description Sin sesión válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rol sin permiso o dato ajeno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

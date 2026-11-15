@@ -178,8 +178,9 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 |---|---|---|
 | GET | `/link?env=` | `{state: LinkState, delay_s, queued, since}` |
 | GET | `/link/messages?env=&direction=` | Mensajes pendientes o entregados. Los `home_message` (privados) solo los ve `admin` |
-| POST | `/members/{id}/home-messages` *(P2, BE-22)* | member | "Mensaje a casa": `{id: UUID, text}` → `HomeMessage`. Idempotente por `id` (mismo `id` con otro texto → `409`). Sale por el enlace (cola en LOS, retardo del entorno) |
+| POST | `/members/{id}/home-messages` *(P2, BE-22)* | member | "Mensaje a casa": `{id: UUID, text}` → `HomeMessage`. Idempotente por `id` (mismo `id` con otro texto → `409`). Sale por el enlace (cola en LOS, retardo del entorno). Responde el personaje del entorno (`data/chat_personas.json`): con el LLM local si hay `OLLAMA_URL`, si no con una frase guionizada; lo ajeno al contexto recibe una respuesta de desconcierto |
 | GET | `/members/{id}/home-messages` *(P2, BE-22)* | member | Hilo: lo enviado y las respuestas simuladas **ya entregadas** a bordo, por orden de envío |
+| GET | `/members/{id}/summary?period=day\|week` | member | `StatusSummary` `{member_id, period, text, generated_at}`: resumen en texto del estado de hoy o de la semana para contárselo a casa. Determinista, con los datos reales y sin LLM; solo palabras de estado y nombres de sistema |
 | POST | `/demo/reset` | Reinicia la base de datos con el seed determinista |
 | POST | `/demo/scenarios/{name}` | Ejemplos: `mars_sleep_bp`, `eva_no_contact`, `geriatric_fall_risk` |
 | POST | `/demo/link` | `{env, state}`, para forzar `online`, `delayed` o `los` |

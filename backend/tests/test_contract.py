@@ -24,6 +24,7 @@ CONTRACT_ENDPOINTS = [
     ("post", "/users"),
     ("post", "/members/{member_id}/home-messages"),
     ("get", "/members/{member_id}/home-messages"),
+    ("get", "/members/{member_id}/summary"),
     ("patch", "/users/{user_id}"),
     ("post", "/members/{member_id}/kudos"),
     ("get", "/environments/{env_id}/kudos"),
