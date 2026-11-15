@@ -7,7 +7,7 @@ UUID del cliente: mismo id y contenido → la misma; contenido distinto → conf
 
 from __future__ import annotations
 
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from app import models
 from app.schemas import NotificationIn
@@ -47,3 +47,18 @@ def send(
     session.commit()
     session.refresh(row)
     return row
+
+
+def list_for(session: Session, member: models.Member, limit: int = 50) -> list[models.EventLog]:
+    """Notificaciones del member, de la más reciente a la más antigua (las guarda el event_log)."""
+    return list(
+        session.exec(
+            select(models.EventLog)
+            .where(
+                models.EventLog.type == EventType.notification_sent.value,
+                models.EventLog.member_id == member.id,
+            )
+            .order_by(col(models.EventLog.id).desc())
+            .limit(limit)
+        ).all()
+    )

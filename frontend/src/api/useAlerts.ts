@@ -50,3 +50,17 @@ export function useEnvironmentAlerts(
   useLiveRefresh({ types: ['alert.*'], envId }, r.refresh)
   return r
 }
+
+const getNotifications = (memberId: number) =>
+  unwrap(
+    api.GET('/api/v1/members/{member_id}/notifications', {
+      params: { path: { member_id: memberId } },
+    }),
+  )
+
+/** Notificaciones recibidas por el member (las más recientes primero), al instante con cada una. */
+export function useNotifications(memberId: number | null) {
+  const r = useLoad(() => getNotifications(memberId!), [memberId], { enabled: memberId !== null })
+  useLiveRefresh({ types: ['notification.sent'], memberId }, r.refresh)
+  return r
+}

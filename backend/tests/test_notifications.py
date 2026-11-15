@@ -61,9 +61,7 @@ def test_notification_permissions(client, medic_auth, vega_auth):
         outsider = session.exec(
             select(models.Member).where(models.Member.env_id == "hospital")
         ).first()
-    r = client.post(
-        f"{API}/members/{outsider.id}/notifications", json=_body(), headers=medic_auth
-    )
+    r = client.post(f"{API}/members/{outsider.id}/notifications", json=_body(), headers=medic_auth)
     assert r.status_code == 403
     assert client.post(f"{API}/members/9999/notifications", json=_body()).status_code == 404
 
@@ -103,3 +101,19 @@ def test_events_newest_first_and_several_types(client):
     assert rows and {e["type"] for e in rows} <= {"notification.sent", "user.created"}
     assert [e["id"] for e in rows] == sorted((e["id"] for e in rows), reverse=True)
     assert rows[0]["payload"]["text"] == "segunda"
+
+
+def test_member_can_review_their_notifications(client, vega_auth, medic_auth):
+    body = _body("Revisión a las 18:00", title="Aviso", level="warning")
+    assert client.post(f"{API}/members/{seed.VEGA}/notifications", json=body).status_code == 200
+    r = client.get(f"{API}/members/{seed.VEGA}/notifications", headers=vega_auth)
+    assert r.status_code == 200, r.text
+    first = r.json()[0]
+    assert (
+        first["type"] == "notification.sent" and first["payload"]["text"] == "Revisión a las 18:00"
+    )
+    assert (
+        client.get(f"{API}/members/{seed.VEGA}/notifications", headers=medic_auth).status_code
+        == 200
+    )
+    assert client.get(f"{API}/members/2/notifications", headers=vega_auth).status_code == 403

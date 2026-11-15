@@ -339,6 +339,7 @@ export const handlers: Record<string, Handler> = {
     state.alerts.push(alert)
     return alert
   },
+  'GET /members/{member_id}/notifications': () => [],
   'POST /members/{member_id}/notifications': (req) => {
     const b = body<Schema<'NotificationIn'>>(req)
     const m = findMember(req.params.member_id)

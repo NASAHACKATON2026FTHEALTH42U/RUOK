@@ -111,6 +111,10 @@ export const CONTRACT_OPERATIONS = [
   ],
   [
     "GET",
+    "/members/{member_id}/notifications"
+  ],
+  [
+    "GET",
     "/members/{member_id}/summary"
   ],
   [
@@ -12105,7 +12109,8 @@ export const events: Schema<'Event'>[] = [
       "category": "indicator",
       "severity": "critical",
       "level": 0,
-      "target_role": "self"
+      "target_role": "self",
+      "member_name": "Cmdr. Vega"
     }
   },
   {
@@ -12123,6 +12128,7 @@ export const events: Schema<'Event'>[] = [
       "severity": "critical",
       "level": 1,
       "target_role": "crew",
+      "member_name": "Cmdr. Vega",
       "actor": "system"
     }
   },
@@ -12158,6 +12164,7 @@ export const events: Schema<'Event'>[] = [
       "severity": "critical",
       "level": 2,
       "target_role": "ground",
+      "member_name": "Cmdr. Vega",
       "actor": "system"
     }
   },
@@ -12175,7 +12182,8 @@ export const events: Schema<'Event'>[] = [
       "category": "indicator",
       "severity": "warning",
       "level": 0,
-      "target_role": "self"
+      "target_role": "self",
+      "member_name": "Cmdr. Vega"
     }
   },
   {
@@ -12192,7 +12200,8 @@ export const events: Schema<'Event'>[] = [
       "category": "indicator",
       "severity": "critical",
       "level": 0,
-      "target_role": "self"
+      "target_role": "self",
+      "member_name": "Cmdr. Vega"
     }
   },
   {
@@ -12210,6 +12219,7 @@ export const events: Schema<'Event'>[] = [
       "severity": "critical",
       "level": 1,
       "target_role": "crew",
+      "member_name": "Cmdr. Vega",
       "actor": "system"
     }
   },
@@ -12245,6 +12255,7 @@ export const events: Schema<'Event'>[] = [
       "severity": "critical",
       "level": 2,
       "target_role": "ground",
+      "member_name": "Cmdr. Vega",
       "actor": "system"
     }
   },
@@ -12294,7 +12305,8 @@ export const events: Schema<'Event'>[] = [
       "category": "indicator",
       "severity": "warning",
       "level": 0,
-      "target_role": "self"
+      "target_role": "self",
+      "member_name": "Cmdr. Vega"
     }
   },
   {

@@ -115,6 +115,7 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 | POST | `/alerts/{alert_id}/resolve` | `{actor, note?}` |
 | POST | `/alerts/{alert_id}/messages` | `{actor, text}` (viaja por el enlace si va a tierra) |
 | POST | `/members/{member_id}/notifications` | **Notificación personalizada** (`NotificationIn`) del operador o del staff (medic, commander de su entorno) a un member. No es una alerta: no escala ni tiene estado. Se guarda como evento `notification.sent` y le llega por SSE. Idempotente por `id` (mismo `id` con otro contenido → `409`) |
+| GET | `/members/{member_id}/notifications` | Notificaciones recibidas (`Event[]` de tipo `notification.sent`, las más recientes primero; se guardan 7 días). Las ve el member y el staff de su entorno |
 | GET | `/environments/{env_id}/alerts?view=ground` | Consola del responder: solo lo **entregado** por el enlace y filtrado por privacidad |
 
 ### Rutina y gamificación
