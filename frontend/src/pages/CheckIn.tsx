@@ -240,7 +240,7 @@ export default function CheckIn() {
                   disabled={!reachable || phase.kind === 'sending'}
                   aria-current={i === current ? 'step' : undefined}
                   aria-label={`Paso ${i + 1}: ${q.name}${answered && i < total ? ` (respondida: ${answers[q.id]})` : ''}`}
-                  className={`block h-2 w-full rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
+                  className={`relative before:absolute before:inset-x-0 before:content-[''] before:-inset-y-[18px] block h-2 w-full rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
                     i === current
                       ? 'bg-env-primary'
                       : answered

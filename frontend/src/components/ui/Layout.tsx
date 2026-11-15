@@ -50,7 +50,7 @@ export function Layout() {
   const logo = (
     <NavLink
       to={role ? homeFor(role) : '/'}
-      className="font-mono text-[13px] tracking-[0.24em] text-env-text"
+      className="relative before:absolute before:inset-x-0 before:content-[''] before:-inset-y-3 font-mono text-[13px] tracking-[0.24em] text-env-text"
       aria-label="R U OK: inicio"
     >
       R U OK

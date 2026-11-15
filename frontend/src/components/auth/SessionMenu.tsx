@@ -29,7 +29,7 @@ export function SessionMenu({ part = 'all' }: { part?: 'all' | 'user' | 'logout'
             await logout()
             navigate('/login')
           }}
-          className="rounded-md border border-env-border px-2 py-0.5 text-env-muted hover:border-env-text hover:text-env-text"
+          className="relative before:absolute before:inset-x-0 before:content-[''] before:-inset-y-[10px] rounded-md border border-env-border px-2 py-0.5 text-env-muted hover:border-env-text hover:text-env-text"
         >
           Salir
         </button>
