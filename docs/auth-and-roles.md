@@ -57,8 +57,8 @@ La matriz vive en código en **un único sitio** por lado: `backend/app/auth/per
 | Método | Para quién | Cómo |
 |---|---|---|
 | **Usuario + contraseña** | Todos | `POST /auth/login`. Hash **bcrypt**. |
-| **PIN rápido (4–6 dígitos)** | `member`, `medic` en tablets compartidas | `POST /auth/pin` con `{username, pin}`. Se bloquea 5 min tras 5 fallos. |
-| **Selector de usuarios demo** | Solo en la demo (`DEMO_MODE=true`) | Botones en la pantalla de login con los usuarios sembrados. Simplifican la presentación. |
+| **PIN rápido (4–6 dígitos)** | `member`, `medic` en tablets compartidas | `POST /auth/pin` con `{username, pin}`. Se bloquea 5 min tras 5 fallos. **La pantalla de login ya no lo ofrece** (solo usuario y contraseña); el endpoint sigue en el backend. |
+| **Selector de usuarios demo** | Solo en la demo (`DEMO_MODE=true`) | Botones en la pantalla de login con los usuarios sembrados **del entorno elegido** (por defecto la misión espacial, Marte) y el operador global. Entran con la contraseña de demo `ruok-<env>`. |
 
 **Sesión:**
 - Token **JWT HS256** firmado con una clave local. La clave se genera en el primer arranque y se guarda en `app_state`. También se puede pasar en `RUOK_JWT_SECRET`.
