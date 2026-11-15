@@ -309,7 +309,10 @@ async function submit<T>(
     member_id: memberId,
     created_at: now,
     attempts: 0,
-    next_retry_at: now,
+    // Reloj del DISPOSITIVO, no el del servidor: `isDue()` y el backoff comparan con Date.now().
+    // Con la hora del servidor, un fast-forward de la demo dejaba cada escritura "en cola"
+    // (sin enviar) hasta que la hora real alcanzara a la adelantada.
+    next_retry_at: new Date().toISOString(),
     status: 'pending',
     last_error: null,
   }

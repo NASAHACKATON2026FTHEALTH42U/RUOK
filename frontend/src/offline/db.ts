@@ -27,6 +27,7 @@ export interface OutboxEntry {
   member_id: number
   created_at: string
   attempts: number
+  /** Cuándo toca el siguiente intento, con el reloj del DISPOSITIVO (se compara con Date.now()). */
   next_retry_at: string
   status: OutboxStatus
   last_error: string | null
