@@ -55,13 +55,11 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 | Método | Ruta | Auth | Descripción |
 |---|---|---|---|
 | POST | `/auth/login` | — | `{username, password}` → `{access_token, expires_at, user: User}`. `401` = credenciales incorrectas; `429` (+ `Retry-After`) = cuenta bloqueada 5 min tras 5 fallos |
-| POST | `/auth/pin` | — | `{username, pin}` → igual que login, también `429` si está bloqueada (PIN rápido en tablets) |
 | GET | `/auth/me` | ✅ | `User` actual |
 | GET | `/auth/demo-users` | — | Solo con `DEMO_MODE=true`: usuarios sembrados para el selector de la demo |
 | GET | `/users?env_id=` *(FS-07)* | admin | Listado de usuarios, activos o no (pestaña Usuarios de `/control`) |
-| POST | `/users` *(FS-07)* | admin | Crear usuario: `{username, display_name, role, env_id, member_id?, password, pin?}` → `201 User`. `409` = usuario ya existente o member ya con cuenta; `422` = rol/entorno/member incoherentes |
+| POST | `/users` *(FS-07)* | admin | Crear usuario: `{username, display_name, role, env_id, member_id?, password}` → `201 User`. `409` = usuario ya existente o member ya con cuenta; `422` = rol/entorno/member incoherentes |
 | PATCH | `/users/{id}` *(FS-07)* | admin | `{active}` → `User`. Desactivar impide el login. `409` si es tu propia cuenta o el último admin activo |
-| PUT | `/users/{id}/pin` *(FS-07)* | admin | `{pin}` → `User`. Restablece el PIN y desbloquea la cuenta. Solo roles `member`/`medic` (`422` si no) |
 
 **Permisos por endpoint:** los define la matriz de [auth-and-roles.md](auth-and-roles.md#matriz-de-acceso-a-vistas). Reglas generales:
 - un `member` solo accede a `/members/{su_member_id}/…`;
@@ -298,7 +296,7 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 { "env_id": "mars", "crew_points": 1820,
   "members": [{ "member_id": 1, "name": "Cmdr. Vega", "points": 340, "streak_days": 5 }] }
 
-// TokenResponse (login / PIN)
+// TokenResponse (login)
 { "access_token": "…", "token_type": "bearer", "expires_at": "...", "user": { /* User */ } }
 // DemoUser = { username, display_name, role, env_id, role_label }
 

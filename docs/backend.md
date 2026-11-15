@@ -85,7 +85,7 @@ backend/
 │   │   ├── ground.py        consola del responder: estado as-of y filtro de privacidad (BE-17)
 │   │   ├── comm_link.py     enlace simulado: cola persistente, retardo y LOS (BE-13)
 │   │   ├── home_messages.py "Mensaje a casa" por el enlace (BE-22)
-│   │   ├── accounts.py      cuentas, contraseñas, PIN y usuarios de demo (BE-25, FS-07)
+│   │   ├── accounts.py      cuentas, contraseñas y usuarios de demo (BE-25, FS-07)
 │   │   ├── events.py        bitácora event_log y bus SSE (BE-28)
 │   │   ├── devices.py       registro de dispositivos (BE-29)
 │   │   ├── control.py       panorama del centro de control y pausa del liveness (BE-30)

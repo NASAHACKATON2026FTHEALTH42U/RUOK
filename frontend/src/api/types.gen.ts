@@ -38,26 +38,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/pin": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Login rápido con PIN
-         * @description Solo para `member` y `medic` (tablets compartidas).
-         */
-        post: operations["login_pin_api_v1_auth_pin_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/auth/me": {
         parameters: {
             query?: never;
@@ -125,23 +105,6 @@ export interface paths {
         head?: never;
         /** Activar o desactivar un usuario (admin) */
         patch: operations["update_user_api_v1_users__user_id__patch"];
-        trace?: never;
-    };
-    "/api/v1/users/{user_id}/pin": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Restablecer el PIN de un usuario (admin) */
-        put: operations["reset_user_pin_api_v1_users__user_id__pin_put"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/api/v1/environments": {
@@ -2172,21 +2135,6 @@ export interface components {
             /** Detail */
             detail: string | null;
         };
-        /** PinLoginIn */
-        PinLoginIn: {
-            /** Username */
-            username: string;
-            /** Pin */
-            pin: string;
-        };
-        /**
-         * PinReset
-         * @description Nuevo PIN de una cuenta member/medic (FS-07).
-         */
-        PinReset: {
-            /** Pin */
-            pin: string;
-        };
         /** PrivacyIn */
         PrivacyIn: {
             /** Share Behavioral Details */
@@ -2430,11 +2378,6 @@ export interface components {
             member_id?: number | null;
             /** Password */
             password: string;
-            /**
-             * Pin
-             * @description Solo member/medic
-             */
-            pin?: string | null;
         };
         /**
          * UserUpdate
@@ -2511,60 +2454,6 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["LoginIn"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TokenResponse"];
-                };
-            };
-            /** @description Credenciales incorrectas */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Cuenta bloqueada tras 5 fallos (Retry-After) */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    login_pin_api_v1_auth_pin_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
-                "x-device-id"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PinLoginIn"];
             };
         };
         responses: {
@@ -2868,71 +2757,6 @@ export interface operations {
             };
             /** @description Choca con el estado actual */
             409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    reset_user_pin_api_v1_users__user_id__pin_put: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
-                "x-device-id"?: string | null;
-            };
-            path: {
-                user_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PinReset"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["User"];
-                };
-            };
-            /** @description Sin sesión válida */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Rol sin permiso o dato ajeno */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Recurso inexistente */
-            404: {
                 headers: {
                     [name: string]: unknown;
                 };

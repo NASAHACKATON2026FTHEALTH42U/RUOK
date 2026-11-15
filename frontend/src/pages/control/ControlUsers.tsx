@@ -9,7 +9,7 @@ export default function ControlUsers() {
     <section className="flex flex-col gap-4">
       <ControlHeader
         title="Usuarios"
-        subtitle={`Cuentas de ${env?.name ?? 'el entorno'}: alta, activación y PIN rápido.`}
+        subtitle={`Cuentas de ${env?.name ?? 'el entorno'}: alta y activación.`}
       />
       {env ? (
         <UsersPanel env={env} />

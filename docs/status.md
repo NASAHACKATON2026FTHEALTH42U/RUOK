@@ -28,7 +28,7 @@
 | 💓 Liveness | BE-12, BE-16, FE-15 | Heartbeat, `overall_status` = peor entre salud y liveness, check-in "R U OK?" y alerta `no_contact` |
 | 🚨 Alertas | BE-14, BE-15, BE-17, BE-35, FE-13, FE-14, FE-16 | Alertas automáticas con deduplicación y escalera, SOS manual (también sin sesión), consola `/ground` as-of |
 | 📡 Enlace | BE-13, BE-32, FE-17 | Enlace simulado con retardo y LOS (store-and-forward persistente), fast-forward con reloj persistente |
-| 🔐 Auth | FS-06, BE-25 … BE-27, BE-36, FE-27, FE-28, FS-07 | Login local (contraseña y PIN), JWT, matriz de roles validada en el backend, gestión de usuarios en `/control` |
+| 🔐 Auth | FS-06, BE-25 … BE-27, BE-36, FE-27, FE-28, FS-07 | Login local (usuario y contraseña), JWT, matriz de roles validada en el backend, gestión de usuarios en `/control` |
 | 📶 Tiempo real | BE-28, BE-29, FE-29, FE-30 | Bitácora `event_log` + SSE, registro de dispositivos, IndexedDB por dispositivo |
 | 🛰️ Control | BE-30, FE-31, FE-32 | Centro de control `/control`: panorama de entornos, eventos en vivo, dispositivos, demo y QR de red local |
 | 📴 Offline | FE-11, FE-12 | Outbox persistente con sincronización y backoff; semáforo provisional sin conexión |

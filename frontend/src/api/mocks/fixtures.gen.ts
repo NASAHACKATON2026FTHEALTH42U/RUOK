@@ -151,10 +151,6 @@ export const CONTRACT_OPERATIONS = [
   ],
   [
     "POST",
-    "/auth/pin"
-  ],
-  [
-    "POST",
     "/control/liveness/pause"
   ],
   [
@@ -212,10 +208,6 @@ export const CONTRACT_OPERATIONS = [
   [
     "POST",
     "/users"
-  ],
-  [
-    "PUT",
-    "/users/{user_id}/pin"
   ]
 ] as const
 
