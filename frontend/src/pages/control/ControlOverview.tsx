@@ -5,7 +5,6 @@ import { useControlOverview, useRecentEvents } from '../../api/useControl'
 import { severityStyle } from '../../components/alerts/alertFormat'
 import { ControlHeader, ControlPanel } from '../../components/control/ControlHeader'
 import { formatDuration, GROUPS, groupOf, mergeEvents } from '../../components/control/feed'
-import { OperatorMessageButton } from '../../components/control/OperatorMessageForm'
 import { useControlScope } from '../../components/control/useControlScope'
 import { describeLink, hhmm } from '../../components/ui/link'
 import { livenessState } from '../../components/ui/status'
@@ -36,7 +35,7 @@ const FEED_TYPES = [
  * demás tiene su sección: Simulación, Usuarios, Dispositivos y Registro.
  */
 export default function ControlOverview() {
-  const { envId, env, recipients, memberId, memberName } = useControlScope()
+  const { envId, memberId, memberName } = useControlScope()
   const vocab = useVocab()
   const navigate = useNavigate()
   const overview = useControlOverview(envId)
@@ -98,16 +97,6 @@ export default function ControlOverview() {
           </>
         }
         memberScope
-        actions={
-          env && (
-            <OperatorMessageButton
-              recipients={recipients}
-              memberId={memberId}
-              ladder={env.escalation_ladder}
-              vocabulary={env.vocabulary}
-            />
-          )
-        }
       />
 
       {!envId ? (

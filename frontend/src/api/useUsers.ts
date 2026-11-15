@@ -21,9 +21,3 @@ export function setUserActive(id: number, active: boolean) {
     api.PATCH('/api/v1/users/{user_id}', { params: { path: { user_id: id } }, body: { active } }),
   )
 }
-
-export function resetUserPin(id: number, pin: string) {
-  return unwrap(
-    api.PUT('/api/v1/users/{user_id}/pin', { params: { path: { user_id: id } }, body: { pin } }),
-  )
-}

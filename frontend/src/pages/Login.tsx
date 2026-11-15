@@ -78,7 +78,7 @@ export default function Login() {
     setBusy(true)
     setError(null)
     try {
-      const u = await login(user, { password })
+      const u = await login(user, password)
       const next = params.get('next')
       navigate(next && expired ? next : homeFor(u.role), { replace: true })
     } catch (err) {

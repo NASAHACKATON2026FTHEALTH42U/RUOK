@@ -1,7 +1,7 @@
 """Autenticación local (BE-26) y gestión de usuarios (FS-07, solo admin).
 
 Ver docs/auth-and-roles.md:
-- `POST /auth/login` y `POST /auth/pin` devuelven un JWT local (12 h).
+- `POST /auth/login` devuelve un JWT local (12 h).
 - Credenciales incorrectas o cuenta inexistente → 401. Cuenta bloqueada → 429 con
   `Retry-After` (el front lo muestra como "demasiados intentos"). Los 5 fallos
   seguidos y el bloqueo de 5 min están en `services/accounts.py` (BE-25).
@@ -23,8 +23,6 @@ from app.schemas import (
     ErrorResponse,
     EventType,
     LoginIn,
-    PinLoginIn,
-    PinReset,
     Slug,
     TokenResponse,
     User,
@@ -80,17 +78,16 @@ def _auth_event(
     session.commit()
 
 
-def _authenticate(session: Session, username: str, secret: str, *, pin: bool) -> TokenResponse:
+def _authenticate(session: Session, username: str, password: str) -> TokenResponse:
     account = session.exec(
         select(models.UserAccount).where(models.UserAccount.username == username)
     ).first()
-    method = "pin" if pin else "password"
+    method = "password"
     if account is None:
         _auth_event(session, EventType.auth_failed, None, username, method, "unknown_user")
         raise HTTPException(401, _BAD_CREDENTIALS)
-    check = accounts.check_pin if pin else accounts.check_password
     try:
-        ok = check(session, account, secret)
+        ok = accounts.check_password(session, account, password)
     except accounts.AccountLocked as exc:
         _auth_event(session, EventType.auth_failed, account, username, method, "locked")
         until = exc.locked_until.isoformat(timespec="seconds")
@@ -102,7 +99,7 @@ def _authenticate(session: Session, username: str, secret: str, *, pin: bool) ->
         ) from exc
     if not ok:
         _auth_event(session, EventType.auth_failed, account, username, method, "bad_credentials")
-        raise HTTPException(401, "PIN incorrecto" if pin else _BAD_CREDENTIALS)
+        raise HTTPException(401, _BAD_CREDENTIALS)
 
     token, expires_at = create_token(session, account)
     _auth_event(session, EventType.auth_login, account, username, method)
@@ -116,18 +113,7 @@ def _authenticate(session: Session, username: str, secret: str, *, pin: bool) ->
     summary="Login con usuario y contraseña",
 )
 def login(body: LoginIn, session: SessionDep) -> TokenResponse:
-    return _authenticate(session, body.username, body.password, pin=False)
-
-
-@router.post(
-    "/auth/pin",
-    response_model=TokenResponse,
-    responses=_ERR_LOGIN,
-    summary="Login rápido con PIN",
-    description="Solo para `member` y `medic` (tablets compartidas).",
-)
-def login_pin(body: PinLoginIn, session: SessionDep) -> TokenResponse:
-    return _authenticate(session, body.username, body.pin, pin=True)
+    return _authenticate(session, body.username, body.password)
 
 
 @router.get(
@@ -226,18 +212,3 @@ def update_user(user_id: int, body: UserUpdate, session: SessionDep, admin: Curr
         raise HTTPException(409, str(exc)) from exc
     return to_user(account)
 
-
-@router.put(
-    "/users/{user_id}/pin",
-    response_model=User,
-    responses={**ERRORS_AUTH, **ERRORS_404},
-    dependencies=[AdminDep],
-    summary="Restablecer el PIN de un usuario (admin)",
-)
-def reset_user_pin(user_id: int, body: PinReset, session: SessionDep) -> User:
-    account = _get_account(session, user_id)
-    try:
-        account = accounts.reset_pin(session, account, body.pin)
-    except accounts.UserInvalid as exc:
-        raise HTTPException(422, str(exc)) from exc
-    return to_user(account)

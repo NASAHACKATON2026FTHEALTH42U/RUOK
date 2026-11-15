@@ -1,4 +1,4 @@
-"""BE-25: hash de contraseña/PIN, bloqueo tras 5 fallos y usuarios demo."""
+"""BE-25: hash de contraseña, bloqueo tras 5 fallos y usuarios demo."""
 
 from datetime import timedelta
 
@@ -12,7 +12,6 @@ from app.services.accounts import (
     MAX_FAILED_ATTEMPTS,
     AccountLocked,
     check_password,
-    check_pin,
     hash_secret,
     is_locked,
     seed_users,
@@ -37,7 +36,6 @@ def user(session):
         role="member",
         env_id="mars",
         password_hash=hash_secret("ruok-mars"),
-        pin_hash=hash_secret("1234"),
     )
     session.add(u)
     session.commit()
@@ -64,7 +62,7 @@ def test_verify_never_raises_on_bad_hash(bad_hash):
     assert verify_secret("1234", bad_hash) is False
 
 
-# --- Login con contraseña y PIN ----------------------------------------------------
+# --- Login con contraseña ----------------------------------------------------------
 
 
 def test_correct_password_resets_counter_and_sets_last_login(session, user):
@@ -73,16 +71,6 @@ def test_correct_password_resets_counter_and_sets_last_login(session, user):
     assert check_password(session, user, "ruok-mars") is True
     assert user.failed_attempts == 0
     assert user.last_login_at is not None
-
-
-def test_pin(session, user):
-    assert check_pin(session, user, "1234") is True
-    assert check_pin(session, user, "0000") is False
-
-
-def test_no_pin_configured_always_fails(session, user):
-    user.pin_hash = None
-    assert check_pin(session, user, "1234") is False
 
 
 def test_inactive_user_cannot_log_in(session, user):
@@ -109,15 +97,6 @@ def test_locks_after_5_failures_for_5_minutes(session, user):
     clock.advance(LOCK_SECONDS)
     assert not is_locked(user)
     assert check_password(session, user, "ruok-mars") is True
-
-
-def test_password_and_pin_share_the_counter(session, user):
-    for _ in range(3):
-        check_password(session, user, "wrong")
-    for _ in range(2):
-        check_pin(session, user, "0000")
-    with pytest.raises(AccountLocked):
-        check_pin(session, user, "1234")
 
 
 def test_lock_expires_exactly_at_locked_until(session, user):
@@ -156,11 +135,10 @@ def test_demo_users_per_environment(session):
     for role in accounts.STAFF_ROLES:
         assert users[f"{role}-geriatric"].env_id == "geriatric"
 
-    # Contraseña ruok-<env>, PIN 1234 solo para member y medic, admin global.
+    # Contraseña ruok-<env> y admin global (no hay PIN: solo usuario y contraseña).
     assert verify_secret("ruok-mars", users["vega"].password_hash)
     assert verify_secret("ruok-hospital", users["medic-hospital"].password_hash)
-    assert verify_secret("1234", users["medic-hospital"].pin_hash)
-    assert users["psych-mars"].pin_hash is None
+    assert not hasattr(users["vega"], "pin_hash")
     assert (users["admin"].role, users["admin"].env_id) == ("admin", None)
     assert verify_secret("ruok-admin", users["admin"].password_hash)
 
@@ -176,7 +154,6 @@ def test_without_demo_mode_no_known_passwords(session):
     assert [u.username for u in users] == ["admin"]
     known = ["ruok-admin", "ruok-mars", "1234", "admin"]
     assert not any(verify_secret(p, users[0].password_hash) for p in known)
-    assert users[0].pin_hash is None
 
 
 @pytest.mark.parametrize(

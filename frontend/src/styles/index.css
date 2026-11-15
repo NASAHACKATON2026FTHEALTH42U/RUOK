@@ -331,7 +331,17 @@ textarea {
     position: relative;
     background: color-mix(in srgb, var(--env-surface) 92%, transparent);
     border: 1px solid var(--env-border);
-    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+    /* Solo se recorta la esquina: el resto del polígono sobresale 1px para que, con anchos o
+       escalados fraccionarios, el recorte no se coma el borde derecho ni el inferior. */
+    clip-path: polygon(
+      -1px -1px,
+      calc(100% - 12px) -1px,
+      calc(100% - 12px) 0,
+      100% 12px,
+      calc(100% + 1px) 12px,
+      calc(100% + 1px) calc(100% + 1px),
+      -1px calc(100% + 1px)
+    );
   }
   .hud-panel::after {
     content: '';

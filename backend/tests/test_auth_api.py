@@ -1,4 +1,4 @@
-"""BE-26: endpoints /auth (login, PIN, me, demo-users) con JWT local."""
+"""BE-26: endpoints /auth (login, me, demo-users) con JWT local."""
 
 from typing import Annotated
 
@@ -22,10 +22,6 @@ ENV_KEY = "clave-de-entorno-de-32-bytes-o-mas!"
 
 def _login(client, username, password):
     return client.post(API + "/auth/login", json={"username": username, "password": password})
-
-
-def _pin(client, username, pin):
-    return client.post(API + "/auth/pin", json={"username": username, "pin": pin})
 
 
 def _bearer(token):
@@ -156,36 +152,26 @@ def test_env_secret_overrides_app_state(client, monkeypatch):
     assert client.get(API + "/auth/me", headers=_bearer(token)).status_code == 401
 
 
-# ── PIN ─────────────────────────────────────────────────────────────
+# ── Sin login por PIN ───────────────────────────────────────────────
 
 
-def test_pin_login_ok(client):
-    resp = _pin(client, "vega", "1234")
-    assert resp.status_code == 200
-    assert resp.json()["user"]["username"] == "vega"
+def test_pin_login_no_longer_exists(client):
+    """El login rápido con PIN se retiró: solo usuario y contraseña."""
+    resp = client.post(API + "/auth/pin", json={"username": "vega", "pin": "1234"})
+    assert resp.status_code in (404, 405)
 
 
-def test_pin_for_role_without_pin_is_401(client):
-    assert _pin(client, "commander-mars", "1234").status_code == 401
-    assert _login(client, "commander-mars", "ruok-mars").status_code == 200
-
-
-def test_pin_is_locked_after_five_failures(client):
+def test_login_is_locked_after_five_failures(client):
     for _ in range(accounts.MAX_FAILED_ATTEMPTS):
-        assert _pin(client, "okafor", "0000").status_code == 401
+        assert _login(client, "okafor", "mala").status_code == 401
 
-    resp = _pin(client, "okafor", "1234")  # PIN correcto, pero bloqueada
+    resp = _login(client, "okafor", "ruok-mars")  # contraseña correcta, pero bloqueada
     assert resp.status_code == 429  # el front lo muestra como "demasiados intentos"
     assert "bloqueada" in resp.json()["detail"]
     assert 0 < int(resp.headers["retry-after"]) <= accounts.LOCK_SECONDS
-    assert _login(client, "okafor", "ruok-mars").status_code == 429  # también con contraseña
 
     clock.advance(accounts.LOCK_SECONDS + 1)
-    assert _pin(client, "okafor", "1234").status_code == 200
-
-
-def test_pin_format_is_validated(client):
-    assert _pin(client, "vega", "12a4").status_code == 422
+    assert _login(client, "okafor", "ruok-mars").status_code == 200
 
 
 # ── Usuarios demo ───────────────────────────────────────────────────

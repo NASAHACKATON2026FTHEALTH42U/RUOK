@@ -243,7 +243,7 @@ export function OperatorMessageForm({
           maxLength={500}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className={`${INPUT}`}
+          className={`${INPUT} py-2.5 leading-snug`}
           placeholder={
             mode === 'alert'
               ? 'Qué pasa (lo verá en el detalle de la alerta)'
