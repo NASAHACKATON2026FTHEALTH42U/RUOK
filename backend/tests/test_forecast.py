@@ -191,6 +191,7 @@ def test_no_data_at_all():
     assert f.points == []
     assert f.change is None
     assert f.history_days == 0
+    assert f.last_value_unusual is False
 
 
 @pytest.mark.parametrize("last_value", [70, 200])  # 200 lpm sería crítico si no hubiera caducado
@@ -244,6 +245,20 @@ def test_cadence_change_is_insufficient_data():
     f = forecast("weight_kg", on_days([(d, 70.0) for d in days]), env="geriatric")
     assert f.status == ForecastStatus.insufficient_data
     assert f.points == []
+    assert f.change is None
+
+
+def test_weekly_series_with_a_day_of_jitter_fails_safe():
+    # Semanal, pero no siempre el mismo día de la semana (±1 día). La rejilla semanal que
+    # termina en el último dato no coincide con casi ninguna medición y hoy la respuesta es
+    # `insufficient_data`: un fallo seguro (sin datos = desconocido). Si algún día se
+    # prevé, tiene que ser con pasos de una semana: nunca con otra cadencia.
+    days = [0, 6, 13, 21, 27, 35, 41, 49, 55, 63]
+    f = forecast("weight_kg", on_days([(d, 70.0) for d in days]), env="geriatric")
+    assert f.status in (ForecastStatus.ok, ForecastStatus.insufficient_data)
+    assert f.step_days == (7 if f.status == ForecastStatus.ok else None)
+    assert bool(f.points) == (f.status == ForecastStatus.ok)
+    assert all(p.value == 70.0 for p in f.points)
     assert f.change is None
 
 
@@ -306,46 +321,125 @@ def test_values_are_clamped_to_input_min():
     assert all(0 <= p.low <= p.value <= p.high for p in f.points)
 
 
-def test_history_that_never_decreases_is_not_forecast_to_decrease():
-    doses = [100, 100, 103, 103, 103, 110, 110, 112, 112, 112]
+def test_growing_history_is_not_forecast_to_decrease():
+    # Dosis acumulada leída a diario: sube un día sí y otro no (justo la mitad de los pasos)
+    # y nunca baja. El último día sube mucho más de lo habitual: la medición se trata con
+    # cautela, pero una dosis acumulada no vuelve atrás y la previsión no baja de 140.
+    doses = [100, 100, 102, 102, 104, 104, 106, 106, 108, 108, 140]
     f = forecast("radiation_dose", daily(doses), env="mars")
     assert f.status == ForecastStatus.ok
-    assert all(b >= a for a, b in pairwise([112, *values(f)]))
+    assert all(b >= a for a, b in pairwise([140, *values(f)]))
+
+
+def test_history_that_barely_grows_is_not_treated_as_cumulative():
+    # Nunca ha bajado, pero tampoco ha ido creciendo: solo 4 de sus 20 pasos son subidas
+    # (menos de la mitad). El valor alto del final es un valor suelto, no una dosis
+    # acumulada, y la previsión vuelve al nivel habitual en vez de quedarse clavada en 110.
+    readings = [70] * 3 + [71] * 4 + [72] * 7 + [73] * 6 + [110]
+    f = forecast("heart_rate", daily(readings))
+    assert f.status == ForecastStatus.ok
+    final = f.points[-1].value
+    assert abs(final - 73) < abs(final - 110)
+
+
+def test_history_with_decreases_is_not_treated_as_cumulative():
+    # 9 de sus 15 pasos son subidas, pero las 6 últimas mediciones bajan 2 lpm al día: no es
+    # una serie acumulada y la previsión sigue la racha de bajadas (al menos 2·φ^h por paso).
+    readings = [60 + 2 * i for i in range(10)] + [76 - 2 * i for i in range(6)]  # … 78, 76, … 66
+    f = forecast("heart_rate", daily(readings))
+    assert f.status == ForecastStatus.ok
+    path = [66, *values(f)]
+    assert all(b < a for a, b in pairwise(path))
+    for h in range(2, 8):
+        assert path[h - 1] - path[h] >= 2 * PHI**h - 2 * ROUNDING
 
 
 # --- valores sueltos ----------------------------------------------------------
 
-# Un único valor suelto al final no arrastra la previsión: la última medición, sin otra que
-# la confirme, mueve el nivel como mucho lo que lo movería una variación normal (con la
-# semilla 23 el ajuste elige α = 0,6 y antes se iba más cerca del valor suelto).
-@pytest.mark.parametrize("seed", [1, 2, 3, 23])
-def test_final_outlier_does_not_drag_the_forecast(seed):
-    rng = random.Random(seed)
-    usual, outlier = 70, 110
-    f = forecast("heart_rate", daily([round(rng.gauss(usual, 2)) for _ in range(20)] + [outlier]))
+
+def assert_final_outlier_is_not_followed(f, usual, outlier):
+    """A 7 pasos el valor esperado sigue más cerca del nivel habitual que del valor suelto,
+    y en ningún paso llega hasta él."""
+    assert f.status == ForecastStatus.ok
     final = f.points[-1].value  # h = 7
     assert abs(final - usual) < abs(final - outlier)
-    assert all(p.value < outlier for p in f.points)
+    if outlier > usual:
+        assert all(p.value < outlier for p in f.points)
+    else:
+        assert all(p.value > outlier for p in f.points)
+
+
+# Un único valor suelto al final, alto o bajo, no arrastra la previsión: la última medición,
+# sin otra que la confirme, mueve el nivel como mucho lo que lo movería una variación normal
+# y no toca la tendencia. Casos que antes fallaban:
+# - semilla 23: el ajuste elegía α = 0,6 y el nivel se iba hacia el valor suelto;
+# - semillas 109 y 190: las 3 mediciones anteriores se movían por azar en la misma dirección
+#   (… 69, 70, 72, 73, 110) y el valor suelto «continuaba la racha» y se daba por bueno;
+# - semillas 992 y 405: el error del valor suelto decidía el ajuste (α = β ≥ 0,5).
+@pytest.mark.parametrize(
+    ("seed", "outlier"),
+    [
+        *[(seed, outlier) for seed in (1, 2, 3, 23) for outlier in (110, 30)],
+        (109, 110),
+        (190, 30),
+        (992, 110),
+        (405, 30),
+    ],
+)
+def test_final_outlier_does_not_drag_the_forecast(seed, outlier):
+    rng = random.Random(seed)
+    usual = 70
+    f = forecast("heart_rate", daily([round(rng.gauss(usual, 2)) for _ in range(20)] + [outlier]))
+    assert_final_outlier_is_not_followed(f, usual, outlier)
+
+
+# Con solo 10 mediciones y algo más de ruido pasa más a menudo (≈ 9 % de las series
+# simuladas): la primera previsión sube de 94 a 121, más allá del propio valor suelto; la
+# segunda baja de 58 a 48.
+@pytest.mark.parametrize(
+    ("usual", "outlier"),
+    [
+        ([74, 73, 66, 64, 70, 72, 70, 66, 69, 74], 110),
+        ([66, 71, 69, 69, 73, 70, 69, 75, 69, 66], 30),
+    ],
+)
+def test_final_outlier_on_a_short_noisy_history(usual, outlier):
+    f = forecast("heart_rate", daily([*usual, outlier]))
+    assert_final_outlier_is_not_followed(f, 70, outlier)
+
+
+# Series planas con un único valor suelto al final: (indicador, nivel habitual, valor suelto).
+FLAT_OUTLIERS = [
+    ("heart_rate", 70, 110),
+    ("heart_rate", 70, 30),
+    ("stress", 2, 5),
+    ("mood", 2, 5),
+    ("mood", 4, 1),
+    ("spo2", 98, 85),
+]
 
 
 # Una serie plana con un valor suelto alto al final «nunca ha bajado», pero no es una serie
 # acumulada: la regla de las dosis no puede clavar la previsión en el valor suelto.
-@pytest.mark.parametrize(
-    ("indicator_id", "usual", "outlier"), [("heart_rate", 70, 110), ("stress", 2, 5)]
-)
+@pytest.mark.parametrize(("indicator_id", "usual", "outlier"), FLAT_OUTLIERS)
 def test_final_outlier_on_a_flat_series(indicator_id, usual, outlier):
     f = forecast(indicator_id, daily([usual] * 20 + [outlier]), env="mars")
-    final = f.points[-1].value
-    assert abs(final - usual) < abs(final - outlier)
+    assert_final_outlier_is_not_followed(f, usual, outlier)
+
+
+NEARLY_FLAT = [70, 70, 70, 70, 70, 70, 70, 70, 69, 71, 70, 70, 70, 71, 70, 70, 70, 70, 70, 71]
+NEARLY_FLAT_LOW = [70, 69, 70, 69, 71, 70, 70, 70, 70, 70, 70, 70, 69, 69, 70, 70, 70, 70, 70, 69]
 
 
 # Con más de la mitad de las diferencias iguales (MAD = 0) el ruido no se estima con una
 # desviación típica (el propio valor suelto la inflaría): manda el error de redondeo.
-def test_final_outlier_on_a_nearly_flat_series():
-    usual = [70, 70, 70, 70, 70, 70, 70, 70, 69, 71, 70, 70, 70, 71, 70, 70, 70, 70, 70, 71]
-    f = forecast("heart_rate", daily([*usual, 110]))
-    assert all(p.value <= 110 for p in f.points)
-    assert abs(f.points[-1].value - 70) < abs(f.points[-1].value - 110)
+@pytest.mark.parametrize(
+    ("usual", "outlier"),
+    [(NEARLY_FLAT, 110), (NEARLY_FLAT, 30), (NEARLY_FLAT_LOW, 110), (NEARLY_FLAT_LOW, 30)],
+)
+def test_final_outlier_on_a_nearly_flat_series(usual, outlier):
+    f = forecast("heart_rate", daily([*usual, outlier]))
+    assert_final_outlier_is_not_followed(f, 70, outlier)
 
 
 @pytest.mark.parametrize("seed", [None, 1, 2, 3])
@@ -593,6 +687,75 @@ def test_without_forecast_nothing_is_flagged(status_case):
     assert f.last_value_unusual is False
 
 
+@pytest.mark.parametrize(("indicator_id", "usual", "outlier"), FLAT_OUTLIERS)
+def test_final_outlier_on_a_flat_series_is_flagged(indicator_id, usual, outlier):
+    f = forecast(indicator_id, daily([usual] * 20 + [outlier]), env="mars")
+    assert f.last_value_unusual is True
+
+
+@pytest.mark.parametrize(
+    ("indicator_id", "readings"),
+    [
+        ("heart_rate", [70] * 10),  # siempre igual
+        ("heart_rate", [50 + 5 * i for i in range(10)]),  # sube 5 lpm al día, sin ruido
+        ("bp_systolic", [171 - 5 * i for i in range(8)]),  # baja 5 mmHg al día, sin ruido
+        ("bp_systolic", STABLE_BP),  # ruido habitual; la última (119) es su media
+    ],
+)
+def test_ordinary_last_value_is_not_flagged(indicator_id, readings):
+    f = forecast(indicator_id, daily(readings))
+    assert f.status == ForecastStatus.ok
+    assert f.last_value_unusual is False
+
+
+@pytest.mark.parametrize("days_at_the_new_level", [2, 7])
+def test_confirmed_change_on_a_flat_history_is_followed(days_at_the_new_level):
+    # Un cambio que se mantiene sí mueve la previsión, también cuando el historial era plano.
+    f = forecast("heart_rate", daily([70] * 15 + [85] * days_at_the_new_level))
+    assert f.last_value_unusual is False
+    final = f.points[-1].value
+    assert abs(final - 85) < abs(final - 70)
+
+
+# `last_value_unusual` avisa de una medición que «se aparta de lo esperado mucho más que el
+# ruido habitual de la persona» (docs/api-contract.md) y el front pide repetirla. Los tres
+# tests siguientes son mediciones que la persona da a menudo y hoy salen marcadas.
+# En una escala con muchos valores repetidos el ruido habitual no se queda en el error de
+# redondeo: cuenta la variación de siempre, y un valor a un paso de la escala no se marca.
+@pytest.mark.parametrize(
+    ("indicator_id", "readings"),
+    [
+        # Saturación casi siempre 98 % y de vez en cuando 97 %.
+        ("spo2", [98, 98, 98, 97, 98, 98, 98, 98, 97, 98, 98, 98, 98, 98, 97]),
+        # Ánimo casi siempre 3 y algunos días 4.
+        ("mood", [3, 3, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3, 3, 3, 4]),
+    ],
+)
+def test_value_the_person_often_gives_is_not_flagged(indicator_id, readings):
+    f = forecast(indicator_id, daily(readings))
+    assert f.last_value_unusual is False
+
+
+# Un valor suelto que la medición siguiente no confirma apenas mueve el nivel, así que la
+# medición de siempre que viene después no queda «lejos de lo esperado».
+@pytest.mark.parametrize("readings_after", [1, 9])
+def test_usual_value_after_an_outlier_is_not_flagged(readings_after):
+    f = forecast("heart_rate", daily([70] * 19 + [110] + [70] * readings_after))
+    assert f.last_value_unusual is False
+
+
+# Con dos mediciones al día, tras la primera del día siguiente ese día está incompleto: queda
+# fuera del ajuste en vez de compararse (solo la de la mañana) con los días completos.
+def test_usual_morning_reading_is_not_flagged_before_the_evening_one():
+    series = []
+    for i in range(10):
+        series += [(T0 + i * DAY, 60), (T0 + i * DAY + 10 * HOUR, 80)]
+    series.append((T0 + 10 * DAY, 60))  # la mañana siguiente: lo mismo que todas las mañanas
+    f = forecast("heart_rate", series)
+    assert f.status == ForecastStatus.ok
+    assert f.last_value_unusual is False
+
+
 # --- el día se centra en la hora habitual de medición ---------------------------
 
 
@@ -625,6 +788,54 @@ def test_forecast_does_not_depend_on_the_hour_of_measurement():
     assert values(forecast("heart_rate", at(0))) == values(forecast("heart_rate", at(12)))
 
 
+MIDNIGHT = datetime(2026, 10, 1, 0, 0, tzinfo=UTC)
+JITTER_MIN = [-50, 35, -20, 55, -5, 10, -45, 40, -30, 25, -15, 50, -35, 5]
+
+
+@pytest.mark.parametrize("scale", [1, 4])  # hasta ±55 min y hasta ±3 h 40 min
+def test_one_reading_a_day_around_midnight_utc_is_a_daily_series(scale):
+    # Una lectura al día, unas veces antes y otras después de las 00:00 UTC. Agrupando por
+    # fecha UTC, casi todas las fechas tendrían dos lecturas o ninguna.
+    series = [
+        (MIDNIGHT + timedelta(days=i, minutes=scale * minutes), 60 + 2 * i)
+        for i, minutes in enumerate(JITTER_MIN)
+    ]
+    last_at = series[-1][0]
+    f = forecast("heart_rate", series)
+    assert f.status == ForecastStatus.ok
+    assert (f.step_days, f.history_days) == (1, len(series))  # una lectura = un día
+    # La misma previsión que con la recta medida siempre a la misma hora: 86 + 2·(φ + …).
+    assert values(f) == pytest.approx([damped(86, 2, h) for h in range(1, 8)], abs=ROUNDING)
+    assert [p.at for p in f.points] == [last_at + k * DAY for k in range(1, 8)]
+    assert f.backtest_mae == pytest.approx((1 - PHI) * 2, abs=ROUNDING)
+
+
+MORNING_JITTER_MIN = [-10, 5, -15, 10, -5, 15, -10, 5, -15, 10]
+EVENING_JITTER_MIN = [5, -10, 10, -5, 15, -15, 5, -10, 10, -5]
+# Con dos horas habituales el corte entre días va en un hueco del reloj que deja cada día con
+# sus dos lecturas (también a 12 h justas o a más de 12 h una de otra).
+@pytest.mark.parametrize(
+    ("morning", "evening"),
+    [
+        (8, 18),
+        (8, 20),
+        (7, 21),
+    ],
+)
+def test_morning_and_evening_readings_are_averaged_into_one_day(morning, evening):
+    # Dos lecturas al día, 60 por la mañana y 80 por la noche, con ±15 min de variación. La
+    # media de cada día es 70 y la última lectura (noche) es la de todas las noches.
+    series = []
+    for i in range(10):
+        day = MIDNIGHT + i * DAY
+        series.append((day + timedelta(hours=morning, minutes=MORNING_JITTER_MIN[i]), 60))
+        series.append((day + timedelta(hours=evening, minutes=EVENING_JITTER_MIN[i]), 80))
+    f = forecast("heart_rate", series)
+    assert f.status == ForecastStatus.ok
+    assert values(f) == [70.0] * 7
+    assert f.last_value_unusual is False
+
+
 # --- mediciones con fecha futura --------------------------------------------------
 
 
@@ -634,4 +845,53 @@ def test_measurements_dated_in_the_future_are_ignored():
     wrong_clock = [*series, (now + 10 * DAY, 180)]  # un dispositivo con el reloj mal
     f = forecast("heart_rate", wrong_clock, now=now)
     assert f == forecast("heart_rate", series, now=now)
+    assert all(now < p.at <= now + 7 * DAY for p in f.points)
+
+
+@pytest.mark.parametrize("ahead", [HOUR, 3 * DAY])
+def test_measurement_ahead_of_now_changes_nothing(ahead):
+    series = daily([60 + 2 * i for i in range(10)])  # … 76, 78 lpm
+    now = series[-1][0] + HOUR
+    f = forecast("heart_rate", [*series, (now + ahead, 200)], now=now)
+    assert f == forecast("heart_rate", series, now=now)
+    assert f.current_status == Status.normal  # el de 78 lpm, no el de los 200 «del futuro»
+    assert f.points[0].value == pytest.approx(damped(78, 2, 1), abs=ROUNDING)
+
+
+def test_only_future_measurements_is_like_no_data():
+    f = forecast("heart_rate", daily([70] * 10, start=T0 + DAY), now=T0)
+    assert f.status == ForecastStatus.insufficient_data
+    assert f.current_status == Status.unknown
+    assert (f.history_days, f.points, f.change, f.backtest_mae) == (0, [], None, None)
+
+
+def test_future_measurement_does_not_hide_a_stale_series():
+    series = daily([70] * 10)
+    now = series[-1][0] + 3 * DAY  # la frecuencia cardíaca caduca a las 24 h
+    f = forecast("heart_rate", [*series, (now + HOUR, 70)], now=now)
+    assert f.status == ForecastStatus.stale
+    assert f.current_status == Status.unknown
+    assert f.points == []
+
+
+def test_measurement_taken_exactly_now_counts():
+    series = daily([70] * 9 + [120])
+    now = series[-1][0]
+    f = forecast("heart_rate", series, now=now)
+    assert f.status == ForecastStatus.ok
+    assert f.current_status == Status.warning  # 120 lpm: atención (101–130)
+    assert f.history_days == 10
+    assert [p.at for p in f.points] == [now + k * DAY for k in range(1, 8)]
+
+
+def test_slightly_fast_device_clock_is_tolerated():
+    # Un móvil con el reloj 2 minutos adelantado: su medición no se descarta (hay un margen
+    # de unos minutos) y los puntos siguen siendo posteriores a ahora y dentro del horizonte.
+    series = daily([70] * 9 + [120])
+    now = series[-1][0] - timedelta(minutes=2)
+    f = forecast("heart_rate", series, now=now)
+    assert f.status == ForecastStatus.ok
+    assert f.current_status == Status.warning
+    assert f.history_days == 10
+    assert len(f.points) == 7
     assert all(now < p.at <= now + 7 * DAY for p in f.points)

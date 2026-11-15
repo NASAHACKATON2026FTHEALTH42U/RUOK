@@ -178,7 +178,10 @@ class Forecast(ApiModel):
         default=None, description="Cadencia de la serie: 1 = diaria, 7 = semanal"
     )
     history_days: int = Field(
-        default=0, ge=0, description="Días con mediciones usados para ajustar el modelo"
+        default=0,
+        ge=0,
+        description="Días con mediciones usados para ajustar el modelo (con `insufficient_data`, "
+        "los días con mediciones del tramo reciente)",
     )
     current_status: Status = Field(
         description="Estado del último valor con los rangos del entorno (`unknown` si ha "
@@ -187,12 +190,14 @@ class Forecast(ApiModel):
     )
     last_value_unusual: bool = Field(
         default=False,
-        description="true si la última medición se aparta de lo esperado mucho más que el ruido "
-        "habitual de la persona: la previsión la trata con cautela hasta que otra la confirme",
+        description="true si la última medición se aparta de lo esperado mucho más de lo habitual "
+        "en esa persona: la previsión aún no la da por buena (y `change` es null) hasta que otra "
+        "medición parecida la confirme",
     )
     points: list[ForecastPoint] = Field(default_factory=list)
     change: ForecastChange | None = Field(
-        default=None, description="null si el estado no cambia en el horizonte"
+        default=None,
+        description="null si el estado no cambia en el horizonte o si `last_value_unusual`",
     )
     backtest_mae: float | None = Field(
         default=None,

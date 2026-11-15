@@ -196,8 +196,9 @@ const nextDays = (n: number) => (n === 1 ? 'el próximo día' : `los próximos $
  * tendría ese valor con los rangos del entorno), no del semáforo, que además mira tendencias.
  * - Con `ok`: el primer cambio de estado previsto (a peor o a mejor, en el orden normal <
  *   atención < crítico) o que el valor se mantiene.
- * - Si la última medición se sale de lo habitual (`last_value_unusual`), no se anuncia ninguna
- *   mejora a partir de un solo valor: se pide repetirla (api-contract.md, regla 4).
+ * - Si la última medición se sale de lo habitual (`last_value_unusual`), no se anuncia ningún
+ *   cambio a partir de un solo valor: se dice que la previsión espera a que se repita
+ *   (api-contract.md, regla 4). Vale igual para una medida y para una respuesta del check-in.
  * - Sin previsión (`insufficient_data`, `stale`), por qué no la hay.
  * Los nombres de estado son los de status.ts.
  */
@@ -217,7 +218,7 @@ export function forecastSummary(forecast: Forecast): ForecastSummary {
   if (forecast.last_value_unusual) {
     return {
       tone: 'unusual',
-      text: 'La última medición se sale de lo habitual: repítela para confirmarla.',
+      text: 'El último valor se sale de lo habitual: la previsión espera a que se repita para seguirlo.',
     }
   }
   const { change, current_status: current, horizon_days: horizon } = forecast

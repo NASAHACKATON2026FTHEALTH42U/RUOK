@@ -1526,7 +1526,7 @@ export interface components {
             step_days: number | null;
             /**
              * History Days
-             * @description Días con mediciones usados para ajustar el modelo
+             * @description Días con mediciones usados para ajustar el modelo (con `insufficient_data`, los días con mediciones del tramo reciente)
              * @default 0
              */
             history_days: number;
@@ -1534,13 +1534,13 @@ export interface components {
             current_status: components["schemas"]["Status"];
             /**
              * Last Value Unusual
-             * @description true si la última medición se aparta de lo esperado mucho más que el ruido habitual de la persona: la previsión la trata con cautela hasta que otra la confirme
+             * @description true si la última medición se aparta de lo esperado mucho más de lo habitual en esa persona: la previsión aún no la da por buena (y `change` es null) hasta que otra medición parecida la confirme
              * @default false
              */
             last_value_unusual: boolean;
             /** Points */
             points: components["schemas"]["ForecastPoint"][];
-            /** @description null si el estado no cambia en el horizonte */
+            /** @description null si el estado no cambia en el horizonte o si `last_value_unusual` */
             change: components["schemas"]["ForecastChange"] | null;
             /**
              * Backtest Mae

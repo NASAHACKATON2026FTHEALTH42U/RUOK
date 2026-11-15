@@ -263,16 +263,16 @@ describe('forecastSummary', () => {
     })
   })
 
-  it('con la última medición inusual pide repetirla y no anuncia ninguna mejora', () => {
+  it('con la última medición inusual no anuncia ningún cambio: espera a que se repita', () => {
     const odd: Forecast = {
       ...FORECAST,
       current_status: 'critical',
       last_value_unusual: true,
-      change: { status: 'normal', at: '2026-11-16T06:00:00Z', in_days: 1 },
+      change: null,
     }
     expect(forecastSummary(odd)).toEqual({
       tone: 'unusual',
-      text: 'La última medición se sale de lo habitual: repítela para confirmarla.',
+      text: 'El último valor se sale de lo habitual: la previsión espera a que se repita para seguirlo.',
     })
     // Sin previsión no hay nada que matizar: manda el motivo por el que no la hay.
     expect(forecastSummary({ ...NO_FORECAST, last_value_unusual: true }).tone).toBe('none')

@@ -23,18 +23,25 @@ Modelo: suavizado exponencial de Holt con **tendencia amortiguada** (Gardner y M
   tal y como está ahora. φ es fijo.
 - **Robusto a valores sueltos** (Gelper, Fried y Croux, 2010): se estima el ruido
   habitual de la serie (σ robusta: MAD de las diferencias entre días) y un error mayor
-  que ``OUTLIER_SIGMAS`` σ se recorta al actualizar la tendencia y cuenta de forma lineal,
-  no cuadrática, al elegir α y β (pérdida de Huber). Así una medición rara, o un error al
-  teclear, no dispara la previsión; un cambio que se mantiene varios días sí la mueve.
-- **La última medición no está confirmada:** si se aparta de lo esperado más que ese
-  límite, mueve el nivel solo lo que lo movería una variación normal; y si se aparta más
-  de ``UNUSUAL_SIGMAS`` σ (algo que el ruido habitual casi nunca explica), la respuesta
-  lo avisa (``last_value_unusual``). Si la siguiente medición la confirma, el modelo la
-  sigue entera, porque el nivel sí se actualiza sin recorte con las mediciones anteriores.
+  que ``OUTLIER_SIGMAS`` σ es un **salto**.
+- **Un salto solo cuenta si se confirma.** Si la medición siguiente se queda cerca del
+  valor nuevo, es un cambio real: el nivel pasa al valor nuevo y la tendencia aprende de
+  él (con el error recortado al límite, para que no se desboque). Si la siguiente vuelve a
+  lo de antes, era un valor suelto (una medición rara, un error al teclear): mueve el
+  nivel como mucho lo que lo movería una variación normal y no toca la tendencia. Al
+  elegir α y β, un cambio real cuenta de forma lineal (pérdida de Huber) y un valor
+  suelto solo como ese límite: ningún ajuste gana por haberse acercado a él por azar.
+- **La última medición aún no está confirmada:** se trata como un valor suelto, y si se
+  aparta de lo esperado más de ``UNUSUAL_SIGMAS`` veces lo que el modelo suele fallar con
+  esa persona (y más de un paso y medio de la escala), la respuesta lo avisa con
+  ``last_value_unusual`` y no anuncia ningún cambio de estado. Otra lectura parecida (el
+  mismo día o el siguiente) la confirma.
 - **Racha:** si el valor lleva ``RUN_MOVES`` o más mediciones seguidas moviéndose en la
   misma dirección (con ruido independiente eso pasa por azar menos del 2 % de las veces:
   2/5!), la tendencia no es menor que el ritmo de la racha: la mediana de sus cambios, que
-  ignora un salto aislado. Una última medición que continúa la racha se da por confirmada.
+  ignora un salto aislado. Una última medición que continúa la racha a su ritmo se da por
+  confirmada y la previsión parte de ella; un salto al final no cuenta como parte de la
+  racha.
   Es la misma idea que la regla «empeora ≥ 3 días seguidos» de BE-10.
 - La tendencia amortiguada se va frenando, así que la previsión no se dispara.
 - El intervalo es el de predicción del 80 % **aproximado**: su anchura sale del error
@@ -46,9 +53,12 @@ Modelo: suavizado exponencial de Holt con **tendencia amortiguada** (Gardner y M
 
 Preparación de la serie:
 
-- Media por día. El día se centra en la hora a la que la persona suele medirse (y no en
-  la fecha UTC): quien se mide cerca de las 00:00 UTC tendría dos lecturas en una fecha
-  y ninguna en la siguiente. Las mediciones con fecha posterior a ahora se ignoran.
+- Media por día. El corte entre días no es la medianoche UTC, sino la mitad del hueco
+  más largo del reloj en el que la persona nunca se mide: quien se mide cerca de las
+  00:00 UTC tendría dos lecturas en una fecha y ninguna en la siguiente. Si suele medirse
+  varias veces al día y el último día aún tiene menos lecturas, ese día queda fuera del
+  ajuste (su media no es comparable). Las mediciones con fecha futura se ignoran (con
+  5 minutos de margen, por si el reloj de un dispositivo va algo adelantado).
 - La cadencia es la mediana de los días entre mediciones (1 = diaria, 7 = semanal).
 - Un hueco de más de ``MAX_GAP_STEPS`` pasos corta la serie: solo cuenta el tramo
   reciente. Los huecos más cortos se rellenan por interpolación lineal para tener una
@@ -72,6 +82,7 @@ Salida:
 
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, replace
 from datetime import date, datetime, timedelta
@@ -119,6 +130,9 @@ PHI = 0.8  # amortiguación de la tendencia (entre 0,8 y 0,98 en la literatura)
 DISCOUNT = 0.95  # peso de un error respecto al del paso siguiente, al ajustar α y β
 OUTLIER_SIGMAS = 2.0  # un error mayor que esto (en σ robustas) se trata como valor suelto
 UNUSUAL_SIGMAS = 3.0  # y a partir de aquí se avisa de que la última medición es inusual
+UNUSUAL_STEPS = 1.5  # … si además se aparta más de un paso y medio de la escala (`input.step`)
+TRIM = 0.2  # con MAD = 0, parte de las diferencias (las mayores) que no cuenta como ruido
+DAY_CUT_CANDIDATES = 3  # huecos del reloj que se prueban como corte entre días
 RUN_MOVES = 4  # cambios seguidos en la misma dirección que cuentan como racha
 Z_80 = 1.2816  # cuantil 0,90 de la normal: intervalo central del 80 %
 # Cuantil 0,90 de la t de Student con 1 … 30 grados de libertad (valores de tabla).
@@ -146,8 +160,8 @@ class _Fit:
     level: float
     trend: float
     errors: tuple[float, ...]  # errors[i] es el error al prever y[i + 1]
-    loss: float  # error a un paso (Huber), con más peso en lo reciente
-    unusual: bool  # la última medición se aparta de lo esperado y aún no está confirmada
+    loss: float  # error a un paso (ver `_loss`), con más peso en lo reciente
+    unusual: bool = False  # la última medición se aparta mucho de lo esperado, sin confirmar
 
 
 # --------------------------------------------------------------------------
@@ -156,18 +170,27 @@ class _Fit:
 
 
 def _day_shift(points: Sequence[tuple[datetime, float]]) -> timedelta:
-    """Desplazamiento que centra el «día» en la hora a la que la persona suele medirse.
+    """Desplazamiento que lleva a las 00:00 el corte entre «días» de esta persona.
 
-    La hora habitual es la mediana circular de las horas de medición (respecto a la de la
-    última). Sumando el desplazamiento, esa hora cae a las 12:00 y cada día va de 12 h
-    antes a 12 h después: una lectura diaria con algo de variación de hora nunca se parte
-    entre dos días ni se junta con la del día siguiente.
+    El corte va en mitad de un hueco largo del reloj de 24 h en el que nunca se mide. Con
+    una lectura diaria queda lejos de su hora habitual; con dos (mañana y noche), entre
+    las dos. Entre los huecos más largos se elige el que deja más días con su número
+    habitual de lecturas (y, a igualdad, el más largo): así una lectura con algo de
+    variación de hora nunca se parte entre dos días ni se junta con la del día siguiente.
     """
-    last = points[-1][0]
-    offsets = [((t - last).total_seconds() + 43200) % 86400 - 43200 for t, _ in points]
-    usual = last + timedelta(seconds=median(offsets))
-    midnight = usual.replace(hour=0, minute=0, second=0, microsecond=0)
-    return timedelta(hours=12) - (usual - midnight)
+    seconds = sorted({t.hour * 3600 + t.minute * 60 + t.second for t, _ in points})
+    gaps = [(b - a, a) for a, b in pairwise(seconds)]
+    gaps.append((seconds[0] + 86400 - seconds[-1], seconds[-1]))
+    best: tuple[int, float, timedelta] | None = None
+    for width, start in sorted(gaps, reverse=True)[:DAY_CUT_CANDIDATES]:
+        shift = -timedelta(seconds=(start + width / 2) % 86400)
+        per_day = Counter((t + shift).date() for t, _ in points).values()
+        usual = median_low(per_day)
+        score = (sum(n == usual for n in per_day), width)
+        if best is None or score > best[:2]:
+            best = (*score, shift)
+    assert best is not None  # siempre hay al menos un hueco
+    return best[2]
 
 
 def _recent_segment(days: list[tuple[date, float]], step: int) -> list[tuple[date, float]]:
@@ -214,15 +237,20 @@ def _noise(y: Sequence[float]) -> float:
 
     1,4826·MAD estima la desviación típica de una normal, y la diferencia de dos valores
     con ruido σ tiene desviación √2·σ. Si más de la mitad de las diferencias son iguales
-    (MAD = 0, típico en escalas de 1 a 5 y en series casi planas) devuelve 0 y manda el
-    error de redondeo de la medida; la desviación típica no sirve aquí, porque un solo
-    valor suelto la infla y dejaría de parecer suelto.
+    (MAD = 0: escalas de 1 a 5, series casi planas) se usa la media cuadrática de las
+    diferencias tras quitar las ``TRIM`` mayores: cuenta la variación de siempre (un punto
+    arriba o abajo de vez en cuando) y no un valor suelto, que la inflaría.
     """
     diffs = [b - a for a, b in pairwise(y)]
     if not diffs:
         return 0.0
     center = median(diffs)
-    return 1.4826 * median(abs(d - center) for d in diffs) / sqrt(2)
+    deviations = sorted(abs(d - center) for d in diffs)
+    mad = median(deviations)
+    if mad > 0:
+        return 1.4826 * mad / sqrt(2)
+    kept = deviations[: ceil(len(deviations) * (1 - TRIM))]
+    return sqrt(fmean(d * d for d in kept)) / sqrt(2)
 
 
 def _smooth(
@@ -231,92 +259,144 @@ def _smooth(
     beta: float,
     limit: float | None = None,
     trust_last: bool = False,
-) -> tuple[float, float, list[float]]:
-    """Recorre la serie con (α, β) y devuelve (nivel, tendencia, errores a un paso).
+) -> tuple[float, float, list[float], list[bool]]:
+    """Recorre la serie con (α, β): (nivel, tendencia, errores a un paso, ¿confirmados?).
 
-    Con ``limit``, el error que actualiza la tendencia se recorta a ±``limit``: un salto
-    aislado mueve el nivel (según α) pero no se convierte en una tendencia desbocada.
-    El nivel sigue al dato sin recorte salvo en la última medición, que aún no está
-    confirmada por otra (a no ser que ``trust_last``: continúa una racha).
+    Con ``limit``, un error mayor es un salto y solo cuenta si se confirma: si la medición
+    siguiente también es un salto hacia el mismo lado y queda más cerca del valor nuevo
+    que de lo que se esperaba. Confirmado, el
+    nivel pasa al valor nuevo y la tendencia aprende del error recortado a ±``limit``. Sin
+    confirmar (un valor suelto), el nivel se mueve como mucho α·``limit`` y la tendencia
+    no cambia. La última medición no tiene siguiente: solo se confía en ella con
+    ``trust_last`` (continúa una racha o se ha repetido).
     """
     m = min(len(y), INIT_POINTS)
     level = y[0]
     trend = (y[m - 1] - y[0]) / (m - 1) if m > 1 else 0.0
     errors: list[float] = []
+    accepted: list[bool] = []
     last = len(y) - 1
     for i in range(1, len(y)):
         predicted = level + PHI * trend
         error = y[i] - predicted
         clipped = error if limit is None else _clamp(error, -limit, limit)
-        level = predicted + alpha * (clipped if i == last and not trust_last else error)
-        trend = PHI * trend + beta * clipped
+        if clipped == error:
+            confirmed = True  # dentro de lo habitual
+        elif i < last:
+            # La siguiente también queda lejos de lo esperado, por el mismo lado, y más
+            # cerca del valor nuevo que de lo que se esperaba.
+            ahead = y[i + 1] - predicted
+            same_side = ahead * error > 0 and abs(ahead) > limit
+            confirmed = same_side and abs(y[i + 1] - y[i]) < abs(ahead)
+        else:
+            confirmed = trust_last
+        if clipped == error:
+            level = predicted + alpha * error
+        elif confirmed:
+            level = y[i]  # un cambio real: el nivel se va al valor nuevo, no a medio camino
+        else:
+            level = predicted + alpha * clipped
+        trend = PHI * trend + (beta * clipped if confirmed else 0.0)
         errors.append(error)
-    return level, trend, errors
+        accepted.append(confirmed)
+    return level, trend, errors, accepted
 
 
-def _huber(error: float, limit: float | None) -> float:
-    """Pérdida de Huber: cuadrática hasta ``limit`` y lineal a partir de ahí."""
+def _loss(error: float, limit: float | None, confirmed: bool = True) -> float:
+    """Lo que pesa un error al elegir α y β.
+
+    Dentro del límite, su cuadrado. Un salto confirmado (un cambio real) crece de forma
+    lineal (Huber): sigue ganando el ajuste que se adapta antes, sin que un cambio grande
+    lo decida todo. Un salto sin confirmar (un valor suelto) cuenta como el límite, por
+    grande que sea: ningún ajuste gana por haberse acercado a él por azar.
+    """
     size = abs(error)
     if limit is None or size <= limit:
         return size * size
-    return limit * (2 * size - limit)
+    return limit * (2 * size - limit) if confirmed else limit * limit
 
 
-def _fit(y: Sequence[float], noise_floor: float = 0.0, trust_last: bool = False) -> _Fit:
-    """(α, β) de la rejilla con menos error a un paso (Huber), ponderado por recencia.
+def _fit(y: Sequence[float], limit: float | None = None, trust_last: bool = False) -> _Fit:
+    """(α, β) de la rejilla con menos error a un paso (``_loss``), ponderado por recencia.
 
     El último error pesa 1 y cada paso hacia atrás, ``DISCOUNT`` veces el siguiente.
-    ``noise_floor`` es el error de redondeo de la medida: el ruido estimado no baja de ahí.
     Recorre la rejilla en orden y solo cambia por una mejora real: con empate gana el
     modelo más suave (menos α y menos β), y el resultado es determinista.
     """
-    noise = max(_noise(y), noise_floor)
-    limit = OUTLIER_SIGMAS * noise if noise > 0 else None
     weights = [DISCOUNT ** (len(y) - 2 - i) for i in range(len(y) - 1)]
     best: _Fit | None = None
     for alpha in ALPHAS:
         for ratio in BETA_RATIOS:
             beta = alpha * ratio
-            level, trend, errors = _smooth(y, alpha, beta, limit, trust_last)
-            loss = sum(w * _huber(e, limit) for w, e in zip(weights, errors, strict=True))
+            level, trend, errors, accepted = _smooth(y, alpha, beta, limit, trust_last)
+            loss = sum(
+                w * _loss(e, limit, ok)
+                for w, e, ok in zip(weights, errors, accepted, strict=True)
+            )
             if best is None or loss < best.loss - 1e-9 * max(1.0, best.loss):
-                unusual = not trust_last and noise > 0 and abs(errors[-1]) > UNUSUAL_SIGMAS * noise
-                best = _Fit(alpha, beta, level, trend, tuple(errors), loss, unusual)
+                best = _Fit(alpha, beta, level, trend, tuple(errors), loss)
     assert best is not None  # la rejilla nunca está vacía
     return best
 
 
-def _run_pace(y: Sequence[float], observed: Sequence[bool]) -> float:
-    """Ritmo por paso de la racha final, o 0 si no hay racha.
+def _run_pace(
+    y: Sequence[float], observed: Sequence[bool], limit: float | None = None
+) -> tuple[float, bool]:
+    """(ritmo por paso de la racha final, ¿la continúa la última medición?). Sin racha, 0.
 
     Racha = los últimos ``RUN_MOVES`` o más cambios entre días **con mediciones** van todos
-    en la misma dirección. Su ritmo es la mediana de esos cambios (por paso).
+    en la misma dirección. Su ritmo es la mediana de esos cambios (por paso). Si el último
+    cambio se aparta de ese ritmo más que ``limit`` es un salto, no parte de la racha: la
+    racha tiene que sostenerse sin él y la última medición queda sin confirmar.
     """
     real = [(i, value) for i, (value, seen) in enumerate(zip(y, observed, strict=True)) if seen]
     moves = [(b[1] - a[1]) / (b[0] - a[0]) for a, b in pairwise(real)]
     if not moves or moves[-1] == 0:
-        return 0.0
+        return 0.0, False
     rising = moves[-1] > 0
-    run: list[float] = []
+    run: list[float] = []  # del más reciente al más antiguo
     for move in reversed(moves):
         if move == 0 or (move > 0) != rising:
             break
         run.append(move)
-    return median(run) if len(run) >= RUN_MOVES else 0.0
+    if len(run) >= RUN_MOVES and (limit is None or abs(run[0] - median(run)) <= limit):
+        return median(run), True
+    if len(run) > RUN_MOVES:
+        return median(run[1:]), False
+    return 0.0, False
 
 
-def _model(y: Sequence[float], observed: Sequence[bool], noise_floor: float = 0.0) -> _Fit:
+def _model(
+    y: Sequence[float],
+    observed: Sequence[bool],
+    quantum: float = 0.0,
+    last_readings: Sequence[float] = (),
+) -> _Fit:
     """Modelo completo: el ajuste de Holt y, si hay racha, su ritmo como tendencia mínima.
 
-    Con racha, la última medición la continúa: se da por confirmada (``trust_last``).
+    ``quantum`` es el paso de la medida (``input.step``): el ruido estimado no baja de su
+    error de redondeo (``quantum``/√12). La última medición se da por confirmada si continúa
+    una racha a su ritmo o si se ha repetido: ``last_readings`` son las dos últimas lecturas
+    y, si coinciden (dentro del ruido habitual), se confirman entre sí. Si no, y se aparta
+    mucho de lo esperado, queda marcada como inusual.
     """
-    pace = _run_pace(y, observed)
-    fit = _fit(y, noise_floor, trust_last=pace != 0)
-    if pace > 0:
-        return replace(fit, trend=max(fit.trend, pace))
-    if pace < 0:
-        return replace(fit, trend=min(fit.trend, pace))
-    return fit
+    noise = max(_noise(y), quantum / sqrt(12))
+    limit = OUTLIER_SIGMAS * noise if noise > 0 else None
+    pace, trusted = _run_pace(y, observed, limit)
+    if len(last_readings) >= 2 and limit is not None:
+        trusted = trusted or max(last_readings) - min(last_readings) <= limit
+    fit = _fit(y, limit, trust_last=trusted)
+    trend = max(fit.trend, pace) if pace > 0 else min(fit.trend, pace) if pace < 0 else fit.trend
+    # Con racha que la última medición continúa, la previsión parte de ese valor: el nivel
+    # suavizado va por detrás de una serie que se mueve siempre en la misma dirección.
+    level = y[-1] if pace != 0 and trusted else fit.level
+    # Inusual = muy lejos de lo esperado frente a lo que el modelo suele fallar con esta
+    # persona (sus errores anteriores) y frente al ruido de la serie; y más de un paso y
+    # medio de la escala, para no marcar el cambio mínimo posible.
+    typical = sqrt(fmean(e * e for e in fit.errors[:-1])) if len(fit.errors) > 1 else 0.0
+    threshold = max(UNUSUAL_SIGMAS * max(noise, typical), UNUSUAL_STEPS * quantum)
+    unusual = not trusted and noise > 0 and abs(fit.errors[-1]) > threshold
+    return replace(fit, level=level, trend=trend, unusual=unusual)
 
 
 def _sigma(
@@ -360,7 +440,7 @@ def _project(fit: _Fit, sigma: float, steps: int) -> list[tuple[float, float]]:
 def _backtest(
     y: Sequence[float],
     observed: Sequence[bool],
-    noise_floor: float = 0.0,
+    quantum: float = 0.0,
     lo: float | None = None,
     hi: float | None = None,
 ) -> float | None:
@@ -374,7 +454,7 @@ def _backtest(
     for i in range(max(MIN_POINTS, len(y) - BACKTEST_POINTS), len(y)):
         if not (observed[i] and observed[i - 1]) or sum(observed[:i]) < MIN_POINTS:
             continue
-        fit = _model(y[:i], observed[:i], noise_floor)
+        fit = _model(y[:i], observed[:i], quantum)
         errors.append(abs(y[i] - _clamp(fit.level + PHI * fit.trend, lo, hi)))
     return round(fmean(errors), DECIMALS) if errors else None
 
@@ -432,7 +512,17 @@ def build_forecast(
     current = classify(last_value, ranges)
 
     shift = _day_shift(points)
-    days = daily_means([(t + shift, v) for t, v in points])
+    shifted = [(t + shift, v) for t, v in points]
+    days = daily_means(shifted)
+    # Quien suele medirse varias veces al día: mientras al último día le falten lecturas,
+    # su media no es comparable con la de los días completos y queda fuera del ajuste.
+    readings = Counter(t.date() for t, _ in shifted)
+    usual = median_low(readings.values())
+    pending = 1 if len(days) > 1 and readings[days[-1][0]] < usual else 0
+    if pending:
+        days = days[:-1]
+    if len(days) > 1 and readings[days[0][0]] < usual:
+        days = days[1:]  # lo mismo con un primer día a medias
     if len(days) < 2:
         return result(ForecastStatus.insufficient_data, current, history_days=len(days))
     step = median_low([(b[0] - a[0]).days for a, b in pairwise(days)])
@@ -441,12 +531,12 @@ def build_forecast(
     # Días reales suficientes y que sean mayoría: una serie casi toda interpolada (p. ej.
     # al pasar de medir cada semana a cada día) no es base para prever.
     if sum(observed) < MIN_POINTS or 2 * sum(observed) < len(y):
-        return result(ForecastStatus.insufficient_data, current, history_days=sum(observed))
+        return result(ForecastStatus.insufficient_data, current, history_days=len(days))
 
     input_spec = _as_dict(ind.get("input"))
-    rounding = (input_spec.get("step") or 0) / sqrt(12)  # error de redondeo de la medida
-    fit = _model(y, observed, rounding)
-    sigma, dof = _sigma(fit.errors, observed, rounding)
+    quantum = input_spec.get("step") or 0.0  # resolución de la medida
+    fit = _model(y, observed, quantum, last_readings=[v for _, v in points[-2:]])
+    sigma, dof = _sigma(fit.errors, observed, quantum / sqrt(12))
     quantile = _quantile(dof)
 
     # Pasos hasta cubrir el horizonte desde AHORA (el último dato puede ser de ayer).
@@ -462,7 +552,9 @@ def build_forecast(
     cumulative = 2 * rises >= len(y) - 1 and all(b >= a for a, b in pairwise(y))
     floor = y[-1]
     forecast_points: list[ForecastPoint] = []
-    for h, (value, deviation) in enumerate(_project(fit, sigma, steps), start=1):
+    # Con el último día fuera del ajuste, el primer paso del modelo es ese mismo día.
+    projection = _project(fit, sigma, steps + pending)[pending:]
+    for h, (value, deviation) in enumerate(projection, start=1):
         if cumulative:
             value = floor = max(value, floor)
         value = _clamp(value, lo, hi)
@@ -480,8 +572,10 @@ def build_forecast(
             )
         )
 
+    # Con la última medición sin confirmar no se anuncia ningún cambio: el estado actual
+    # sale de ese valor y la previsión, de lo que había antes.
     change = None
-    if current != Status.unknown:
+    if current != Status.unknown and not fit.unusual:
         first = next((p for p in forecast_points if p.status != current), None)
         if first is not None:
             change = ForecastChange(
@@ -498,7 +592,7 @@ def build_forecast(
         history_days=sum(observed),
         points=forecast_points,
         change=change,
-        backtest_mae=_backtest(y, observed, rounding, lo, hi),
+        backtest_mae=_backtest(y, observed, quantum, lo, hi),
         last_value_unusual=fit.unusual,
     )
 
