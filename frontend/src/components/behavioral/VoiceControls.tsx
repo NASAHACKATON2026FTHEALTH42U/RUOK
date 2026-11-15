@@ -52,7 +52,7 @@ export function VoiceToggle({
       }}
       title={`Voz guía. ${VOICE_NOTE}`}
       className={`inline-flex shrink-0 items-center gap-2 rounded-lg border ${FOCUS} ${
-        compact ? 'size-10 justify-center' : 'min-h-10 px-3 text-sm'
+        compact ? 'size-11 justify-center' : 'min-h-11 px-3 text-sm'
       } ${
         on
           ? 'border-env-primary bg-env-primary/15 text-env-text'
@@ -127,7 +127,7 @@ export function ListenButton({
       aria-pressed={playing}
       title={`${playing ? 'Parar la voz' : label}. ${VOICE_NOTE}`}
       className={`inline-flex shrink-0 items-center gap-1.5 rounded-md border text-sm ${FOCUS} ${
-        iconOnly ? 'size-9 justify-center' : 'min-h-9 px-2.5'
+        iconOnly ? 'size-11 justify-center' : 'min-h-11 px-3'
       } ${
         playing
           ? 'border-env-primary bg-env-primary/15 text-env-text'

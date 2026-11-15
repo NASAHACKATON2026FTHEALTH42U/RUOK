@@ -237,7 +237,7 @@ export function AlertDetail({
                     <select
                       value={target}
                       onChange={(e) => setTarget(e.target.value)}
-                      className="mt-1 border border-env-border bg-env-surface px-2 py-1.5 text-env-text"
+                      className="mt-1 block min-h-11 border border-env-border bg-env-surface px-3 text-env-text"
                     >
                       {targets.map((r, i) => (
                         <option key={r} value={r}>
@@ -251,7 +251,7 @@ export function AlertDetail({
                     type="button"
                     disabled={busy}
                     onClick={() => act(() => escalateAlert(alert.id, target || null))}
-                    className="bg-env-primary px-4 py-2 font-medium text-env-primary-text disabled:opacity-60"
+                    className="min-h-11 bg-env-primary px-4 font-medium text-env-primary-text disabled:opacity-60"
                   >
                     ⇡ Escalar
                   </button>

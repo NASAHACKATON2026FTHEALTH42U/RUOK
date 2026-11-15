@@ -219,7 +219,7 @@ export default function Ground() {
                       if (resolvedOpen && current?.status === 'resolved') setSelected(null)
                       setShowResolved(!resolvedOpen)
                     }}
-                    className="w-full px-3.5 py-2.5 text-left text-sm text-env-muted hover:text-env-text"
+                    className="w-full min-h-11 px-3.5 py-2.5 text-left text-sm text-env-muted hover:text-env-text"
                   >
                     {resolvedOpen ? '▾' : '▸'} Resueltas ({resolved.length})
                   </button>

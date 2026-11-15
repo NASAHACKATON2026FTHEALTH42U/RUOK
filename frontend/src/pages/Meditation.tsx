@@ -202,7 +202,7 @@ export default function Meditation() {
                   setTimerMin(m)
                   if (playing) setEndsAt(m ? Date.now() + m * 60_000 : null)
                 }}
-                className="rounded-md border border-env-border bg-env-surface px-2 py-1.5 text-env-text"
+                className="min-h-11 border border-env-border bg-env-surface px-3 text-env-text"
               >
                 {TIMER_OPTIONS.map((m) => (
                   <option key={m} value={m}>

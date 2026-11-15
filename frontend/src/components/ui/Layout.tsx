@@ -59,7 +59,7 @@ export function Layout() {
   const logo = (
     <NavLink
       to={role ? homeFor(role) : '/'}
-      className="shrink-0 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-env-primary"
+      className="inline-flex min-h-11 shrink-0 items-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-env-primary"
       aria-label="R U OK?: inicio"
     >
       <RuokMark />

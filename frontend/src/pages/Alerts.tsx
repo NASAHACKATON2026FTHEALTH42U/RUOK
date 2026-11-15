@@ -200,7 +200,7 @@ export default function Alerts() {
                     type="button"
                     aria-expanded={showResolved}
                     onClick={() => setShowResolved((v) => !v)}
-                    className="flex w-full items-center justify-between gap-2 px-3.5 py-2.5 text-left text-sm text-env-muted hover:text-env-text"
+                    className="flex w-full items-center justify-between gap-2 min-h-11 px-3.5 py-2.5 text-left text-sm text-env-muted hover:text-env-text"
                   >
                     <span>
                       {showResolved ? '▾' : '▸'} Resueltas ({resolved.length})
