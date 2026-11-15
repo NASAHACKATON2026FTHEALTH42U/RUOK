@@ -1,13 +1,13 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import {
   useId,
-  useRef,
   useState,
   type FocusEvent,
   type KeyboardEvent,
   type PointerEvent,
   type ReactNode,
 } from 'react'
+import { createPortal } from 'react-dom'
 import xrayHuman from '../../assets/xray-human.webp'
 import { STATUS_COLORS, statusStyle, type Liveness } from '../ui/status'
 import { StatusBadge } from '../ui/StatusBadge'
@@ -27,6 +27,17 @@ interface BodyFigureProps {
   onHoverSystem?: (systemId: string | null) => void
   /** Leyenda de sistemas debajo de la figura (por defecto, sí). */
   showLegend?: boolean
+  /**
+   * Parte de la figura que se ve, desde arriba (1 = entera). Con 0.71 se corta por las rodillas:
+   * todas las zonas que se pueden pulsar siguen dentro (las piernas, de los huesos, se pulsan
+   * por los muslos).
+   */
+  crop?: number
+  /**
+   * Se encaja en su contenedor (lo más grande posible sin deformarse) en vez de un ancho máximo
+   * fijo. El contenedor tiene que ser de tamaño (`container-type: size`).
+   */
+  fill?: boolean
 }
 
 interface Tooltip {
@@ -64,12 +75,13 @@ export function BodyFigure({
   hoveredSystemId,
   onHoverSystem,
   showLegend = true,
+  crop = 1,
+  fill = false,
 }: BodyFigureProps) {
   const uid = useId().replace(/:/g, '')
   const stripes = `stripes-${uid}`
   const glow = `glow-${uid}`
   const critical = `critical-${uid}`
-  const boxRef = useRef<HTMLDivElement>(null)
   const [tooltip, setTooltip] = useState<Tooltip | null>(null)
   // Zona señalada (ratón, foco de teclado o su botón de la leyenda): se ilumina y el resto se atenúa.
   const [ownHovered, setOwnHovered] = useState<string | null>(null)
@@ -90,20 +102,13 @@ export function BodyFigure({
   const auraLit = !!radiation && hovered === radiation.systemId
   const aura = auraLit ? { scale: baseAura.scale * 1.12, opacity: 1 } : baseAura
 
+  // Coordenadas de la ventana: el cartel va en un portal, fuera del panel que recorta la figura.
   const showTooltip = (region: RegionState, target: Element) => {
-    const box = boxRef.current?.getBoundingClientRect()
     const el = target.getBoundingClientRect()
-    if (!box) return
     // Inmune (ganglios repartidos por el cuerpo): el cartel va a la derecha, no encima.
     if (region.region === 'immune')
-      setTooltip({
-        region,
-        x: el.right - box.left + 10,
-        y: el.top + el.height / 2 - box.top,
-        side: 'right',
-      })
-    else
-      setTooltip({ region, x: el.left + el.width / 2 - box.left, y: el.top - box.top, side: 'top' })
+      setTooltip({ region, x: el.right + 10, y: el.top + el.height / 2, side: 'right' })
+    else setTooltip({ region, x: el.left + el.width / 2, y: el.top, side: 'top' })
   }
 
   /** Relleno de una región: color del estado, o rayado gris si no hay datos fiables. */
@@ -326,19 +331,36 @@ export function BodyFigure({
     ],
   ]
 
-  return (
-    <div className="flex flex-col items-center gap-4">
-      {stale && <StatusBadge status={liveness === 'lost' ? 'lost' : 'stale'} label={staleLabel} />}
+  // Alto visible de la imagen (887 × 1774) según el recorte.
+  const viewH = Math.round(1774 * crop * 10) / 10
 
-      {/* Hasta 300 px de ancho, y menos en pantallas bajas (la figura mide el doble de alto) para
-          que el panel quepa sin scroll con las fases de la misión debajo. El panel puede fijar
-          otro máximo con la variable CSS `--body-max`. */}
+  return (
+    <div
+      className={
+        fill
+          ? 'relative flex h-full w-full items-center justify-center'
+          : 'flex flex-col items-center gap-4'
+      }
+    >
+      {stale && (
+        <div className={fill ? 'absolute top-3 left-3 z-10' : undefined}>
+          <StatusBadge status={liveness === 'lost' ? 'lost' : 'stale'} label={staleLabel} />
+        </div>
+      )}
+
+      {/* Con `fill`, lo más grande que quepa en el contenedor sin deformarse (unidades de
+          contenedor) y centrada. Si no, hasta 300 px de ancho y menos en pantallas bajas (la figura
+          mide el doble de alto); el contenedor puede fijar otro máximo con `--body-max`. */}
       <div
-        ref={boxRef}
-        className="relative w-full"
-        style={{
-          maxWidth: 'var(--body-max, min(300px, max(220px, calc((100vh - 350px) / 2))))',
-        }}
+        className={fill ? 'relative' : 'relative w-full'}
+        style={
+          fill
+            ? {
+                aspectRatio: `887 / ${viewH}`,
+                width: `min(100cqw, calc(100cqh * ${(887 / viewH).toFixed(4)}))`,
+              }
+            : { maxWidth: 'var(--body-max, min(300px, max(220px, calc((100vh - 350px) / 2))))' }
+        }
       >
         {/* Aura de luz amarilla detrás del cuerpo, con un latido suave (degradado CSS, sin
             imágenes). Respeta "reducir movimiento"; sin datos fiables se apaga a gris y no late. */}
@@ -363,10 +385,13 @@ export function BodyFigure({
             !pulse ? { duration: 0.4 } : { duration: 4, repeat: Infinity, ease: 'easeInOut' }
           }
         />
-        {/* Coordenadas en píxeles de la imagen original (887 × 1774). */}
+        {/* Coordenadas en píxeles de la imagen original (887 × 1774). Recortada, lo que queda
+            por debajo no se pinta ni se puede pulsar. */}
         <svg
-          viewBox="0 0 887 1774"
-          className="relative h-auto w-full overflow-visible"
+          viewBox={`0 0 887 ${viewH}`}
+          className={`relative w-full ${fill ? 'h-full' : 'h-auto'} ${
+            crop < 1 ? 'overflow-hidden' : 'overflow-visible'
+          }`}
           role="group"
           aria-label="Estado por sistema del cuerpo"
         >
@@ -460,27 +485,29 @@ export function BodyFigure({
           </g>
         </svg>
 
-        {tooltip && (
-          <div
-            role="tooltip"
-            className={`pointer-events-none absolute z-10 rounded-lg border border-env-border bg-env-bg px-3 py-2 text-sm whitespace-nowrap shadow-lg ${
-              tooltip.side === 'right' ? '-translate-y-1/2' : '-translate-x-1/2 -translate-y-full'
-            }`}
-            style={{ left: tooltip.x, top: tooltip.side === 'right' ? tooltip.y : tooltip.y - 6 }}
-          >
-            <p className="font-medium whitespace-nowrap">{tooltip.region.name}</p>
-            <StatusBadge
-              status={stale ? 'stale' : tooltip.region.status}
-              size="sm"
-              className="mt-1"
-            />
-            {stale && (
-              <p className="mt-1 text-xs whitespace-nowrap text-env-muted">
-                Último conocido: {statusStyle(tooltip.region.status).label}
-              </p>
-            )}
-          </div>
-        )}
+        {tooltip &&
+          createPortal(
+            <div
+              role="tooltip"
+              className={`pointer-events-none fixed z-50 rounded-lg border border-env-border bg-env-bg px-3 py-2 text-sm whitespace-nowrap shadow-lg ${
+                tooltip.side === 'right' ? '-translate-y-1/2' : '-translate-x-1/2 -translate-y-full'
+              }`}
+              style={{ left: tooltip.x, top: tooltip.side === 'right' ? tooltip.y : tooltip.y - 6 }}
+            >
+              <p className="font-medium whitespace-nowrap">{tooltip.region.name}</p>
+              <StatusBadge
+                status={stale ? 'stale' : tooltip.region.status}
+                size="sm"
+                className="mt-1"
+              />
+              {stale && (
+                <p className="mt-1 text-xs whitespace-nowrap text-env-muted">
+                  Último conocido: {statusStyle(tooltip.region.status).label}
+                </p>
+              )}
+            </div>,
+            document.body,
+          )}
       </div>
 
       {showLegend && (

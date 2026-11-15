@@ -180,8 +180,7 @@ export default function Dashboard() {
     )
 
   return (
-    // Ocupa el alto disponible (Layout `fill`): en tableta y escritorio el bloque se centra en
-    // vertical y, si no cabe, la página hace scroll como siempre (`my-auto` no corta nada).
+    // Ocupa el alto disponible (Layout `fill`): en tableta y escritorio, la rejilla llena el hueco.
     <section className="flex min-h-0 flex-1 flex-col gap-4">
       {/* `contents`: sin hueco arriba cuando no hay nada que avisar (en escritorio va todo arriba). */}
       <header className="contents">
@@ -208,14 +207,35 @@ export default function Dashboard() {
         onSelectSystem={setSelected}
       />
 
-      {/* Tableta y escritorio, sin scroll. Tableta (768–1023 px): el cuerpo a la izquierda y, a
-          la derecha, los indicadores y debajo los sistemas. Desde 1024 px, tres columnas
-          centradas en vertical: sistemas | cuerpo | indicadores. Debajo, la fase de la misión
-          a todo el ancho y en una línea. Los indicadores van en celdas (2 por fila, 3 desde
-          1280 px): 16 indicadores ocupan 6–8 filas en vez de 16. */}
-      <div className="hidden md:my-auto md:flex md:flex-col md:gap-4">
-        <div className="grid gap-3 md:grid-cols-[150px_minmax(0,1fr)] lg:grid-cols-[190px_auto_minmax(0,1fr)] lg:items-center lg:gap-x-5 xl:grid-cols-[220px_auto_minmax(0,1fr)] xl:gap-x-6">
-          <div className="md:row-span-2 md:self-center lg:col-start-2 lg:row-span-1 lg:row-start-1 lg:max-xl:[--body-max:min(200px,max(170px,calc((100vh-300px)/2)))]">
+      {/* Tableta y escritorio: ocupa todo el hueco, sin scroll (rejilla `.dash-grid` en index.css).
+          Estrecho: arriba el cuerpo y los sistemas, abajo los indicadores. Ancho: sistemas |
+          cuerpo | indicadores. El cuerpo va en su panel, recortado por las rodillas (ahí están
+          todas las zonas que se pueden pulsar). Las celdas reparten el alto
+          y su texto crece con el espacio; si no caben, la lista hace scroll dentro del panel. */}
+      <div className="dash-fill hidden min-h-0 flex-1 overflow-hidden md:block">
+        <div className="dash-grid">
+          <section
+            aria-labelledby="dash-systems"
+            className="hud-panel @container flex min-h-0 min-w-0 flex-col [grid-area:systems]"
+          >
+            <h2 id="dash-systems" className="hud-panel-head">
+              Sistemas
+            </h2>
+            <BodyLegend
+              regions={regions}
+              stale={stale}
+              selectedSystemId={selected}
+              onSelectSystem={setSelected}
+              onHoverSystem={setHovered}
+              className="-mr-px -mb-px min-h-0 flex-1 auto-rows-[minmax(2.75rem,1fr)] grid-cols-1 overflow-y-auto @min-[26rem]:grid-cols-2"
+              rows
+            />
+          </section>
+
+          <section
+            aria-label="Cuerpo"
+            className="hud-panel min-h-0 min-w-0 [container-type:size] [grid-area:body]"
+          >
             <BodyFigure
               regions={regions}
               liveness={a.liveness}
@@ -225,25 +245,27 @@ export default function Dashboard() {
               hoveredSystemId={hovered}
               onHoverSystem={setHovered}
               showLegend={false}
+              crop={0.71}
+              fill
             />
-          </div>
+          </section>
 
           <section
             aria-labelledby="dash-indicators"
-            className="hud-panel min-w-0 md:col-start-2 md:row-start-1 lg:col-start-3"
+            className="hud-panel @container flex min-h-0 min-w-0 flex-col [grid-area:indicators]"
           >
             <h2 id="dash-indicators" className="hud-panel-head">
-              <b>IND.02</b>Indicadores
+              Indicadores
             </h2>
             {cards.length === 0 ? (
               <p className="px-3.5 py-3 text-sm text-env-muted">Todavía no hay mediciones.</p>
             ) : (
               // Celdas separadas por líneas; las del borde se esconden bajo el marco del panel.
-              <ul className="-mr-px -mb-px grid grid-cols-2 xl:grid-cols-3">
+              <ul className="-mr-px -mb-px grid min-h-0 flex-1 auto-rows-[minmax(3.75rem,1fr)] grid-cols-2 overflow-y-auto @min-[30rem]:grid-cols-3 @min-[44rem]:grid-cols-4">
                 {cards.map(({ systemId, ind }) => (
                   <li
                     key={`${systemId}-${ind.indicator_id}`}
-                    className="border-r border-b border-env-border/60"
+                    className="dash-cell border-r border-b border-env-border/60"
                   >
                     <IndicatorCard
                       indicator={ind}
@@ -258,24 +280,6 @@ export default function Dashboard() {
                 ))}
               </ul>
             )}
-          </section>
-
-          <section
-            aria-labelledby="dash-systems"
-            className="hud-panel min-w-0 md:col-start-2 md:row-start-2 lg:col-start-1 lg:row-start-1"
-          >
-            <h2 id="dash-systems" className="hud-panel-head">
-              <b>SYS.01</b>Sistemas
-            </h2>
-            <BodyLegend
-              regions={regions}
-              stale={stale}
-              selectedSystemId={selected}
-              onSelectSystem={setSelected}
-              onHoverSystem={setHovered}
-              className="-mr-px -mb-px grid-cols-2 lg:grid-cols-1"
-              rows
-            />
           </section>
         </div>
       </div>

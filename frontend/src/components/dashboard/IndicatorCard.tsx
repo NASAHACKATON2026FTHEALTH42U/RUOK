@@ -71,19 +71,21 @@ export function IndicatorCard({
       </span>
     </span>
   )
+  // Celda del panel: nombre y valor agrupados y centrados; los dos crecen con el tamaño de la
+  // celda (`dash-tile-*` en index.css, con unidades de contenedor).
   const tileBody = (
-    <span className="flex h-full flex-col justify-between gap-1" title={stateLabel}>
-      <span className="text-xs leading-snug text-env-muted">
+    <span className="flex h-full flex-col justify-center gap-[0.35em]" title={stateLabel}>
+      <span className="dash-tile-label text-env-muted">
         {name ?? indicator.indicator_id}
         {provisional && !stale && <span aria-hidden> ⇡</span>}
       </span>
-      <span className="flex items-center gap-1.5">
+      <span className="dash-tile-value flex items-center gap-[0.3em] font-semibold tabular-nums">
         {/* Símbolo de estado (forma, no solo color) y su texto para lectores de pantalla. */}
-        <StatusIcon glyph={st.glyph} color={st.color} size={16} />
-        <span className="sr-only">{stateLabel}:</span>
-        <span className="text-lg leading-tight font-semibold tabular-nums">
-          {formatValue(indicator.last_value, indicator.unit)}
+        <span aria-hidden className="dash-tile-icon flex">
+          <StatusIcon glyph={st.glyph} color={st.color} size={16} />
         </span>
+        <span className="sr-only">{stateLabel}:</span>
+        <span>{formatValue(indicator.last_value, indicator.unit)}</span>
       </span>
     </span>
   )
@@ -119,7 +121,7 @@ export function IndicatorCard({
   )
   // La celda no lleva borde propio: la rejilla del panel dibuja las líneas.
   const cls = tile
-    ? 'block h-full w-full px-3 py-2 text-left'
+    ? 'block h-full w-full px-[clamp(0.75rem,7cqw,1.5rem)] py-[clamp(0.375rem,7cqh,1rem)] text-left'
     : `block w-full rounded-lg border border-env-border bg-env-surface text-left ${
         compact ? 'px-3 py-2' : 'p-3'
       }`
