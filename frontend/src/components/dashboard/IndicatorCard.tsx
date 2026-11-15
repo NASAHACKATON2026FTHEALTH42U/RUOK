@@ -28,7 +28,7 @@ interface IndicatorCardProps {
    */
   compact?: boolean
   /**
-   * Celda de la rejilla de indicadores del panel (`IND.02`): el nombre arriba y, debajo, el
+   * Celda de la rejilla de indicadores del panel («Indicadores»): el nombre arriba y, debajo, el
    * símbolo de estado y el valor. Misma información que `compact` en menos ancho, para que
    * caben dos o tres por fila.
    */

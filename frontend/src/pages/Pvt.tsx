@@ -125,9 +125,9 @@ export default function Pvt() {
 
   if (phase.kind === 'intro') {
     return (
-      <section className="mx-auto max-w-xl space-y-4">
+      <section className="mx-auto my-auto w-full max-w-xl space-y-4 lg:max-w-3xl lg:space-y-6">
         {title}
-        <div className="space-y-2 rounded-xl border border-env-border bg-env-surface p-4 text-sm">
+        <div className="space-y-2 rounded-xl border border-env-border bg-env-surface p-4 text-sm lg:space-y-3 lg:p-6 lg:text-lg">
           <p>Mide tu tiempo de reacción, un marcador objetivo de fatiga.</p>
           <ol className="list-decimal space-y-1 pl-5">
             <li>La pantalla espera un rato al azar (entre 2 y 10 s).</li>
@@ -143,7 +143,12 @@ export default function Pvt() {
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {(Object.keys(PVT_MODES) as PvtMode[]).map((m) => (
-            <button key={m} type="button" onClick={() => start(m)} className={btnPrimary}>
+            <button
+              key={m}
+              type="button"
+              onClick={() => start(m)}
+              className={`${btnPrimary} lg:min-h-16 lg:text-lg`}
+            >
               {PVT_MODES[m].label} · {PVT_MODES[m].short}
             </button>
           ))}
@@ -157,7 +162,7 @@ export default function Pvt() {
   const lapsesName = indicators.pvt_lapses?.name ?? 'Lapsos'
 
   return (
-    <section className="mx-auto max-w-xl space-y-4">
+    <section className="mx-auto my-auto w-full max-w-xl space-y-4 lg:max-w-3xl lg:space-y-6">
       <h1 className="text-2xl font-semibold">
         {phase.kind === 'sent'
           ? 'Test guardado'

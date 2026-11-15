@@ -4,7 +4,7 @@ import type { RegionState } from '../body/regions'
 
 /**
  * Panel principal en móvil con el estilo HUD (maqueta `Main`, docs/design/hud-style.md §6):
- * saludo, anillo con un arco por sistema (color por estado) y la lista `SYS.01`.
+ * saludo, anillo con un arco por sistema (color por estado) y la lista de sistemas.
  * Sin datos = arco apagado (`hud-dim`), nunca en el color nominal. Tocar una fila abre el
  * detalle del sistema (el mismo `SystemPanel` del escritorio).
  */
@@ -118,7 +118,7 @@ export function SystemsRing({ regions, stale, name, env, now, onSelectSystem }: 
   return (
     <div className="flex flex-col gap-1 md:hidden">
       <div>
-        <h1 className="text-[28px] leading-tight font-light tracking-[-0.01em]">
+        <h1 className="text-[1.75rem] leading-tight font-light tracking-[-0.01em]">
           {greeting(now)}
           {name ? (
             <>
@@ -229,7 +229,7 @@ export function SystemsRing({ regions, stale, name, env, now, onSelectSystem }: 
 
       <section className="hud-panel" aria-label="Sistemas del cuerpo">
         <div className="hud-panel-head">
-          <b>SYS.01</b>Sistemas
+          Sistemas
           <span
             className={`hud-chip ${crit ? 'text-st-crit' : warn ? 'text-st-warn' : 'text-st-ok'}`}
           >
@@ -250,7 +250,7 @@ export function SystemsRing({ regions, stale, name, env, now, onSelectSystem }: 
                   aria-label={`${r.name}: ${s.label}. Ver detalle`}
                 >
                   <span
-                    className={`w-[30px] font-mono text-[11px] ${r.status === 'normal' ? 'text-env-muted' : ST_CLASS[r.status]}`}
+                    className={`w-[30px] font-mono text-[0.75rem] ${r.status === 'normal' ? 'text-env-muted' : ST_CLASS[r.status]}`}
                   >
                     S-{String(i + 1).padStart(2, '0')}
                   </span>
@@ -262,7 +262,7 @@ export function SystemsRing({ regions, stale, name, env, now, onSelectSystem }: 
                     <i style={{ width: `${BAR[r.status]}%` }} />
                   </span>
                   <span
-                    className={`w-[72px] shrink-0 text-right font-mono text-[10px] tracking-[0.08em] uppercase ${ST_CLASS[r.status]}`}
+                    className={`w-[72px] shrink-0 text-right font-mono text-[0.6875rem] tracking-[0.08em] uppercase ${ST_CLASS[r.status]}`}
                   >
                     {r.status === 'normal' ? 'Nominal' : s.label}
                   </span>

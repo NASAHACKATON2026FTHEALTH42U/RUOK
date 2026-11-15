@@ -87,7 +87,7 @@ export default function Earth() {
             <p className="line-clamp-2 text-xs" title={photo.caption}>
               {photo.caption}
             </p>
-            <p className="mt-0.5 text-[11px] text-env-muted">
+            <p className="mt-0.5 text-[0.75rem] text-env-muted">
               {photo.date} · {PHOTO_CREDIT}
             </p>
           </figcaption>

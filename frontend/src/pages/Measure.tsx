@@ -2,6 +2,7 @@ import { Fragment, useMemo, useState } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { serverNow } from '../api/client'
 import { newId } from '../api/newId'
+import { useAssessment } from '../api/useAssessment'
 import { useEnvironments } from '../api/useEnvironments'
 import { useIndicators, type Indicator } from '../api/useIndicators'
 import { useSystems } from '../api/useSystems'
@@ -52,6 +53,20 @@ export default function Measure() {
   const envs = useEnvironments()
   const systems = useSystems()
   const catalog = useIndicators()
+  // Estado actual de cada sistema, para mostrarlo en su tarjeta (ayuda a decidir qué medir).
+  const assessment = useAssessment(memberId)
+  const systemStatus = (id: string) =>
+    assessment.state === 'ready'
+      ? (assessment.data.systems.find((x) => x.system_id === id)?.status ?? 'unknown')
+      : null
+  const badge = (id: string) => {
+    const st = systemStatus(id)
+    return st ? (
+      <span className="absolute top-3 right-3 lg:top-4 lg:right-4">
+        <StatusBadge status={st} size="sm" />
+      </span>
+    ) : null
+  }
 
   const env = envs.state === 'ready' ? envs.data.find((e) => e.id === envId) : undefined
   const active = useMemo(() => {
@@ -106,13 +121,16 @@ export default function Measure() {
       .map((s) => ({ s, inds: active.filter((i) => i.system_id === s.id) }))
       .filter((x) => x.inds.length > 0)
     return (
-      <section className="space-y-4">
-        {title}
-        <p className="text-env-muted">¿Qué quieres medir?</p>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="flex flex-1 flex-col gap-4">
+        <div>
+          {title}
+          <p className="text-env-muted lg:text-lg">¿Qué quieres medir?</p>
+        </div>
+        {/* Las tarjetas reparten el alto disponible (filas iguales) y crecen con la pantalla. */}
+        <ul className="grid flex-1 auto-rows-fr gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
           {withIndicators.map(({ s, inds }) => {
             const card =
-              'block h-full rounded-xl border border-env-border bg-env-surface p-4 hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary'
+              'relative flex h-full flex-col justify-center gap-1 rounded-xl border border-env-border bg-env-surface p-4 pt-12 hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary lg:p-6 lg:pt-14 [&>span:nth-child(1)]:lg:text-xl [&>span:nth-child(2)]:lg:text-base'
             if (toCheckin && s.id === CHECKIN_SYSTEM) {
               // Check-in diario en lugar del formulario, y una tarjeta por indicador sin test propio.
               const rest = inds.filter((i) => !OWN_TEST.includes(i.id))
@@ -128,6 +146,7 @@ export default function Measure() {
                           .map((i) => i.name)
                           .join(' · ')}
                       </span>
+                      {badge(s.id)}
                     </Link>
                   </li>
                   {rest.map((i) => (
@@ -148,6 +167,7 @@ export default function Measure() {
                   <span className="mt-1 block text-sm text-env-muted">
                     {inds.map((i) => i.name).join(' · ')}
                   </span>
+                  {badge(s.id)}
                 </Link>
               </li>
             )
@@ -322,7 +342,7 @@ function MeasureForm({
           // tarjetas pequeñas (sin el rótulo «Cómo medir», letra y campos más bajos).
           className={`grid gap-4 ${
             fields.length > 1
-              ? 'grid-cols-2 max-md:gap-2 [&_fieldset]:min-w-0 max-md:[&_fieldset]:p-2.5 max-md:[&_input]:min-w-0 max-md:[&_input]:px-2 max-md:[&_legend]:text-sm max-md:[&_ol]:text-xs max-[341px]:grid-cols-1 max-[341px]:gap-1 max-[341px]:[&_fieldset]:px-2 max-[341px]:[&_fieldset]:py-1 max-[341px]:[&_input]:px-1.5 max-[341px]:[&_input]:py-1 max-[341px]:[&_input]:text-sm max-[341px]:[&_ol]:space-y-0 max-[341px]:[&_ol]:text-[11px] max-[341px]:[&_ol]:leading-tight max-[341px]:[&_p.uppercase]:hidden'
+              ? 'grid-cols-2 max-md:gap-2 [&_fieldset]:min-w-0 max-md:[&_fieldset]:p-2.5 max-md:[&_input]:min-w-0 max-md:[&_input]:px-2 max-md:[&_legend]:text-sm max-md:[&_ol]:text-xs max-[341px]:grid-cols-1 max-[341px]:gap-1 max-[341px]:[&_fieldset]:px-2 max-[341px]:[&_fieldset]:py-1 max-[341px]:[&_input]:px-1.5 max-[341px]:[&_input]:py-1 max-[341px]:[&_input]:text-sm max-[341px]:[&_ol]:space-y-0 max-[341px]:[&_ol]:text-[0.75rem] max-[341px]:[&_ol]:leading-tight max-[341px]:[&_p.uppercase]:hidden'
               : ''
           }`}
         >

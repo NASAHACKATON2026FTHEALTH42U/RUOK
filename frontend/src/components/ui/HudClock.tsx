@@ -28,11 +28,11 @@ export function HudClock({ env }: { env?: ClockEnv }) {
     <div className="text-right">
       <time
         dateTime={now.toISOString()}
-        className="block font-mono text-[23px] leading-tight font-light tabular-nums"
+        className="block font-mono text-[1.4375rem] leading-tight font-light tabular-nums"
       >
         {now.toLocaleTimeString('es-ES', { hour12: false })}
       </time>
-      {day && <span className="hud-label block text-[10px] whitespace-nowrap">{day}</span>}
+      {day && <span className="hud-label block text-[0.6875rem] whitespace-nowrap">{day}</span>}
     </div>
   )
 }

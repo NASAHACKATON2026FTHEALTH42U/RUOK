@@ -77,7 +77,7 @@ export default function Alerts() {
   const now = serverNow()
 
   return (
-    <section className="space-y-4">
+    <section className="flex flex-1 flex-col gap-4">
       <header className="flex flex-wrap items-center justify-between gap-3">
         {title}
         <NoticeButton />
@@ -105,7 +105,7 @@ export default function Alerts() {
       )}
 
       {list.length > 0 && (
-        <div className="grid gap-6 md:grid-cols-[minmax(260px,340px)_1fr]">
+        <div className="grid flex-1 gap-6 md:grid-cols-[minmax(260px,340px)_1fr] lg:grid-cols-[minmax(300px,420px)_1fr]">
           <ul className="space-y-2" aria-label="Alertas">
             {list.map((a) => {
               const sev = severityStyle(a.severity)

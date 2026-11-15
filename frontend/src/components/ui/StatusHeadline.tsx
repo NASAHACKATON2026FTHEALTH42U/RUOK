@@ -20,7 +20,7 @@ export function StatusHeadline({
       role="status"
       aria-live="polite"
       data-state={state}
-      className={`status-word font-sans text-[17px] leading-none font-semibold tracking-[0.2em] uppercase ${
+      className={`status-word font-sans text-[1.0625rem] leading-none font-semibold tracking-[0.2em] uppercase ${
         state === 'critical' ? 'critical-blink' : ''
       } ${className}`}
     >

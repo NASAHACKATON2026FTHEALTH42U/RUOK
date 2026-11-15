@@ -71,7 +71,7 @@ interface TrendPlotProps {
   range: Ranges
   days: Period
   /** Alto en píxeles. */
-  height?: number
+  height?: number | string
 }
 
 /**

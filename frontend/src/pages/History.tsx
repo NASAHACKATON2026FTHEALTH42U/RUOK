@@ -153,7 +153,7 @@ export default function History() {
   )
 
   return (
-    <section className="mx-auto flex w-full max-w-xl flex-col gap-2.5 md:gap-4 lg:max-w-none">
+    <section className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-2.5 md:gap-4 lg:max-w-none">
       {title}
 
       <div className="grid gap-2.5 sm:grid-cols-[minmax(0,1fr)_minmax(0,18rem)] sm:items-end">
@@ -205,14 +205,17 @@ export default function History() {
         </div>
       </div>
 
-      <div className="grid gap-2.5 md:gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
+      <div className="grid gap-2.5 md:gap-4 lg:flex-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-stretch">
         {/* Gráfica: solo en escritorio (en móvil la pantalla es la tabla, como la maqueta). */}
-        <section aria-label={`Tendencia de ${name}`} className="hud-panel hidden md:block">
+        <section
+          aria-label={`Tendencia de ${name}`}
+          className="hud-panel hidden md:flex md:flex-col"
+        >
           <p className="border-b border-hud-line px-3.5 py-2.5 text-sm text-env-muted">
             {name} · últimos {days} días
             {unit && ` · ${unit === '1-5' ? 'escala 1-5' : unit}`}
           </p>
-          <div className="p-3.5">
+          <div className="flex min-h-64 flex-1 flex-col p-3.5 [&>*]:flex-1">
             {series.state === 'loading' && (
               <div className="h-64 animate-pulse bg-env-bg" aria-busy="true" />
             )}
@@ -222,7 +225,7 @@ export default function History() {
               </p>
             )}
             {series.state === 'ready' && points.length > 0 && (
-              <TrendPlot points={points} unit={unit} range={range} days={days} height={256} />
+              <TrendPlot points={points} unit={unit} range={range} days={days} height="100%" />
             )}
             {series.state === 'error' && (
               <p className="flex h-64 items-center justify-center text-sm text-env-muted">

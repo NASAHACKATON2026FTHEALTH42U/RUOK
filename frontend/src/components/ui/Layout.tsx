@@ -37,7 +37,6 @@ export function Layout() {
   const vocab = useVocab()
   const { role, can } = useAuth()
   const { pathname } = useLocation()
-  const wide = ['/control', '/dashboard'].some((p) => pathname.startsWith(p))
   // Páginas que ocupan justo el alto disponible y reparten el espacio por dentro, sin scroll
   // de página (misiones, La Tierra).
   const fill = ['/dashboard', '/missions', '/earth', '/home'].some((p) => pathname.startsWith(p))
@@ -110,7 +109,7 @@ export function Layout() {
             <ServerStatus quiet />
             {can('action:change-environment') && <EnvironmentSelector />}
             {/* Aviso siempre visible en escritorio; en móvil va en «Más» y en el login. */}
-            <p className="mt-2 text-[11px] leading-snug text-env-muted">
+            <p className="mt-2 text-[0.75rem] leading-snug text-env-muted">
               Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
               el criterio de un profesional sanitario.
               {device.mode === 'tab' && (
@@ -131,7 +130,7 @@ export function Layout() {
               lateral. */}
           <div className="hidden shrink-0 px-4 pt-4 md:block lg:px-6">
             <div
-              className={`mx-auto flex w-full flex-wrap items-center gap-x-5 gap-y-3 rounded-xl border border-env-border bg-env-surface px-5 py-3.5 lg:gap-x-8 lg:px-7 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
+              className={`mx-auto flex w-full flex-wrap items-center gap-x-5 gap-y-3 rounded-xl border border-env-border bg-env-surface px-5 py-3.5 lg:gap-x-8 lg:px-7 max-w-[1800px]`}
             >
               {logo}
               <span aria-hidden="true" className="h-8 w-px shrink-0 bg-env-border" />
@@ -153,13 +152,13 @@ export function Layout() {
           {/* Contenido. En móvil, cada pantalla debería caber sin scroll (hud-style.md §5). */}
           <main className="min-w-0 flex-1 overflow-x-clip overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
             <div
-              className={`mx-auto w-full px-3.5 py-3.5 md:px-4 md:py-4 lg:px-6 lg:py-6 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'} ${fill ? 'flex h-full flex-col' : ''}`}
+              className={`mx-auto w-full px-3.5 py-3.5 md:px-4 md:py-4 lg:px-6 lg:py-6 max-w-[1800px] ${fill ? 'flex h-full flex-col' : 'flex min-h-full flex-col'}`}
             >
               {/* Fundido corto al cambiar de página (FE-26). Solo opacidad: un transform crearía un
                 bloque contenedor y descolocaría las modales `fixed` de las páginas. */}
               <motion.div
                 key={pathname}
-                className={fill ? 'flex min-h-0 flex-1 flex-col' : undefined}
+                className={fill ? 'flex min-h-0 flex-1 flex-col' : 'flex flex-1 flex-col'}
                 initial={reducedMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}
