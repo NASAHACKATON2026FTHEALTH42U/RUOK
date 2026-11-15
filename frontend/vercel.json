@@ -5,7 +5,8 @@
   "outputDirectory": "dist",
   "build": {
     "env": {
-      "VITE_USE_MOCKS": "true"
+      "VITE_USE_MOCKS": "true",
+      "VITE_SHOWCASE": "true"
     }
   },
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]

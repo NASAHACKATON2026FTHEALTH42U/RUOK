@@ -1,13 +1,17 @@
-import { setMockMode } from '../../api/mocks/mode'
+import { isShowcase, setMockMode } from '../../api/mocks/mode'
 import { useMockStatus } from '../../api/mocks/useMockStatus'
 
 /**
  * Banner obligatorio cuando se muestran datos de ejemplo: NUNCA deben confundirse con datos
- * reales de un member (principio "sin datos = desconocido").
+ * reales de un member (principio "sin datos = desconocido"). Única excepción: el escaparate
+ * público (`VITE_SHOWCASE`), donde toda la web es una demo.
  */
 export function MockBanner() {
   const status = useMockStatus()
   if (status === 'real') return null
+  // Escaparate público: el modo demo no lleva banner (sigue el chip «Modo demo» de la barra
+  // lateral y de «Más»). El aviso de servidor sin conexión se pinta siempre.
+  if (status === 'mock' && isShowcase()) return null
 
   return (
     <div
