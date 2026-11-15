@@ -2,7 +2,7 @@
 # Orden = orden de creación = prioridad por dependencias (las bloqueantes primero).
 # area: backend | frontend | fullstack | content
 # priority: P0-blocker | P1 | P2
-# milestone: m0 | h1 | h2 | freeze
+# milestone: m0 | h1 | h2 | freeze | roadmap
 # comp: clave de `components` (qué parte del sistema resuelve la issue)
 
 milestones:
@@ -10,6 +10,7 @@ milestones:
   h1: { title: "Hito 1 (sáb noche)", description: "Dashboard con cuerpo + semáforo con datos reales y cambio de entorno." }
   h2: { title: "Hito 2 (dom 09:00)", description: "MVP integrado: alertas, offline, liveness, gamificación, consola ground." }
   freeze: { title: "Freeze (dom 11:00)", description: "P2 y pulido. Lo no terminado a las 11:00 se corta." }
+  roadmap: { title: "Roadmap (después de la demo)", description: "Diseño cerrado, sin implementar antes de la presentación." }
 
 labels:
   "area:backend":     { color: "0052cc", description: "FastAPI / Python" }
@@ -1363,3 +1364,25 @@ issues:
     - "Tras el escenario `mars_sleep_bp`, el Historial de la tensión de Vega muestra la previsión y el cambio de estado previsto"
     - "La previsión es informativa: no crea alertas ni cambia el `assessment`"
     - "Un rol sin permiso para ver lo conductual recibe 403 al pedir la previsión de un indicador privado"
+
+- id: FS-10
+  title: Asistente local sobre un member y su previsión (LLM pequeño a bordo, 100 % local)
+  area: fullstack
+  comp: engine
+  priority: P2
+  milestone: roadmap
+  depends: [FS-09, BE-27]
+  docs: assistant.md
+  tasks:
+    - "Contrato: `POST /members/{id}/assistant` (`AssistantQuestion`, `AssistantAnswer` con `kind` model | summary | out_of_scope) y permiso `assistant:ask` (`allow_member`); no crea datos, sin UUID ni evento"
+    - "`services/assistant.py`: `collect` + `render_sheet` (función pura) con la ficha del member filtrada para quien pregunta; privacidad conductual, alertas solo con campos estructurados y «sin datos vigentes» para lo caducado; textos en `data/assistant.json`"
+    - "Capa 1: resumen automático por palabras clave, sin modelo"
+    - "Capa 2: `services/llm.py` (cliente Ollama con `urllib`, solo loopback o red privada, sin proxy, una generación a la vez, timeout y pausa tras error); el modelo devuelve `{tipo, temas}` de lista cerrada y el código escribe la respuesta; frases fijas de rechazo"
+    - "Front: página `/assistant` (selector de member para el personal, `mentionedMember`, chips, «Cancelar», etiqueta del origen de la respuesta, aviso fijo) y mock con el resumen automático"
+    - "`scripts/assistant_eval.py` (~130 preguntas en es/ca/en) para elegir el modelo más pequeño que llegue a los umbrales; servicio opcional `ollama` con perfil `ai` en docker-compose; docs y fuentes (licencia del modelo)"
+  acceptance:
+    - "Sin modelo, con el modelo parado o con una respuesta inválida, la API devuelve `kind: summary`, nunca un error"
+    - "Como commander o medic sin permiso, el cuerpo enviado al modelo no contiene datos conductuales privados ni el texto de ninguna alerta"
+    - "member sobre otro member, responder, psych y family reciben 403; no se guarda nada"
+    - "Evaluación: rechaza ≥ 95 % de lo fuera de tema, acepta ≥ 90 % de lo que es del tema, elige los temas correctos ≥ 85 %; latencia mediana ≤ 8 s y p95 ≤ 15 s en una máquina mínima (solo CPU, ~4 GB de RAM) y modelo de menos de 1 GB"
+    - "La CI pasa en verde sin servidor de modelos"
