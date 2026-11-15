@@ -14,7 +14,7 @@ import { SystemsRing } from '../components/dashboard/SystemsRing'
 import { BodyLegend } from '../components/body/BodyLegend'
 import { TopBarPortal } from '../components/ui/TopBarPortal'
 import { bySeverity, livenessState } from '../components/ui/status'
-import { TrafficLight } from '../components/ui/TrafficLight'
+import { StatusLights } from '../components/ui/StatusLights'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { capitalize, useVocab } from '../environments/useVocab'
 import { useEnvironmentStore } from '../store/environment'
@@ -154,11 +154,11 @@ export default function Dashboard() {
             : 'mb-3 flex flex-wrap items-center gap-2 md:hidden'
         }
       >
-        {/* Estado general como un semáforo, sin texto (el nombre accesible y el tooltip lo dicen).
-          Es el peor entre la salud y el liveness: con liveness stale o lost y todo normal, las
-          luces se apagan (nunca verde sin datos). En móvil lo cuenta el anillo (SystemsRing). */}
+        {/* Estado general con tres iconos que se encienden, sin texto (el nombre accesible y el
+          tooltip lo dicen). Es el peor entre la salud y el liveness: con liveness stale o lost y
+          todo normal, se apagan los tres (nunca verde sin datos). En móvil lo cuenta el anillo (SystemsRing). */}
         {desktop && (
-          <TrafficLight
+          <StatusLights
             state={live && a.overall_status === 'normal' ? 'unknown' : a.overall_status}
           />
         )}
