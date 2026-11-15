@@ -47,3 +47,6 @@ Thumbs.db
 
 # Página temporal de capturas del front (Firefox headless); no se versiona.
 frontend/hud-preview.*
+
+# Vercel CLI: enlace local del proyecto
+.vercel
