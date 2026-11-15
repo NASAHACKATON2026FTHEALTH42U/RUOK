@@ -74,8 +74,9 @@ function RuokRings() {
  *
  * - Entorno: si el dispositivo no tiene ninguno, arranca en la misión espacial (Marte). Se
  *   puede cambiar aquí; solo se enseñan los usuarios demo de ese entorno (y el operador).
- * - Responsive: una columna en móvil; desde `lg`, el acceso a la izquierda y los usuarios
- *   demo y la ayuda a la derecha.
+ * - Responsive: una columna en móvil y tablet. Desde `lg`, cabecera centrada, dos columnas
+ *   de la misma altura (entorno y acceso | usuarios demo) y la ayuda a todo el ancho debajo.
+ *   Sin lista de usuarios demo a la vista, se queda en una columna centrada.
  */
 export default function Login() {
   const [params] = useSearchParams()
@@ -108,6 +109,8 @@ export default function Login() {
   }, [envId, envList, selectEnvironment])
 
   const demoUsers = demo.state === 'ready' ? demoUsersFor(demo.data, envId) : []
+  // Dos columnas solo si la lista de usuarios demo está a la vista.
+  const twoCol = demoUsers.length > 0 && showDemo
 
   const enter = async (user: string, password: string) => {
     setBusy(true)
@@ -125,7 +128,11 @@ export default function Login() {
 
   return (
     <div className="hud-grid flex min-h-full flex-col">
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-3.5 pt-4 pb-4 md:max-w-xl md:px-6 lg:max-w-5xl lg:justify-center lg:py-8">
+      <main
+        className={`mx-auto flex w-full max-w-md flex-1 flex-col px-3.5 pt-4 pb-4 md:max-w-xl md:justify-center md:px-6 md:py-6 lg:py-5 ${
+          twoCol ? 'lg:max-w-4xl' : ''
+        }`}
+      >
         <div className="flex justify-between px-1">
           <span className="hud-label text-[9px] lg:text-[10px]">
             Nodo{envName ? `.${envName}` : ''} / Servidor a bordo
@@ -133,39 +140,66 @@ export default function Login() {
           <span className="hud-label text-[9px] lg:text-[10px]">Sin internet · Local</span>
         </div>
 
-        <div className="mt-2 lg:mt-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-10">
-          {/* Columna 1: marca y acceso */}
-          <div className="flex flex-col">
-            <RuokRings />
+        {/* Cabecera: marca y saludo, centrados sobre las columnas */}
+        <div className="mt-2 lg:mt-3">
+          <RuokRings />
+          <div className="mt-1 text-center">
+            <h1 className="text-[30px] leading-tight font-light lg:text-[34px]">
+              Hola de nuevo, <span className="text-env-primary">{vocab.member}.</span>
+            </h1>
+            <p className="mt-0.5 text-sm text-env-muted">Inicia sesión en el sistema de a bordo.</p>
+          </div>
+        </div>
 
-            <div className="mt-1 text-center">
-              <h1 className="text-[30px] leading-tight font-light lg:text-[34px]">
-                Hola de nuevo, <span className="text-env-primary">{vocab.member}.</span>
-              </h1>
-              <p className="mt-0.5 text-sm text-env-muted">
-                Inicia sesión en el sistema de a bordo.
-              </p>
-            </div>
+        {expired && (
+          <p role="status" className="hud-panel mt-4 p-3 text-sm">
+            Tu sesión ha caducado. Vuelve a entrar: lo que tengas pendiente en este dispositivo se
+            enviará después, no se ha perdido nada.
+          </p>
+        )}
 
-            {expired && (
-              <p role="status" className="hud-panel mt-4 p-3 text-sm">
-                Tu sesión ha caducado. Vuelve a entrar: lo que tengas pendiente en este dispositivo
-                se enviará después, no se ha perdido nada.
-              </p>
+        {/* Dos columnas que empiezan y acaban a la misma altura (items-stretch) */}
+        <div
+          className={`mt-4 flex flex-col gap-3 lg:mt-5 ${
+            twoCol ? 'lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-6' : ''
+          }`}
+        >
+          {/* Columna 1: entorno y acceso */}
+          <div className="flex flex-col gap-3">
+            {envList.length > 0 && (
+              <label className="hud-panel flex items-center gap-3 py-1.5 pr-[22px] pl-3.5">
+                <span className="hud-label shrink-0">
+                  <b className="font-normal text-env-primary">ENV.01</b> Entorno
+                </span>
+                <select
+                  value={envId ?? ''}
+                  onChange={(e) => {
+                    const next = envList.find((x) => x.id === e.target.value)
+                    if (next) selectEnvironment(next)
+                  }}
+                  className="hud-input min-w-0 flex-1 !border-0 !bg-transparent !px-1 !font-sans !text-[15px]"
+                >
+                  {envList.map((e) => (
+                    <option key={e.id} value={e.id}>
+                      {e.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
             )}
 
             <form
-              className="hud-panel mt-4"
+              className="hud-panel flex flex-1 flex-col"
               onSubmit={(e) => {
                 e.preventDefault()
                 void enter(username.trim(), secret)
               }}
             >
               <div className="hud-head">
-                <b>AUTH.01</b>Acceso
+                <b>AUTH.02</b>Acceso
                 {envName && <span className="hud-chip mr-[22px]">{envName}</span>}
               </div>
-              <div className="flex flex-col gap-3 px-3.5 pt-3 pb-3.5">
+              <div className="flex flex-1 flex-col gap-3 px-3.5 pt-3 pb-3.5">
                 <label className="flex flex-col gap-1.5">
                   <span className="hud-label">Usuario</span>
                   <input
@@ -195,83 +229,64 @@ export default function Login() {
                       ' Si necesitas ayuda, usa "Pedir ayuda sin sesión".'}
                   </p>
                 )}
-                <button type="submit" disabled={busy} className="hud-btn hud-btn-primary w-full">
+                {/* mt-auto: si la otra columna es más alta, el botón se queda abajo del panel */}
+                <button
+                  type="submit"
+                  disabled={busy}
+                  className="hud-btn hud-btn-primary mt-auto w-full"
+                >
                   {busy ? 'Entrando…' : 'Entrar'}
                 </button>
               </div>
             </form>
           </div>
 
-          {/* Columna 2: entorno, usuarios demo y ayuda */}
-          <div className="mt-3 flex flex-1 flex-col gap-3 lg:mt-0">
-            {envList.length > 0 && (
-              <label className="hud-panel flex items-center gap-3 py-1.5 pr-[22px] pl-3.5">
-                <span className="hud-label shrink-0">
-                  <b className="font-normal text-env-primary">ENV.02</b> Entorno
-                </span>
-                <select
-                  value={envId ?? ''}
-                  onChange={(e) => {
-                    const next = envList.find((x) => x.id === e.target.value)
-                    if (next) selectEnvironment(next)
-                  }}
-                  className="hud-input min-w-0 flex-1 !border-0 !bg-transparent !px-1 !font-sans !text-[15px]"
-                >
-                  {envList.map((e) => (
-                    <option key={e.id} value={e.id}>
-                      {e.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
+          {/* Columna 2: usuarios demo. Plegada en un botón en el escaparate público y en móvil. */}
+          {demoUsers.length > 0 && !showDemo && (
+            <button
+              type="button"
+              aria-expanded={false}
+              onClick={() => setShowDemo(true)}
+              className="hud-btn !h-11 w-full"
+            >
+              Usuarios demo ({demoUsers.length})
+            </button>
+          )}
+          {twoCol && (
+            <section className="hud-panel flex flex-col" aria-label="Usuarios de la demo">
+              <div className="hud-head">
+                <b>DEMO.03</b>Usuarios
+                <span className="hud-chip mr-[22px]">Un toque para entrar</span>
+              </div>
+              <ul className="grid flex-1 auto-rows-fr grid-cols-2 md:grid-cols-3 lg:grid-cols-2">
+                {demoUsers.map((u) => (
+                  <li key={u.username} className="border-r border-b border-env-border/60">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void enter(u.username, demoPassword(u))}
+                      className="flex h-full min-h-11 w-full flex-col justify-center gap-0.5 px-3 py-2.5 text-left hover:bg-env-primary/10 disabled:opacity-60"
+                    >
+                      <span className="text-sm">{shortDisplayName(u.display_name, envName)}</span>
+                      <span className="hud-label text-[9px]">
+                        {u.role_label}
+                        {u.env_id ? '' : ' · global'}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
 
-            {/* Plegada en un botón en el escaparate público y en móvil. */}
-            {demoUsers.length > 0 && !showDemo && (
-              <button
-                type="button"
-                aria-expanded={false}
-                onClick={() => setShowDemo(true)}
-                className="hud-btn !h-11 w-full"
-              >
-                Usuarios demo ({demoUsers.length})
-              </button>
-            )}
-            {demoUsers.length > 0 && showDemo && (
-              <section className="hud-panel" aria-label="Usuarios de la demo">
-                <div className="hud-head">
-                  <b>DEMO.03</b>Usuarios
-                  <span className="hud-chip mr-[22px]">Un toque para entrar</span>
-                </div>
-                <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2">
-                  {demoUsers.map((u) => (
-                    <li key={u.username} className="border-r border-b border-env-border/60">
-                      <button
-                        type="button"
-                        disabled={busy}
-                        onClick={() => void enter(u.username, demoPassword(u))}
-                        className="flex min-h-11 w-full flex-col gap-0.5 px-3 py-2.5 text-left hover:bg-env-primary/10 disabled:opacity-60"
-                      >
-                        <span className="text-sm">{shortDisplayName(u.display_name, envName)}</span>
-                        <span className="hud-label text-[9px]">
-                          {u.role_label}
-                          {u.env_id ? '' : ' · global'}
-                        </span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-
-            <div className="mt-auto flex flex-col gap-2.5 pt-1 lg:mt-0">
-              <SosButton variant="inline" label="Pedir ayuda sin sesión" />
-              <p className="text-center text-xs leading-snug text-env-muted">
-                Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni
-                sustituye el criterio de un profesional sanitario.
-              </p>
-            </div>
-          </div>
+        {/* Pie a todo el ancho: ayuda sin sesión y aviso */}
+        <div className="mt-auto flex flex-col gap-2.5 pt-4 md:mt-5 md:pt-0">
+          <SosButton variant="inline" label="Pedir ayuda sin sesión" />
+          <p className="text-center text-xs leading-snug text-env-muted">
+            Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
+            el criterio de un profesional sanitario.
+          </p>
         </div>
       </main>
     </div>
