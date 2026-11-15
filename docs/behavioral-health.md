@@ -39,7 +39,7 @@ Responde al peligro HRP **Isolation & Confinement**. Se apoya en la literatura d
 - **Tarjetas de intervención** (`interventions.json`): respiración guiada, módulos breves de terapia cognitivo-conductual, diario, higiene del sueño y de la luz circadiana, y ejercicio.
 - **Conexión con la Tierra (P2):**
   - "Mensaje a casa", con mensajes asíncronos que van por el enlace con su retardo;
-  - galería Earth view (empaquetada).
+  - **meditación guiada** con paisajes sonoros relajantes generados en el navegador (FE-36; sustituye a la galería Earth view).
 - **Gamificación cooperativa (P2):**
   - misiones de tripulación (comer juntos, juego de grupo, cuidar plantas);
   - **kudos** entre compañeros.
@@ -70,4 +70,4 @@ En la residencia geriátrica, la soledad es un problema de salud de primer orden
 | Test PVT (móvil) | 2–3 h | P1 (lo usa la demo) |
 | Mensaje a casa con retardo | 2 h | P2 |
 | Kudos y misiones de tripulación | 2 h | P2 |
-| Earth view | 1 h | P2 (se recorta lo primero) |
+| Meditación y paisajes sonoros (FE-36) | 3 h | P2 |

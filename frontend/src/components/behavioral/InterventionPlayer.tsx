@@ -1,5 +1,5 @@
 import { motion, useReducedMotion } from 'framer-motion'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Intervention } from '../../api/useInterventions'
 import { Modal } from '../ui/Modal'
 import { breathPhase, expandSteps } from './intervention'
@@ -7,6 +7,10 @@ import { breathPhase, expandSteps } from './intervention'
 interface InterventionPlayerProps {
   intervention: Intervention
   onClose: () => void
+  /** Al pasar de paso o terminar (no al abrir): p. ej. la campana de la meditación. */
+  onStepChange?: (index: number, done: boolean) => void
+  /** Controles extra en la cabecera (p. ej. cambiar de paisaje sonoro sin salir). */
+  toolbar?: ReactNode
 }
 
 /** Escala del círculo según la fase: inhala crece, exhala encoge, mantén se queda (null). */
@@ -23,7 +27,12 @@ function targetScale(text: string | undefined): number | null {
  * los de respiración, un círculo que crece al inhalar y encoge al exhalar (sin animación si
  * el sistema pide movimiento reducido). Todo en local: funciona sin conexión.
  */
-export function InterventionPlayer({ intervention, onClose }: InterventionPlayerProps) {
+export function InterventionPlayer({
+  intervention,
+  onClose,
+  onStepChange,
+  toolbar,
+}: InterventionPlayerProps) {
   const steps = useMemo(() => expandSteps(intervention.steps), [intervention.steps])
   const [index, setIndex] = useState(0)
   const [left, setLeft] = useState<number | null>(steps[0]?.seconds ?? null)
@@ -53,6 +62,17 @@ export function InterventionPlayer({ intervention, onClose }: InterventionPlayer
     return () => window.clearTimeout(t)
   }, [left, paused, done, index, goTo])
 
+  // Aviso al cambiar de paso o terminar. No al abrir (ni en el doble montaje del modo estricto):
+  // se compara con el paso anterior.
+  const onStepRef = useRef(onStepChange)
+  onStepRef.current = onStepChange
+  const shown = useRef(index)
+  useEffect(() => {
+    if (shown.current === index) return
+    shown.current = index
+    onStepRef.current?.(index, done)
+  }, [index, done])
+
   const next = () => goTo(index + 1)
 
   return (
@@ -63,14 +83,17 @@ export function InterventionPlayer({ intervention, onClose }: InterventionPlayer
           <h2 id="intervention-title" className="font-semibold">
             {intervention.title}
           </h2>
-          <button
-            data-autofocus
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-env-border px-3 py-1.5 text-sm hover:border-env-text"
-          >
-            {done ? 'Cerrar' : 'Terminar'}
-          </button>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {toolbar}
+            <button
+              data-autofocus
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-env-border px-3 py-1.5 text-sm hover:border-env-text"
+            >
+              {done ? 'Cerrar' : 'Terminar'}
+            </button>
+          </div>
         </div>
         <div className="mx-4 h-1 overflow-hidden rounded-full bg-env-border" aria-hidden>
           <div

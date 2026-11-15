@@ -139,5 +139,110 @@
     ],
     "indicator_ids": ["bp_systolic", "bp_diastolic"],
     "sources": ["S20"]
+  },
+  {
+    "id": "med_breath_awareness",
+    "title": "Respiración consciente",
+    "category": "meditation",
+    "system_id": null,
+    "duration_min": 3,
+    "steps": [
+      "Siéntate o túmbate cómodo y deja que el cuerpo se apoye",
+      "Cierra los ojos o mira un punto fijo durante 10 segundos",
+      "Inhala por la nariz contando 4 segundos",
+      "Exhala despacio por la boca contando 6 segundos",
+      "Inhala por la nariz contando 4 segundos",
+      "Exhala despacio por la boca contando 6 segundos",
+      "Inhala por la nariz contando 4 segundos",
+      "Exhala despacio por la boca contando 6 segundos",
+      "Inhala por la nariz contando 4 segundos",
+      "Exhala despacio por la boca contando 6 segundos",
+      "Respira a tu ritmo y nota el aire entrar y salir durante 60 segundos",
+      "Abre los ojos despacio cuando estés listo"
+    ],
+    "indicator_ids": [],
+    "sources": ["S3", "S29"]
+  },
+  {
+    "id": "med_sounds",
+    "title": "Atención a los sonidos",
+    "category": "meditation",
+    "system_id": null,
+    "duration_min": 4,
+    "steps": [
+      "Elige un paisaje sonoro, ponte cómodo y cierra los ojos",
+      "Escucha el sonido sin juzgarlo durante 60 segundos",
+      "Si te distraes, vuelve al sonido con amabilidad durante 60 segundos",
+      "Nota a la vez el sonido y tu respiración durante 60 segundos",
+      "Deja el sonido de fondo y descansa durante 30 segundos",
+      "Abre los ojos despacio cuando estés listo"
+    ],
+    "indicator_ids": [],
+    "sources": ["S29", "S30"]
+  },
+  {
+    "id": "med_body_scan",
+    "title": "Escaneo corporal",
+    "category": "meditation",
+    "system_id": null,
+    "duration_min": 5,
+    "steps": [
+      "Túmbate o siéntate cómodo y cierra los ojos",
+      "Lleva la atención a los pies y nota cómo están durante 30 segundos",
+      "Sube a las piernas y suelta la tensión que encuentres durante 30 segundos",
+      "Nota el abdomen y la espalda al respirar durante 40 segundos",
+      "Lleva la atención al pecho y a la respiración durante 40 segundos",
+      "Suelta los hombros, los brazos y las manos durante 40 segundos",
+      "Relaja el cuello, la mandíbula y la cara durante 40 segundos",
+      "Siente todo el cuerpo a la vez, tranquilo y apoyado, durante 60 segundos",
+      "Mueve despacio los dedos y abre los ojos cuando estés listo"
+    ],
+    "indicator_ids": [],
+    "sources": ["S29"]
+  },
+  {
+    "id": "med_pmr",
+    "title": "Relajación muscular progresiva",
+    "category": "meditation",
+    "system_id": null,
+    "duration_min": 5,
+    "steps": [
+      "Siéntate cómodo con la espalda apoyada",
+      "Aprieta los puños con fuerza durante 5 segundos",
+      "Suelta de golpe y nota la diferencia durante 15 segundos",
+      "Sube los hombros hacia las orejas durante 5 segundos",
+      "Suéltalos y deja que caigan durante 15 segundos",
+      "Arruga la cara y aprieta los ojos durante 5 segundos",
+      "Suelta y relaja la frente y la mandíbula durante 15 segundos",
+      "Tensa las piernas y estira las puntas de los pies durante 5 segundos",
+      "Suelta y deja las piernas pesadas durante 15 segundos",
+      "Respira tranquilo y nota todo el cuerpo relajado durante 60 segundos"
+    ],
+    "indicator_ids": [],
+    "sources": ["S31"]
+  },
+  {
+    "id": "med_sleep",
+    "title": "Antes de dormir",
+    "category": "meditation",
+    "system_id": null,
+    "duration_min": 6,
+    "steps": [
+      "Si vas a dormir, marca «Sueño» en Actividad y túmbate",
+      "Baja las luces y cierra los ojos durante 10 segundos",
+      "Inhala despacio por la nariz contando 4 segundos",
+      "Exhala muy despacio contando 8 segundos",
+      "Inhala despacio por la nariz contando 4 segundos",
+      "Exhala muy despacio contando 8 segundos",
+      "Inhala despacio por la nariz contando 4 segundos",
+      "Exhala muy despacio contando 8 segundos",
+      "Inhala despacio por la nariz contando 4 segundos",
+      "Exhala muy despacio contando 8 segundos",
+      "Repasa el día sin juzgarlo y déjalo ir durante 60 segundos",
+      "Nota cómo el cuerpo pesa sobre la cama durante 60 segundos",
+      "Deja que el sonido te acompañe: no hace falta hacer nada más"
+    ],
+    "indicator_ids": [],
+    "sources": ["S29"]
   }
 ]

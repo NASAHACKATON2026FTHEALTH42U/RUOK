@@ -12,7 +12,8 @@ export interface NavItem {
   icon: IconName
 }
 
-export type IconName = 'panel' | 'measure' | 'missions' | 'more' | 'crew' | 'alerts' | 'list'
+export type IconName =
+  'panel' | 'measure' | 'missions' | 'more' | 'crew' | 'alerts' | 'list' | 'meditation'
 
 export function navItems(vocab: { crew: string; ground: string }): NavItem[] {
   const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
@@ -25,7 +26,7 @@ export function navItems(vocab: { crew: string; ground: string }): NavItem[] {
     { to: '/checkin', label: 'Check-in diario', icon: 'list' },
     { to: '/pvt', label: 'Test de vigilancia', icon: 'list' },
     { to: '/history', label: 'Historial', icon: 'list' },
-    { to: '/earth', label: 'La Tierra', icon: 'list' },
+    { to: '/meditation', label: 'Meditación', icon: 'meditation' },
     { to: '/home', label: 'Mensaje a casa', icon: 'list' },
     { to: '/ground', label: `Consola de ${vocab.ground}`, icon: 'alerts' },
     { to: '/control', label: 'Centro de control', icon: 'panel' },

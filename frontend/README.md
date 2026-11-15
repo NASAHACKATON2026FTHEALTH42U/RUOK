@@ -478,6 +478,15 @@ Los dos se envían **por el outbox** (`sendAlert()`, mismo UUID en el dispositiv
 
 **Modales bloqueantes** (`components/ui/Modal.tsx`): el SOS, el aviso a control, el «R U OK?», el detalle de un sistema, la intervención guiada y el PVT usan el `<dialog>` nativo con `showModal()`. El resto de la interfaz queda inerte (no se puede pulsar ni tabular) hasta que se resuelven o se cierran. Un clic fuera no cierra nada; Escape cierra los que se pueden cerrar (el «R U OK?» no). El foco entra en el modal y vuelve a su sitio al cerrar.
 
+## Meditación (FE-36)
+
+`/meditation` (`src/pages/Meditation.tsx`) sustituye a la galería «La Tierra» (FE-25); `/earth` redirige aquí. Solo para quien hace el check-in (`view:checkin`).
+
+- **Paisajes sonoros** (`components/behavioral/soundscapes.ts`): océano, lluvia, viento, bosque, hoguera y cuenco, **generados en el navegador** con Web Audio (ruido blanco, rosa o marrón filtrado, osciladores lentos y eventos sueltos: gotas, trinos, chasquidos). Sin archivos, sin internet y en bucle sin cortes. Sin `AudioWorklet`, que exige HTTPS (los móviles entran por HTTP). Se cambian en cualquier momento con un fundido.
+- **Volumen y temporizador** (sin límite, 10, 20, 30 o 45 min, con un fundido largo al acabar). El temporizador usa el reloj del dispositivo, no el de la demo. Al salir de la sección, el sonido se apaga. En Safari 17+ suena aunque el iPhone esté en silencio (`navigator.audioSession`).
+- **Meditaciones guiadas**: las intervenciones con `category: "meditation"` de `interventions.json` (respiración consciente, atención a los sonidos, escaneo corporal, relajación muscular progresiva y antes de dormir), con fuentes [S29]–[S31]. Van sin `system_id`: tienen su sección y no entran en las recomendaciones del motor. Se reproducen en el modo guiado (`InterventionPlayer`, con `toolbar` para cambiar de paisaje sin salir y `onStepChange` para la campana del cuenco al empezar, en cada paso y al terminar).
+- Accesible: paisajes como botones con `aria-pressed`, estado en `aria-live`, animación de «Sonando» quieta con «reducir movimiento».
+
 ## Login y sesión (FE-27)
 
 Diseño completo en [`docs/auth-and-roles.md`](../docs/auth-and-roles.md).
