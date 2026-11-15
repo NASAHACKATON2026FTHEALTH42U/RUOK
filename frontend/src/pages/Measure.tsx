@@ -9,7 +9,7 @@ import { useSystems } from '../api/useSystems'
 import { CHECKIN_INDICATORS } from '../components/behavioral/checkin'
 import { PVT_INDICATORS } from '../components/behavioral/pvt'
 import { VoiceNote } from '../components/behavioral/VoiceControls'
-import { IndicatorField } from '../components/measure/IndicatorField'
+import { MeasureStep } from '../components/measure/MeasureStep'
 import { SystemArt } from '../components/measure/SystemArt'
 import { emptyValue, parseValue, type RawValue } from '../components/measure/measureForm'
 import { statusStyle } from '../components/ui/status'
@@ -213,9 +213,40 @@ function MeasureForm({
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [note, setNote] = useState('')
   const [phase, setPhase] = useState<Phase>({ kind: 'editing' })
+  // Con varios indicadores (p. ej. cardiovascular) se miden de uno en uno: un paso por
+  // indicador y, al final, un resumen para repasar y guardar. `step === fields.length` = resumen.
+  const multi = fields.length > 1
+  const [step, setStep] = useState(0)
+  const reviewing = multi && step === fields.length
+  const current = fields[Math.min(step, fields.length - 1)]
+
+  const setValue = (id: string, v: RawValue) => {
+    setValues((s) => ({ ...s, [id]: v }))
+    setErrors((s) => {
+      const next = { ...s }
+      delete next[id]
+      return next
+    })
+    if (phase.kind === 'failed') setPhase({ kind: 'editing' })
+  }
+  /** Valida el indicador del paso actual; si está mal, se queda en él con el error a la vista. */
+  const currentIsValid = () => {
+    const r = parseValue(values[current.id], current.input, current.unit)
+    if (r.ok === false) {
+      setErrors((s) => ({ ...s, [current.id]: r.error }))
+      return false
+    }
+    return true
+  }
+  const filled = (f: Indicator) => parseValue(values[f.id], f.input, f.unit)
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
+    // En un paso intermedio, Intro o «Siguiente» avanzan (no guardan).
+    if (multi && !reviewing) {
+      if (currentIsValid()) setStep((n) => n + 1)
+      return
+    }
     const errs: Record<string, string> = {}
     const ok: { id: string; value: number }[] = []
     for (const f of fields) {
@@ -224,7 +255,11 @@ function MeasureForm({
       else if (r.ok === false) errs[f.id] = r.error
     }
     setErrors(errs)
-    if (Object.keys(errs).length > 0) return
+    if (Object.keys(errs).length > 0) {
+      // Vuelve al primer indicador con un valor no válido.
+      if (multi) setStep(fields.findIndex((f) => errs[f.id]))
+      return
+    }
     if (ok.length === 0) {
       setPhase({ kind: 'failed', message: 'Rellena al menos un valor.' })
       return
@@ -325,73 +360,158 @@ function MeasureForm({
     )
   }
 
+  const busy = phase.kind === 'sending'
+  const noteField = (
+    <label className="flex flex-col gap-1">
+      <span className="hud-label">Nota (opcional)</span>
+      <AutoTextarea
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        rows={2}
+        className="hud-input w-full py-2.5 !font-sans !text-[0.9375rem] leading-snug"
+      />
+    </label>
+  )
+
   return (
-    // Con varios indicadores (p. ej. cardiovascular), el formulario es más ancho y los campos van
-    // en dos columnas (un par de filas) en vez de en una sola columna larga.
     <form
       onSubmit={submit}
-      className={`mx-auto space-y-4 max-[341px]:space-y-1.5 max-[341px]:[&_h1]:text-xl max-[341px]:[&_textarea]:h-8 max-[341px]:[&_textarea]:py-1 ${fields.length > 1 ? 'max-w-4xl' : 'max-w-xl'}`}
+      className="mx-auto flex w-full max-w-md flex-col gap-3 md:gap-4 lg:max-w-3xl"
       noValidate
     >
-      <Link to="/measure" className="text-sm text-env-muted hover:text-env-text hover:underline">
-        ← Elegir otra cosa
-      </Link>
-      <h1 className="text-2xl font-semibold">{heading}</h1>
+      <div>
+        <Link to="/measure" className="text-sm text-env-muted hover:text-env-text hover:underline">
+          ← Elegir otra cosa
+        </Link>
+        <h1 className="mt-1 text-2xl font-semibold">{heading}</h1>
+      </div>
 
-      <fieldset disabled={phase.kind === 'sending'} className="space-y-4 max-[341px]:space-y-2">
-        <div
-          // También en móvil (< 768 px) van de dos en dos, con el contenido más compacto, para
-          // no tener que bajar con scroll. Hasta 340 px no caben dos: una columna, pero con
-          // tarjetas pequeñas (sin el rótulo «Cómo medir», letra y campos más bajos).
-          className={`grid gap-4 ${
-            fields.length > 1
-              ? 'grid-cols-2 max-md:gap-2 [&_fieldset]:min-w-0 max-md:[&_fieldset]:p-2.5 max-md:[&_input]:min-w-0 max-md:[&_input]:px-2 max-md:[&_legend]:text-sm max-md:[&_ol]:text-xs max-[341px]:grid-cols-1 max-[341px]:gap-1 max-[341px]:[&_fieldset]:px-2 max-[341px]:[&_fieldset]:py-1 max-[341px]:[&_input]:px-1.5 max-[341px]:[&_input]:py-1 max-[341px]:[&_input]:text-sm max-[341px]:[&_ol]:space-y-0 max-[341px]:[&_ol]:text-[0.75rem] max-[341px]:[&_ol]:leading-tight max-[341px]:[&_p.uppercase]:hidden'
-              : ''
-          }`}
-        >
-          {fields.map((f) => (
-            <IndicatorField
-              key={f.id}
-              indicator={f}
-              value={values[f.id]}
-              error={errors[f.id]}
-              onChange={(v) => {
-                setValues((s) => ({ ...s, [f.id]: v }))
-                setErrors((s) => {
-                  const next = { ...s }
-                  delete next[f.id]
-                  return next
-                })
-              }}
-            />
-          ))}
+      {multi && (
+        // Progreso: un tramo por indicador (toca uno para volver a él) y el resumen al final.
+        <ol className="flex items-center gap-1.5" aria-label="Pasos de la medición">
+          {fields.map((f, i) => {
+            const r = filled(f)
+            return (
+              <li key={f.id} className="flex-1">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setStep(i)}
+                  aria-current={step === i ? 'step' : undefined}
+                  aria-label={`Paso ${i + 1}: ${f.name}${r.ok === true ? ' (con valor)' : ''}`}
+                  className="relative block h-2 w-full before:absolute before:inset-x-0 before:-inset-y-[18px] before:content-[''] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-env-primary"
+                  style={{
+                    background:
+                      step === i
+                        ? 'var(--env-primary)'
+                        : r.ok === true
+                          ? 'color-mix(in srgb, var(--env-primary) 55%, transparent)'
+                          : 'var(--env-border)',
+                  }}
+                />
+              </li>
+            )
+          })}
+        </ol>
+      )}
+
+      <fieldset disabled={busy} className="hud-panel min-w-0">
+        <legend className="sr-only">{reviewing ? 'Resumen' : current.name}</legend>
+        <div className="hud-panel-head">
+          {reviewing ? 'Resumen' : current.name}
+          {multi && (
+            <span className="mr-2.5 ml-auto tracking-normal text-env-muted normal-case">
+              {reviewing ? 'Repasa y guarda' : `Paso ${step + 1} de ${fields.length}`}
+            </span>
+          )}
         </div>
-
-        <label className="block text-sm">
-          <span className="text-env-muted">Nota (opcional)</span>
-          <AutoTextarea
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            rows={2}
-            className="mt-1 w-full rounded-md border border-env-border bg-env-surface px-3 py-2 text-env-text focus:outline-2 focus:outline-offset-1 focus:outline-env-primary"
-          />
-        </label>
+        <div className="p-3.5 md:p-4">
+          {reviewing ? (
+            <div className="flex flex-col gap-4">
+              <ul className="divide-y divide-env-border/60">
+                {fields.map((f, i) => {
+                  const r = filled(f)
+                  return (
+                    <li key={f.id}>
+                      <button
+                        type="button"
+                        onClick={() => setStep(i)}
+                        className="flex min-h-11 w-full items-center justify-between gap-3 py-2 text-left hover:bg-env-primary/5 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary"
+                      >
+                        <span className="min-w-0 truncate">{f.name}</span>
+                        <span
+                          className={`shrink-0 tabular-nums ${r.ok === true ? 'font-semibold' : 'text-env-muted'}`}
+                        >
+                          {r.ok === true
+                            ? `${r.value.toLocaleString('es-ES', { maximumFractionDigits: 2 })} ${f.unit}`
+                            : r.ok === false
+                              ? 'Valor no válido'
+                              : 'Sin valor'}
+                        </span>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+              {noteField}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <MeasureStep
+                key={current.id}
+                indicator={current}
+                value={values[current.id]}
+                error={errors[current.id]}
+                onChange={(v) => setValue(current.id, v)}
+              />
+              {!multi && noteField}
+            </div>
+          )}
+        </div>
       </fieldset>
 
       {phase.kind === 'failed' && (
-        <p className="rounded-lg border border-env-border bg-env-surface p-3 text-sm" role="alert">
+        <p className="hud-panel p-3 text-sm" role="alert">
           <span aria-hidden>⚠ </span>
           {phase.message}
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={phase.kind === 'sending'}
-        className="w-full rounded-lg bg-env-primary px-4 py-3 font-medium max-[341px]:py-2 text-env-primary-text disabled:opacity-60"
-      >
-        {phase.kind === 'sending' ? 'Guardando…' : 'Guardar medición'}
-      </button>
+      <div className="flex gap-2">
+        {multi && step > 0 && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => setStep((n) => n - 1)}
+            className="hud-btn shrink-0 px-4"
+          >
+            Atrás
+          </button>
+        )}
+        {multi && !reviewing && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              // Omitir deja el indicador sin valor (no se envía) y pasa al siguiente.
+              setValue(current.id, emptyValue(current.input.type))
+              setStep((n) => n + 1)
+            }}
+            className="hud-btn shrink-0 px-4"
+          >
+            Omitir
+          </button>
+        )}
+        <button type="submit" disabled={busy} className="hud-btn hud-btn-primary min-w-0 flex-1">
+          {busy
+            ? 'Guardando…'
+            : multi && !reviewing
+              ? step === fields.length - 1
+                ? 'Ver resumen'
+                : 'Siguiente'
+              : 'Guardar medición'}
+        </button>
+      </div>
       <VoiceNote
         texts={fields.flatMap((f) => f.measurement_instructions)}
         className="text-center"

@@ -24,6 +24,8 @@ const STRIPES =
  * Consola de tierra (FE-16): lo que el enlace YA ha entregado. Banner del enlace (retardo o
  * LOS → estado DESCONOCIDO, nunca verde), members con "último dato recibido hace X" y alertas
  * entregadas con recibir, responder y resolver. Se actualiza en vivo con los eventos (FE-29).
+ * Ocupa el alto disponible: el estado de cada member en una franja compacta y, debajo, la lista
+ * y el detalle con su propio scroll.
  */
 export default function Ground() {
   const vocab = useVocab()
@@ -32,6 +34,8 @@ export default function Ground() {
   const envs = useEnvironments()
   const ground = useGroundView(envId)
   const [selected, setSelected] = useState<string | null>(null)
+  // Las resueltas salen de la lista y quedan plegadas en «Resueltas».
+  const [showResolved, setShowResolved] = useState(false)
   const ladder = (envs.state === 'ready'
     ? envs.data.find((e) => e.id === envId)?.escalation_ladder
     : null) ?? ['self', 'crew', 'ground']
@@ -73,129 +77,189 @@ export default function Ground() {
   const unknown = g.link.state === 'los' || ground.refreshFailed
   const banner = linkBanner(g.link, g.as_of, now)
   const alerts = sortAlerts(g.alerts)
-  // La elegida; si no, la primera sin resolver; si todas están resueltas, la primera.
+  // La elegida; si no, la primera sin resolver.
   const current =
-    alerts.find((a) => a.id === selected) ??
-    alerts.find((a) => a.status !== 'resolved') ??
-    alerts[0]
+    alerts.find((a) => a.id === selected) ?? alerts.find((a) => a.status !== 'resolved')
   const shares = new Map(g.members.map((m) => [m.id, m.share_behavioral_details]))
 
-  return (
-    <section className="space-y-5">
-      {title}
+  const open = alerts.filter((a) => a.status !== 'resolved')
+  const resolved = alerts.filter((a) => a.status === 'resolved')
+  const resolvedOpen = showResolved || current?.status === 'resolved'
 
-      <div
-        role="status"
-        className={`rounded-xl border p-4 ${unknown ? 'border-env-text font-medium' : 'border-env-border'} bg-env-surface`}
-        style={unknown ? { backgroundImage: STRIPES } : undefined}
-      >
-        <p>
+  const row = (a: (typeof alerts)[number]) => {
+    const sev = severityStyle(a.severity)
+    const member = g.members.find((m) => m.id === a.member_id)
+    const active = current?.id === a.id
+    return (
+      <li key={a.id}>
+        <button
+          type="button"
+          onClick={() => setSelected(a.id)}
+          aria-current={active}
+          className={`flex w-full flex-col gap-0.5 px-3.5 py-2.5 text-left focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary ${
+            active
+              ? 'bg-env-primary/10 shadow-[inset_3px_0_0_var(--env-primary)]'
+              : 'hover:bg-env-primary/5'
+          } ${a.status === 'resolved' ? 'opacity-60' : ''}`}
+        >
+          <span className="flex items-center justify-between gap-2">
+            <span className="truncate font-medium">
+              {member?.name ?? `#${a.member_id}`} · {categoryLabel(a.category)}
+            </span>
+            <StatusBadge status={sev.status} label={sev.label} size="sm" />
+          </span>
+          <span className="truncate text-xs text-env-muted">
+            {statusLabel(a.status)} · entregada{' '}
+            {a.delivered_at ? formatAgo(a.delivered_at, now) : '—'}
+          </span>
+        </button>
+      </li>
+    )
+  }
+
+  return (
+    <section className="flex min-h-0 flex-1 flex-col gap-4">
+      <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+        {title}
+        {/* Estado del enlace: en una línea, junto al título. */}
+        <div
+          role="status"
+          className={`hud-panel min-w-0 px-3.5 py-2 text-sm ${unknown ? 'font-medium' : ''}`}
+          style={unknown ? { backgroundImage: STRIPES } : undefined}
+        >
           <span aria-hidden>{unknown ? '○ ' : g.link.state === 'delayed' ? '◐ ' : '● '}</span>
           {ground.refreshFailed && g.link.state !== 'los'
             ? `Sin conexión con el servidor: estado DESCONOCIDO, último conocido de las ${new Date(g.as_of).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}.`
             : banner.text}
-        </p>
-        {g.link.queued > 0 && (
-          <p className="mt-1 text-sm text-env-muted">
-            {g.link.queued} {g.link.queued === 1 ? 'mensaje' : 'mensajes'} en cola del enlace.
-          </p>
-        )}
-      </div>
+          {g.link.queued > 0 && (
+            <span className="text-env-muted">
+              {' '}
+              · {g.link.queued} {g.link.queued === 1 ? 'mensaje' : 'mensajes'} en cola
+            </span>
+          )}
+        </div>
+      </header>
 
-      <section>
-        <h2 className="mb-2 text-lg font-semibold">{capitalize(vocab.crew)}</h2>
-        <ul className="grid gap-2 sm:grid-cols-2">
+      {/* Estado de cada member: una fila compacta por persona (lo último que ha llegado). */}
+      <section className="hud-panel" aria-labelledby="ground-crew-title">
+        <h2 id="ground-crew-title" className="hud-panel-head">
+          {capitalize(vocab.crew)}
+          <span className="mr-2.5 ml-auto tracking-normal text-env-muted normal-case">
+            {g.members.length}
+          </span>
+        </h2>
+        <ul className="-mr-px -mb-px grid max-h-[11.5rem] overflow-y-auto [scrollbar-color:var(--env-border)_transparent] sm:grid-cols-2 xl:grid-cols-4">
           {g.members.map((m) => {
             const live = livenessState(m.liveness)
             return (
-              <li key={m.id} className="rounded-lg border border-env-border bg-env-surface p-3">
-                <div className="flex items-start justify-between gap-2">
-                  <span className="font-medium">{m.name}</span>
-                  {unknown ? (
-                    <StatusBadge status="unknown" label="Desconocido" size="sm" />
-                  ) : (
-                    <span className="flex flex-wrap justify-end gap-1">
-                      {!(live === 'stale' && m.overall_status === 'unknown') && (
-                        <StatusBadge status={m.overall_status} size="sm" />
-                      )}
-                      {live && <StatusBadge status={live} size="sm" />}
-                    </span>
-                  )}
-                </div>
-                <p className="mt-1 text-sm text-env-muted">
-                  Último dato recibido {m.last_seen_at ? formatAgo(m.last_seen_at, now) : 'nunca'}
+              <li
+                key={m.id}
+                className="flex flex-col gap-1 border-r border-b border-env-border/60 px-3.5 py-2.5"
+              >
+                <span className="truncate font-medium">{m.name}</span>
+                {unknown ? (
+                  <span>
+                    <StatusBadge status="unknown" label="Desconocido" size="xs" />
+                  </span>
+                ) : (
+                  <span className="flex flex-wrap gap-1">
+                    {!(live === 'stale' && m.overall_status === 'unknown') && (
+                      <StatusBadge status={m.overall_status} size="xs" />
+                    )}
+                    {live && <StatusBadge status={live} size="xs" />}
+                  </span>
+                )}
+                <span className="text-xs text-env-muted">
+                  Último dato {m.last_seen_at ? formatAgo(m.last_seen_at, now) : 'nunca'}
                   {unknown && ` · último conocido: ${statusStyle(m.overall_status).label}`}
                   {m.open_alerts > 0 &&
                     ` · ${m.open_alerts} alerta${m.open_alerts > 1 ? 's' : ''} abierta${m.open_alerts > 1 ? 's' : ''}`}
-                </p>
+                </span>
               </li>
             )
           })}
         </ul>
       </section>
 
-      <section>
-        <h2 className="mb-2 text-lg font-semibold">Alertas entregadas</h2>
-        {alerts.length === 0 ? (
-          <p className="text-env-muted">
-            No ha llegado ninguna alerta por el enlace.
-            {g.link.state !== 'online' && ' Las que estén en cola aparecerán al entregarse.'}
-          </p>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-[minmax(260px,340px)_1fr]">
-            <ul className="space-y-2" aria-label="Alertas entregadas">
-              {alerts.map((a) => {
-                const sev = severityStyle(a.severity)
-                const member = g.members.find((m) => m.id === a.member_id)
-                return (
-                  <li key={a.id}>
-                    <button
-                      type="button"
-                      onClick={() => setSelected(a.id)}
-                      aria-current={current?.id === a.id}
-                      className={`w-full rounded-lg border p-3 text-left ${
-                        current?.id === a.id
-                          ? 'border-env-text bg-env-surface'
-                          : 'border-env-border hover:border-env-text'
-                      } ${a.status === 'resolved' ? 'opacity-70' : ''}`}
+      {alerts.length === 0 ? (
+        <p className="text-env-muted">
+          No ha llegado ninguna alerta por el enlace.
+          {g.link.state !== 'online' && ' Las que estén en cola aparecerán al entregarse.'}
+        </p>
+      ) : (
+        // Lista y detalle miden lo que su contenido y, como mucho, el hueco: si no caben, el
+        // scroll es suyo y no de la página.
+        <div className="grid gap-4 md:min-h-0 md:flex-1 md:grid-cols-[minmax(260px,340px)_1fr] md:items-start lg:grid-cols-[minmax(300px,400px)_1fr]">
+          <section
+            aria-labelledby="ground-alerts-title"
+            className="hud-panel flex max-h-[45dvh] min-h-0 flex-col md:max-h-full"
+          >
+            <h2 id="ground-alerts-title" className="hud-panel-head">
+              Alertas entregadas
+              <span className="mr-2.5 ml-auto tracking-normal text-env-muted normal-case">
+                {open.length} abiertas
+              </span>
+            </h2>
+            <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
+              {open.length === 0 && (
+                <p className="px-3.5 py-3 text-sm text-env-muted">No hay alertas abiertas.</p>
+              )}
+              <ul
+                className="divide-y divide-env-border/60"
+                aria-label="Alertas entregadas abiertas"
+              >
+                {open.map(row)}
+              </ul>
+              {resolved.length > 0 && (
+                <div className="border-t border-env-border">
+                  <button
+                    type="button"
+                    aria-expanded={resolvedOpen}
+                    onClick={() => {
+                      if (resolvedOpen && current?.status === 'resolved') setSelected(null)
+                      setShowResolved(!resolvedOpen)
+                    }}
+                    className="w-full min-h-11 px-3.5 py-2.5 text-left text-sm text-env-muted hover:text-env-text"
+                  >
+                    {resolvedOpen ? '▾' : '▸'} Resueltas ({resolved.length})
+                  </button>
+                  {resolvedOpen && (
+                    <ul
+                      className="divide-y divide-env-border/60"
+                      aria-label="Alertas entregadas resueltas"
                     >
-                      <span className="flex items-start justify-between gap-2">
-                        <span className="font-medium">
-                          {member?.name ?? `#${a.member_id}`} · {categoryLabel(a.category)}
-                        </span>
-                        <StatusBadge status={sev.status} label={sev.label} size="sm" />
-                      </span>
-                      <span className="mt-1 block text-xs text-env-muted">
-                        {statusLabel(a.status)} · entregada{' '}
-                        {a.delivered_at ? formatAgo(a.delivered_at, now) : '—'}
-                      </span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-            {current && (
-              <div className="rounded-xl border border-env-border p-4">
-                <AlertDetail
-                  key={current.id}
-                  alert={current}
-                  ladder={ladder}
-                  vocabulary={vocab}
-                  assessment={undefined}
-                  interventions={[]}
-                  onChanged={() => {
-                    setSelected(current.id) // sigue a la vista tras recibir/resolver
-                    ground.refresh()
-                  }}
-                  showProtocol={false}
-                  allowReply
-                  showDetails={canSeeDetails(current, role, shares.get(current.member_id) ?? false)}
-                />
-              </div>
-            )}
-          </div>
-        )}
-      </section>
+                      {resolved.map(row)}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+          {current && (
+            <section
+              aria-label="Detalle de la alerta"
+              className="hud-panel min-h-0 overflow-y-auto p-4 [scrollbar-color:var(--env-border)_transparent] md:max-h-full"
+            >
+              <AlertDetail
+                key={current.id}
+                alert={current}
+                ladder={ladder}
+                vocabulary={vocab}
+                assessment={undefined}
+                interventions={[]}
+                onChanged={(what) => {
+                  // Sigue a la vista tras recibir; al resolver sale de las abiertas.
+                  setSelected(what === 'resolved' ? null : current.id)
+                  ground.refresh()
+                }}
+                showProtocol={false}
+                allowReply
+                showDetails={canSeeDetails(current, role, shares.get(current.member_id) ?? false)}
+              />
+            </section>
+          )}
+        </div>
+      )}
     </section>
   )
 }

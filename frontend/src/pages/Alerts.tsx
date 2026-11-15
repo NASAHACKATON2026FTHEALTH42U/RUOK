@@ -200,7 +200,7 @@ export default function Alerts() {
                     type="button"
                     aria-expanded={showResolved}
                     onClick={() => setShowResolved((v) => !v)}
-                    className="flex w-full items-center justify-between gap-2 px-3.5 py-2.5 text-left text-sm text-env-muted hover:text-env-text"
+                    className="flex w-full items-center justify-between gap-2 min-h-11 px-3.5 py-2.5 text-left text-sm text-env-muted hover:text-env-text"
                   >
                     <span>
                       {showResolved ? '▾' : '▸'} Resueltas ({resolved.length})
@@ -248,8 +248,9 @@ export default function Alerts() {
                 vocabulary={vocab}
                 assessment={assessment.state === 'ready' ? assessment.data : undefined}
                 interventions={interventions.state === 'ready' ? interventions.data : []}
-                onChanged={() => {
-                  setSelected(current.id) // sigue a la vista tras escalar/recibir/resolver
+                onChanged={(what) => {
+                  // Sigue a la vista tras escalar o recibir; al resolver sale de las abiertas.
+                  setSelected(what === 'resolved' ? null : current.id)
                   alerts.refresh()
                 }}
               />

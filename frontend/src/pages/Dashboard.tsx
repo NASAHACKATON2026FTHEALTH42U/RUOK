@@ -189,13 +189,14 @@ export default function Dashboard() {
         )}
       </header>
 
-      {/* Móvil: anillo de sistemas y lista de sistemas (estilo HUD, maqueta Main). */}
+      {/* Móvil: cuerpo en pequeño con el estado y lista de sistemas (estilo HUD). */}
       <SystemsRing
         regions={regions}
         stale={stale}
         name={user?.member_id === memberId ? user?.display_name.split(' ').pop() : undefined}
-        env={env}
         now={serverNow()}
+        liveness={a.liveness}
+        staleLabel={formatSinceLabel(a.last_seen_at, serverNow())}
         onSelectSystem={selectSystem}
       />
 

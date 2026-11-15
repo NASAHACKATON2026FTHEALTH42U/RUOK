@@ -7,6 +7,7 @@ import { useVocab } from '../../environments/useVocab'
 import { useEnvironmentStore } from '../../store/environment'
 import { SosDialog } from './SosDialog'
 import { SosEmergency } from './SosEmergency'
+import { Icon } from '../ui/Icon'
 
 /**
  * Lo que necesitan el SOS y los avisos: quién pide ayuda, su entorno y las intervenciones (se
@@ -75,7 +76,7 @@ export function SosButton({
         <div className="flex items-start justify-center">
           <button
             {...common}
-            className="sos-font -mt-6 flex size-[4.75rem] items-center justify-center rounded-full border-4 border-env-bg bg-st-crit text-lg font-semibold tracking-[0.12em] text-[#1a0606] shadow-lg transition-[transform,box-shadow,filter] duration-150 hover:bg-[#ff2a2a] hover:shadow-[0_0_0_3px_#ffffff,0_0_28px_rgba(255,42,42,0.85)] motion-safe:hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
+            className="sos-font -mt-6 flex size-[4.75rem] items-center justify-center rounded-full border-4 border-env-bg bg-[var(--sos-bg)] text-lg font-semibold tracking-[0.12em] text-[var(--sos-text)] shadow-lg transition-[transform,box-shadow,background-color] duration-150 hover:bg-[var(--sos-bg-strong)] hover:shadow-[0_0_0_3px_#ffffff,0_0_28px_rgba(255,42,42,0.85)] active:bg-[var(--sos-bg-strong)] active:shadow-[0_0_0_3px_#ffffff,0_0_28px_rgba(255,42,42,0.85)] motion-safe:hover:scale-105 motion-safe:active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
           >
             SOS
           </button>
@@ -123,7 +124,7 @@ export function NoticeButton({ className = '' }: { className?: string }) {
         aria-haspopup="dialog"
         className={`inline-flex min-h-11 items-center gap-2 rounded-lg border border-env-border px-3.5 text-sm font-medium hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${className}`}
       >
-        <span aria-hidden>✉</span>
+        <Icon name="mail" size={17} />
         Enviar aviso a control
       </button>
       {open && (

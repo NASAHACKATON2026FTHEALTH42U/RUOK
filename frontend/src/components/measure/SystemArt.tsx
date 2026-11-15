@@ -13,14 +13,10 @@ const ART: Record<string, ReactNode> = {
       <path d="M2 62 H40 l6 -14 l8 30 l7 -38 l7 22 h52" />
     </>
   ),
-  // Hueso.
+  // Hueso: un solo contorno (caña y dos cóndilos por extremo), sin líneas interiores.
   musculoskeletal: (
     <g transform="rotate(-30 60 60)">
-      <path d="M36 53 H84 M36 67 H84" />
-      <circle cx="28" cy="50" r="10" />
-      <circle cx="28" cy="70" r="10" />
-      <circle cx="92" cy="50" r="10" />
-      <circle cx="92" cy="70" r="10" />
+      <path d="M39.95 53 H80.05 A10 10 0 1 1 96 60 A10 10 0 1 1 80.05 67 H39.95 A10 10 0 1 1 24 60 A10 10 0 1 1 39.95 53 Z" />
     </g>
   ),
   // Escudo con una cruz.

@@ -13,6 +13,7 @@ import { ControlPanel } from './ControlHeader'
 import { formatDuration } from './feed'
 import { Segmented } from './OperatorMessageForm'
 import type { Scenario } from './simulate'
+import { Icon } from '../ui/Icon'
 
 const FAST_FORWARD: number[] = [60, 300, 900, 3600]
 const LINK_STATES: { id: Schema<'LinkState'>; label: string }[] = [
@@ -87,7 +88,8 @@ export function ScenarioPanel({
                 className={BTN}
                 onClick={() => run(`Escenario «${s.label}» cargado`, () => demoScenario(s.id))}
               >
-                ▶ Lanzar
+                <Icon name="play" size={14} className="mr-1" />
+                Lanzar
               </button>
             </li>
           ))}

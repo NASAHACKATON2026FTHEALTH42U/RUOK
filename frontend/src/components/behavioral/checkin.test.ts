@@ -3,17 +3,17 @@ import { answeredCount, buildCheckinBatch, CHECKIN_INDICATORS, faceFor } from '.
 
 describe('faceFor', () => {
   it('más es mejor: 1 triste, 5 contento', () => {
-    expect(faceFor(1, false)).toBe('😞')
-    expect(faceFor(5, false)).toBe('😄')
+    expect(faceFor(1, false)).toBe('mood-1')
+    expect(faceFor(5, false)).toBe('mood-5')
   })
   it('más es peor (estrés, soledad): la escala se invierte', () => {
-    expect(faceFor(1, true)).toBe('😄')
-    expect(faceFor(5, true)).toBe('😞')
-    expect(faceFor(3, true)).toBe('😐')
+    expect(faceFor(1, true)).toBe('mood-5')
+    expect(faceFor(5, true)).toBe('mood-1')
+    expect(faceFor(3, true)).toBe('mood-3')
   })
   it('acota valores fuera de 1–5', () => {
-    expect(faceFor(0, false)).toBe('😞')
-    expect(faceFor(9, false)).toBe('😄')
+    expect(faceFor(0, false)).toBe('mood-1')
+    expect(faceFor(9, false)).toBe('mood-5')
   })
 })
 

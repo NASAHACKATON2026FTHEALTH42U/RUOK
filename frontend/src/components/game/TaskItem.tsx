@@ -75,7 +75,7 @@ export function TaskItem({ task, pending, onComplete, busy }: TaskItemProps) {
       {link && !done && (
         <Link
           to={link}
-          className="shrink-0 rounded-md border border-env-border px-3 py-1.5 text-sm hover:border-env-text"
+          className="inline-flex min-h-11 shrink-0 items-center border border-env-border px-3.5 text-sm hover:border-env-text"
         >
           Hacer
         </Link>

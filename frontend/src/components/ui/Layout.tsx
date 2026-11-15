@@ -17,6 +17,7 @@ import { LivenessGuard, MemberActivitySelector } from '../liveness/LivenessGuard
 import { HudClock } from './HudClock'
 import { LinkStatusChip } from './LinkStatusChip'
 import { ScopeSelector } from './ScopeSelector'
+import { Toaster } from './Toaster'
 import { MockBanner } from './MockBanner'
 import { NavIcon } from './NavIcon'
 import { allowedItems, menuFor, navItems, OPERATOR_FILL_ROUTES, tabsFor } from './navigation'
@@ -58,7 +59,7 @@ export function Layout() {
   const logo = (
     <NavLink
       to={role ? homeFor(role) : '/'}
-      className="shrink-0 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-env-primary"
+      className="inline-flex min-h-11 shrink-0 items-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-env-primary"
       aria-label="R U OK?: inicio"
     >
       <RuokMark />
@@ -67,6 +68,12 @@ export function Layout() {
 
   return (
     <div className="flex h-dvh flex-col">
+      {/* Rejilla viva: una pasada de luz por las líneas del fondo al cambiar de página (la `key`
+          reinicia la animación) y otra lenta de vez en cuando. Decorativa. */}
+      <div aria-hidden className="grid-fx">
+        <span key={pathname} className="grid-fx-band grid-fx-nav" />
+        <span className="grid-fx-band grid-fx-ambient" />
+      </div>
       <MockBanner />
 
       {/* Cabecera móvil: logo y reloj. El SOS va en la barra inferior, al alcance del pulgar. */}
@@ -166,13 +173,13 @@ export function Layout() {
           {/* Contenido. En móvil, cada pantalla debería caber sin scroll (hud-style.md §5). */}
           <main className="min-w-0 flex-1 overflow-x-clip overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
             <div
-              className={`mx-auto w-full px-3.5 py-3.5 md:px-4 md:py-4 lg:px-6 lg:py-6 max-w-[1800px] ${fillPage ? 'flex h-full flex-col' : 'flex min-h-full flex-col'}`}
+              className={`mx-auto w-full px-3.5 pt-3.5 pb-9 md:px-4 md:py-4 lg:px-6 lg:py-6 max-w-[1800px] ${fillPage ? 'flex h-full flex-col' : 'flex min-h-full flex-col'}`}
             >
               {/* Fundido corto al cambiar de página (FE-26). Solo opacidad: un transform crearía un
                 bloque contenedor y descolocaría las modales `fixed` de las páginas. */}
               <motion.div
                 key={pathname}
-                className={fillPage ? 'flex min-h-0 flex-1 flex-col' : 'flex flex-1 flex-col'}
+                className={`page-enter ${fillPage ? 'flex min-h-0 flex-1 flex-col' : 'flex flex-1 flex-col'}`}
                 initial={reducedMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}
@@ -205,6 +212,7 @@ export function Layout() {
       <LivenessGuard />
       <RealtimeConnector />
       <LiveAlertToast />
+      <Toaster />
     </div>
   )
 }

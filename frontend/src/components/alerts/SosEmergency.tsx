@@ -213,7 +213,7 @@ export function SosEmergency({
                 <button
                   type="button"
                   onClick={() => void fireRef.current()}
-                  className="min-h-12 rounded-xl bg-st-crit px-4 font-semibold text-[#1a0606] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text max-sm:min-h-16 max-sm:text-xl"
+                  className="min-h-12 rounded-xl bg-[var(--sos-bg)] px-4 font-semibold text-[var(--sos-text)] hover:bg-[var(--sos-bg-strong)] active:bg-[var(--sos-bg-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text max-sm:min-h-16 max-sm:text-xl"
                 >
                   Enviar ya
                 </button>
