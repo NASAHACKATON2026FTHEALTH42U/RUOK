@@ -15,6 +15,7 @@ from app.schemas.common import (
     AlertStatus,
     ApiModel,
     EscalationMode,
+    NotificationLevel,
     Slug,
 )
 from app.schemas.link import LinkStatus
@@ -82,6 +83,15 @@ class ResolveIn(ApiModel):
 class AlertMessageIn(ApiModel):
     actor: Actor
     text: str = Field(min_length=1)
+
+
+class NotificationIn(ApiModel):
+    """Notificación personalizada a un member (operador o staff). Idempotente por `id`."""
+
+    id: UUID
+    title: str | None = Field(default=None, max_length=80)
+    text: str = Field(min_length=1, max_length=500)
+    level: NotificationLevel = NotificationLevel.info
 
 
 class GroundView(ApiModel):

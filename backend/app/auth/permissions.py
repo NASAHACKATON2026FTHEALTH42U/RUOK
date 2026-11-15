@@ -53,6 +53,7 @@ PERMISSIONS: dict[str, frozenset[str]] = {
     "alerts:create": frozenset({"member", "medic", "commander", "admin"}),
     "alerts:escalate": frozenset({"member", "medic", "commander", "admin"}),
     "alerts:ack": frozenset({"medic", "commander", "responder", "psych", "admin"}),
+    "notifications:send": frozenset({"medic", "commander", "admin"}),
     "alerts:message": frozenset({"member", "medic", "commander", "responder", "psych", "admin"}),
     "ground:read": frozenset({"responder", "psych", "admin"}),
     # Rutina y gamificación

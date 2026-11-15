@@ -27,7 +27,8 @@ import bcrypt
 from sqlmodel import Session, select
 
 from app import clock, models
-from app.services import environments
+from app.schemas.common import EventType
+from app.services import environments, events
 
 __all__ = [
     "LOCK_SECONDS",
@@ -315,6 +316,16 @@ def create_user(
         pin_hash=hash_secret(pin) if pin else None,
     )
     session.add(account)
+    session.flush()  # id para el evento
+    events.emit(
+        session,
+        EventType.user_created,
+        env_id=env_id,
+        member_id=member_id,
+        user_id=account.id,
+        summary=f"Usuario creado: {display_name} ({role})",
+        payload={"username": username, "display_name": display_name, "role": role},
+    )
     session.commit()
     session.refresh(account)
     return account

@@ -2,11 +2,10 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import { SessionMenu } from '../components/auth/SessionMenu'
 import { MemberActivitySelector } from '../components/liveness/LivenessGuard'
-import { EnvironmentSelector } from '../components/ui/EnvironmentSelector'
-import { MemberSwitcher } from '../components/ui/MemberSwitcher'
+import { ScopeSelector } from '../components/ui/ScopeSelector'
 import { LinkStatusChip } from '../components/ui/LinkStatusChip'
 import { ChevronIcon } from '../components/ui/NavIcon'
-import { allowedItems, navItems, tabsFor } from '../components/ui/navigation'
+import { allowedItems, menuFor, navItems, tabsFor } from '../components/ui/navigation'
 import { PendingSyncChip } from '../components/ui/PendingSyncChip'
 import { ServerStatus } from '../components/ui/ServerStatus'
 import { useVocab } from '../environments/useVocab'
@@ -20,7 +19,7 @@ export default function More() {
   const vocab = useVocab()
   const { role, can } = useAuth()
   const device = getDevice()
-  const allowed = allowedItems(navItems(vocab), can)
+  const allowed = menuFor(role, allowedItems(navItems(vocab), can))
   const inTabs = new Set(tabsFor(role, allowed).map((t) => t.to))
   const rest = allowed.filter((i) => !inTabs.has(i.to))
 
@@ -53,6 +52,8 @@ export default function More() {
 
       <MemberActivitySelector />
 
+      <ScopeSelector />
+
       <section aria-label="Estado del dispositivo" className="hud-panel">
         <div className="hud-panel-head">Conexión</div>
         <div className="flex flex-wrap items-center gap-2 px-3.5 py-3 text-xs">
@@ -60,16 +61,6 @@ export default function More() {
           <LinkStatusChip />
           <PendingSyncChip />
         </div>
-        {can('action:change-environment') && (
-          <div className="border-t border-hud-row px-3.5 py-3 text-sm">
-            <EnvironmentSelector />
-          </div>
-        )}
-        {can('view:members') && (
-          <div className="border-t border-hud-row px-3.5 py-3 text-sm">
-            <MemberSwitcher />
-          </div>
-        )}
       </section>
 
       <p className="px-1 text-center text-xs text-env-muted">

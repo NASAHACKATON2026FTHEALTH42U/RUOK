@@ -145,6 +145,32 @@ def test_active_devices_and_measurements_last_hour(session, frozen):
     assert m.measurements_last_hour == before + 1
 
 
+
+def test_overview_filtered_by_env_has_only_its_data(session, frozen):
+    before = {e: control.overview(session, e).metrics for e in ("mars", "hospital")}
+    _alert(session, env_id="mars", severity="critical")
+    session.add(
+        models.Measurement(
+            id=str(uuid.uuid4()),
+            member_id=seed.VEGA,  # de Marte
+            indicator_id="heart_rate",
+            value=70,
+            unit="bpm",
+            taken_at=T0,
+            received_at=T0,
+        )
+    )
+    session.commit()
+    mars = control.overview(session, "mars")
+    hospital = control.overview(session, "hospital")
+    assert [e.environment.id for e in mars.environments] == ["mars"]
+    assert [e.environment.id for e in hospital.environments] == ["hospital"]
+    assert all(m.env_id == "hospital" for m in hospital.environments[0].members)
+    # Lo de Marte cuenta en Marte y no en el hospital.
+    assert mars.metrics.open_alerts == before["mars"].open_alerts + 1
+    assert mars.metrics.measurements_last_hour == before["mars"].measurements_last_hour + 1
+    assert hospital.metrics == before["hospital"]
+
 # ── API ────────────────────────────────────────────────────────────────
 
 
@@ -215,3 +241,10 @@ def test_lan_host_and_port_overrides(monkeypatch):
     monkeypatch.setenv("RUOK_LAN_HOST", "192.168.8.10")
     monkeypatch.setenv("RUOK_PUBLIC_PORT", "5173")
     assert network.lan_urls(network.public_port(8000)) == ["http://192.168.8.10:5173"]
+
+
+def test_api_overview_env_filter_and_unknown_env(client):
+    r = client.get(f"{API}/control/overview", params={"env_id": "hospital"})
+    assert r.status_code == 200, r.text
+    assert [e["environment"]["id"] for e in r.json()["environments"]] == ["hospital"]
+    assert client.get(f"{API}/control/overview", params={"env_id": "pluto"}).status_code == 404

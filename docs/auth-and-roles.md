@@ -31,7 +31,7 @@
 | Vista / acción | member | medic | commander | responder | psych | family (P2) | admin |
 |---|---|---|---|---|---|---|---|
 | Login | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **SOS** (también **sin sesión**) y avisos a control | ✅ | ✅ | ✅ | — | — | ✅ | ✅ |
+| **SOS** (también **sin sesión**) y avisos a control | ✅ | ✅ | ✅ | — | — | ✅ | — (es control: crea alertas y notificaciones desde Simulación) |
 | Selector de entorno | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
 | Dashboard (cuerpo + semáforo) | ✅ propio | ✅ todos los del entorno | 👁️ todos | 🔒 (usa `/ground`) | 🔒 | 👁️ agregado de su familiar | ✅ |
 | Registrar mediciones | ✅ propio | ✅ para cualquier member (asistida) | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |

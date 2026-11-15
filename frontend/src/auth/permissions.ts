@@ -21,7 +21,8 @@ export const PERMISSIONS = {
   'view:home-messages': ['member', 'admin'],
   'view:control': ['admin'],
   // Acciones
-  'action:sos': ['member', 'medic', 'commander', 'family', 'admin'],
+  // El operador es control: no pide ayuda (crea alertas y notificaciones desde Simulación).
+  'action:sos': ['member', 'medic', 'commander', 'family'],
   'action:measure-others': ['medic', 'admin'],
   'action:change-environment': ['admin'],
   'action:demo-panel': ['admin'],
@@ -51,6 +52,11 @@ export const ROUTE_PERMISSIONS: Record<string, Permission> = {
   '/alerts': 'view:alerts',
   '/ground': 'view:ground',
   '/control': 'view:control',
+  // Secciones del centro de control (operador)
+  '/control/simulate': 'view:control',
+  '/control/users': 'view:control',
+  '/control/devices': 'view:control',
+  '/control/log': 'view:control',
 }
 
 /**

@@ -17,6 +17,7 @@ import { describeLink, formatDelay, hhmm } from '../components/ui/link'
 import { pendingHomeMessages, sendHomeMessage, useOutboxStore } from '../offline/outbox'
 import { useEnvironmentStore } from '../store/environment'
 import { NoMemberSelected } from '../components/ui/NoMemberSelected'
+import { AutoTextarea } from '../components/ui/AutoTextarea'
 
 /** Clase del color de cada tono. El estado nunca va solo con color: lleva icono y texto. */
 const TONE_CLASS: Record<Tone, string> = {
@@ -195,7 +196,7 @@ export default function HomeMessages() {
         <label htmlFor="home-message" className="hud-label">
           Tu mensaje
         </label>
-        <textarea
+        <AutoTextarea
           id="home-message"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -209,7 +210,7 @@ export default function HomeMessages() {
           maxLength={MAX_LENGTH}
           rows={2}
           placeholder="Escribe a casa…"
-          className={`hud-input !h-auto resize-none !py-2.5 !font-sans !text-[0.9375rem] leading-snug ${focusRing}`}
+          className={`hud-input !py-2.5 !font-sans !text-[0.9375rem] leading-snug ${focusRing}`}
         />
         {error && (
           <p role="alert" className="text-sm text-st-crit">

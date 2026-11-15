@@ -22,6 +22,8 @@ export const GROUPS: Record<string, { label: string; icon: string }> = {
   auth: { label: 'Accesos', icon: '🔐' },
   task: { label: 'Misiones', icon: '🎯' },
   device: { label: 'Dispositivos', icon: '📱' },
+  user: { label: 'Usuarios', icon: '👤' },
+  notification: { label: 'Notificaciones', icon: '✉' },
 }
 
 export function groupOf(type: string): string {

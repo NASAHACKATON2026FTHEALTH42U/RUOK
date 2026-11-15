@@ -28,60 +28,57 @@ export function ConnectQr() {
   }, [url])
 
   return (
-    <section
-      aria-label="QR de conexión"
-      className="rounded-xl border border-env-border bg-env-surface p-4"
-    >
-      <h2 className="text-xl font-semibold">Unirse desde un móvil</h2>
-      {info.state === 'loading' && (
-        <div className="mt-3 h-48 w-48 animate-pulse rounded-lg bg-env-bg" />
-      )}
-      {info.state === 'error' && (
-        <p className="mt-2 text-env-muted">
-          No se ha podido obtener la dirección del servidor.{' '}
-          <button type="button" onClick={info.retry} className="underline">
-            Reintentar
-          </button>
-        </p>
-      )}
-      {info.state === 'ready' && urls.length === 0 && (
-        <p className="mt-2 text-env-muted">El servidor no tiene dirección en la red local.</p>
-      )}
-      {url && (
-        <div className="mt-3 flex flex-wrap items-center gap-4">
-          {/* Fondo blanco siempre: los lectores de QR necesitan contraste oscuro sobre claro. */}
-          <div
-            role="img"
-            aria-label={`Código QR para abrir ${url}`}
-            className="h-48 w-48 rounded-lg bg-white p-2"
-            // SVG generado localmente por la librería a partir de la URL del servidor.
-            dangerouslySetInnerHTML={svg ? { __html: svg } : undefined}
-          />
-          <div className="space-y-2 text-sm">
-            <p>Escanéalo con la cámara del móvil, conectado al wifi de la demo.</p>
-            <p className="font-mono text-base break-all">{url}</p>
-            {urls.length > 1 && (
-              <label className="block">
-                <span className="text-env-muted">Dirección</span>
-                <select
-                  value={index}
-                  onChange={(e) => setIndex(Number(e.target.value))}
-                  className="mt-1 block rounded-md border border-env-border bg-env-bg px-2 py-1 text-env-text"
-                >
-                  {urls.map((u, i) => (
-                    <option key={u} value={i}>
-                      {u}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-            {info.state === 'ready' && (
-              <p className="text-env-muted">Servidor: {info.data.hostname}</p>
-            )}
+    <section aria-label="QR de conexión" className="hud-panel">
+      <h2 className="hud-panel-head">Conectar un móvil</h2>
+      <div className="p-4">
+        {info.state === 'loading' && <div className="h-48 w-48 animate-pulse bg-env-bg" />}
+        {info.state === 'error' && (
+          <p className="text-env-muted">
+            No se ha podido obtener la dirección del servidor.{' '}
+            <button type="button" onClick={info.retry} className="underline">
+              Reintentar
+            </button>
+          </p>
+        )}
+        {info.state === 'ready' && urls.length === 0 && (
+          <p className="text-env-muted">El servidor no tiene dirección en la red local.</p>
+        )}
+        {url && (
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Fondo blanco siempre: los lectores de QR necesitan contraste oscuro sobre claro. */}
+            <div
+              role="img"
+              aria-label={`Código QR para abrir ${url}`}
+              className="h-48 w-48 rounded-lg bg-white p-2"
+              // SVG generado localmente por la librería a partir de la URL del servidor.
+              dangerouslySetInnerHTML={svg ? { __html: svg } : undefined}
+            />
+            <div className="space-y-2 text-sm">
+              <p>Escanéalo con la cámara del móvil, conectado a la misma wifi que este servidor.</p>
+              <p className="font-mono text-base break-all">{url}</p>
+              {urls.length > 1 && (
+                <label className="block">
+                  <span className="text-env-muted">Dirección</span>
+                  <select
+                    value={index}
+                    onChange={(e) => setIndex(Number(e.target.value))}
+                    className="mt-1 block rounded-md border border-env-border bg-env-bg px-2 py-1 text-env-text"
+                  >
+                    {urls.map((u, i) => (
+                      <option key={u} value={i}>
+                        {u}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              {info.state === 'ready' && (
+                <p className="text-env-muted">Servidor: {info.data.hostname}</p>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </section>
   )
 }

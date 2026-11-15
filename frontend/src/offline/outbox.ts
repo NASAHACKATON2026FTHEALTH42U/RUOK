@@ -613,6 +613,19 @@ export function pauseLiveness(envId: string, paused: boolean) {
   return unwrap(api.POST('/api/v1/control/liveness/pause', { body: { env_id: envId, paused } }))
 }
 
+/**
+ * Notificación personalizada a un member (`POST /members/{id}/notifications`): directa, como el
+ * resto de acciones de operación, e idempotente por el UUID del cliente (reintentar es seguro).
+ */
+export function sendNotification(memberId: number, body: Schema<'NotificationIn'>) {
+  return unwrap(
+    api.POST('/api/v1/members/{member_id}/notifications', {
+      params: { path: { member_id: memberId } },
+      body,
+    }),
+  )
+}
+
 // ── Señales en tiempo real (FE-15): NO se encolan ────────────
 // El heartbeat y la respuesta al "R U OK?" solo tienen sentido en el momento: un heartbeat
 // guardado y enviado más tarde haría creer al servidor que el member seguía vivo. Si no hay

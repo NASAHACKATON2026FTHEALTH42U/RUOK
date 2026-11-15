@@ -14,13 +14,12 @@ import { UserIdentity } from '../auth/UserIdentity'
 import { RuokMark } from './RuokLogo'
 import { SessionMenu } from '../auth/SessionMenu'
 import { LivenessGuard, MemberActivitySelector } from '../liveness/LivenessGuard'
-import { EnvironmentSelector } from './EnvironmentSelector'
 import { HudClock } from './HudClock'
 import { LinkStatusChip } from './LinkStatusChip'
-import { MemberSwitcher } from './MemberSwitcher'
+import { ScopeSelector } from './ScopeSelector'
 import { MockBanner } from './MockBanner'
 import { NavIcon } from './NavIcon'
-import { allowedItems, navItems, tabsFor } from './navigation'
+import { allowedItems, menuFor, navItems, OPERATOR_FILL_ROUTES, tabsFor } from './navigation'
 import { PendingSyncChip } from './PendingSyncChip'
 import { ServerStatus } from './ServerStatus'
 import { TOPBAR_SLOT_ID } from './TopBarPortal'
@@ -49,8 +48,11 @@ export function Layout() {
   const env = envs.state === 'ready' ? envs.data.find((e) => e.id === envId) : undefined
 
   // Solo las vistas que permite el rol (FE-28, src/auth/permissions.ts).
-  const allowed = allowedItems(navItems(vocab), can)
+  // Menú del rol (el operador tiene el suyo: gestión y monitorización).
+  const allowed = menuFor(role, allowedItems(navItems(vocab), can))
   const tabs = tabsFor(role, allowed)
+  // Vistas que ocupan el alto disponible (el scroll es de sus paneles, no de la página).
+  const fillPage = fill || OPERATOR_FILL_ROUTES.includes(pathname)
 
   // Logo de las maquetas HUD (emblema de anillos y "R U OK?"); lleva a la vista inicial del rol.
   const logo = (
@@ -81,7 +83,17 @@ export function Layout() {
           className="hidden w-52 shrink-0 flex-col gap-3 overflow-y-auto border-r border-hud-line px-3 py-4 lg:w-64 lg:px-4 [scrollbar-width:none] md:flex [&::-webkit-scrollbar]:hidden [@media(max-height:800px)]:gap-2 [@media(max-height:800px)]:py-3"
         >
           {/* SOS: lo primero del menú, arriba a la izquierda y siempre a la vista. */}
-          <SosButton variant="sidebar" />
+          {role === 'admin' ? (
+            // El operador es control: en vez del SOS, una placa (sin función) que lo recuerda.
+            // En el móvil no hay nada en su lugar (el SOS de la barra inferior no sale).
+            <p className="sos-font hud-btn pointer-events-none mb-3 !h-16 w-full shrink-0 border-env-primary/70 bg-env-primary/10 !text-xl !font-semibold !tracking-[0.3em] text-env-primary [@media(max-height:800px)]:mb-4 [@media(max-height:800px)]:!h-14">
+              Control
+            </p>
+          ) : (
+            <SosButton variant="sidebar" />
+          )}
+          {/* Ámbito (entorno y member): el único sitio donde se eligen, para todas las vistas. */}
+          <ScopeSelector />
 
           <nav aria-label="Secciones" className="hud-panel">
             <ul>
@@ -110,9 +122,6 @@ export function Layout() {
             <LinkStatusChip quiet />
             <PendingSyncChip />
             <ServerStatus quiet />
-            {can('action:change-environment') && <EnvironmentSelector />}
-            {/* Quien supervisa (admin, medic, commander) cambia de member desde cualquier página (FE-35). */}
-            <MemberSwitcher />
             {/* Aviso siempre visible en escritorio; en móvil va en «Más» y en el login. */}
             <p className="mt-2 text-[0.75rem] leading-snug text-env-muted">
               Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
@@ -157,13 +166,13 @@ export function Layout() {
           {/* Contenido. En móvil, cada pantalla debería caber sin scroll (hud-style.md §5). */}
           <main className="min-w-0 flex-1 overflow-x-clip overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
             <div
-              className={`mx-auto w-full px-3.5 py-3.5 md:px-4 md:py-4 lg:px-6 lg:py-6 max-w-[1800px] ${fill ? 'flex h-full flex-col' : 'flex min-h-full flex-col'}`}
+              className={`mx-auto w-full px-3.5 py-3.5 md:px-4 md:py-4 lg:px-6 lg:py-6 max-w-[1800px] ${fillPage ? 'flex h-full flex-col' : 'flex min-h-full flex-col'}`}
             >
               {/* Fundido corto al cambiar de página (FE-26). Solo opacidad: un transform crearía un
                 bloque contenedor y descolocaría las modales `fixed` de las páginas. */}
               <motion.div
                 key={pathname}
-                className={fill ? 'flex min-h-0 flex-1 flex-col' : 'flex flex-1 flex-col'}
+                className={fillPage ? 'flex min-h-0 flex-1 flex-col' : 'flex flex-1 flex-col'}
                 initial={reducedMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}

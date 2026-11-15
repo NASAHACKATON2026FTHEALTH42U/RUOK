@@ -1,7 +1,8 @@
 """Centro de control (BE-30, docs/control-center-and-devices.md §2).
 
 Vista global **sin retardo** para el admin: todos los entornos con sus members
-(estado global y liveness), alertas abiertas por severidad, enlace y métricas.
+(estado global y liveness), alertas abiertas por severidad, enlace y métricas. Con
+`env_id`, solo ese entorno y sus métricas (el operador no ve datos de otros entornos).
 
 La pausa del liveness (presentación) se guarda en `app_state`: mientras un entorno
 está en pausa no se lanzan "R U OK?" ni alertas `no_contact` (`liveness_watch`). El
@@ -61,15 +62,17 @@ def _open_alert_counts(session: Session) -> dict[str, AlertCounts]:
     return counts
 
 
-def avg_alert_response_s(session: Session) -> float | None:
+def avg_alert_response_s(session: Session, env_id: str | None = None) -> float | None:
     """Media de segundos entre que se crea una alerta y su primer reconocimiento.
     `None` si todavía no se ha reconocido ninguna (sin datos ≠ 0)."""
-    rows = session.exec(
+    query = (
         select(models.Alert.created_at, func.min(models.AlertEvent.at))
         .join(models.AlertEvent, col(models.AlertEvent.alert_id) == models.Alert.id)
         .where(models.AlertEvent.type == "acknowledged")
-        .group_by(models.Alert.id)
-    ).all()
+    )
+    if env_id is not None:
+        query = query.where(models.Alert.env_id == env_id)
+    rows = session.exec(query.group_by(models.Alert.id)).all()
     if not rows:
         return None
     total = sum((_utc(ack) - _utc(created)).total_seconds() for created, ack in rows)
@@ -83,35 +86,50 @@ def _utc(value: datetime) -> datetime:
     return value if value.tzinfo else value.replace(tzinfo=clock.now().tzinfo)
 
 
-def metrics(session: Session, now: datetime | None = None) -> ControlMetrics:
+def metrics(
+    session: Session, now: datetime | None = None, env_id: str | None = None
+) -> ControlMetrics:
+    """Métricas globales o, con `env_id`, las de ese entorno (las mediciones por el entorno
+    del member y los dispositivos por el de su último usuario, como `GET /devices?env_id=`)."""
     now = now or clock.now()
-    measurements = session.exec(
+    measurements = (
         select(func.count())
         .select_from(models.Measurement)
         .where(col(models.Measurement.received_at) >= now - timedelta(hours=1))
-    ).one()
-    open_alerts = session.exec(
+    )
+    open_alerts = (
         select(func.count()).select_from(models.Alert).where(col(models.Alert.status).in_(_OPEN))
-    ).one()
-    devices = session.exec(
+    )
+    devices = (
         select(func.count())
         .select_from(models.Device)
         .where(col(models.Device.last_seen_at) >= now - ACTIVE_DEVICE_WINDOW)
-    ).one()
+    )
+    if env_id is not None:
+        measurements = measurements.join(
+            models.Member, col(models.Measurement.member_id) == models.Member.id
+        ).where(models.Member.env_id == env_id)
+        open_alerts = open_alerts.where(models.Alert.env_id == env_id)
+        devices = devices.join(
+            models.UserAccount, col(models.Device.user_id) == models.UserAccount.id
+        ).where(models.UserAccount.env_id == env_id)
     return ControlMetrics(
-        measurements_last_hour=measurements,
-        open_alerts=open_alerts,
-        active_devices=devices,
-        avg_alert_response_s=avg_alert_response_s(session),
+        measurements_last_hour=session.exec(measurements).one(),
+        open_alerts=session.exec(open_alerts).one(),
+        active_devices=session.exec(devices).one(),
+        avg_alert_response_s=avg_alert_response_s(session, env_id),
     )
 
 
-def overview(session: Session) -> ControlOverview:
+def overview(session: Session, env_id: str | None = None) -> ControlOverview:
+    """Todos los entornos o, con `env_id`, solo ese (y sus métricas)."""
     now = clock.now()
     counts = _open_alert_counts(session)
     paused = paused_envs(session)
     envs = []
     for env in environments.list_environments():
+        if env_id is not None and env.id != env_id:
+            continue
         members = session.exec(
             select(models.Member).where(models.Member.env_id == env.id).order_by(models.Member.id)
         ).all()
@@ -124,4 +142,6 @@ def overview(session: Session) -> ControlOverview:
                 liveness_paused=env.id in paused,
             )
         )
-    return ControlOverview(generated_at=now, environments=envs, metrics=metrics(session, now))
+    return ControlOverview(
+        generated_at=now, environments=envs, metrics=metrics(session, now, env_id)
+    )
