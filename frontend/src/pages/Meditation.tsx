@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useInterventions, type Intervention } from '../api/useInterventions'
+import { expandSteps } from '../components/behavioral/intervention'
 import { InterventionPlayer } from '../components/behavioral/InterventionPlayer'
 import { formatRemaining, meditationsOf, TIMER_OPTIONS } from '../components/behavioral/meditation'
 import { SoundscapeIcon } from '../components/behavioral/SoundscapeIcon'
@@ -11,13 +12,26 @@ import {
   stopSoundscape,
   type SoundscapeId,
 } from '../components/behavioral/soundscapes'
+import { hasVoiceFor, speak, stopSpeaking } from '../components/behavioral/voiceGuide'
+
+const VOICE_KEY = 'ruok.meditation.voice'
+
+/** Preferencia de voz guía del dispositivo (por defecto, sí). */
+function readVoicePref(): boolean {
+  try {
+    return localStorage.getItem(VOICE_KEY) !== 'off'
+  } catch {
+    return true
+  }
+}
 
 /**
  * Meditación (FE-36, sustituye a la galería «La Tierra»): paisajes sonoros relajantes que se
  * pueden cambiar en cualquier momento (generados en el navegador, sin archivos ni internet) y
  * meditaciones guiadas del catálogo (`interventions.json`, categoría `meditation`, con fuentes en
  * docs/sources.md). Una meditación se reproduce en el modo guiado de las intervenciones, con el
- * paisaje elegido de fondo y una campana al empezar, en cada paso y al terminar.
+ * paisaje elegido de fondo, una campana al empezar y al terminar y, si se han generado los
+ * audios (FE-37, ElevenLabs, empaquetados), una voz guía que dice cada paso y baja el paisaje.
  */
 export default function Meditation() {
   const interventions = useInterventions()
@@ -31,9 +45,37 @@ export default function Meditation() {
   const [now, setNow] = useState(() => Date.now())
   const [session, setSession] = useState<Intervention | null>(null)
   const [noAudio, setNoAudio] = useState(false)
+  const [voiceOn, setVoiceOn] = useState(readVoicePref)
+  const [voiceReady, setVoiceReady] = useState(false)
+  const firstLine = useRef(0)
 
-  // Al salir de la sección, el sonido se apaga.
-  useEffect(() => () => stopSoundscape(400), [])
+  // ¿Hay audios de la voz guía para estas meditaciones?
+  const allSteps = meditations.flatMap((m) => m.steps).join('\n')
+  useEffect(() => {
+    if (!allSteps) return
+    void hasVoiceFor(allSteps.split('\n')).then(setVoiceReady)
+  }, [allSteps])
+  const voice = voiceOn && voiceReady
+  const toggleVoice = () => {
+    const next = !voiceOn
+    setVoiceOn(next)
+    if (!next) stopSpeaking()
+    try {
+      localStorage.setItem(VOICE_KEY, next ? 'on' : 'off')
+    } catch {
+      // sin almacenamiento, la preferencia dura lo que la página
+    }
+  }
+
+  // Al salir de la sección, el sonido y la voz se apagan.
+  useEffect(
+    () => () => {
+      window.clearTimeout(firstLine.current)
+      stopSpeaking()
+      stopSoundscape(400)
+    },
+    [],
+  )
 
   // Temporizador: cuenta atrás y, al acabar, un fundido largo.
   useEffect(() => {
@@ -71,7 +113,61 @@ export default function Meditation() {
     if (!playing) play(chosen)
     playBell()
     setSession(m)
+    // La primera frase, después de la campana.
+    window.clearTimeout(firstLine.current)
+    if (voice) firstLine.current = window.setTimeout(() => void speak(m.steps[0]), 1500)
   }
+  const endSession = () => {
+    window.clearTimeout(firstLine.current)
+    stopSpeaking()
+    setSession(null)
+  }
+  /** Cada paso nuevo: su frase (si hay voz y audio) o la campana; al terminar, la campana. */
+  const onStep = (index: number, done: boolean) => {
+    window.clearTimeout(firstLine.current)
+    if (done || !session) {
+      stopSpeaking()
+      playBell()
+      return
+    }
+    const text = expandSteps(session.steps)[index]?.text
+    if (voice && text) void speak(text).then((ok) => !ok && playBell())
+    else playBell()
+  }
+
+  /** Interruptor de la voz guía (solo si se han generado los audios). */
+  const voiceToggle = (compact: boolean) =>
+    voiceReady && (
+      <button
+        type="button"
+        aria-pressed={voiceOn}
+        onClick={toggleVoice}
+        title="Voz guía"
+        className={`inline-flex items-center gap-2 rounded-lg border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
+          compact ? 'size-10 justify-center' : 'min-h-10 px-3 text-sm'
+        } ${
+          voiceOn
+            ? 'border-env-primary bg-env-primary/15 text-env-text'
+            : 'border-env-border text-env-muted hover:text-env-text'
+        }`}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="18"
+          height="18"
+          aria-hidden="true"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M4 10v4h4l5 4V6L8 10zM16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" />
+          {!voiceOn && <path d="M3 3l18 18" />}
+        </svg>
+        {compact ? <span className="sr-only">Voz guía</span> : 'Voz guía'}
+      </button>
+    )
 
   const current = SOUNDSCAPES.find((s) => s.id === playing)
 
@@ -207,9 +303,10 @@ export default function Meditation() {
         </section>
 
         <section aria-labelledby="guided-title" className="hud-panel flex min-w-0 flex-col">
-          <h2 id="guided-title" className="hud-panel-head">
-            Meditaciones guiadas
-          </h2>
+          <div className="hud-panel-head">
+            <h2 id="guided-title">Meditaciones guiadas</h2>
+            <span className="mr-2.5 ml-auto">{voiceToggle(false)}</span>
+          </div>
           {interventions.state === 'loading' && (
             <div className="m-4 h-40 animate-pulse rounded-lg bg-env-bg" aria-busy="true" />
           )}
@@ -250,9 +347,14 @@ export default function Meditation() {
       {session && (
         <InterventionPlayer
           intervention={session}
-          onClose={() => setSession(null)}
-          onStepChange={() => playBell()}
-          toolbar={switcher}
+          onClose={endSession}
+          onStepChange={onStep}
+          toolbar={
+            <>
+              {voiceToggle(true)}
+              {switcher}
+            </>
+          }
         />
       )}
     </section>
