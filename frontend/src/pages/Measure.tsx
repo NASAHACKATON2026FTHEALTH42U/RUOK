@@ -9,6 +9,7 @@ import { useSystems } from '../api/useSystems'
 import { CHECKIN_INDICATORS } from '../components/behavioral/checkin'
 import { PVT_INDICATORS } from '../components/behavioral/pvt'
 import { IndicatorField } from '../components/measure/IndicatorField'
+import { SystemArt } from '../components/measure/SystemArt'
 import { emptyValue, parseValue, type RawValue } from '../components/measure/measureForm'
 import { statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
@@ -123,7 +124,7 @@ export default function Measure() {
         <ul className="grid flex-1 auto-rows-fr gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
           {withIndicators.map(({ s, inds }) => {
             const card =
-              'relative flex h-full flex-col justify-center gap-1 rounded-xl border border-env-border bg-env-surface p-4 pt-12 hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary lg:p-6 lg:pt-14 [&>span:nth-child(1)]:lg:text-xl [&>span:nth-child(2)]:lg:text-base'
+              'relative isolate flex h-full flex-col justify-center gap-1 overflow-hidden rounded-xl border border-env-border bg-env-surface p-4 pt-12 hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary lg:p-6 lg:pt-14 [&>span:nth-of-type(1)]:lg:text-xl [&>span:nth-of-type(2)]:lg:text-base'
             if (toCheckin && s.id === CHECKIN_SYSTEM) {
               // Check-in diario en lugar del formulario, y una tarjeta por indicador sin test propio.
               const rest = inds.filter((i) => !OWN_TEST.includes(i.id))
@@ -131,7 +132,10 @@ export default function Measure() {
                 <Fragment key={s.id}>
                   <li>
                     <Link to="/checkin" className={card}>
-                      <span className="block font-semibold">{s.name}</span>
+                      <SystemArt id={s.id} />
+                      <span className="block font-display font-semibold tracking-wide">
+                        {s.name}
+                      </span>
                       <span className="mt-1 block text-sm text-env-muted">
                         Check-in diario «R U OK?»:{' '}
                         {inds
@@ -145,7 +149,10 @@ export default function Measure() {
                   {rest.map((i) => (
                     <li key={i.id}>
                       <Link to={`/measure?indicator=${encodeURIComponent(i.id)}`} className={card}>
-                        <span className="block font-semibold">{i.name}</span>
+                        <SystemArt id={i.id} fallback={s.id} />
+                        <span className="block font-display font-semibold tracking-wide">
+                          {i.name}
+                        </span>
                         <span className="mt-1 block text-sm text-env-muted">{s.name}</span>
                       </Link>
                     </li>
@@ -156,7 +163,8 @@ export default function Measure() {
             return (
               <li key={s.id}>
                 <Link to={`/measure?system=${encodeURIComponent(s.id)}`} className={card}>
-                  <span className="block font-semibold">{s.name}</span>
+                  <SystemArt id={s.id} />
+                  <span className="block font-display font-semibold tracking-wide">{s.name}</span>
                   <span className="mt-1 block text-sm text-env-muted">
                     {inds.map((i) => i.name).join(' · ')}
                   </span>

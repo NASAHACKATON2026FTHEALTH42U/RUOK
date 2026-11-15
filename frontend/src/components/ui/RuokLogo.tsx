@@ -1,7 +1,8 @@
 /**
  * Logo de R U OK? (propuesta «A · anillo» del kit de logos): un anillo de 7 segmentos, uno por
- * sistema del cuerpo, el primero en el color de acento, con un cuadrado en el centro y un anillo
- * punteado alrededor. Se dibuja con los colores del tema (texto y acento), así que se ve igual de
+ * sistema del cuerpo, con un cuadrado en el centro y un anillo punteado alrededor. El segmento de
+ * acento recorre el anillo a saltos y el punteado gira muy despacio (quietos con «reducir
+ * movimiento»). Se dibuja con los colores del tema (texto y acento), así que se ve igual de
  * bien en los temas oscuros y en los claros. La palabra «R U OK?» va en texto (IBM Plex Mono).
  */
 
@@ -15,6 +16,7 @@ export function RuokEmblem({ size = 36 }: { size?: number }) {
   return (
     <svg viewBox="0 0 200 200" width={size} height={size} aria-hidden="true" className="shrink-0">
       <circle
+        className="ruok-dots"
         cx="100"
         cy="100"
         r="95"
@@ -31,11 +33,20 @@ export function RuokEmblem({ size = 36 }: { size?: number }) {
             cx="100"
             cy="100"
             r={R}
-            stroke={i === 0 ? 'var(--env-primary)' : 'var(--env-text)'}
+            stroke="var(--env-text)"
             strokeDasharray={`${SEGMENT} ${CIRCUMFERENCE - SEGMENT}`}
             strokeDashoffset={-(i * CIRCUMFERENCE) / SEGMENTS}
           />
         ))}
+        {/* El segmento de acento va encima y recorre el anillo a saltos, uno por sistema. */}
+        <circle
+          className="ruok-orbit"
+          cx="100"
+          cy="100"
+          r={R}
+          stroke="var(--env-primary)"
+          strokeDasharray={`${SEGMENT} ${CIRCUMFERENCE - SEGMENT}`}
+        />
       </g>
       <rect x="91" y="91" width="18" height="18" fill="var(--env-text)" />
     </svg>

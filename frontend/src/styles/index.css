@@ -11,6 +11,8 @@
 @theme {
   --font-sans: Saira, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Títulos cortos (página, tarjetas, palabra de estado). En los entornos espaciales, Orbitron. */
+  --font-display: Saira, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
 
   /* HUD: líneas, segmentos y textos (fijos en todos los entornos HUD) */
   --color-hud-line: #15303a;
@@ -102,6 +104,16 @@ html[data-theme-ready] :is(body, header, footer, nav a, select) {
  * (p. ej. outline-none en las zonas del cuerpo, que tienen su propio resaltado) manden.
  */
 @layer base {
+  /* Entornos espaciales (data-hud): tipografía más futurista. Texto en Exo 2 y títulos cortos
+     en Orbitron (solo títulos: en párrafos costaría leerla). */
+  html[data-hud] {
+    --font-sans: 'Exo 2', Saira, system-ui, sans-serif;
+    --font-display: Orbitron, 'Exo 2', system-ui, sans-serif;
+  }
+  html[data-hud] h1 {
+    font-family: var(--font-display);
+    letter-spacing: 0.04em;
+  }
   /* Escala del texto: el tamaño base (el del navegador, normalmente 16 px) se mantiene hasta
      1440 px de ancho y crece hasta 1,1875 veces (~19 px) en pantallas grandes. Todo lo que va en
      rem (texto y espacios) se adapta al espacio disponible, y respeta el tamaño que elija el
@@ -423,8 +435,10 @@ html[data-hud] body {
     color: #ff8f8f;
     background: rgba(255, 107, 107, 0.08);
   }
+  /* El SOS con borde (login) se rellena entero al pasar por encima. */
   .hud-btn-danger:hover {
-    background: rgba(255, 107, 107, 0.16);
+    background: var(--color-st-crit);
+    color: #1a0606;
   }
   /* Temas claros (hospital, residencia): el rojo claro del HUD no llega a 2:1 sobre fondo claro.
      Rojo oscuro (≥ 5:1 sobre sus fondos): el SOS tiene que verse siempre. */
@@ -436,13 +450,24 @@ html[data-hud] body {
     font-weight: 600;
   }
   html[data-scheme='light'] .hud-btn-danger:hover {
-    background: rgba(166, 27, 18, 0.14);
+    background: #a61b12;
+    color: #fff;
   }
   .hud-btn-danger-solid {
     --hud-edge: var(--color-st-crit);
     border-color: var(--color-st-crit);
     background: var(--color-st-crit);
     color: #1a0606;
+    transition:
+      background-color 150ms ease-out,
+      box-shadow 150ms ease-out;
+  }
+
+  /* Hover del SOS bien visible: más claro y con un anillo blanco por dentro (un brillo por fuera
+     lo cortaría el recorte de la esquina). Sin depender de `@media (hover)`. */
+  .hud-btn-danger-solid:hover {
+    background: #ff9a9a;
+    box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.9);
   }
 
   /* Dentro de los botones y paneles recortados, el foco va hacia dentro (fuera se recortaría). */
@@ -576,6 +601,14 @@ html[data-hud] body {
   .status-word {
     --c: #7c9aa3;
     color: var(--c);
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    letter-spacing: 0.2em;
+  }
+  /* Orbitron es más ancha: algo más pequeña y con menos espaciado para que quepa en el título. */
+  html[data-hud] .status-word {
+    font-size: 0.9375rem;
+    letter-spacing: 0.1em;
   }
   .status-word[data-state='critical'] {
     --c: #ff6b6b;
@@ -601,5 +634,32 @@ html[data-hud] body {
   }
   html[data-scheme='light'] .status-word[data-state='normal'] {
     --c: #0f7b55;
+  }
+}
+
+/* Logo (RuokEmblem): el segmento de acento recorre el anillo a saltos (uno por sistema, 1,2 s cada
+   uno) y el anillo punteado gira muy despacio. Quietos con "reducir movimiento". */
+@layer components {
+  .ruok-orbit,
+  .ruok-dots {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .ruok-orbit {
+    animation: ruok-orbit 8.4s steps(7, end) infinite;
+  }
+  .ruok-dots {
+    animation: ruok-orbit 90s linear infinite;
+  }
+  @keyframes ruok-orbit {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ruok-orbit,
+    .ruok-dots {
+      animation: none;
+    }
   }
 }
