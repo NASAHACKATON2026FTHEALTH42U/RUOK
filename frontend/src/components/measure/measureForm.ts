@@ -67,3 +67,28 @@ export function parseValue(raw: RawValue, input: InputSpec, unit: string): Parse
 export function emptyValue(type: InputSpec['type']): RawValue {
   return type === 'duration' ? { hours: '', minutes: '' } : { text: '' }
 }
+
+/** Como mucho, estas cifras en un campo (evita valores absurdos con el teclado en pantalla). */
+const MAX_DIGITS = 7
+
+/**
+ * Aplica una tecla del teclado numérico en pantalla al texto de un campo: un dígito, la coma
+ * decimal (`,`), borrar el último carácter (`back`) o vaciar (`clear`).
+ */
+export function applyKey(text: string, key: string, decimal = true): string {
+  if (key === 'clear') return ''
+  if (key === 'back') return text.slice(0, -1)
+  if (key === ',') {
+    if (!decimal || /[.,]/.test(text)) return text
+    return (text === '' ? '0' : text) + ','
+  }
+  if (!/^\d$/.test(key)) return text
+  if (text.replace(/\D/g, '').length >= MAX_DIGITS) return text
+  if (text === '0') return key // sin ceros a la izquierda
+  return text + key
+}
+
+/** ¿El campo admite decimales? Sí, salvo que su paso sea un número entero. */
+export function allowsDecimal(input: InputSpec): boolean {
+  return input.type === 'number' && (input.step == null || !Number.isInteger(input.step))
+}
