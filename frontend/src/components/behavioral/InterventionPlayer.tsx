@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Intervention } from '../../api/useInterventions'
 import { Modal } from '../ui/Modal'
@@ -38,6 +38,11 @@ function targetScale(text: string | undefined): number | null {
  * Voz guía (FE-37): si hay audio para sus pasos, la cabecera tiene el interruptor «Voz guía» y,
  * con él encendido, cada paso se lee al mostrarse; la voz se para al cambiar de paso o al salir.
  */
+/** Paso sin cuenta atrás: avanza solo si no se pulsa «Siguiente» en este tiempo. */
+const AUTO_NEXT_MS = 3000
+/** Al terminar, tiempo con «Hecho» antes de cerrarse solo. */
+const AUTO_CLOSE_MS = 2500
+
 export function InterventionPlayer({
   intervention,
   onClose,
@@ -103,6 +108,7 @@ export function InterventionPlayer({
         spoken.current = true
         void speak(text).then((ok) => {
           if (!ok) missingRef.current?.()
+          setSpokenIndex(index) // termina de leerlo (o no hay audio): ya puede avanzar solo
         })
       },
       spoken.current ? 150 : voiceDelayMs,
@@ -114,6 +120,26 @@ export function InterventionPlayer({
   }, [voice, done, index, steps, voiceDelayMs])
 
   const next = () => goTo(index + 1)
+
+  // Pasos sin cuenta atrás: si no se pulsa «Siguiente», avanza solo a los 3 s (con la voz activa,
+  // 3 s después de que termine de leerlo). En pausa, no.
+  const [spokenIndex, setSpokenIndex] = useState(-1)
+  const waitingVoice = voice && spokenIndex !== index
+  const autoAdvance = !done && !paused && left === null && !waitingVoice
+  useEffect(() => {
+    if (!autoAdvance) return
+    const t = window.setTimeout(() => goTo(index + 1), AUTO_NEXT_MS)
+    return () => window.clearTimeout(t)
+  }, [autoAdvance, index, goTo])
+
+  // Al terminar, «Hecho» unos segundos y se cierra solo.
+  const closeRef = useRef(onClose)
+  closeRef.current = onClose
+  useEffect(() => {
+    if (!done) return
+    const t = window.setTimeout(() => closeRef.current(), AUTO_CLOSE_MS)
+    return () => window.clearTimeout(t)
+  }, [done])
 
   return (
     // Modal bloqueante: hasta terminar (botón o Escape) no se puede usar nada más.
@@ -147,10 +173,16 @@ export function InterventionPlayer({
 
         <div className="flex flex-1 flex-col items-center justify-center gap-8 p-6 text-center">
           {done ? (
-            <>
-              <p className="text-4xl font-bold">Hecho</p>
-              <p className="text-env-muted">Bien hecho. Puedes repetirla cuando lo necesites.</p>
-            </>
+            <motion.div
+              initial={reduce ? false : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35 }}
+            >
+              <p className="font-display text-5xl font-bold">Hecho</p>
+              <p className="mt-3 text-lg text-env-muted">
+                Bien hecho. Puedes repetirla cuando lo necesites.
+              </p>
+            </motion.div>
           ) : (
             <>
               {phase && (
@@ -165,10 +197,22 @@ export function InterventionPlayer({
                   }}
                 />
               )}
-              <div aria-live="polite">
-                <p className="text-3xl font-semibold">{step?.text}</p>
+              <div aria-live="polite" className="w-full max-w-3xl">
+                {/* Cada paso entra con un fundido corto (sin movimiento si se pide menos). */}
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.p
+                    key={index}
+                    initial={reduce ? false : { opacity: 0, y: 14 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={reduce ? undefined : { opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    className="text-[clamp(1.75rem,4.2vw,3rem)] leading-tight font-semibold text-balance"
+                  >
+                    {step?.text}
+                  </motion.p>
+                </AnimatePresence>
                 {step?.cycle && (
-                  <p className="mt-2 text-sm text-env-muted">
+                  <p className="mt-3 text-base text-env-muted">
                     Ciclo {step.cycle.n} de {step.cycle.of}
                   </p>
                 )}
@@ -186,7 +230,7 @@ export function InterventionPlayer({
                   <button
                     type="button"
                     onClick={() => setPaused((p) => !p)}
-                    className=" border border-env-border px-5 py-2.5 hover:border-env-text"
+                    className="border border-env-border px-6 py-3 text-lg hover:border-env-text"
                   >
                     {paused ? 'Seguir' : 'Pausa'}
                   </button>
@@ -194,11 +238,27 @@ export function InterventionPlayer({
                 <button
                   type="button"
                   onClick={next}
-                  className=" bg-env-primary px-5 py-2.5 font-medium text-env-primary-text"
+                  className="relative overflow-hidden bg-env-primary px-6 py-3 text-lg font-medium text-env-primary-text"
                 >
-                  {index === steps.length - 1 ? 'Terminar' : 'Siguiente'}
+                  {/* Barra que se llena en los 3 s antes de avanzar solo. */}
+                  {autoAdvance && !reduce && (
+                    <motion.span
+                      key={index}
+                      aria-hidden
+                      className="absolute inset-y-0 left-0 bg-white/25"
+                      initial={{ width: '0%' }}
+                      animate={{ width: '100%' }}
+                      transition={{ duration: AUTO_NEXT_MS / 1000, ease: 'linear' }}
+                    />
+                  )}
+                  <span className="relative">
+                    {index === steps.length - 1 ? 'Terminar' : 'Siguiente'}
+                  </span>
                 </button>
               </div>
+              {autoAdvance && (
+                <p className="-mt-4 text-sm text-env-muted">Pasa solo en 3 s si no pulsas</p>
+              )}
             </>
           )}
         </div>
