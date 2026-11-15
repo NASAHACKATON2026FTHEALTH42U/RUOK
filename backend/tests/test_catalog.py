@@ -276,8 +276,8 @@ def test_override_of_unknown_indicator_is_rejected():
 
 
 def test_override_of_inactive_indicator_is_rejected():
-    env = _mars(threshold_overrides={"hydration_ml": {"warning": (1000, 1400)}})
-    assert "hydration_ml" not in env.indicators
+    env = _mars(threshold_overrides={"glucose": {"warning": (60, 70)}})
+    assert "glucose" not in env.indicators
     with pytest.raises(ValueError, match="no está en sus indicators"):
         check_consistency(load_indicators(), load_systems(), [env])
 
