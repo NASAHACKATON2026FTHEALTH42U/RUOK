@@ -36,3 +36,17 @@ export function shortDisplayName(displayName: string, envName: string | undefine
   const suffix = envName ? ` (${envName})` : ''
   return suffix && displayName.endsWith(suffix) ? displayName.slice(0, -suffix.length) : displayName
 }
+
+/** Iniciales del avatar: sin el tratamiento abreviado ("Cmdr.", "Dra.") ni artículos, hasta dos letras. */
+export function initials(name: string): string {
+  // Sin artículos ni preposiciones: «Supervisión de planta» → SP.
+  const words = name
+    .split(/\s+/)
+    .filter((w) => w && !w.endsWith('.') && !/^(de|del|la|las|el|los|y|e)$/i.test(w))
+  return (
+    words
+      .slice(0, 2)
+      .map((w) => w[0].toLocaleUpperCase('es'))
+      .join('') || '?'
+  )
+}

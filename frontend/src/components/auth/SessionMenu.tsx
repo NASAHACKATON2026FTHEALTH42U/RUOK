@@ -29,8 +29,21 @@ export function SessionMenu({ part = 'all' }: { part?: 'all' | 'user' | 'logout'
             await logout()
             navigate('/login')
           }}
-          className="relative before:absolute before:inset-x-0 before:content-[''] before:-inset-y-[10px] rounded-md border border-env-border px-2 py-0.5 text-env-muted hover:border-env-text hover:text-env-text"
+          className="relative inline-flex min-h-9 items-center gap-1.5 rounded-md border border-env-border px-2.5 text-env-muted before:absolute before:inset-x-0 before:-inset-y-[6px] before:content-[''] hover:border-env-text hover:text-env-text focus-visible:outline-2 focus-visible:outline-env-primary"
         >
+          <svg
+            viewBox="0 0 16 16"
+            width="14"
+            height="14"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M6.5 2.5h-3v11h3M10 5l3 3-3 3M13 8H6.5" />
+          </svg>
           Salir
         </button>
       )}

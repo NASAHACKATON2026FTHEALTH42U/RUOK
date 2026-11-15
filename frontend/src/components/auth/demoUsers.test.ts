@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_LOGIN_ENV, demoPassword, demoUsersFor, shortDisplayName } from './demoUsers'
+import {
+  DEFAULT_LOGIN_ENV,
+  demoPassword,
+  demoUsersFor,
+  initials,
+  shortDisplayName,
+} from './demoUsers'
 
 const USERS = [
   { username: 'ruiz', env_id: 'earth' },
@@ -42,5 +48,15 @@ describe('shortDisplayName', () => {
     )
     expect(shortDisplayName('Cmdr. Vega', 'Base marciana')).toBe('Cmdr. Vega')
     expect(shortDisplayName('Operador', undefined)).toBe('Operador')
+  })
+})
+
+describe('initials', () => {
+  it('sin el tratamiento abreviado y hasta dos letras', () => {
+    expect(initials('Cmdr. Ito')).toBe('I')
+    expect(initials('Ana Ruiz')).toBe('AR')
+    expect(initials('Oficial médico')).toBe('OM')
+    expect(initials('Supervisión de planta')).toBe('SP')
+    expect(initials('')).toBe('?')
   })
 })

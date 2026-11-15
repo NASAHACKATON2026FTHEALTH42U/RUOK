@@ -153,7 +153,8 @@
     },
     "vocabulary": {
       "member": "paciente", "crew": "planta", "ground": "médico", "medic": "enfermería",
-      "nurse": "enfermería", "doctor": "médico"
+      "nurse": "enfermería", "doctor": "médico",
+      "commander": "supervisión de planta", "psych": "psicología clínica"
     },
     "theme": { "primary": "#0b5a96" },
     "threshold_overrides": {},
@@ -179,7 +180,8 @@
     },
     "vocabulary": {
       "member": "residente", "crew": "residencia", "ground": "médico", "medic": "cuidador",
-      "caregiver": "cuidador", "doctor": "médico", "family": "familia"
+      "caregiver": "cuidador", "doctor": "médico", "family": "familia",
+      "commander": "dirección del centro", "psych": "psicología"
     },
     "theme": { "primary": "#6a429e" },
     "threshold_overrides": { "temperature": { "normal": [36.0, 37.7], "warning": [37.8, 39.5] } },

@@ -10,6 +10,8 @@ import { RealtimeConnector } from '../../realtime/RealtimeConnector'
 import { useEnvironmentStore } from '../../store/environment'
 import { LiveAlertToast } from '../alerts/LiveAlertToast'
 import { SosButton } from '../alerts/SosButton'
+import { UserIdentity } from '../auth/UserIdentity'
+import { RuokMark } from './RuokLogo'
 import { SessionMenu } from '../auth/SessionMenu'
 import { LivenessGuard, MemberActivitySelector } from '../liveness/LivenessGuard'
 import { EnvironmentSelector } from './EnvironmentSelector'
@@ -48,13 +50,14 @@ export function Layout() {
   const allowed = allowedItems(navItems(vocab), can)
   const tabs = tabsFor(role, allowed)
 
+  // Logo de las maquetas HUD (emblema de anillos y "R U OK?"); lleva a la vista inicial del rol.
   const logo = (
     <NavLink
       to={role ? homeFor(role) : '/'}
-      className="relative before:absolute before:inset-x-0 before:content-[''] before:-inset-y-3 font-mono text-[13px] tracking-[0.24em] text-env-text"
-      aria-label="R U OK: inicio"
+      className="shrink-0 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-env-primary"
+      aria-label="R U OK?: inicio"
     >
-      R U OK
+      <RuokMark />
     </NavLink>
   )
 
@@ -89,7 +92,6 @@ export function Layout() {
                       `hud-row !min-h-10 !text-sm [@media(max-height:800px)]:!min-h-9 ${isActive ? 'is-active' : 'hover:text-env-text'}`
                     }
                   >
-                    <span className="w-8 font-mono text-[10px] text-env-muted">{item.code}</span>
                     {item.label}
                   </NavLink>
                 </li>
@@ -129,10 +131,12 @@ export function Layout() {
               lateral. */}
           <div className="hidden shrink-0 px-4 pt-4 md:block lg:px-6">
             <div
-              className={`mx-auto flex w-full flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-env-border bg-env-surface px-3 py-2.5 lg:gap-x-5 lg:px-4 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
+              className={`mx-auto flex w-full flex-wrap items-center gap-x-5 gap-y-3 rounded-xl border border-env-border bg-env-surface px-5 py-3.5 lg:gap-x-8 lg:px-7 ${wide ? 'max-w-[1800px]' : 'max-w-6xl'}`}
             >
               {logo}
-              <SessionMenu part="user" />
+              <span aria-hidden="true" className="h-8 w-px shrink-0 bg-env-border" />
+              {/* Quién ha entrado: nombre y su papel con las palabras del entorno. */}
+              <UserIdentity />
               <div
                 id={TOPBAR_SLOT_ID}
                 // Por debajo de lg no cabe todo en una línea: el resumen de la página baja a una

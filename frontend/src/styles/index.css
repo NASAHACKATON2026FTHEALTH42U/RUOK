@@ -571,3 +571,38 @@ html[data-hud] body {
     line-height: 1.25;
   }
 }
+
+/* Palabra del estado general (StatusHeadline): rojo, ámbar, verde o gris, con brillo en los temas
+   oscuros. En los claros, tonos más oscuros y sin brillo (contraste AA sobre fondo claro). El
+   verde de "normal" lo pidió el equipo: aquí se lee como un semáforo. */
+@layer components {
+  .status-word {
+    --c: #7c9aa3;
+    color: var(--c);
+  }
+  .status-word[data-state='critical'] {
+    --c: #ff6b6b;
+  }
+  .status-word[data-state='warning'] {
+    --c: #f5a623;
+  }
+  .status-word[data-state='normal'] {
+    --c: #34d399;
+  }
+  .status-word:is([data-state='critical'], [data-state='warning'], [data-state='normal']) {
+    text-shadow: 0 0 14px color-mix(in srgb, var(--c) 45%, transparent);
+  }
+  html[data-scheme='light'] .status-word {
+    --c: #4b5d64;
+    text-shadow: none;
+  }
+  html[data-scheme='light'] .status-word[data-state='critical'] {
+    --c: #b42318;
+  }
+  html[data-scheme='light'] .status-word[data-state='warning'] {
+    --c: #8a5a00;
+  }
+  html[data-scheme='light'] .status-word[data-state='normal'] {
+    --c: #0f7b55;
+  }
+}

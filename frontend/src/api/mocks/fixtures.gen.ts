@@ -542,7 +542,9 @@ export const environments: Schema<'Environment'>[] = [
       "ground": "médico",
       "medic": "enfermería",
       "nurse": "enfermería",
-      "doctor": "médico"
+      "doctor": "médico",
+      "commander": "supervisión de planta",
+      "psych": "psicología clínica"
     },
     "theme": {
       "primary": "#0b5a96",
@@ -598,7 +600,9 @@ export const environments: Schema<'Environment'>[] = [
       "medic": "cuidador",
       "caregiver": "cuidador",
       "doctor": "médico",
-      "family": "familia"
+      "family": "familia",
+      "commander": "dirección del centro",
+      "psych": "psicología"
     },
     "theme": {
       "primary": "#6a429e",
@@ -11329,7 +11333,7 @@ export const users: Schema<'User'>[] = [
   {
     "id": 24,
     "username": "psych-iss",
-    "display_name": "Psicólogo bhp (Estación Espacial Internacional)",
+    "display_name": "Psicólogo BHP (Estación Espacial Internacional)",
     "role": "psych",
     "env_id": "iss",
     "member_id": null,
@@ -11369,7 +11373,7 @@ export const users: Schema<'User'>[] = [
   {
     "id": 28,
     "username": "psych-moon",
-    "display_name": "Psicólogo bhp (Base lunar Artemis)",
+    "display_name": "Psicólogo BHP (Base lunar Artemis)",
     "role": "psych",
     "env_id": "moon",
     "member_id": null,
@@ -11409,7 +11413,7 @@ export const users: Schema<'User'>[] = [
   {
     "id": 32,
     "username": "psych-mars",
-    "display_name": "Psicólogo bhp (Base marciana)",
+    "display_name": "Psicólogo BHP (Base marciana)",
     "role": "psych",
     "env_id": "mars",
     "member_id": null,
@@ -11469,11 +11473,11 @@ export const users: Schema<'User'>[] = [
   {
     "id": 38,
     "username": "commander-hospital",
-    "display_name": "Commander (Planta de hospital)",
+    "display_name": "Supervisión de planta (Planta de hospital)",
     "role": "commander",
     "env_id": "hospital",
     "member_id": null,
-    "role_label": "commander",
+    "role_label": "supervisión de planta",
     "active": true
   },
   {
@@ -11489,11 +11493,11 @@ export const users: Schema<'User'>[] = [
   {
     "id": 40,
     "username": "psych-hospital",
-    "display_name": "Psych (Planta de hospital)",
+    "display_name": "Psicología clínica (Planta de hospital)",
     "role": "psych",
     "env_id": "hospital",
     "member_id": null,
-    "role_label": "psych",
+    "role_label": "psicología clínica",
     "active": true
   },
   {
@@ -11509,11 +11513,11 @@ export const users: Schema<'User'>[] = [
   {
     "id": 42,
     "username": "commander-geriatric",
-    "display_name": "Commander (Residencia geriátrica)",
+    "display_name": "Dirección del centro (Residencia geriátrica)",
     "role": "commander",
     "env_id": "geriatric",
     "member_id": null,
-    "role_label": "commander",
+    "role_label": "dirección del centro",
     "active": true
   },
   {
@@ -11529,11 +11533,11 @@ export const users: Schema<'User'>[] = [
   {
     "id": 44,
     "username": "psych-geriatric",
-    "display_name": "Psych (Residencia geriátrica)",
+    "display_name": "Psicología (Residencia geriátrica)",
     "role": "psych",
     "env_id": "geriatric",
     "member_id": null,
-    "role_label": "psych",
+    "role_label": "psicología",
     "active": true
   },
   {
@@ -11635,10 +11639,10 @@ export const demoUsers: Schema<'DemoUser'>[] = [
   },
   {
     "username": "commander-geriatric",
-    "display_name": "Commander (Residencia geriátrica)",
+    "display_name": "Dirección del centro (Residencia geriátrica)",
     "role": "commander",
     "env_id": "geriatric",
-    "role_label": "commander"
+    "role_label": "dirección del centro"
   },
   {
     "username": "responder-geriatric",
@@ -11649,10 +11653,10 @@ export const demoUsers: Schema<'DemoUser'>[] = [
   },
   {
     "username": "psych-geriatric",
-    "display_name": "Psych (Residencia geriátrica)",
+    "display_name": "Psicología (Residencia geriátrica)",
     "role": "psych",
     "env_id": "geriatric",
-    "role_label": "psych"
+    "role_label": "psicología"
   },
   {
     "username": "puig",
@@ -11684,10 +11688,10 @@ export const demoUsers: Schema<'DemoUser'>[] = [
   },
   {
     "username": "commander-hospital",
-    "display_name": "Commander (Planta de hospital)",
+    "display_name": "Supervisión de planta (Planta de hospital)",
     "role": "commander",
     "env_id": "hospital",
-    "role_label": "commander"
+    "role_label": "supervisión de planta"
   },
   {
     "username": "responder-hospital",
@@ -11698,10 +11702,10 @@ export const demoUsers: Schema<'DemoUser'>[] = [
   },
   {
     "username": "psych-hospital",
-    "display_name": "Psych (Planta de hospital)",
+    "display_name": "Psicología clínica (Planta de hospital)",
     "role": "psych",
     "env_id": "hospital",
-    "role_label": "psych"
+    "role_label": "psicología clínica"
   },
   {
     "username": "lindqvist",
@@ -11747,7 +11751,7 @@ export const demoUsers: Schema<'DemoUser'>[] = [
   },
   {
     "username": "psych-iss",
-    "display_name": "Psicólogo bhp (Estación Espacial Internacional)",
+    "display_name": "Psicólogo BHP (Estación Espacial Internacional)",
     "role": "psych",
     "env_id": "iss",
     "role_label": "psicólogo BHP"
@@ -11803,7 +11807,7 @@ export const demoUsers: Schema<'DemoUser'>[] = [
   },
   {
     "username": "psych-mars",
-    "display_name": "Psicólogo bhp (Base marciana)",
+    "display_name": "Psicólogo BHP (Base marciana)",
     "role": "psych",
     "env_id": "mars",
     "role_label": "psicólogo BHP"
@@ -11852,7 +11856,7 @@ export const demoUsers: Schema<'DemoUser'>[] = [
   },
   {
     "username": "psych-moon",
-    "display_name": "Psicólogo bhp (Base lunar Artemis)",
+    "display_name": "Psicólogo BHP (Base lunar Artemis)",
     "role": "psych",
     "env_id": "moon",
     "role_label": "psicólogo BHP"

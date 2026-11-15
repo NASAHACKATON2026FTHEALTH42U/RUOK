@@ -7,6 +7,8 @@ import { useLoad } from '../api/useLoad'
 import { homeFor } from '../auth/roles'
 import { login, useSession, type LoginError } from '../auth/session'
 import { SosButton } from '../components/alerts/SosButton'
+import { RuokRings } from '../components/ui/RuokLogo'
+import { capitalize } from '../environments/useVocab'
 import {
   DEFAULT_LOGIN_ENV,
   demoPassword,
@@ -19,51 +21,14 @@ import { useEnvironmentStore } from '../store/environment'
 /** Lista vacía estable mientras carga el catálogo (no cambia de identidad en cada render). */
 const NO_ENVS: Schema<'Environment'>[] = []
 
-/** Logo: anillos que giran despacio alrededor de "R U OK" (quietos con "reducir movimiento"). */
-function RuokRings() {
-  return (
-    <div className="relative mx-auto h-[132px] w-full max-w-[390px]" aria-hidden="true">
-      <svg viewBox="0 0 390 132" className="absolute inset-0 h-full w-full">
-        <circle
-          cx="195"
-          cy="66"
-          r="62"
-          fill="none"
-          stroke="var(--env-border)"
-          strokeWidth="4"
-          strokeDasharray="1 4.4"
-        />
-        <circle
-          className="ruok-spin"
-          cx="195"
-          cy="66"
-          r="50"
-          fill="none"
-          stroke="var(--env-primary)"
-          strokeWidth="7"
-          strokeDasharray="38 14"
-          strokeOpacity="0.8"
-        />
-        <circle
-          className="ruok-spin ruok-spin-reverse"
-          cx="195"
-          cy="66"
-          r="38"
-          fill="none"
-          stroke="var(--env-primary)"
-          strokeOpacity="0.4"
-          strokeWidth="2"
-          strokeDasharray="6 5"
-        />
-        <path d="M40 66H118M272 66H350" stroke="var(--env-border)" />
-        <rect x="116" y="64" width="5" height="5" fill="var(--env-primary)" />
-        <rect x="269" y="64" width="5" height="5" fill="var(--env-primary)" />
-      </svg>
-      <span className="absolute inset-x-0 top-[56px] text-center font-mono text-[15px] tracking-[0.2em]">
-        R U OK<span className="text-env-primary">?</span>
-      </span>
-    </div>
-  )
+/** Grupo de cada rol que no es member, debajo de su nombre en la lista de la demo. */
+const ROLE_GROUP: Partial<Record<string, string>> = {
+  medic: 'atención sanitaria',
+  commander: 'mando',
+  responder: 'control externo',
+  psych: 'apoyo psicológico',
+  family: 'familia',
+  admin: 'global',
 }
 
 /**
@@ -252,10 +217,17 @@ export default function Login() {
                         onClick={() => void enter(u.username, demoPassword(u))}
                         className="flex min-h-11 w-full flex-col gap-0.5 px-3 py-2.5 text-left hover:bg-env-primary/10 disabled:opacity-60"
                       >
-                        <span className="text-sm">{shortDisplayName(u.display_name, envName)}</span>
+                        {/* Members por su nombre; el resto, por su rol con las palabras del
+                            entorno ("Oficial médico") y debajo su grupo. */}
+                        <span className="text-sm">
+                          {u.role === 'member' || u.role === 'admin'
+                            ? shortDisplayName(u.display_name, envName)
+                            : capitalize(u.role_label)}
+                        </span>
                         <span className="hud-label text-[9px]">
-                          {u.role_label}
-                          {u.env_id ? '' : ' · global'}
+                          {u.role === 'member'
+                            ? u.role_label
+                            : (ROLE_GROUP[u.role] ?? u.role_label)}
                         </span>
                       </button>
                     </li>

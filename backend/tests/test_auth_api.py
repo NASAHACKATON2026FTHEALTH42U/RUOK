@@ -224,3 +224,13 @@ def test_require_roles(client):
         resp = c.get("/solo-admin", headers=_bearer(admin))
         assert resp.status_code == 200
         assert resp.json() == {"username": "admin"}
+
+
+def test_staff_role_labels_never_fall_back_to_english():
+    """Sin término en el vocabulario, el rol sale en español (nunca "commander" o "psych")."""
+    from app.services.accounts import _capitalize, _role_label
+
+    assert _role_label("commander", {}) == "responsable"
+    assert _role_label("psych", {}) == "psicólogo"
+    assert _role_label("commander", {"commander": "comandante"}) == "comandante"
+    assert _capitalize("psicólogo BHP") == "Psicólogo BHP"

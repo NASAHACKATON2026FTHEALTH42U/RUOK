@@ -41,7 +41,6 @@ export default function More() {
                     i === rest.length - 1 ? '!border-b-0' : ''
                   }`}
                 >
-                  <span className="w-[34px] font-mono text-[11px] text-env-muted">{item.code}</span>
                   <span className="flex-1">{item.label}</span>
                   <ChevronIcon />
                 </Link>
