@@ -13,6 +13,7 @@ import {
   type PvtSummary,
 } from '../components/behavioral/pvt'
 import { PvtRunner } from '../components/behavioral/PvtRunner'
+import { CaseFeedbackFor } from '../components/alerts/CaseFeedbackNote'
 import { formatValue } from '../components/dashboard/format'
 import { statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
@@ -194,6 +195,14 @@ export default function Pvt() {
             size="sm"
           />
         </p>
+      )}
+      {phase.kind === 'sent' && (
+        <CaseFeedbackFor
+          systemId="neuro_behavioral"
+          current={
+            phase.result.assessment.systems.find((s) => s.system_id === 'neuro_behavioral')?.status
+          }
+        />
       )}
       {phase.kind === 'queued' && (
         <p className="rounded-xl border border-env-border bg-env-surface p-4 text-sm" role="status">

@@ -6,6 +6,7 @@ import type { Indicator } from '../../api/useIndicators'
 import { useInterventions } from '../../api/useInterventions'
 import type { BodySystem } from '../../api/useSystems'
 import { InterventionCard } from '../behavioral/InterventionCard'
+import { CaseFeedbackFor } from '../alerts/CaseFeedbackNote'
 import { Modal } from '../ui/Modal'
 import { bySeverity } from '../ui/status'
 import { StatusBadge } from '../ui/StatusBadge'
@@ -154,6 +155,13 @@ export function SystemPanel({
               ✕
             </button>
           </header>
+
+          {/* Aviso abierto de este sistema: «Estamos revisando tu caso» (y si ha mejorado, se dice). */}
+          <CaseFeedbackFor
+            systemId={system.id}
+            current={stale ? 'unknown' : assessed?.status}
+            className="mt-4"
+          />
 
           {/* Las secciones plegadas (indicadores, recomendaciones, intervenciones) se abren SOBRE
             este bloque, ocupando justo su hueco y con scroll propio: no empujan el contenido ni

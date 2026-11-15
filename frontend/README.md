@@ -476,6 +476,8 @@ Los dos se envían **por el outbox** (`sendAlert()`, mismo UUID en el dispositiv
 - No hay textos clínicos en el código: todo el protocolo viene de la evaluación o del catálogo. **Falta un endpoint de protocolos** (`protocol_id` existe en la evaluación, pero no hay `GET /protocols`); cuando exista, se cachea con `withCatalogCache('protocols')`.
 - Sin member elegido, el diálogo pide elegirlo y recuerda avisar de viva voz.
 
+**Seguimiento del caso (FE-38)** (`caseFeedback()` y `CaseFeedbackFor` en `components/alerts/`): mientras el member tiene un aviso abierto de un sistema, el detalle del sistema, la alerta y los resultados del check-in y del PVT le dicen «Estamos revisando tu caso». Si el sistema ya está mejor que cuando saltó el aviso, «Nos alegra ver que estás mejor» y quién lo cerrará. Solo para el propio member.
+
 **Modales bloqueantes** (`components/ui/Modal.tsx`): el SOS, el aviso a control, el «R U OK?», el detalle de un sistema, la intervención guiada y el PVT usan el `<dialog>` nativo con `showModal()`. El resto de la interfaz queda inerte (no se puede pulsar ni tabular) hasta que se resuelven o se cierran. Un clic fuera no cierra nada; Escape cierra los que se pueden cerrar (el «R U OK?» no). El foco entra en el modal y vuelve a su sitio al cerrar.
 
 ## Meditación (FE-36)
