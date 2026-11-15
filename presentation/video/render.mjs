@@ -8,6 +8,8 @@ import { pathToFileURL } from 'node:url'
 
 const out = resolve(process.argv[2] ?? 'frames')
 const FPS = Number(process.argv[3] ?? 30)
+// Primer fotograma a renderizar (para rehacer solo un tramo, p. ej. el cierre: 720).
+const FROM = Number(process.argv[4] ?? 0)
 mkdirSync(out, { recursive: true })
 const profile = mkdtempSync(join(tmpdir(), 'ruok-render-'))
 const chrome = spawn('chromium', ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--allow-file-access-from-files', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] })
@@ -42,7 +44,7 @@ const ev = (expression) => s('Runtime.evaluate', { expression, awaitPromise: tru
 await ev('window.ready.then(() => true)')
 const total = Math.round(30 * FPS)
 const t0 = Date.now()
-for (let f = 0; f < total; f++) {
+for (let f = FROM; f < total; f++) {
   await ev(`window.seek(${f / FPS}); new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))`)
   const { data } = await s('Page.captureScreenshot', { format: 'jpeg', quality: 92 })
   writeFileSync(join(out, `${String(f).padStart(5, '0')}.jpg`), Buffer.from(data, 'base64'))

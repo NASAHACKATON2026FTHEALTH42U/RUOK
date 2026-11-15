@@ -199,12 +199,22 @@
       }
       .end .team {
         margin-top: 46px;
+        max-width: 1300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
         font-size: 34px;
         color: var(--text);
         opacity: 0;
       }
+      .end .team div span + span::before {
+        content: '·';
+        margin: 0 22px;
+        color: var(--primary);
+      }
       .end .org {
-        margin-top: 16px;
+        margin-top: 28px;
         font-family: 'IBM Plex Mono', monospace;
         font-size: 26px;
         letter-spacing: 0.24em;
@@ -251,7 +261,8 @@
           </div>
           <div class="claim" id="claim">Caring for those who explore.</div>
           <div class="team" id="team">
-            Félix Rodríguez González · Alberto Sanz Alonso · Bryan Fajardo · and team
+            <div><span>Félix Rodríguez González</span><span>Alberto Sanz Alonso</span><span>Bryan Fajardo</span></div>
+            <div><span>Franco Delucchi</span><span>Lluis Noval</span></div>
           </div>
           <div class="org" id="org">
             STUDENTS FROM <b>42 BARCELONA</b> · NASA SPACE APPS CHALLENGE 2026
