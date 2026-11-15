@@ -49,7 +49,7 @@ El Human Research Program (HRP) identifica **5 peligros**:
 **P2 (si da tiempo):**
 - mensajes a casa con retardo;
 - kudos y misiones de tripulación;
-- galería Earth view;
+- meditación guiada con paisajes sonoros (sustituye a la galería Earth view);
 - rejilla de Amsler (SANS) *(sin issue: solo si sobra tiempo)*.
 
 ## Fuera de alcance (roadmap del pitch)

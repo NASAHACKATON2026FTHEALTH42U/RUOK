@@ -31,6 +31,9 @@
 | S26 | AASM / SRS (2015), *Recommended amount of sleep for a healthy adult*. [PDF](https://www.aasm.org/resources/pdf/adultsleepdurationconsensus.pdf) · [PMC4434546](https://pmc.ncbi.nlm.nih.gov/articles/PMC4434546/) | **≥ 7 h** por noche de forma regular (18–60 años) |
 | S27 | EFSA (2010), valores dietéticos de referencia de agua. [Nota de prensa](https://www.efsa.europa.eu/fi/press/news/nda100326) | Ingesta adecuada total: 2,0 L/día (mujeres) y 2,5 L/día (hombres), incluida el agua de los alimentos; igual en mayores de 65 |
 | S28 | European Resuscitation Council Guidelines 2021: *Basic Life Support* (Olasveengen T. M. et al., Resuscitation 161:98–114). *Cita de memoria: verificar antes de la presentación.* | Ante alguien que no responde: comprobar respuesta y respiración, pedir ayuda e iniciar primeros auxilios (protocolo `no_contact`) |
+| S29 | Goyal M. et al. (2014), *Meditation programs for psychological stress and well-being: a systematic review and meta-analysis*. JAMA Intern Med 174(3):357–368. [doi:10.1001/jamainternmed.2013.13018](https://doi.org/10.1001/jamainternmed.2013.13018). *Cita de memoria: verificar antes de la presentación.* | Meditación guiada (FE-36): la atención plena mejora de forma moderada la ansiedad, la depresión y el dolor |
+| S30 | Alvarsson J. J., Wiens S., Nilsson M. E. (2010), *Stress recovery during exposure to nature sound and environmental noise*. Int J Environ Res Public Health 7(3):1036–1046. [doi:10.3390/ijerph7031036](https://doi.org/10.3390/ijerph7031036). *Cita de memoria: verificar antes de la presentación.* | Paisajes sonoros (FE-36): los sonidos de la naturaleza ayudan a recuperarse del estrés |
+| S31 | Manzoni G. M. et al. (2008), *Relaxation training for anxiety: a ten-years systematic review with meta-analysis*. BMC Psychiatry 8:41. [doi:10.1186/1471-244X-8-41](https://doi.org/10.1186/1471-244X-8-41). *Cita de memoria: verificar antes de la presentación.* | Relajación muscular progresiva (FE-36) |
 
 ## Tabla de umbrales (CNT-01)
 
@@ -149,19 +152,8 @@ Tarjetas de `backend/app/data/interventions.json`. Cada una lleva en `sources` l
 | `int_exercise_session` Sesión de ejercicio de resistencia | exercise_min | [S14] unas 2 h de ejercicio al día en la ISS |
 | `int_bp_out_of_range` Tensión fuera de rango: qué hacer mientras llega la respuesta (CNT-03) | bp_systolic, bp_diastolic | [S20] medir en reposo y con el brazo a la altura del corazón; síntomas de alarma de la crisis hipertensiva. *Pasos y tiempos: diseño* |
 
-## Imágenes (Earth view, FE-25)
-Fotos de la NASA Image and Video Library (Johnson Space Center), **dominio público** (las imágenes de la NASA no tienen copyright en EE. UU. salvo indicación). Empaquetadas en `frontend/public/earth/` en tamaño medio.
-
-| ID NASA | Título | Fecha |
-|---|---|---|
-| AS17-148-22727 | View of the Earth seen by the Apollo 17 crew traveling toward the moon | 1972-12-07 |
-| AS08-14-2383 | Apollo 8 Mission image, Earth over the horizon of the moon | 1968-12-24 |
-| iss071e439624 | An orbital sunrise colorfully illuminates the Earth's atmosphere | 2024-08-06 |
-| iss071e364425 | Noctilucent clouds illuminated when the sun is below Earth's horizon | 2024-07-16 |
-| iss072e518202 | The city lights of Mexico's Yucatan peninsula | 2025-01-23 |
-| iss045e013851 | Earth Observation from the International Space Station | 2015-09-17 |
-
-Fuente: https://images.nasa.gov · Uso: https://www.nasa.gov/nasa-brand-center/images-and-media/
+## Sonido (Meditación, FE-36)
+Los paisajes sonoros (océano, lluvia, viento, bosque, hoguera y cuenco) y la campana de las meditaciones se **generan en el navegador** con Web Audio (ruido filtrado, osciladores y envolventes): no hay grabaciones, así que no hay licencias que citar ni archivos que descargar. Las meditaciones guiadas citan [S29], [S30] y [S31]. La galería de fotos de la Tierra (FE-25) se retiró al sustituirla por esta sección.
 
 ## Imágenes del cuerpo (FE-05)
 | Archivo | Uso | Origen y licencia |

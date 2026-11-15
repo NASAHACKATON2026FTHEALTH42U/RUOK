@@ -36,7 +36,7 @@
 | 🫀 Dashboard | FE-05 … FE-09 | Figura del cuerpo, anillo de sistemas, panel de sistema, tarjetas de indicador, tendencias e historial |
 | 📝 Formularios | FE-10, FE-19, FE-22 | Medición guiada, check-in diario y test PVT |
 | 🎮 Juego | BE-18, BE-19, BE-23, BE-37, FE-18 | Rutina diaria desde el perfil del entorno, puntos, racha, insignias, leaderboard cooperativo, kudos y misiones de grupo (backend) |
-| 🧘 Conductual | BE-20, BE-21, BE-22, FE-20, FE-21, FE-23, FE-25 | Reglas frente a la línea base, privacidad de los detalles, intervenciones, "Mensaje a casa", galería de la Tierra |
+| 🧘 Conductual | BE-20, BE-21, BE-22, FE-20, FE-21, FE-23, FE-25 | Reglas frente a la línea base, privacidad de los detalles, intervenciones, "Mensaje a casa", meditación guiada con paisajes sonoros (FE-36, sustituye a la galería de la Tierra |
 
 ## Endpoints
 

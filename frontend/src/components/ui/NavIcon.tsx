@@ -38,6 +38,10 @@ const ICONS: Record<IconName, ReactNode> = {
     </>
   ),
   list: <path d="M5 7h14M5 12h14M5 17h9" />,
+  // Loto (Meditación).
+  meditation: (
+    <path d="M12 19c-4 0-7-3-8-6 3 0 6 1 8 3 2-2 5-3 8-3-1 3-4 6-8 6zM12 16c-2-2-2-6 0-9 2 3 2 7 0 9z" />
+  ),
 }
 
 export function NavIcon({ name, size = 20 }: { name: IconName; size?: number }) {

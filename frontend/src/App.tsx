@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { ROUTE_PERMISSIONS } from './auth/permissions'
 import { RequireRole } from './components/auth/RequireRole'
 import { RequireSession } from './components/auth/RequireSession'
@@ -8,13 +8,13 @@ import Alerts from './pages/Alerts'
 import Control from './pages/Control'
 import CheckIn from './pages/CheckIn'
 import Dashboard from './pages/Dashboard'
-import Earth from './pages/Earth'
 import EnvironmentSelect from './pages/EnvironmentSelect'
 import Ground from './pages/Ground'
 import History from './pages/History'
 import HomeMessages from './pages/HomeMessages'
 import Login from './pages/Login'
 import Measure from './pages/Measure'
+import Meditation from './pages/Meditation'
 import Members from './pages/Members'
 import Missions from './pages/Missions'
 import More from './pages/More'
@@ -42,7 +42,9 @@ const router = createBrowserRouter([
           { path: '/measure', element: guard('/measure', <Measure />) },
           { path: '/checkin', element: guard('/checkin', <CheckIn />) },
           { path: '/pvt', element: guard('/pvt', <Pvt />) },
-          { path: '/earth', element: guard('/earth', <Earth />) },
+          { path: '/meditation', element: guard('/meditation', <Meditation />) },
+          // La antigua galería «La Tierra» (FE-25) es ahora Meditación (FE-36).
+          { path: '/earth', element: <Navigate to="/meditation" replace /> },
           { path: '/home', element: guard('/home', <HomeMessages />) },
           { path: '/history', element: guard('/history', <History />) },
           { path: '/missions', element: guard('/missions', <Missions />) },

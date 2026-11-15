@@ -48,7 +48,7 @@ RUOK/
 ├── docs/                       esta documentación
 ├── scripts/github/             backlog.yaml + script de creación de issues
 ├── frontend/                   Vite + React + TS
-│   ├── public/                 fondos de los entornos, imágenes de Earth view
+│   ├── public/                 fondos de los entornos y favicon
 │   └── src/
 │       ├── main.tsx  App.tsx
 │       ├── api/                client.ts, newId.ts, types.gen.ts (generado), mocks/
