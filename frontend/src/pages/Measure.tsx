@@ -8,6 +8,7 @@ import { useIndicators, type Indicator } from '../api/useIndicators'
 import { useSystems } from '../api/useSystems'
 import { CHECKIN_INDICATORS } from '../components/behavioral/checkin'
 import { PVT_INDICATORS } from '../components/behavioral/pvt'
+import { VoiceNote } from '../components/behavioral/VoiceControls'
 import { IndicatorField } from '../components/measure/IndicatorField'
 import { SystemArt } from '../components/measure/SystemArt'
 import { emptyValue, parseValue, type RawValue } from '../components/measure/measureForm'
@@ -390,6 +391,10 @@ function MeasureForm({
       >
         {phase.kind === 'sending' ? 'Guardando…' : 'Guardar medición'}
       </button>
+      <VoiceNote
+        texts={fields.flatMap((f) => f.measurement_instructions)}
+        className="text-center"
+      />
     </form>
   )
 }

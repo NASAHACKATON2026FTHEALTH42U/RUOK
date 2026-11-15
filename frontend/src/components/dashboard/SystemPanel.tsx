@@ -6,6 +6,7 @@ import type { Indicator } from '../../api/useIndicators'
 import { useInterventions } from '../../api/useInterventions'
 import type { BodySystem } from '../../api/useSystems'
 import { InterventionCard } from '../behavioral/InterventionCard'
+import { ListenButton } from '../behavioral/VoiceControls'
 import { CaseFeedbackFor } from '../alerts/CaseFeedbackNote'
 import { Modal } from '../ui/Modal'
 import { bySeverity } from '../ui/status'
@@ -91,11 +92,19 @@ export function SystemPanel({
           label: 'Recomendaciones',
           count: recommendations.length,
           content: (
-            <ol className="list-decimal space-y-1 pl-5 text-sm">
-              {recommendations.map((r) => (
-                <li key={r.id}>{r.text}</li>
-              ))}
-            </ol>
+            <>
+              {/* Voz guía (FE-37): las recomendaciones en voz alta. */}
+              <ListenButton
+                texts={recommendations.map((r) => r.text)}
+                label="Escuchar recomendaciones"
+                className="mb-2"
+              />
+              <ol className="list-decimal space-y-1 pl-5 text-sm">
+                {recommendations.map((r) => (
+                  <li key={r.id}>{r.text}</li>
+                ))}
+              </ol>
+            </>
           ),
         }
       : null,
