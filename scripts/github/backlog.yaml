@@ -1379,10 +1379,10 @@ issues:
     - "Capa 1: resumen automático por palabras clave, sin modelo"
     - "Capa 2: `services/llm.py` (cliente Ollama con `urllib`, solo loopback o red privada, sin proxy, una generación a la vez, timeout y pausa tras error); el modelo devuelve `{tipo, temas}` de lista cerrada y el código escribe la respuesta; frases fijas de rechazo"
     - "Front: página `/assistant` (selector de member para el personal, `mentionedMember`, chips, «Cancelar», etiqueta del origen de la respuesta, aviso fijo) y mock con el resumen automático"
-    - "`scripts/assistant_eval.py` (~130 preguntas en es/ca/en) para elegir el modelo; servicio opcional `ollama` con perfil `ai` en docker-compose; docs y fuentes (licencia del modelo)"
+    - "`scripts/assistant_eval.py` (~130 preguntas en es/ca/en) para elegir el modelo más pequeño que llegue a los umbrales; servicio opcional `ollama` con perfil `ai` en docker-compose; docs y fuentes (licencia del modelo)"
   acceptance:
     - "Sin modelo, con el modelo parado o con una respuesta inválida, la API devuelve `kind: summary`, nunca un error"
     - "Como commander o medic sin permiso, el cuerpo enviado al modelo no contiene datos conductuales privados ni el texto de ninguna alerta"
     - "member sobre otro member, responder, psych y family reciben 403; no se guarda nada"
-    - "Evaluación: rechaza ≥ 95 % de lo fuera de tema, acepta ≥ 90 % de lo que es del tema, elige los temas correctos ≥ 85 %; latencia mediana ≤ 8 s y p95 ≤ 15 s"
+    - "Evaluación: rechaza ≥ 95 % de lo fuera de tema, acepta ≥ 90 % de lo que es del tema, elige los temas correctos ≥ 85 %; latencia mediana ≤ 8 s y p95 ≤ 15 s en una máquina mínima (solo CPU, ~4 GB de RAM) y modelo de menos de 1 GB"
     - "La CI pasa en verde sin servidor de modelos"

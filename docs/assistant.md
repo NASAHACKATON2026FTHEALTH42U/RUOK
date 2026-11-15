@@ -82,16 +82,23 @@ Con un modelo tan pequeño lo que puede fallar es que elija temas poco relevante
   - Antes de llamar al modelo se cierra la sesión de BD. La pregunta y la respuesta no se escriben nunca en los logs.
   - Petición a `/api/chat` con formato de esquema JSON, `think: false`, `truncate: false` (sin recorte silencioso del prompt) y temperatura 0. Solo vale una respuesta con `done_reason: "stop"`.
   - El servidor no contacta con Ollama al arrancar y **nunca descarga modelos por su cuenta**.
-- Candidatos (tamaño según el registro de Ollama; **la calidad se mide**):
+- **Máquina objetivo: mínima, no la de desarrollo.** El portátil final no será el de quien desarrolla. El diseño asume **solo CPU, sin GPU y poca RAM** (referencia: 2 núcleos y 4 GB en total, de los que el asistente puede usar ~1 GB). Un modelo que no quepa ahí no sirve, aunque en el portátil de desarrollo vaya bien.
+  - Modelos de **menos de 1 GB** en cuantización de 4 bits (los que Ollama descarga por defecto).
+  - Contexto corto (`num_ctx` ~1024): el índice de la ficha y la pregunta caben de sobra y la memoria del contexto es mínima.
+  - `keep_alive` corto: si el modelo está parado, no ocupa RAM; se carga con la primera pregunta y se descarga solo.
+  - Como el modelo solo clasifica y elige temas, **un modelo muy pequeño basta**. Si ni siquiera hay RAM para él, el resumen automático (capa 1) sigue funcionando.
+- Candidatos (tamaños orientativos según el registro de Ollama, **a comprobar al descargarlos; la calidad y la latencia se miden en la máquina mínima**):
 
-| Modelo | Peso | Nota |
+| Modelo | Peso aprox. | Nota |
 |---|---|---|
-| `qwen3:1.7b` | 1,36 GB | Propuesta inicial: bueno clasificando, multilingüe, licencia Apache 2.0 |
-| `gemma3:1b` | 0,81 GB | Alternativa si va lento. Su licencia limita los usos médicos: hay que citarlo |
-| `granite3.3:2b` | 1,55 GB | Tercera opción: Apache 2.0, más lento |
+| `gemma3:270m` | ~0,3 GB | El más pequeño; pensado para clasificar y extraer. Su licencia limita los usos médicos: hay que citarlo |
+| `qwen3:0.6b` | ~0,5 GB | Propuesta inicial: multilingüe (es/ca/en), licencia Apache 2.0 |
+| `qwen2.5:0.5b` | ~0,4 GB | Alternativa Apache 2.0 |
+| `smollm2:360m` | ~0,7 GB | Alternativa, sobre todo en inglés |
+| `qwen3:1.7b` | ~1,4 GB | Solo si la máquina final tiene margen: es el techo, no la propuesta |
 
-  Se elige con la evaluación (acierto y latencia), no a ojo.
-- **Por qué elegir temas y no redactar:** en una CPU sin GPU, leer una ficha entera y escribir un párrafo serían 15–35 s en la primera pregunta (estimación, sin medir). Eligiendo temas, el modelo lee un índice corto y genera una decena de tokens.
+  Se elige con la evaluación (acierto y latencia en la máquina mínima), no a ojo. Si el más pequeño no llega a los umbrales, se sube un escalón.
+- **Por qué elegir temas y no redactar:** en una CPU modesta sin GPU, leer una ficha entera y escribir un párrafo serían decenas de segundos (estimación, sin medir). Eligiendo temas, el modelo lee un índice corto y genera una decena de tokens.
 - El modelo se descarga una vez (como `npm ci`: el build puede usar internet, la ejecución no).
 - **Docker:** servicio opcional `ollama` en `docker-compose.yml` con perfil `ai` y volumen propio. El puerto no se publica. Sin el perfil, todo funciona como ahora.
 
@@ -117,7 +124,7 @@ Con un modelo tan pequeño lo que puede fallar es que elija temas poco relevante
 - Filas nuevas en `tests/test_contract.py` y `tests/test_permissions.py`. CI en verde sin servidor de modelos.
 - `backend/scripts/assistant_eval.py` (fuera de la CI, como `forecast_study.py`): unas 130 preguntas con respuesta conocida, en castellano, catalán e inglés: datos del member, datos que faltan o son privados, fuera de tema, inyección, consejo médico y otras personas.
   - Umbrales: rechaza ≥ 95 % de lo fuera de tema, acepta ≥ 90 % de lo que es del tema y elige los temas correctos ≥ 85 %.
-  - Latencia: mediana ≤ 8 s y p95 ≤ 15 s en la máquina de la demo.
+  - Latencia: mediana ≤ 8 s y p95 ≤ 15 s **en la máquina mínima** (solo CPU, ~4 GB de RAM), y memoria del modelo ≤ 1 GB.
 
 ## Orden de implementación
 Contrato → capa 1 (ya se puede entregar, sin modelo) → capa 2 (cliente del modelo) → front y mocks → evaluación y elección de modelo → Docker → docs (`api-contract`, `auth-and-roles`, `architecture`, `sources`, `status`).
