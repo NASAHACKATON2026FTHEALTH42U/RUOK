@@ -31,10 +31,15 @@ export function voiceManifest(): Promise<Record<string, string>> {
   const lang = currentLang()
   let manifest = manifests.get(lang)
   if (!manifest) {
+    // Si no hay manifiesto (aún sin audios en ese idioma) o falla la red, no se recuerda el
+    // vacío: se vuelve a mirar la próxima vez (p. ej. tras generar las voces).
     manifest = fetch(`${voiceBase(lang)}manifest.json`)
-      .then((r) => (r.ok ? r.json() : {}))
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
       .then((m: { texts?: Record<string, string> }) => m.texts ?? {})
-      .catch(() => ({}))
+      .catch(() => {
+        manifests.delete(lang)
+        return {}
+      })
     manifests.set(lang, manifest)
   }
   return manifest
