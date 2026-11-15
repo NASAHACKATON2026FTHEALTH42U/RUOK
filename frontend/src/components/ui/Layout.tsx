@@ -20,7 +20,7 @@ import { LinkStatusChip } from './LinkStatusChip'
 import { MemberSwitcher } from './MemberSwitcher'
 import { MockBanner } from './MockBanner'
 import { NavIcon } from './NavIcon'
-import { allowedItems, navItems, tabsFor } from './navigation'
+import { allowedItems, menuFor, navItems, tabsFor } from './navigation'
 import { PendingSyncChip } from './PendingSyncChip'
 import { ServerStatus } from './ServerStatus'
 import { TOPBAR_SLOT_ID } from './TopBarPortal'
@@ -49,7 +49,8 @@ export function Layout() {
   const env = envs.state === 'ready' ? envs.data.find((e) => e.id === envId) : undefined
 
   // Solo las vistas que permite el rol (FE-28, src/auth/permissions.ts).
-  const allowed = allowedItems(navItems(vocab), can)
+  // Menú del rol (el operador tiene el suyo: gestión y monitorización).
+  const allowed = menuFor(role, allowedItems(navItems(vocab), can))
   const tabs = tabsFor(role, allowed)
 
   // Logo de las maquetas HUD (emblema de anillos y "R U OK?"); lleva a la vista inicial del rol.

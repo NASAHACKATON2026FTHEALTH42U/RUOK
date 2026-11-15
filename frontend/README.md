@@ -530,6 +530,7 @@ const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el
 
 - **Rutas:** cada ruta de `App.tsx` va envuelta en `<RequireRole>` con el permiso de `ROUTE_PERMISSIONS`. Una ruta prohibida **redirige a la vista inicial del rol** (`homeFor`).
 - **Menú:** la navegación solo muestra las vistas permitidas (p. ej. el flight surgeon ve Historial, Alertas y su consola; el medic, además, "Tripulación"). El logo lleva a la vista inicial del rol.
+- **Menú del operador (`admin`):** solo gestión y monitorización (`menuFor()` en `navigation.ts`): Centro de control, Usuarios (`/control/users`), Entornos, Equipo, Alertas y la consola de tierra. Las vistas de autocuidado de un member (Medir, Check-in, Misiones, Meditación…) no salen en su menú, aunque sigue pudiendo abrirlas desde la ficha de cada member. Al elegir entorno en `/` va al centro de control de ese entorno.
 - **Selector de entorno** de la cabecera y página `/`: solo `admin`.
 - **"Medir ahora"** del `SystemPanel`: el member para sí mismo; medic y admin para cualquiera ("medir para otro solo medic").
 - **SOS:** sin sesión, siempre visible. Con sesión, oculto para `responder` y `psych` (están en tierra).

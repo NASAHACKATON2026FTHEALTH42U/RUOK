@@ -6,7 +6,7 @@ import { EnvironmentSelector } from '../components/ui/EnvironmentSelector'
 import { MemberSwitcher } from '../components/ui/MemberSwitcher'
 import { LinkStatusChip } from '../components/ui/LinkStatusChip'
 import { ChevronIcon } from '../components/ui/NavIcon'
-import { allowedItems, navItems, tabsFor } from '../components/ui/navigation'
+import { allowedItems, menuFor, navItems, tabsFor } from '../components/ui/navigation'
 import { PendingSyncChip } from '../components/ui/PendingSyncChip'
 import { ServerStatus } from '../components/ui/ServerStatus'
 import { useVocab } from '../environments/useVocab'
@@ -20,7 +20,7 @@ export default function More() {
   const vocab = useVocab()
   const { role, can } = useAuth()
   const device = getDevice()
-  const allowed = allowedItems(navItems(vocab), can)
+  const allowed = menuFor(role, allowedItems(navItems(vocab), can))
   const inTabs = new Set(tabsFor(role, allowed).map((t) => t.to))
   const rest = allowed.filter((i) => !inTabs.has(i.to))
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { serverNow } from '../api/client'
 import {
   useControlOverview,
@@ -44,7 +44,13 @@ export default function Control() {
   const [events, setEvents] = useState<RealtimeEvent[]>([])
   const [fresh, setFresh] = useState<Set<number>>(new Set())
   const [filters, setFilters] = useState<FeedFilters>(EMPTY_FILTERS)
-  const [tab, setTab] = useState<'overview' | 'users'>('overview')
+  // La pestaña va en la ruta: /control (panorama) o /control/users (gestión de usuarios), para
+  // que el menú del operador pueda enlazar cada una.
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+  const tab: 'overview' | 'users' = pathname.startsWith('/control/users') ? 'users' : 'overview'
+  const setTab = (id: 'overview' | 'users') =>
+    navigate(id === 'users' ? '/control/users' : '/control')
 
   // Depende de los datos, no del objeto de useLoad (es nuevo en cada render): si no, cada
   // setEvents provocaba otro render y otro efecto ("Maximum update depth exceeded").

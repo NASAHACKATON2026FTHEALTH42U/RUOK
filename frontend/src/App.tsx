@@ -51,6 +51,7 @@ const router = createBrowserRouter([
           { path: '/alerts', element: guard('/alerts', <Alerts />) },
           { path: '/ground', element: guard('/ground', <Ground />) },
           { path: '/control', element: guard('/control', <Control />) },
+          { path: '/control/users', element: guard('/control/users', <Control />) },
           // «Más» (estilo HUD): cualquier rol con sesión.
           { path: '/more', element: <More /> },
           { path: '*', element: <NotFound /> },
