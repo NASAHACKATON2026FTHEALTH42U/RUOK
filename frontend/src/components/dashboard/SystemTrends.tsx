@@ -11,6 +11,7 @@ import {
 } from 'recharts'
 import { serverNow } from '../../api/client'
 import { useMeasurementsMany } from '../../api/useMeasurements'
+import { translate, useT } from '../../i18n/t'
 import { useEnvironmentStore } from '../../store/environment'
 import { STATUS_COLORS } from '../ui/status'
 import { formatValue } from './format'
@@ -49,7 +50,8 @@ export interface TrendSeries {
   range: Ranges
 }
 
-const unitLabel = (unit: string) => (unit === '1-5' ? 'escala 1-5' : unit || 'sin unidad')
+const unitLabel = (unit: string) =>
+  unit === '1-5' ? translate('escala 1-5') : unit || translate('sin unidad')
 
 /**
  * Tendencias de un sistema en UNA sola gráfica (detalle de un sistema o de un indicador). Los
@@ -64,6 +66,7 @@ const unitLabel = (unit: string) => (unit === '1-5' ? 'escala 1-5' : unit || 'si
  * solo).
  */
 export function SystemTrends({ series, initial }: { series: TrendSeries[]; initial?: string[] }) {
+  const t = useT()
   const memberId = useEnvironmentStore((s) => s.memberId)
   const [days, setDays] = useState<Period>(7)
   const ids = series.map((s) => s.id)
@@ -80,7 +83,8 @@ export function SystemTrends({ series, initial }: { series: TrendSeries[]; initi
     <figure className="border border-env-border bg-env-surface p-4">
       <div className="flex items-center justify-between gap-2">
         <figcaption className="text-base font-semibold">
-          Tendencias <span className="font-normal text-env-muted">· últimos {days} días</span>
+          {t('Tendencias')}{' '}
+          <span className="font-normal text-env-muted">· {t('últimos {n} días', { n: days })}</span>
         </figcaption>
         <PeriodSwitch days={days} onChange={setDays} size="md" />
       </div>
@@ -88,7 +92,7 @@ export function SystemTrends({ series, initial }: { series: TrendSeries[]; initi
       {series.length > 1 && (
         <div
           role="group"
-          aria-label="Indicadores en la gráfica"
+          aria-label={t('Indicadores en la gráfica')}
           className="mt-3 flex flex-wrap gap-2"
         >
           {series.map((s) => {
@@ -107,8 +111,8 @@ export function SystemTrends({ series, initial }: { series: TrendSeries[]; initi
                 title={
                   locked
                     ? on
-                      ? 'Tiene que quedar al menos un indicador'
-                      : `Como mucho ${MAX} a la vez`
+                      ? t('Tiene que quedar al menos un indicador')
+                      : t('Como mucho {n} a la vez', { n: MAX })
                     : undefined
                 }
                 onClick={() => !locked && setSlots((cur) => toggleSlot(cur, s.id, MAX))}
@@ -144,9 +148,9 @@ export function SystemTrends({ series, initial }: { series: TrendSeries[]; initi
       )}
       {data.state === 'error' && (
         <p className="mt-2 text-sm text-env-muted">
-          No se han podido cargar las series.{' '}
+          {t('No se han podido cargar las series.')}{' '}
           <button type="button" onClick={data.retry} className="underline">
-            Reintentar
+            {t('Reintentar')}
           </button>
         </p>
       )}
@@ -168,6 +172,7 @@ function Plot({
   data: Record<string, { taken_at: string; value: number }[]>
   days: Period
 }) {
+  const t = useT()
   const now = serverNow().getTime()
   const unit = commonUnit(selected.map((s) => s.unit))
   const normalized = unit === null
@@ -180,9 +185,9 @@ function Plot({
     for (const m of data[s.id] ?? []) {
       const y = normalized ? normalPct(m.value, s.range) : m.value
       if (y === null) continue
-      const t = Date.parse(m.taken_at)
-      byT.set(t, { ...(byT.get(t) ?? { t }), [s.id]: y, [s.id + RAW]: m.value })
-      points.push({ t, value: y })
+      const at = Date.parse(m.taken_at)
+      byT.set(at, { ...(byT.get(at) ?? { t: at }), [s.id]: y, [s.id + RAW]: m.value })
+      points.push({ t: at, value: y })
     }
   }
   const rows = [...byT.values()].sort((a, b) => a.t - b.t)
@@ -191,7 +196,7 @@ function Plot({
   const range: Ranges = normalized ? { normal: [0, 100] } : single ? selected[0].range : {}
   const domain = yDomain(points, range)
   const caption = normalized
-    ? 'Escala común: % del rango normal de cada indicador (0–100 % = normal)'
+    ? t('Escala común: % del rango normal de cada indicador (0–100 % = normal)')
     : single
       ? `${selected[0].name} · ${unitLabel(unit)}`
       : unitLabel(unit)
@@ -200,7 +205,9 @@ function Plot({
     <div className="mt-2 min-w-0">
       <p className="text-sm text-env-muted">{caption}</p>
       {rows.length === 0 ? (
-        <p className="mt-1 text-sm text-env-muted">Sin mediciones en los últimos {days} días.</p>
+        <p className="mt-1 text-sm text-env-muted">
+          {t('Sin mediciones en los últimos {n} días.', { n: days })}
+        </p>
       ) : (
         <>
           <div style={{ height: PLOT_H }} aria-hidden="true" className="mt-1">
@@ -264,7 +271,8 @@ function Plot({
                                 </span>
                                 <span className="text-env-muted">
                                   {s.name}
-                                  {normalized && ` · ${Math.round(row[s.id])} % del rango`}
+                                  {normalized &&
+                                    ` · ${t('{n} % del rango', { n: Math.round(row[s.id]) })}`}
                                 </span>
                               </div>
                             ),
@@ -303,16 +311,19 @@ function Plot({
 
           <details className="mt-2 text-sm">
             <summary className="cursor-pointer text-env-muted hover:text-env-text">
-              Ver datos ({rows.length})
+              {t('Ver datos ({n})', { n: rows.length })}
             </summary>
             <div className="overflow-x-auto">
               <table className="mt-1 w-full">
                 <caption className="sr-only">
-                  {selected.map((s) => s.name).join(', ')}: últimos {days} días
+                  {t('{names}: últimos {n} días', {
+                    names: selected.map((s) => s.name).join(', '),
+                    n: days,
+                  })}
                 </caption>
                 <thead>
                   <tr className="text-left text-env-muted">
-                    <th className="font-normal">Fecha</th>
+                    <th className="font-normal">{t('Fecha')}</th>
                     {selected.map((s) => (
                       <th key={s.id} className="pl-2 text-right font-normal">
                         {s.name}

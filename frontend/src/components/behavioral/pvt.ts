@@ -1,4 +1,5 @@
 import type { MeasurementIn } from '../../offline/outbox'
+import { translate } from '../../i18n/t'
 
 /**
  * Lógica pura del test de vigilancia psicomotora (PVT, FE-22; docs/behavioral-health.md).
@@ -16,7 +17,10 @@ export const LAPSE_MS = 500
 /** Respuesta más rápida que esto = anticipación (falso inicio): nadie reacciona tan rápido. */
 export const FALSE_START_MS = 100
 
-/** Duraciones: el test completo y la versión corta de la demo (el juez desde su móvil). */
+/**
+ * Duraciones: el test completo y la versión corta de la demo (el juez desde su móvil).
+ * `label` está en español: se traduce al pintarlo (`translate(label)`).
+ */
 export const PVT_MODES = {
   full: { durationMs: 180_000, label: 'Test completo', short: '3 min' },
   demo: { durationMs: 30_000, label: 'Versión demo', short: '30 s' },
@@ -85,7 +89,12 @@ export function buildPvtBatch(
 ): MeasurementIn[] {
   if (summary.meanRtMs === null) return []
   const m = PVT_MODES[mode]
-  const note = `${m.label} (${m.short}) · ${summary.responses} respuestas · ${summary.falseStarts} falsos inicios`
+  const note = translate('{label} ({short}) · {n} respuestas · {f} falsos inicios', {
+    label: translate(m.label),
+    short: m.short,
+    n: summary.responses,
+    f: summary.falseStarts,
+  })
   const base = { taken_at: takenAt, source: 'pvt' as const, note }
   return [
     {

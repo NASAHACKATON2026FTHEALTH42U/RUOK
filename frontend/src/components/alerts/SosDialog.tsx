@@ -7,6 +7,7 @@ import type { Environment } from '../../api/useEnvironments'
 import type { Intervention } from '../../api/useInterventions'
 import { loadCachedAssessment } from '../../offline/cache'
 import { sendAlert, type AlertResult } from '../../offline/outbox'
+import { translate, useT } from '../../i18n/t'
 import type { Vocabulary } from '../../store/environment'
 import { ListenButton } from '../behavioral/VoiceControls'
 import { Modal } from '../ui/Modal'
@@ -47,6 +48,7 @@ interface SosDialogProps {
  * El SOS no pasa por aquí: avisa y envía solo, sin formulario (`SosEmergency`).
  */
 export function SosDialog({ memberId, env, vocabulary, interventions, onClose }: SosDialogProps) {
+  const t = useT()
   const ladder = env?.escalation_ladder ?? ['self', 'crew', 'ground']
   const [category, setCategory] = useState<AlertCategory | null>(null)
   const [severity, setSeverity] = useState<AlertSeverity>('warning')
@@ -63,7 +65,7 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
         id: newId(),
         category,
         severity,
-        message: message.trim() || CATEGORIES.find((c) => c.id === category)!.label,
+        message: message.trim() || translate(CATEGORIES.find((c) => c.id === category)!.label),
         system_id: null,
         target_role: target,
       })
@@ -71,7 +73,9 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
     } catch (err) {
       setPhase({
         kind: 'error',
-        message: `No se ha podido guardar en el dispositivo: ${String(err)}`,
+        message: translate('No se ha podido guardar en el dispositivo: {error}', {
+          error: String(err),
+        }),
       })
     }
   }
@@ -83,14 +87,14 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
         <div className="w-full max-w-lg  border border-env-border bg-env-bg p-5 shadow-2xl ">
           <div className="flex items-start justify-between gap-3">
             <h2 id="notice-title" className="text-xl font-semibold">
-              {phase.kind === 'queued' ? 'No enviado' : 'Enviar aviso a control'}
+              {phase.kind === 'queued' ? t('No enviado') : t('Enviar aviso a control')}
             </h2>
             <button
               data-autofocus
               type="button"
               onClick={onClose}
               disabled={phase.kind === 'sending'}
-              aria-label="Cerrar"
+              aria-label={t('Cerrar')}
               className=" px-2 py-1 text-env-muted hover:bg-env-surface hover:text-env-text disabled:opacity-50"
             >
               ✕
@@ -99,11 +103,14 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
 
           {memberId === null ? (
             <p className="mt-3">
-              Primero{' '}
+              {t('Primero')}{' '}
               <Link to="/" onClick={onClose} className="underline">
-                elige entorno y {vocabulary.member}
+                {t('elige entorno y {member}', { member: vocabulary.member })}
               </Link>
-              . Si es una emergencia, avisa ya de viva voz a {roleLabel('crew', vocabulary)}.
+              .{' '}
+              {t('Si es una emergencia, avisa ya de viva voz a {crew}.', {
+                crew: roleLabel('crew', vocabulary),
+              })}
             </p>
           ) : phase.kind === 'sent' ? (
             <Sent alert={phase.alert} vocabulary={vocabulary} onClose={onClose} />
@@ -118,7 +125,7 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
           ) : (
             <form onSubmit={submit} className="mt-4 space-y-5">
               <fieldset>
-                <legend className="text-sm font-medium">¿Qué pasa?</legend>
+                <legend className="text-sm font-medium">{t('¿Qué pasa?')}</legend>
                 <div className="mt-2 grid grid-cols-2 gap-2" role="radiogroup">
                   {CATEGORIES.map((c) => (
                     <button
@@ -136,21 +143,23 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
                           : 'border-env-border hover:border-env-text'
                       }`}
                     >
-                      <span className="block font-medium">{c.label}</span>
-                      <span className="block text-xs text-env-muted">{c.hint}</span>
+                      <span className="block font-medium">{t(c.label)}</span>
+                      <span className="block text-xs text-env-muted">{t(c.hint)}</span>
                     </button>
                   ))}
                 </div>
                 {category === 'psychological' && (
                   <p className="mt-2 text-sm text-env-muted">
-                    <Icon name="lock" size={15} /> Confidencial: solo lo verá{' '}
-                    {vocabulary.psych ?? 'el equipo de apoyo psicológico'}.
+                    <Icon name="lock" size={15} />{' '}
+                    {t('Confidencial: solo lo verá {who}.', {
+                      who: vocabulary.psych ?? t('el equipo de apoyo psicológico'),
+                    })}
                   </p>
                 )}
               </fieldset>
 
               <fieldset>
-                <legend className="text-sm font-medium">¿Cuánto urge?</legend>
+                <legend className="text-sm font-medium">{t('¿Cuánto urge?')}</legend>
                 <div className="mt-2 flex gap-2" role="radiogroup">
                   {SEVERITIES.map((s) => (
                     <button
@@ -165,14 +174,14 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
                           : 'border-env-border hover:border-env-text'
                       }`}
                     >
-                      {s.label}
+                      {t(s.label)}
                     </button>
                   ))}
                 </div>
               </fieldset>
 
               <label className="block text-sm">
-                <span className="font-medium">¿A quién avisar?</span>
+                <span className="font-medium">{t('¿A quién avisar?')}</span>
                 <select
                   value={target ?? ''}
                   onChange={(e) => setTarget(e.target.value)}
@@ -181,14 +190,14 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
                   {targets(ladder).map((r, i) => (
                     <option key={r} value={r}>
                       {roleLabel(r, vocabulary)}
-                      {i === 0 ? ' (siguiente nivel)' : ''}
+                      {i === 0 ? ` ${t('(siguiente nivel)')}` : ''}
                     </option>
                   ))}
                 </select>
               </label>
 
               <label className="block text-sm">
-                <span className="font-medium">Mensaje (opcional)</span>
+                <span className="font-medium">{t('Mensaje (opcional)')}</span>
                 <AutoTextarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
@@ -208,7 +217,7 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
                 disabled={!category || phase.kind === 'sending'}
                 className="w-full bg-[var(--sos-bg)] px-4 py-3 font-semibold text-[var(--sos-text)] hover:bg-[var(--sos-bg-strong)] disabled:opacity-50"
               >
-                {phase.kind === 'sending' ? 'Enviando…' : 'Enviar aviso'}
+                {phase.kind === 'sending' ? t('Enviando…') : t('Enviar aviso')}
               </button>
             </form>
           )}
@@ -233,20 +242,24 @@ export function Sent({
   vocabulary: Vocabulary
   onClose: () => void
 }) {
+  const t = useT()
   const to = roleLabel(alert.target_role, vocabulary)
   const minutes = Math.max(1, Math.round(alert.delay_s / 60))
   return (
     <div className="mt-4 space-y-3" role="status">
       <p className="text-lg">
-        ✓ Enviado a <strong>{to}</strong>.
+        ✓ {t('Enviado a')} <strong>{to}</strong>.
       </p>
       {alert.delivery_mode === 'realtime' || alert.delay_s < 5 ? (
-        <p className="text-env-muted">Le llega al momento.</p>
+        <p className="text-env-muted">{t('Le llega al momento.')}</p>
       ) : (
         <p className="text-env-muted">
-          Por el retardo de comunicación, le llegará en unos <strong>{minutes} min</strong>
-          {alert.eta ? ` (hacia las ${hhmm(alert.eta)}, hora del servidor)` : ''}. Mientras tanto,
-          sigue las indicaciones de tu panel.
+          {t('Por el retardo de comunicación, le llegará en unos')}{' '}
+          <strong>{t('{n} min', { n: minutes })}</strong>
+          {alert.eta
+            ? ` ${t('(hacia las {time}, hora del servidor)', { time: hhmm(alert.eta) })}`
+            : ''}
+          . {t('Mientras tanto, sigue las indicaciones de tu panel.')}
         </p>
       )}
       <button
@@ -254,7 +267,7 @@ export function Sent({
         onClick={onClose}
         className="w-full  bg-env-primary px-4 py-2.5 font-medium text-env-primary-text"
       >
-        Entendido
+        {t('Entendido')}
       </button>
     </div>
   )
@@ -278,6 +291,7 @@ export function Queued({
   interventions: Intervention[]
   onClose: () => void
 }) {
+  const t = useT()
   const [steps, setSteps] = useState<string[]>([])
   useEffect(() => {
     void loadCachedAssessment<Assessment>(memberId).then((a) => {
@@ -305,18 +319,19 @@ export function Queued({
     <div className="mt-3 space-y-4">
       <div role="alert" className=" border-2 p-3" style={{ borderColor: STATUS_COLORS.critical }}>
         <p className="text-lg font-semibold">
-          No enviado. Avisa a {roleLabel('crew', vocabulary)} de viva voz.
+          {t('No enviado. Avisa a {crew} de viva voz.', { crew: roleLabel('crew', vocabulary) })}
         </p>
         <p className="mt-1 text-sm text-env-muted">
-          No hay conexión con el servidor de a bordo. La petición está guardada en este dispositivo
-          y se enviará sola en cuanto vuelva la conexión.
+          {t(
+            'No hay conexión con el servidor de a bordo. La petición está guardada en este dispositivo y se enviará sola en cuanto vuelva la conexión.',
+          )}
         </p>
       </div>
 
       {(steps.length > 0 || offline.length > 0) && (
         <section>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="font-semibold">Mientras tanto</h3>
+            <h3 className="font-semibold">{t('Mientras tanto')}</h3>
             {/* Voz guía (FE-37): los pasos en voz alta, con las manos libres. */}
             <ListenButton texts={[...steps, ...offline.flatMap((i) => i.steps)]} />
           </div>
@@ -347,7 +362,7 @@ export function Queued({
         onClick={onClose}
         className="w-full  border border-env-border px-4 py-2.5 font-medium hover:border-env-text"
       >
-        Cerrar
+        {t('Cerrar')}
       </button>
     </div>
   )

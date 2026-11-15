@@ -9,6 +9,10 @@ Ver docs/behavioral-health.md ("Conexión con la Tierra").
   personaje del entorno (``home_persona``): con el LLM local si está (``OLLAMA_URL``) y, si
   no, con una frase de ``data/home_message_replies.json`` elegida a partir del UUID.
 - El member solo ve las respuestas ya entregadas a bordo.
+- Idioma (FE-38): la respuesta se genera fuera de una petición, así que casa contesta en el
+  idioma en que escribió el member (``home_persona.detect_language``); la frase guionizada en
+  inglés sale de ``data/i18n/en/home_message_replies.json``. El remitente guardado se devuelve
+  en el idioma de la petición (``home_persona.sender_label``).
 """
 
 from __future__ import annotations
@@ -23,7 +27,7 @@ from typing import Any
 
 from sqlmodel import Session, col, select
 
-from app import models
+from app import i18n, models
 from app.schemas import HomeMessage
 from app.schemas.common import EventType, LinkDirection
 from app.services import comm_link, environments, events, home_persona
@@ -42,6 +46,15 @@ class IdConflict(Exception):
 @lru_cache(maxsize=1)
 def _config() -> dict[str, Any]:
     return json.loads(REPLIES_FILE.read_text(encoding="utf-8"))
+
+
+def _replies(language: str) -> list[str]:
+    """Frases guionizadas de casa en ``language`` (en inglés, de la capa; si falta, español)."""
+    if language == "en":
+        replies = i18n._layer("home_message_replies", "en").get("replies")
+        if replies:
+            return list(replies)
+    return list(_config()["replies"])
 
 
 def _messages(session: Session, env_id: str) -> list[models.LinkMessage]:
@@ -71,7 +84,7 @@ def send(
             and existing.payload.get("text") == text
         )
         if not same:
-            raise IdConflict("Ese id ya se usó con otro mensaje")
+            raise IdConflict(i18n.tr("Ese id ya se usó con otro mensaje"))
         return existing
     return comm_link.send(
         session,
@@ -99,19 +112,20 @@ def on_link_delivered(session: Session, delivered: Iterable[models.LinkMessage])
         env = environments.get_environment(message.env_id)
         row = comm_link.get_state(session, message.env_id)
         sent_at = message.delivered_at + timedelta(seconds=cfg["response_delay_s"])
-        replies = cfg["replies"]
+        history = [
+            ("user" if m.direction == LinkDirection.up else "assistant", m.payload.get("text", ""))
+            for m in _messages(session, message.env_id)
+            if m.payload.get("member_id") == message.payload.get("member_id")
+            and m.ref_id != message.ref_id
+            and (m.direction == LinkDirection.up or m.state == "delivered")
+        ]
+        language = home_persona.detect_language(message.payload.get("text", ""), history)
+        replies = _replies(language)
         scripted = replies[uuid.UUID(message.ref_id).int % len(replies)]
         # Quien responde depende del entorno (familiar, pareja, amigo…). Con el LLM local
         # (OLLAMA_URL) contesta en su papel y sin salirse del contexto; si no, la frase de siempre.
         member_id = message.payload.get("member_id")
         member = session.get(models.Member, member_id) if member_id else None
-        history = [
-            ("user" if m.direction == LinkDirection.up else "assistant", m.payload.get("text", ""))
-            for m in _messages(session, message.env_id)
-            if m.payload.get("member_id") == member_id
-            and m.ref_id != message.ref_id
-            and (m.direction == LinkDirection.up or m.state == "delivered")
-        ]
         text, source = home_persona.reply(
             message.env_id,
             member.name if member else "",
@@ -119,6 +133,7 @@ def on_link_delivered(session: Session, delivered: Iterable[models.LinkMessage])
             message.payload.get("text", ""),
             message.ref_id,
             scripted,
+            language,
         )
         session.add(
             models.LinkMessage(
@@ -129,7 +144,7 @@ def on_link_delivered(session: Session, delivered: Iterable[models.LinkMessage])
                 payload={
                     "member_id": message.payload.get("member_id"),
                     "text": text,
-                    "sender": home_persona.persona(message.env_id)["sender"],
+                    "sender": home_persona.persona(message.env_id, language)["sender"],
                     "source": source,
                     "in_reply_to": message.ref_id,
                 },
@@ -144,7 +159,7 @@ def on_link_delivered(session: Session, delivered: Iterable[models.LinkMessage])
             env_id=message.env_id,
             member_id=message.payload.get("member_id"),
             ref_id=reply_ref,
-            summary="Respuesta de casa en camino",
+            summary=i18n.tr("Respuesta de casa en camino"),
             payload={"direction": "down", "kind": KIND},
         )
 
@@ -156,7 +171,7 @@ def _to_schema(row: models.LinkMessage) -> HomeMessage:
         member_id=p["member_id"],
         direction=row.direction,
         text=p["text"],
-        sender=p.get("sender"),
+        sender=home_persona.sender_label(p.get("sender")),
         in_reply_to=p.get("in_reply_to"),
         sent_at=row.sent_at,
         eta=row.eta,

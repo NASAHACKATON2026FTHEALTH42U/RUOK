@@ -25,7 +25,7 @@ from sqlalchemy import event as sa_event
 from sqlalchemy.orm import Session as SASession
 from sqlmodel import Session, col, delete, select
 
-from app import clock, models
+from app import clock, i18n, models
 from app.schemas import Event, EventType
 
 __all__ = [
@@ -236,6 +236,8 @@ def to_schema(row: models.EventLog) -> Event:
         user_id=row.user_id,
         device_id=device,
         ref_id=row.ref_id,
-        summary=row.summary,
+        # Los resúmenes fijos guardados en español (p. ej. los de la vigilancia en segundo plano,
+        # sin petición) salen en el idioma de quien los lee si están en messages.json.
+        summary=i18n.tr(row.summary) if row.summary else row.summary,
         payload=row.payload or {},
     )

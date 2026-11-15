@@ -1,3 +1,4 @@
+import { translate } from '../../i18n/t'
 import { formatAgo } from '../../lib/time'
 import type { Liveness, Status } from '../ui/status'
 
@@ -56,5 +57,7 @@ export function isFigureStale(liveness: Liveness): boolean {
 
 /** "Sin datos desde hace 12 min" a partir de `last_seen_at` y la hora del servidor. */
 export function formatSinceLabel(lastSeenAt: string | null | undefined, now: Date): string {
-  return lastSeenAt ? `Sin datos desde ${formatAgo(lastSeenAt, now)}` : 'Sin datos'
+  return lastSeenAt
+    ? translate('Sin datos desde {ago}', { ago: formatAgo(lastSeenAt, now) })
+    : translate('Sin datos')
 }

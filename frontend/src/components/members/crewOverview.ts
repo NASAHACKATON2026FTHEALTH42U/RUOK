@@ -3,6 +3,7 @@
  * conjunto, densidad de las tarjetas según cuántos members hay y resumen de sistemas.
  */
 import type { MemberSummary } from '../../api/useMembers'
+import { translate } from '../../i18n/t'
 import type { DisplayState, Status } from '../ui/status'
 
 /** Cómo se pintan las tarjetas del conjunto: ricas (pocos), compactas o en filas (muchos). */
@@ -144,18 +145,19 @@ export function pickIndividual<
 /** Etiqueta de los recuentos («1 crítico», «2 en atención»…), en singular o plural. */
 export function countLabel(state: DisplayState, n: number): string {
   const one: Record<string, string> = {
-    critical: 'crítico',
-    warning: 'en atención',
-    unknown: 'sin datos',
-    normal: 'normal',
-    lost: 'sin contacto',
+    critical: '{n} crítico',
+    warning: '{n} en atención',
+    unknown: '{n} sin datos',
+    normal: '{n} normal',
+    lost: '{n} sin contacto',
   }
   const many: Record<string, string> = {
-    critical: 'críticos',
-    warning: 'en atención',
-    unknown: 'sin datos',
-    normal: 'normales',
-    lost: 'sin contacto',
+    critical: '{n} críticos',
+    warning: '{n} en atención',
+    unknown: '{n} sin datos',
+    normal: '{n} normales',
+    lost: '{n} sin contacto',
   }
-  return `${n} ${(n === 1 ? one : many)[state] ?? state}`
+  const key = (n === 1 ? one : many)[state]
+  return key ? translate(key, { n }) : `${n} ${state}`
 }

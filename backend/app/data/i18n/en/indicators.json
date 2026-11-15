@@ -1,0 +1,146 @@
+{
+  "heart_rate": {
+    "name": "Heart rate",
+    "unit": "bpm",
+    "measurement_instructions": [
+      "Sit at rest for 5 min",
+      "Measure for 60 s"
+    ],
+    "why_it_matters": "Microgravity redistributes body fluids and alters the heart rhythm."
+  },
+  "bp_systolic": {
+    "name": "Systolic blood pressure",
+    "measurement_instructions": [
+      "Sit at rest for 5 min",
+      "Arm at heart level"
+    ],
+    "why_it_matters": "Changes in gravity affect blood pressure regulation."
+  },
+  "bp_diastolic": {
+    "name": "Diastolic blood pressure",
+    "measurement_instructions": [
+      "Taken together with the systolic"
+    ],
+    "why_it_matters": "Completes the blood pressure reading."
+  },
+  "spo2": {
+    "name": "Oxygen saturation",
+    "measurement_instructions": [
+      "Pulse oximeter on the index finger, 30 s"
+    ],
+    "why_it_matters": "The air in a closed habitat can fail; SpO₂ detects it early."
+  },
+  "mood": {
+    "name": "Mood",
+    "measurement_instructions": [
+      "How do you feel today? 1 = very bad, 5 = very good"
+    ],
+    "why_it_matters": "Isolation and confinement affect mood and performance."
+  },
+  "temperature": {
+    "name": "Temperature",
+    "measurement_instructions": [
+      "Thermometer under the tongue, 1 min"
+    ],
+    "why_it_matters": "A fever may signal an infection; the immune system changes in space."
+  },
+  "glucose": {
+    "name": "Glucose",
+    "measurement_instructions": [
+      "Glucose meter: a drop of blood from the finger"
+    ],
+    "why_it_matters": "Nutrition on a mission is limited, and glucose reflects metabolic status."
+  },
+  "exercise_min": {
+    "name": "Daily exercise",
+    "measurement_instructions": [
+      "Minutes of resistance and aerobic exercise today"
+    ],
+    "why_it_matters": "Without gravity, bone and muscle are lost; exercise is the countermeasure."
+  },
+  "sleep_hours": {
+    "name": "Sleep hours",
+    "measurement_instructions": [
+      "Hours slept last night"
+    ],
+    "why_it_matters": "A disrupted light/dark cycle and noise affect sleep."
+  },
+  "vision_changes": {
+    "name": "Vision changes",
+    "measurement_instructions": [
+      "1 = no changes, 5 = very blurred or distorted vision"
+    ],
+    "why_it_matters": "SANS (spaceflight-associated neuro-ocular syndrome) appears on long missions in microgravity."
+  },
+  "radiation_dose": {
+    "name": "Cumulative dose",
+    "measurement_instructions": [
+      "Reading from your personal dosimeter"
+    ],
+    "why_it_matters": "Outside the magnetosphere, radiation increases the risk of cancer."
+  },
+  "hydration_ml": {
+    "name": "Hydration",
+    "measurement_instructions": [
+      "Add up the water and drinks you have had today, in ml"
+    ],
+    "why_it_matters": "Dehydration affects blood pressure, the kidneys and concentration."
+  },
+  "weight_kg": {
+    "name": "Weight",
+    "measurement_instructions": [
+      "Fasting, after using the toilet and wearing light clothing"
+    ],
+    "why_it_matters": "Sustained weight loss points to poor nutrition or muscle loss."
+  },
+  "stress": {
+    "name": "Stress",
+    "measurement_instructions": [
+      "How much stress do you feel today? 1 = none, 5 = a great deal"
+    ],
+    "why_it_matters": "Sustained stress in confinement affects sleep, mood and the immune system."
+  },
+  "energy": {
+    "name": "Energy",
+    "measurement_instructions": [
+      "How much energy do you have today? 1 = none, 5 = a lot"
+    ],
+    "why_it_matters": "Persistent fatigue is an early sign of poor sleep or overload."
+  },
+  "loneliness": {
+    "name": "Loneliness",
+    "measurement_instructions": [
+      "Do you feel lonely today? 1 = not at all, 5 = very much"
+    ],
+    "why_it_matters": "Loneliness is a health risk in isolation and in old age."
+  },
+  "sleep_quality": {
+    "name": "Sleep quality",
+    "measurement_instructions": [
+      "How did you sleep? 1 = very badly, 5 = very well"
+    ],
+    "why_it_matters": "Poor sleep reduces attention and increases the risk of errors."
+  },
+  "crew_relation": {
+    "name": "Team relationships",
+    "measurement_instructions": [
+      "How are things going with your team? 1 = very badly, 5 = very well"
+    ],
+    "why_it_matters": "Conflicts in an isolated group affect mood and safety."
+  },
+  "pvt_mean_rt_ms": {
+    "name": "PVT: mean reaction time",
+    "measurement_instructions": [
+      "Calculated by the PVT: tap as soon as the stimulus appears"
+    ],
+    "why_it_matters": "A slower reaction time is an objective marker of fatigue."
+  },
+  "pvt_lapses": {
+    "name": "PVT: lapses",
+    "unit": "lapses",
+    "measurement_instructions": [
+      "Calculated by the PVT: responses slower than 500 ms"
+    ],
+    "why_it_matters": "Attention lapses increase with lack of sleep and fatigue."
+  }
+}

@@ -2,6 +2,7 @@ import type { Environment } from '../../api/useEnvironments'
 import { useIndicators } from '../../api/useIndicators'
 import { roleLabel } from '../alerts/sos'
 import { formatDelay, formatGravity, formatKind } from '../../environments/format'
+import { useT } from '../../i18n/t'
 import { ControlPanel } from './ControlHeader'
 import { formatDuration } from './feed'
 
@@ -11,28 +12,29 @@ import { formatDuration } from './feed'
  * viven en backend/app/data/environments.json ("configuración, no código").
  */
 export function EnvironmentConfig({ env }: { env: Environment | undefined }) {
+  const t = useT()
   const catalog = useIndicators()
   const name = (id: string) =>
     (catalog.state === 'ready' ? catalog.data.find((i) => i.id === id)?.name : undefined) ?? id
 
   return (
-    <ControlPanel title="Parámetros del entorno" aria-label="Parámetros del entorno">
+    <ControlPanel title={t('Parámetros del entorno')} aria-label={t('Parámetros del entorno')}>
       {!env ? (
-        <p className="text-env-muted">Elige un entorno para ver su configuración.</p>
+        <p className="text-env-muted">{t('Elige un entorno para ver su configuración.')}</p>
       ) : (
         <div className="grid gap-x-6 gap-y-4 text-sm md:grid-cols-2 xl:grid-cols-3">
           <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
-            <dt className="text-env-muted">Tipo</dt>
+            <dt className="text-env-muted">{t('Tipo')}</dt>
             <dd>{formatKind(env.kind)}</dd>
-            <dt className="text-env-muted">Gravedad</dt>
+            <dt className="text-env-muted">{t('Gravedad')}</dt>
             <dd>{formatGravity(env.gravity_g)}</dd>
-            <dt className="text-env-muted">Retardo</dt>
+            <dt className="text-env-muted">{t('Retardo')}</dt>
             <dd>{formatDelay(env.comm_delay_s)}</dd>
-            <dt className="text-env-muted">Radiación</dt>
+            <dt className="text-env-muted">{t('Radiación')}</dt>
             <dd>{env.radiation_level}</dd>
             {env.mission && (
               <>
-                <dt className="text-env-muted">Misión</dt>
+                <dt className="text-env-muted">{t('Misión')}</dt>
                 <dd>
                   {env.mission.start} → {env.mission.end}
                 </dd>
@@ -40,7 +42,7 @@ export function EnvironmentConfig({ env }: { env: Environment | undefined }) {
             )}
           </dl>
           <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
-            <dt className="text-env-muted">Escalera</dt>
+            <dt className="text-env-muted">{t('Escalera')}</dt>
             <dd>{env.escalation_ladder.map((r) => roleLabel(r, env.vocabulary)).join(' → ')}</dd>
             <dt className="text-env-muted">Liveness</dt>
             <dd>
@@ -49,7 +51,7 @@ export function EnvironmentConfig({ env }: { env: Environment | undefined }) {
               {formatDuration(env.liveness.eva_stale_after_s)} · R U OK?{' '}
               {formatDuration(env.liveness.ruok_timeout_s)}
             </dd>
-            <dt className="text-env-muted">Vocabulario</dt>
+            <dt className="text-env-muted">{t('Vocabulario')}</dt>
             <dd>
               {Object.entries(env.vocabulary)
                 .map(([k, v]) => `${k}: ${v}`)
@@ -58,12 +60,12 @@ export function EnvironmentConfig({ env }: { env: Environment | undefined }) {
           </dl>
           <div className="space-y-2">
             <p>
-              <span className="text-env-muted">Indicadores activos:</span>{' '}
+              <span className="text-env-muted">{t('Indicadores activos:')}</span>{' '}
               {env.indicators.map(name).join(', ')}
             </p>
             {env.threshold_overrides && Object.keys(env.threshold_overrides).length > 0 && (
               <div>
-                <p className="text-env-muted">Umbrales ajustados al entorno:</p>
+                <p className="text-env-muted">{t('Umbrales ajustados al entorno:')}</p>
                 <ul className="mt-1 list-disc pl-5">
                   {Object.entries(env.threshold_overrides).map(([ind, r]) => (
                     <li key={ind}>
@@ -79,14 +81,14 @@ export function EnvironmentConfig({ env }: { env: Environment | undefined }) {
             )}
             {env.routine && env.routine.length > 0 && (
               <p>
-                <span className="text-env-muted">Rutina:</span>{' '}
+                <span className="text-env-muted">{t('Rutina:')}</span>{' '}
                 {env.routine
                   .map((t) => `${t.task_type} ×${t.times_per_day} (${t.points} pts)`)
                   .join(', ')}
               </p>
             )}
             <p className="text-xs text-env-muted">
-              Solo lectura: los perfiles se editan en backend/app/data/environments.json.
+              {t('Solo lectura: los perfiles se editan en backend/app/data/environments.json.')}
             </p>
           </div>
         </div>

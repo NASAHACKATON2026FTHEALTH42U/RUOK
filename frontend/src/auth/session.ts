@@ -4,6 +4,7 @@ import { getDb } from '../offline/db'
 import { resumeSync } from '../offline/outbox'
 import { useEnvironmentStore } from '../store/environment'
 import { isValid } from './roles'
+import { translate } from '../i18n/t'
 
 /**
  * Sesión (FE-27, docs/auth-and-roles.md). El token vive en IndexedDB del dispositivo
@@ -116,13 +117,13 @@ export async function login(username: string, password: string): Promise<User> {
 
 function toLoginError(err: unknown): LoginError {
   if (err instanceof NetworkError || (err instanceof ApiError && err.status >= 502)) {
-    return { kind: 'offline', message: 'Sin conexión con el servidor de a bordo.' }
+    return { kind: 'offline', message: translate('Sin conexión con el servidor de a bordo.') }
   }
   if (err instanceof ApiError && err.status === 401) {
-    return { kind: 'credentials', message: 'Usuario o contraseña incorrectos.' }
+    return { kind: 'credentials', message: translate('Usuario o contraseña incorrectos.') }
   }
   if (err instanceof ApiError && err.status === 429) {
-    return { kind: 'locked', message: 'Demasiados intentos. Espera unos minutos.' }
+    return { kind: 'locked', message: translate('Demasiados intentos. Espera unos minutos.') }
   }
   return { kind: 'other', message: err instanceof Error ? err.message : String(err) }
 }

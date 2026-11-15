@@ -1,4 +1,5 @@
 import { ApiError, NetworkError } from '../api/client'
+import { currentLang } from '../i18n/lang'
 import { getDb } from './db'
 
 /**
@@ -16,8 +17,10 @@ export function isUnavailable(err: unknown): boolean {
 export type CatalogKey = 'environments' | 'indicators' | 'systems' | 'interventions' | 'protocols'
 
 /** Envuelve la carga de un catálogo: guarda cada respuesta y, sin red, devuelve la última. */
-export function withCatalogCache<T>(key: CatalogKey, load: () => Promise<T>): () => Promise<T> {
+export function withCatalogCache<T>(catalog: CatalogKey, load: () => Promise<T>): () => Promise<T> {
   return async () => {
+    // Una copia por idioma (FE-38); la de español conserva su clave de siempre.
+    const key = currentLang() === 'es' ? catalog : `${catalog}:${currentLang()}`
     try {
       const value = await load()
       getDb()

@@ -1,3 +1,5 @@
+import { translate } from '../../i18n/t'
+
 /** Texto del estado del enlace simulado (FE-17). Lógica pura, fácil de testear. */
 
 export interface LinkLike {
@@ -23,22 +25,24 @@ export function hhmm(iso: string): string {
  * `null` = no se pudo consultar: el estado es DESCONOCIDO, nunca el último visto.
  */
 export function describeLink(link: LinkLike | null): { icon: string; short: string; long: string } {
-  if (!link) return { icon: '?', short: 'Desconocido', long: 'estado desconocido' }
-  const queued = link.queued > 0 ? ` · ${link.queued} en cola` : ''
+  if (!link) {
+    return { icon: '?', short: translate('Desconocido'), long: translate('estado desconocido') }
+  }
+  const queued = link.queued > 0 ? translate(' · {n} en cola', { n: link.queued }) : ''
   switch (link.state) {
     case 'online':
-      return { icon: '●', short: 'En línea', long: `en línea${queued}` }
+      return { icon: '●', short: translate('En línea'), long: translate('en línea') + queued }
     case 'delayed':
       return {
         icon: '◐',
         short: formatDelay(link.delay_s),
-        long: `con retardo · ${formatDelay(link.delay_s)}${queued}`,
+        long: translate('con retardo · {delay}', { delay: formatDelay(link.delay_s) }) + queued,
       }
     case 'los':
       return {
         icon: '○',
-        short: 'Sin enlace',
-        long: `sin enlace (LOS) desde las ${hhmm(link.since)}${queued}`,
+        short: translate('Sin enlace'),
+        long: translate('sin enlace (LOS) desde las {time}', { time: hhmm(link.since) }) + queued,
       }
   }
 }

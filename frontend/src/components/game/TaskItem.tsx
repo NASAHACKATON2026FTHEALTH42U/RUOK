@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import type { Task } from '../../api/useGame'
+import { useT } from '../../i18n/t'
 import { formatDue, taskLink } from './game'
 
 interface TaskItemProps {
@@ -17,6 +18,7 @@ interface TaskItemProps {
  * los datos solo se añaden (docs/offline-and-liveness.md).
  */
 export function TaskItem({ task, pending, onComplete, busy }: TaskItemProps) {
+  const t = useT()
   const reduce = useReducedMotion()
   const link = taskLink(task)
   const done = task.completed
@@ -28,7 +30,11 @@ export function TaskItem({ task, pending, onComplete, busy }: TaskItemProps) {
         type="button"
         role="checkbox"
         aria-checked={done}
-        aria-label={done ? `${task.title}: hecha` : `Marcar como hecha: ${task.title}`}
+        aria-label={
+          done
+            ? t('{title}: hecha', { title: task.title })
+            : t('Marcar como hecha: {title}', { title: task.title })
+        }
         disabled={done || busy}
         onClick={() => onComplete(task)}
         className={`relative before:absolute before:-inset-1.5 before:content-[''] flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
@@ -62,11 +68,11 @@ export function TaskItem({ task, pending, onComplete, busy }: TaskItemProps) {
       <div className="min-w-0 flex-1">
         <p className={`font-medium ${done ? 'text-env-muted line-through' : ''}`}>{task.title}</p>
         <p className="text-xs text-env-muted">
-          {formatDue(task.due)} · {task.points} puntos
+          {t('{due} · {n} puntos', { due: formatDue(task.due), n: task.points })}
           {pending && (
-            <span title="Se enviará al volver la conexión">
+            <span title={t('Se enviará al volver la conexión')}>
               {' '}
-              · <span aria-hidden>⇡</span> pendiente de sincronizar
+              · <span aria-hidden>⇡</span> {t('pendiente de sincronizar')}
             </span>
           )}
         </p>
@@ -77,7 +83,7 @@ export function TaskItem({ task, pending, onComplete, busy }: TaskItemProps) {
           to={link}
           className="inline-flex min-h-11 shrink-0 items-center border border-env-border px-3.5 text-sm hover:border-env-text"
         >
-          Hacer
+          {t('Hacer')}
         </Link>
       )}
     </div>

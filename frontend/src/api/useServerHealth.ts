@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api, NetworkError, unwrap, type Schema } from './client'
+import { translate } from '../i18n/t'
 
 export type ServerHealth =
   | { state: 'checking' }
@@ -18,7 +19,7 @@ export function useServerHealth(intervalMs = 15_000): ServerHealth {
         if (!cancelled) setStatus({ state: 'online', health })
       } catch (err) {
         if (cancelled) return
-        const error = err instanceof NetworkError ? 'sin conexión' : String(err)
+        const error = err instanceof NetworkError ? translate('sin conexión') : String(err)
         setStatus({ state: 'offline', error })
       }
     }

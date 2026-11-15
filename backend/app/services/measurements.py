@@ -15,7 +15,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, col, select
 
-from app import clock, models
+from app import clock, i18n, models
 from app.schemas import Indicator, MeasurementIn
 from app.schemas import Measurement as MeasurementOut
 from app.schemas.common import EventType
@@ -37,14 +37,21 @@ def validate(item: MeasurementIn) -> Indicator:
     """El indicador existe en el catálogo y el valor está dentro del rango del input."""
     indicator = catalog.get_indicator(item.indicator_id)
     if indicator is None:
-        raise InvalidMeasurement(f"Indicador desconocido: {item.indicator_id}")
+        raise InvalidMeasurement(i18n.tr("Indicador desconocido: {id}", id=item.indicator_id))
     if item.taken_at.tzinfo is None:
-        raise InvalidMeasurement(f"{item.id}: taken_at necesita zona horaria (p. ej. ...Z)")
+        raise InvalidMeasurement(
+            i18n.tr("{id}: taken_at necesita zona horaria (p. ej. ...Z)", id=item.id)
+        )
     lo, hi = indicator.input.min, indicator.input.max
     if (lo is not None and item.value < lo) or (hi is not None and item.value > hi):
         raise InvalidMeasurement(
-            f"{item.indicator_id}: el valor {item.value:g} está fuera del rango "
-            f"permitido [{lo:g}, {hi:g}] ({indicator.unit})"
+            i18n.tr(
+                "{indicator}: el valor {value} está fuera del rango "
+                "permitido [{lo}, {hi}] ({unit})",
+                indicator=item.indicator_id, value=f"{item.value:g}",
+                lo=f"{lo:g}", hi=f"{hi:g}",
+                unit=catalog.localized_unit(indicator.id, indicator.unit),
+            )
         )
     return indicator
 
@@ -79,7 +86,7 @@ def _emit_batch(session: Session, member_id: int, rows: list[models.Measurement]
     if len(rows) > 1 and clock.now() - oldest > SYNC_AGE:
         events.emit(
             session, EventType.sync_batch, env_id=env_id, member_id=member_id,
-            summary=f"Sincronizadas {len(rows)} mediciones pendientes",
+            summary=i18n.tr("Sincronizadas {n} mediciones pendientes", n=len(rows)),
             payload={"count": len(rows), "oldest_taken_at": oldest.isoformat(),
                      "indicators": sorted({r.indicator_id for r in rows})},
         )
@@ -119,7 +126,9 @@ def _save_batch(
         existing = pending.get(key) or session.get(models.Measurement, key)
         if existing is not None:
             if not same_content(existing, member_id, item):
-                raise MeasurementConflict(f"La medición {key} ya existe con otro contenido")
+                raise MeasurementConflict(
+                    i18n.tr("La medición {id} ya existe con otro contenido", id=key)
+                )
             duplicates += 1
             continue
         row = models.Measurement(
@@ -167,7 +176,7 @@ def to_schema(row: models.Measurement) -> MeasurementOut:
         member_id=row.member_id,
         indicator_id=row.indicator_id,
         value=row.value,
-        unit=row.unit,
+        unit=catalog.localized_unit(row.indicator_id, row.unit),  # FE-38: en BD, en español
         taken_at=row.taken_at,
         received_at=row.received_at,
         source=row.source,

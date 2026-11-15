@@ -23,6 +23,7 @@ import { statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox'
 import { NoMemberSelected } from '../components/ui/NoMemberSelected'
+import { useT } from '../i18n/t'
 
 type Phase =
   | { kind: 'intro' }
@@ -54,6 +55,7 @@ function exitFullscreen() {
  * y los lapsos como mediciones con `source: "pvt"` por el outbox (FE-11).
  */
 export default function Pvt() {
+  const t = useT()
   const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el elegido
   const catalog = useIndicators()
   const [phase, setPhase] = useState<Phase>({ kind: 'intro' })
@@ -65,7 +67,7 @@ export default function Pvt() {
     )
   }, [catalog])
 
-  const title = <h1 className="text-2xl font-semibold">Test de vigilancia (PVT)</h1>
+  const title = <h1 className="text-2xl font-semibold">{t('Test de vigilancia (PVT)')}</h1>
 
   if (memberId === null) {
     return (
@@ -98,7 +100,7 @@ export default function Pvt() {
       setPhase({
         kind: 'failed',
         summary,
-        message: `No se ha podido guardar en el dispositivo: ${String(err)}`,
+        message: t('No se ha podido guardar en el dispositivo: {error}', { error: String(err) }),
       })
     }
   }
@@ -123,15 +125,17 @@ export default function Pvt() {
   }
 
   if (phase.kind === 'intro') {
-    // Las instrucciones salen de voiceTexts.json: son las mismas frases que tiene la voz guía.
-    const [lead, ...howTo] = voiceTexts.pvt
+    // Las instrucciones salen de voiceTexts.json: son las mismas frases que tiene la voz guía
+    // (traducidas al idioma de la interfaz, para verlas y oírlas igual).
+    const pvtTexts = voiceTexts.pvt.map((text) => t(text))
+    const [lead, ...howTo] = pvtTexts
     return (
       <section className="mx-auto my-auto w-full max-w-xl space-y-4 lg:max-w-3xl lg:space-y-6">
         {title}
         <div className="space-y-2  border border-env-border bg-env-surface p-4 text-sm lg:space-y-3 lg:p-6 lg:text-lg">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <p>{lead}</p>
-            <ListenButton texts={voiceTexts.pvt} label="Escuchar instrucciones" />
+            <ListenButton texts={pvtTexts} label={t('Escuchar instrucciones')} />
           </div>
           <ol className="list-decimal space-y-1 pl-5">
             {howTo.map((text) => (
@@ -143,9 +147,11 @@ export default function Pvt() {
             ))}
           </ol>
           <p className="text-env-muted">
-            Una respuesta de más de {LAPSE_MS} ms es un <em>lapso</em> de atención.
+            {emphasize(
+              t('Una respuesta de más de {ms} ms es un «lapso» de atención.', { ms: LAPSE_MS }),
+            ).map((part, i) => (part.strong ? <em key={i}>{part.text}</em> : part.text))}
           </p>
-          <VoiceNote texts={voiceTexts.pvt} />
+          <VoiceNote texts={pvtTexts} />
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {(Object.keys(PVT_MODES) as PvtMode[]).map((m) => (
@@ -155,7 +161,7 @@ export default function Pvt() {
               onClick={() => start(m)}
               className={`${btnPrimary} lg:min-h-16 lg:text-lg`}
             >
-              {PVT_MODES[m].label} · {PVT_MODES[m].short}
+              {t(PVT_MODES[m].label)} · {PVT_MODES[m].short}
             </button>
           ))}
         </div>
@@ -164,19 +170,19 @@ export default function Pvt() {
   }
 
   const { summary } = phase
-  const rtName = indicators.pvt_mean_rt_ms?.name ?? 'Tiempo de reacción medio'
-  const lapsesName = indicators.pvt_lapses?.name ?? 'Lapsos'
+  const rtName = indicators.pvt_mean_rt_ms?.name ?? t('Tiempo de reacción medio')
+  const lapsesName = indicators.pvt_lapses?.name ?? t('Lapsos')
 
   return (
     <section className="mx-auto my-auto w-full max-w-xl space-y-4 lg:max-w-3xl lg:space-y-6">
       <h1 className="text-2xl font-semibold">
         {phase.kind === 'sent'
-          ? 'Test guardado'
+          ? t('Test guardado')
           : phase.kind === 'queued'
-            ? 'Test guardado en el dispositivo'
+            ? t('Test guardado en el dispositivo')
             : phase.kind === 'saving'
-              ? 'Guardando…'
-              : 'Resultado del test'}
+              ? t('Guardando…')
+              : t('Resultado del test')}
       </h1>
 
       <dl className="grid grid-cols-2 gap-3">
@@ -192,7 +198,10 @@ export default function Pvt() {
         </div>
       </dl>
       <p className="text-sm text-env-muted">
-        {summary.responses} respuestas válidas · {summary.falseStarts} falsos inicios
+        {t('{n} respuestas válidas · {f} falsos inicios', {
+          n: summary.responses,
+          f: summary.falseStarts,
+        })}
       </p>
 
       {phase.kind === 'sent' && (
@@ -200,10 +209,12 @@ export default function Pvt() {
           className="flex flex-wrap items-center gap-2  border border-env-border bg-env-surface p-4 text-sm text-env-muted"
           role="status"
         >
-          Evaluación actualizada:
+          {t('Evaluación actualizada:')}
           <StatusBadge
             status={phase.result.assessment.overall_status}
-            label={`Estado general: ${statusStyle(phase.result.assessment.overall_status).label}`}
+            label={t('Estado general: {status}', {
+              status: statusStyle(phase.result.assessment.overall_status).label,
+            })}
             size="sm"
           />
         </p>
@@ -219,14 +230,16 @@ export default function Pvt() {
       {phase.kind === 'queued' && (
         <p className=" border border-env-border bg-env-surface p-4 text-sm" role="status">
           <span aria-hidden>⇡ </span>
-          No hay conexión con el servidor. El resultado está guardado aquí y{' '}
-          <strong>se enviará solo</strong> cuando vuelva la conexión, sin duplicarse.
+          {t('No hay conexión con el servidor. El resultado está guardado aquí y')}{' '}
+          <strong>{t('se enviará solo')}</strong> {t('cuando vuelva la conexión, sin duplicarse.')}
         </p>
       )}
       {phase.kind === 'empty' && (
         <p className=" border border-env-border bg-env-surface p-3 text-sm" role="alert">
           <span aria-hidden>⚠ </span>
-          No se ha registrado ninguna respuesta válida, así que no se guarda nada. Repite el test.
+          {t(
+            'No se ha registrado ninguna respuesta válida, así que no se guarda nada. Repite el test.',
+          )}
         </p>
       )}
       {phase.kind === 'failed' && (
@@ -238,13 +251,13 @@ export default function Pvt() {
 
       <div className="flex flex-wrap gap-2">
         <button type="button" onClick={() => setPhase({ kind: 'intro' })} className={btnSecondary}>
-          Repetir el test
+          {t('Repetir el test')}
         </button>
         <Link to="/history?indicator=pvt_mean_rt_ms" className={btnSecondary}>
-          Ver el historial
+          {t('Ver el historial')}
         </Link>
         <Link to="/dashboard" className={btnSecondary}>
-          Ver el panel
+          {t('Ver el panel')}
         </Link>
       </div>
     </section>

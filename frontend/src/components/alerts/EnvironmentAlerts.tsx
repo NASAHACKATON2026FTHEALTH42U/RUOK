@@ -3,6 +3,7 @@ import { serverNow } from '../../api/client'
 import { useEnvironmentAlerts } from '../../api/useAlerts'
 import { useMembers } from '../../api/useMembers'
 import { useVocab } from '../../environments/useVocab'
+import { useT } from '../../i18n/t'
 import { formatAgo } from '../../lib/time'
 import { AlertRowBody } from './AlertRowBody'
 import { categoryLabel, severityStyle, statusLabel } from './alertFormat'
@@ -20,6 +21,7 @@ export function EnvironmentAlerts({
   envId: string
   onSelect: (memberId: number, alertId: string, resolved: boolean) => void
 }) {
+  const t = useT()
   const vocab = useVocab()
   const [showResolved, setShowResolved] = useState(false)
   const members = useMembers(envId)
@@ -32,13 +34,13 @@ export function EnvironmentAlerts({
   if (members.state === 'error' || alerts.state === 'error') {
     return (
       <p className="text-env-muted">
-        No se han podido cargar las alertas de {vocab.crew}.{' '}
+        {t('No se han podido cargar las alertas de {crew}.', { crew: vocab.crew })}{' '}
         <button
           type="button"
           onClick={members.state === 'error' ? members.retry : alerts.retry}
           className="underline"
         >
-          Reintentar
+          {t('Reintentar')}
         </button>
       </p>
     )
@@ -72,9 +74,9 @@ export function EnvironmentAlerts({
                 }
                 status={sev.status}
                 severityLabel={sev.label}
-                state={`${statusLabel(a.status)} · ${a.origin === 'auto' ? 'Automática' : 'Manual'}`}
+                state={`${statusLabel(a.status)} · ${a.origin === 'auto' ? t('Automática') : t('Manual')}`}
                 ago={formatAgo(a.created_at, now)}
-                target={`a ${roleLabel(a.target_role, vocab)}`}
+                target={t('a {role}', { role: roleLabel(a.target_role, vocab) })}
               />
             </button>
           </li>
@@ -86,24 +88,27 @@ export function EnvironmentAlerts({
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <p className="text-sm text-env-muted">
-        Alertas abiertas de {vocab.crew} a bordo · {open.length}. Toca una para ver su detalle.
+        {t('Alertas abiertas de {crew} a bordo · {n}. Toca una para ver su detalle.', {
+          crew: vocab.crew,
+          n: open.length,
+        })}
       </p>
       {alerts.refreshFailed && (
         <p role="status" className="text-sm text-env-muted">
-          ⚠ No se pudo actualizar: puede haber cambios que no se ven.
+          ⚠ {t('No se pudo actualizar: puede haber cambios que no se ven.')}
         </p>
       )}
       {list.length === 0 ? (
-        <p className="text-env-muted">No hay alertas en {vocab.crew}.</p>
+        <p className="text-env-muted">{t('No hay alertas en {crew}.', { crew: vocab.crew })}</p>
       ) : (
         // Filas compactas en un panel que mide lo que su contenido y, como mucho, el hueco: si
         // no caben, el scroll es del panel y no de la página.
         <div className="hud-panel flex min-h-0 flex-col self-stretch md:max-h-full">
           <div className="min-h-0 overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
             {open.length === 0 ? (
-              <p className="px-3.5 py-3 text-sm text-env-muted">No hay alertas abiertas.</p>
+              <p className="px-3.5 py-3 text-sm text-env-muted">{t('No hay alertas abiertas.')}</p>
             ) : (
-              grid(open, `Alertas abiertas de ${vocab.crew}`)
+              grid(open, t('Alertas abiertas de {crew}', { crew: vocab.crew }))
             )}
             {resolved.length > 0 && (
               <div className="border-t border-env-border">
@@ -113,9 +118,10 @@ export function EnvironmentAlerts({
                   onClick={() => setShowResolved((v) => !v)}
                   className="w-full min-h-11 px-3.5 py-2.5 text-left text-sm text-env-muted hover:text-env-text"
                 >
-                  {showResolved ? '▾' : '▸'} Resueltas ({resolved.length})
+                  {showResolved ? '▾' : '▸'} {t('Resueltas ({n})', { n: resolved.length })}
                 </button>
-                {showResolved && grid(resolved, `Alertas resueltas de ${vocab.crew}`)}
+                {showResolved &&
+                  grid(resolved, t('Alertas resueltas de {crew}', { crew: vocab.crew }))}
               </div>
             )}
           </div>

@@ -24,6 +24,9 @@ import Missions from './pages/Missions'
 import More from './pages/More'
 import NotFound from './pages/NotFound'
 import Pvt from './pages/Pvt'
+import Settings from './pages/Settings'
+import { LanguageSync } from './i18n/LanguageSync'
+import { useLangStore } from './i18n/lang'
 
 /** Envuelve la página con el permiso de vista de su ruta (FE-28). */
 function guard(path: string, page: ReactNode) {
@@ -61,6 +64,8 @@ const router = createBrowserRouter([
           { path: '/control/log', element: guard('/control/log', <ControlLog />) },
           // «Más» (estilo HUD): cualquier rol con sesión.
           { path: '/more', element: <More /> },
+          // Ajustes del dispositivo (idioma, voz guía): cualquier rol con sesión.
+          { path: '/settings', element: <Settings /> },
           { path: '*', element: <NotFound /> },
         ],
       },
@@ -69,5 +74,13 @@ const router = createBrowserRouter([
 ])
 
 export default function App() {
-  return <RouterProvider router={router} />
+  // Al cambiar de idioma se vuelve a montar todo: textos, formateadores y datos del servidor
+  // (que llegan en el idioma nuevo por `Accept-Language`).
+  const lang = useLangStore((s) => s.lang)
+  return (
+    <>
+      <LanguageSync />
+      <RouterProvider key={lang} router={router} />
+    </>
+  )
 }

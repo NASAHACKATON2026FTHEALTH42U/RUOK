@@ -1,3 +1,4 @@
+import { useT } from '../../i18n/t'
 import { statusStyle, type DisplayState } from './status'
 
 /**
@@ -8,13 +9,14 @@ import { statusStyle, type DisplayState } from './status'
  */
 export function StatusHeadline({
   state,
-  label = 'Estado general',
+  label,
   className = '',
 }: {
   state: DisplayState
   label?: string
   className?: string
 }) {
+  const t = useT()
   return (
     <p
       role="status"
@@ -24,7 +26,7 @@ export function StatusHeadline({
         state === 'critical' ? 'critical-blink' : ''
       } ${className}`}
     >
-      <span className="sr-only">{label}: </span>
+      <span className="sr-only">{label ?? t('Estado general')}: </span>
       {statusStyle(state).label}
     </p>
   )

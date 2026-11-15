@@ -398,6 +398,149 @@ select option {
     transform: translateX(340%) skewX(-22deg);
   }
 }
+/* Login (FE-27): fondo vivo. Dos franjas de luz que recorren la rejilla a ritmos distintos, una
+   línea de barrido vertical y un halo que respira detrás del logo. Decorativo. */
+.grid-fx-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 22%;
+  opacity: 0;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in srgb, var(--env-primary) 55%, transparent) 50%,
+    transparent
+  );
+  transform: translateY(-120%);
+  will-change: transform, opacity;
+}
+.login-glow {
+  position: fixed;
+  left: 50%;
+  top: 24%;
+  z-index: -1;
+  width: min(1000px, 140vw);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: none;
+  opacity: 0.45;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--env-primary) 13%, transparent),
+    transparent 62%
+  );
+}
+@keyframes grid-sweep-login {
+  0% {
+    opacity: 0;
+    transform: translateX(-130%) skewX(-22deg);
+  }
+  10%,
+  85% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(340%) skewX(-22deg);
+  }
+}
+@keyframes grid-scan {
+  0% {
+    opacity: 0;
+    transform: translateY(-120%);
+  }
+  15%,
+  80% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(520%);
+  }
+}
+@keyframes login-glow {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.06);
+  }
+}
+/* Procesos guiados (meditaciones, protocolos): auroras lentas, orbe que respira y ondas. */
+.guided-aurora {
+  position: absolute;
+  width: 70vmax;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.22;
+  background: radial-gradient(circle, var(--env-primary), transparent 65%);
+}
+.guided-aurora-a {
+  left: -25vmax;
+  top: -30vmax;
+}
+.guided-aurora-b {
+  right: -30vmax;
+  bottom: -35vmax;
+  opacity: 0.16;
+}
+.guided-orb {
+  background: radial-gradient(
+    circle at 38% 35%,
+    color-mix(in srgb, var(--env-primary) 55%, white 10%),
+    color-mix(in srgb, var(--env-primary) 22%, transparent) 62%,
+    transparent 72%
+  );
+  box-shadow:
+    0 0 60px color-mix(in srgb, var(--env-primary) 35%, transparent),
+    inset 0 0 30px color-mix(in srgb, var(--env-primary) 30%, transparent);
+}
+.guided-ripple {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--env-primary) 55%, transparent);
+  opacity: 0;
+}
+@keyframes guided-drift-a {
+  50% {
+    transform: translate(12vmax, 8vmax) scale(1.1);
+  }
+}
+@keyframes guided-drift-b {
+  50% {
+    transform: translate(-10vmax, -6vmax) scale(0.92);
+  }
+}
+@keyframes guided-ripple {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+@keyframes guided-idle {
+  50% {
+    opacity: 0.75;
+  }
+}
+@keyframes guided-done {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--env-primary) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 28px transparent;
+  }
+}
 @keyframes panel-in {
   from {
     opacity: 0;
@@ -410,6 +553,36 @@ select option {
   }
   .grid-fx-ambient {
     animation: grid-sweep-ambient 24s linear 8s infinite both;
+  }
+  .grid-fx-login {
+    animation: grid-sweep-login 5.5s cubic-bezier(0.45, 0, 0.2, 1) 0.4s infinite both;
+  }
+  .grid-fx-login-slow {
+    animation: grid-sweep-login 11s linear 3s infinite both;
+  }
+  .grid-fx-scan {
+    animation: grid-scan 8s cubic-bezier(0.4, 0, 0.3, 1) 1.5s infinite both;
+  }
+  .login-glow {
+    animation: login-glow 7s ease-in-out infinite;
+  }
+  .guided-aurora-a {
+    animation: guided-drift-a 26s ease-in-out infinite;
+  }
+  .guided-aurora-b {
+    animation: guided-drift-b 32s ease-in-out infinite;
+  }
+  .guided-ripple {
+    animation: guided-ripple 4.5s ease-out infinite;
+  }
+  .guided-ripple-2 {
+    animation-delay: 2.25s;
+  }
+  .guided-orb-idle {
+    animation: guided-idle 5s ease-in-out infinite;
+  }
+  .guided-done {
+    animation: guided-done 1.6s ease-out 2;
   }
   .page-enter .hud-panel {
     animation: panel-in 0.42s cubic-bezier(0.2, 0.7, 0.2, 1) both;

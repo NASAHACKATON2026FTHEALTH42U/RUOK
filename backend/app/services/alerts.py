@@ -16,13 +16,14 @@ Reglas (docs/alerts-and-escalation.md, "Alertas automáticas"):
 Cada paso queda en `alert_event` (timeline).
 """
 
+import re
 import uuid
 from collections.abc import Iterable, Sequence
 from datetime import timedelta
 
 from sqlmodel import Session, col, select
 
-from app import clock, models
+from app import clock, i18n, models
 from app.schemas import Alert as AlertOut
 from app.schemas import AlertEvent as AlertEventOut
 from app.schemas import Assessment, Environment
@@ -120,7 +121,7 @@ def _escalate(
         _apply_level(session, alert, level, status, env)
         events.emit_alert(
             session, alert, EventType.alert_escalated,
-            f"Alerta escalada a {env.escalation_ladder[level]}", actor=actor,
+            i18n.tr("Alerta escalada a {role}", role=env.escalation_ladder[level]), actor=actor,
         )
 
 
@@ -143,12 +144,17 @@ def on_link_delivered(session: Session, messages: Iterable[models.LinkMessage]) 
                 mark_delivered(session, alert, message)
 
 
+# Mensaje de una alerta automática sin protocolo. Se guarda en español; `localized_message`
+# lo traduce al leerlo (FE-38).
+_FALLBACK = {Status.critical: "{system} en estado crítico", Status.warning: "{system} en aviso"}
+
+
 def _message(system_id: str, status: Status, protocol_message: str) -> str:
     if protocol_message:
         return protocol_message
     names = {s.id: s.name for s in catalog.list_systems()}
-    estado = "en estado crítico" if status == Status.critical else "en aviso"
-    return f"{names.get(system_id, system_id)} {estado}"
+    template = _FALLBACK[Status.critical if status == Status.critical else Status.warning]
+    return template.replace("{system}", names.get(system_id, system_id))
 
 
 def evaluate(
@@ -208,7 +214,10 @@ def evaluate(
             _event(session, alert, "created", severity=alert.severity, system_id=alert.system_id)
             events.emit_alert(
                 session, alert, EventType.alert_created,
-                f"Alerta automática ({alert.severity}): {alert.system_id or alert.category}",
+                i18n.tr(
+                    "Alerta automática ({severity}): {what}",
+                    severity=alert.severity, what=alert.system_id or alert.category,
+                ),
             )
             _escalate(session, alert, target_level(status, env), status, env)
             changed.append(alert)
@@ -291,6 +300,47 @@ def list_for_member(
     return session.exec(query.order_by(col(models.Alert.created_at).desc())).all()
 
 
+# Textos que genera el servidor y se guardan en español (FE-38): se traducen al leerlos.
+NO_CONTACT_MESSAGE = "Sin contacto con {name} desde las {since} UTC"
+_NO_CONTACT_RE = re.compile(r"^Sin contacto con (?P<name>.+) desde las (?P<since>\S+) UTC$")
+RUOK_HELP_MESSAGE = "Ha respondido 'Necesito ayuda' al R U OK?"
+RUOK_OK_NOTE = "Respondió 'Estoy bien'"
+
+
+def localized_message(alert: models.Alert) -> str:
+    """Mensaje de la alerta en el idioma de la petición (FE-38).
+
+    Solo los textos que genera el servidor (protocolo, «X en aviso», sin contacto, «Necesito
+    ayuda»); lo que escribe una persona se devuelve tal cual. En la BD siguen en español.
+    """
+    message = alert.message
+    if i18n.lang() == "es" or not message:
+        return message
+    if message.startswith(RUOK_HELP_MESSAGE):
+        return i18n.tr(RUOK_HELP_MESSAGE) + message[len(RUOK_HELP_MESSAGE) :]
+    if alert.origin != "auto":
+        return message
+    if alert.category == "no_contact":
+        match = _NO_CONTACT_RE.match(message)
+        return i18n.tr(NO_CONTACT_MESSAGE, **match.groupdict()) if match else message
+    for proto in catalog.list_protocols():
+        if proto.message == message:
+            return catalog.localized_protocol(proto).message
+    system = next((s for s in catalog.list_systems() if s.id == alert.system_id), None)
+    if system is not None:
+        for status, template in _FALLBACK.items():
+            if message == _message(system.id, status, ""):
+                return i18n.tr(template, system=catalog.localized_system(system).name)
+    return message
+
+
+def _localized_payload(payload: dict) -> dict:
+    """Nota de la timeline generada por el servidor, en el idioma de la petición (FE-38)."""
+    if payload.get("note") == RUOK_OK_NOTE and i18n.lang() != "es":
+        return {**payload, "note": i18n.tr(RUOK_OK_NOTE)}
+    return payload
+
+
 def to_schema(session: Session, alert: models.Alert) -> AlertOut:
     events = session.exec(
         select(models.AlertEvent)
@@ -308,7 +358,7 @@ def to_schema(session: Session, alert: models.Alert) -> AlertOut:
         severity=alert.severity,
         system_id=alert.system_id,
         indicator_ids=alert.indicator_ids,
-        message=alert.message,
+        message=localized_message(alert),
         level=alert.level,
         target_role=alert.target_role,
         delivery_mode=alert.delivery_mode,
@@ -319,7 +369,10 @@ def to_schema(session: Session, alert: models.Alert) -> AlertOut:
         created_at=alert.created_at,
         updated_at=alert.updated_at,
         events=[
-            AlertEventOut(type=e.type, actor=e.actor, at=e.at, payload=e.payload) for e in events
+            AlertEventOut(
+                type=e.type, actor=e.actor, at=e.at, payload=_localized_payload(e.payload)
+            )
+            for e in events
         ],
     )
 
@@ -349,7 +402,10 @@ def _status_for(severity: str) -> Status:
 def _level_of(env: Environment, role: str) -> int:
     if role not in env.escalation_ladder:
         raise InvalidAlert(
-            f"'{role}' no está en la escalera de {env.id}: {', '.join(env.escalation_ladder)}"
+            i18n.tr(
+                "'{role}' no está en la escalera de {env}: {ladder}",
+                role=role, env=env.id, ladder=", ".join(env.escalation_ladder),
+            )
         )
     return env.escalation_ladder.index(role)
 
@@ -357,7 +413,7 @@ def _level_of(env: Environment, role: str) -> int:
 def get_alert(session: Session, alert_id: str) -> models.Alert:
     alert = session.get(models.Alert, str(alert_id))
     if alert is None:
-        raise AlertNotFound(f"Alerta desconocida: {alert_id}")
+        raise AlertNotFound(i18n.tr("Alerta desconocida: {id}", id=alert_id))
     return alert
 
 
@@ -390,7 +446,9 @@ def create_manual(
     existing = session.get(models.Alert, str(body.id))
     if existing is not None:
         if not _same_request(existing, member.id, body):
-            raise AlertConflict(f"La alerta {body.id} ya existe con otro contenido")
+            raise AlertConflict(
+                i18n.tr("La alerta {id} ya existe con otro contenido", id=body.id)
+            )
         return existing, False
 
     env = environments.get_environment(member.env_id)
@@ -424,7 +482,7 @@ def create_manual(
     _event(session, alert, "created", "member", category=alert.category, severity=alert.severity)
     events.emit_alert(
         session, alert, EventType.alert_created,
-        "SOS: petición de ayuda" if alert.category == "emergency" else "Petición de ayuda",
+        i18n.tr("SOS: petición de ayuda" if alert.category == "emergency" else "Petición de ayuda"),
         authenticated=alert.authenticated,
     )
     _escalate(session, alert, to_level, status, env, "member")
@@ -441,13 +499,15 @@ def escalate(
 ) -> models.Alert:
     """Sube la alerta al siguiente nivel, o al `target_role` (saltando niveles)."""
     if alert.status == AlertStatus.resolved:
-        raise AlertConflict("La alerta ya está resuelta")
+        raise AlertConflict(i18n.tr("La alerta ya está resuelta"))
     env = environments.get_environment(alert.env_id)
     to_level = _level_of(env, target_role) if target_role else alert.level + 1
     if to_level >= len(env.escalation_ladder):
-        raise InvalidAlert("La alerta ya está en el último nivel de la escalera")
+        raise InvalidAlert(i18n.tr("La alerta ya está en el último nivel de la escalera"))
     if to_level <= alert.level:
-        raise InvalidAlert(f"La alerta ya está en '{alert.target_role}' o por encima")
+        raise InvalidAlert(
+            i18n.tr("La alerta ya está en '{role}' o por encima", role=alert.target_role)
+        )
     extra = {"message": message} if message else {}
     _escalate(session, alert, to_level, _status_for(alert.severity), env, actor, **extra)
     session.commit()
@@ -456,13 +516,13 @@ def escalate(
 
 def acknowledge(session: Session, alert: models.Alert, actor: str) -> models.Alert:
     if alert.status == AlertStatus.resolved:
-        raise AlertConflict("La alerta ya está resuelta")
+        raise AlertConflict(i18n.tr("La alerta ya está resuelta"))
     alert.status = AlertStatus.acknowledged
     alert.updated_at = clock.now()
     session.add(alert)
     _event(session, alert, "acknowledged", actor)
     events.emit_alert(
-        session, alert, EventType.alert_acknowledged, "Alerta reconocida", actor=actor
+        session, alert, EventType.alert_acknowledged, i18n.tr("Alerta reconocida"), actor=actor
     )
     session.commit()
     return alert
@@ -472,12 +532,14 @@ def resolve(
     session: Session, alert: models.Alert, actor: str, note: str | None = None
 ) -> models.Alert:
     if alert.status == AlertStatus.resolved:
-        raise AlertConflict("La alerta ya está resuelta")
+        raise AlertConflict(i18n.tr("La alerta ya está resuelta"))
     alert.status = AlertStatus.resolved  # libera la dedupe_key para una alerta nueva
     alert.updated_at = clock.now()
     session.add(alert)
     _event(session, alert, "resolved", actor, **({"note": note} if note else {}))
-    events.emit_alert(session, alert, EventType.alert_resolved, "Alerta resuelta", actor=actor)
+    events.emit_alert(
+        session, alert, EventType.alert_resolved, i18n.tr("Alerta resuelta"), actor=actor
+    )
     session.commit()
     return alert
 

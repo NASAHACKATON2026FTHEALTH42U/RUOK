@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Assessment } from '../../api/useAssessment'
 import type { Indicator } from '../../api/useIndicators'
+import { useT } from '../../i18n/t'
 import { useInterventions } from '../../api/useInterventions'
 import type { BodySystem } from '../../api/useSystems'
 import { InterventionCard } from '../behavioral/InterventionCard'
@@ -49,6 +50,7 @@ export function SystemPanel({
   focusIndicatorId,
   onClose,
 }: SystemPanelProps) {
+  const t = useT()
   const titleId = `system-panel-${system.id}`
   const byId = new Map(indicators.map((i) => [i.id, i]))
   const recommendations = [...(assessed?.recommendations ?? [])].sort(
@@ -68,7 +70,7 @@ export function SystemPanel({
     assessed && assessed.indicators.length > 0
       ? {
           id: 'indicators',
-          label: 'Indicadores',
+          label: t('Indicadores'),
           count: assessed.indicators.length,
           content: (
             <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -89,14 +91,14 @@ export function SystemPanel({
     recommendations.length > 0
       ? {
           id: 'recommendations',
-          label: 'Recomendaciones',
+          label: t('Recomendaciones'),
           count: recommendations.length,
           content: (
             <>
               {/* Voz guía (FE-37): las recomendaciones en voz alta. */}
               <ListenButton
                 texts={recommendations.map((r) => r.text)}
-                label="Escuchar recomendaciones"
+                label={t('Escuchar recomendaciones')}
                 className="mb-2"
               />
               <ol className="list-decimal space-y-1 pl-5 text-sm">
@@ -111,7 +113,7 @@ export function SystemPanel({
     interventions.length > 0
       ? {
           id: 'interventions',
-          label: 'Qué puedes hacer ahora',
+          label: t('Qué puedes hacer ahora'),
           count: interventions.length,
           content: (
             <ul className="grid gap-2 md:grid-cols-2">
@@ -159,7 +161,7 @@ export function SystemPanel({
               type="button"
               onClick={onClose}
               className=" px-2 py-1 text-env-muted hover:bg-env-surface hover:text-env-text focus-visible:outline-2 focus-visible:outline-env-primary"
-              aria-label="Cerrar"
+              aria-label={t('Cerrar')}
             >
               ✕
             </button>
@@ -177,7 +179,9 @@ export function SystemPanel({
             se salen de la ventana. */}
           <section className={`relative mt-4 ${current ? 'min-h-48' : ''}`}>
             {!assessed || assessed.indicators.length === 0 ? (
-              <p className="text-sm text-env-muted">Todavía no hay mediciones de este sistema.</p>
+              <p className="text-sm text-env-muted">
+                {t('Todavía no hay mediciones de este sistema.')}
+              </p>
             ) : (
               // Los peores primero: son los que se ven al abrir el sistema.
               <SystemTrends
@@ -233,7 +237,7 @@ export function SystemPanel({
               to={`/measure?system=${encodeURIComponent(system.id)}`}
               className="mx-auto mt-4 block max-w-sm  bg-env-primary px-4 py-2 text-center font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
             >
-              Medir ahora
+              {t('Medir ahora')}
             </Link>
           )}
         </motion.div>

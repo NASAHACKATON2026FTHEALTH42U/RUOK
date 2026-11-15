@@ -1,5 +1,6 @@
 /** Lógica pura del SOS y de los avisos a control (FE-13, docs/alerts-and-escalation.md). */
 import type { Schema } from '../../api/client'
+import { translate } from '../../i18n/t'
 
 export type AlertCategory = Extract<
   Schema<'AlertCategory'>,
@@ -7,7 +8,10 @@ export type AlertCategory = Extract<
 >
 export type AlertSeverity = Schema<'AlertSeverity'>
 
-/** Categorías que puede elegir el member (no_contact e indicator las crea el sistema). */
+/**
+ * Categorías que puede elegir el member (no_contact e indicator las crea el sistema). Los textos
+ * están en español: se traducen al pintarlos (`translate(c.label)`).
+ */
 export const CATEGORIES: { id: AlertCategory; label: string; hint: string }[] = [
   { id: 'symptom', label: 'Tengo un síntoma', hint: 'Dolor, mareo, fiebre…' },
   { id: 'physical', label: 'Malestar físico', hint: 'No me encuentro bien' },
@@ -15,6 +19,7 @@ export const CATEGORIES: { id: AlertCategory; label: string; hint: string }[] = 
   { id: 'emergency', label: 'Emergencia', hint: 'Necesito ayuda ya' },
 ]
 
+/** Urgencias elegibles (textos en español: se traducen al pintarlos). */
 export const SEVERITIES: { id: AlertSeverity; label: string }[] = [
   { id: 'warning', label: 'Puede esperar' },
   { id: 'critical', label: 'Urgente' },
@@ -57,7 +62,7 @@ const ROLE_FALLBACK: Record<string, string> = {
 /** Nombre visible de un rol de la escalera, con el vocabulario del entorno. */
 export function roleLabel(role: string, vocabulary: Record<string, string>): string {
   const key = ROLE_VOCAB[role]
-  return (key && vocabulary[key]) || ROLE_FALLBACK[role] || role
+  return (key && vocabulary[key]) || (ROLE_FALLBACK[role] && translate(ROLE_FALLBACK[role])) || role
 }
 
 /** Sistemas cuyas intervenciones offline se proponen al no poder enviar, según la categoría. */

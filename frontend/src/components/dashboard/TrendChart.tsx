@@ -13,6 +13,7 @@ import {
 } from 'recharts'
 import { serverNow } from '../../api/client'
 import { useMeasurements } from '../../api/useMeasurements'
+import { useT } from '../../i18n/t'
 import { useEnvironmentStore } from '../../store/environment'
 import { STATUS_COLORS } from '../ui/status'
 import { formatValue } from './format'
@@ -54,10 +55,11 @@ export function PeriodSwitch({
   onChange: (d: Period) => void
   size?: 'sm' | 'md'
 }) {
+  const t = useT()
   return (
     <div
       role="group"
-      aria-label="Periodo"
+      aria-label={t('Periodo')}
       className={`flex  border border-env-border ${size === 'sm' ? 'text-xs' : 'text-sm'}`}
     >
       {PERIODS.map((p) => (
@@ -104,13 +106,14 @@ interface TrendPlotProps {
  * ≈ 80 %) como banda gris y una línea vertical marca «ahora». Acompáñala de `ForecastLegend`.
  */
 export function TrendPlot({ points, unit, range, days, height = 144, forecast }: TrendPlotProps) {
+  const t = useT()
   const now = serverNow().getTime()
   const rows = withForecast(points, forecast)
   const predicted = rows.length > points.length
   const domain = yDomain(rows, range)
   const ticks = yTicks(domain)
   // Sitio para la marca más larga del eje: con cuatro cifras («3000» ml) la primera se cortaba.
-  const axisWidth = 48 + 7 * Math.max(0, ...ticks.map((t) => String(t).length - 3))
+  const axisWidth = 48 + 7 * Math.max(0, ...ticks.map((v) => String(v).length - 3))
   const end = predicted ? Math.max(now, rows[rows.length - 1].t) : now
 
   return (
@@ -167,14 +170,17 @@ export function TrendPlot({ points, unit, range, days, height = 144, forecast }:
                 <div className=" border border-env-border bg-env-bg px-2 py-1 text-xs shadow">
                   <div className="text-env-muted">
                     {formatDateTime(p.t)}
-                    {estimated && ' · previsión'}
+                    {estimated && ` · ${t('previsión')}`}
                   </div>
                   <div className="font-semibold text-env-text">
                     {formatValue(estimated ? p.forecast : p.value, unit)}
                   </div>
                   {estimated && p.band && (
                     <div className="text-env-muted">
-                      Rango probable: {formatValue(p.band[0], '')} – {formatValue(p.band[1], '')}
+                      {t('Rango probable: {low} – {high}', {
+                        low: formatValue(p.band[0], ''),
+                        high: formatValue(p.band[1], ''),
+                      })}
                     </div>
                   )}
                 </div>
@@ -186,7 +192,7 @@ export function TrendPlot({ points, unit, range, days, height = 144, forecast }:
               x={now}
               stroke="var(--env-muted)"
               strokeOpacity={0.7}
-              label={{ value: 'ahora', position: 'top', fill: 'var(--env-muted)', fontSize: 11 }}
+              label={{ value: t('ahora'), position: 'top', fill: 'var(--env-muted)', fontSize: 11 }}
             />
           )}
           {predicted && (
@@ -267,6 +273,7 @@ export function TrendPlot({ points, unit, range, days, height = 144, forecast }:
  * identidad no depende solo del trazo). Como la gráfica, es `aria-hidden`.
  */
 export function ForecastLegend() {
+  const t = useT()
   const key = 'h-2 w-4 shrink-0'
   return (
     <ul
@@ -277,7 +284,7 @@ export function ForecastLegend() {
         <svg viewBox="0 0 16 8" className={key}>
           <line x1="1" y1="4" x2="15" y2="4" stroke="var(--env-text)" strokeWidth="2" />
         </svg>
-        Medido
+        {t('Medido')}
       </li>
       <li className="inline-flex items-center gap-1.5">
         <svg viewBox="0 0 16 8" className={key}>
@@ -291,13 +298,13 @@ export function ForecastLegend() {
             strokeDasharray={FORECAST_DASH}
           />
         </svg>
-        Previsión
+        {t('Previsión')}
       </li>
       <li className="inline-flex items-center gap-1.5">
         <svg viewBox="0 0 16 8" className={key}>
           <rect width="16" height="8" fill={FORECAST_COLOR} fillOpacity={FORECAST_BAND_OPACITY} />
         </svg>
-        Rango probable (≈ 80 %)
+        {t('Rango probable (≈ 80 %)')}
       </li>
     </ul>
   )
@@ -316,6 +323,7 @@ interface TrendChartProps {
  * selector de periodo, TrendPlot y tabla de datos desplegable.
  */
 export function TrendChart({ indicatorId, name, unit, range }: TrendChartProps) {
+  const t = useT()
   const memberId = useEnvironmentStore((s) => s.memberId)
   const [days, setDays] = useState<Period>(7)
   const series = useMeasurements(memberId, indicatorId, days)
@@ -325,7 +333,7 @@ export function TrendChart({ indicatorId, name, unit, range }: TrendChartProps) 
     <figure className="mt-3">
       <div className="flex items-center justify-between gap-2">
         <figcaption className="text-xs text-env-muted">
-          Últimos {days} días · {unit === '1-5' ? 'escala 1-5' : unit}
+          {t('Últimos {n} días', { n: days })} · {unit === '1-5' ? t('escala 1-5') : unit}
         </figcaption>
         <PeriodSwitch days={days} onChange={setDays} />
       </div>
@@ -335,14 +343,16 @@ export function TrendChart({ indicatorId, name, unit, range }: TrendChartProps) 
       )}
       {series.state === 'error' && (
         <p className="mt-2 text-sm text-env-muted">
-          No se ha podido cargar la serie.{' '}
+          {t('No se ha podido cargar la serie.')}{' '}
           <button type="button" onClick={series.retry} className="underline">
-            Reintentar
+            {t('Reintentar')}
           </button>
         </p>
       )}
       {series.state === 'ready' && points.length === 0 && (
-        <p className="mt-2 text-sm text-env-muted">Sin mediciones en los últimos {days} días.</p>
+        <p className="mt-2 text-sm text-env-muted">
+          {t('Sin mediciones en los últimos {n} días.', { n: days })}
+        </p>
       )}
 
       {series.state === 'ready' && points.length > 0 && (
@@ -352,16 +362,16 @@ export function TrendChart({ indicatorId, name, unit, range }: TrendChartProps) 
           </div>
           <details className="mt-1 text-xs">
             <summary className="cursor-pointer text-env-muted hover:text-env-text">
-              Ver datos ({points.length})
+              {t('Ver datos ({n})', { n: points.length })}
             </summary>
             <table className="mt-1 w-full">
               <caption className="sr-only">
-                {name}, últimos {days} días
+                {t('{name}, últimos {n} días', { name, n: days })}
               </caption>
               <thead>
                 <tr className="text-left text-env-muted">
-                  <th className="font-normal">Fecha</th>
-                  <th className="text-right font-normal">Valor</th>
+                  <th className="font-normal">{t('Fecha')}</th>
+                  <th className="text-right font-normal">{t('Valor')}</th>
                 </tr>
               </thead>
               <tbody>

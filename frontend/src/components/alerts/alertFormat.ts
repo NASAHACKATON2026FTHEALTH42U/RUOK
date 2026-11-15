@@ -2,6 +2,8 @@
 import type { Schema } from '../../api/client'
 import type { IconGlyph } from '../ui/Icon'
 import type { Status } from '../ui/status'
+import { EN } from '../../i18n/en'
+import { translate } from '../../i18n/t'
 
 const CATEGORY: Record<Schema<'AlertCategory'>, string> = {
   symptom: 'Síntoma',
@@ -11,7 +13,14 @@ const CATEGORY: Record<Schema<'AlertCategory'>, string> = {
   no_contact: 'Sin contacto',
   indicator: 'Indicador fuera de rango',
 }
-export const categoryLabel = (c: Schema<'AlertCategory'>) => CATEGORY[c] ?? c
+export const categoryLabel = (c: Schema<'AlertCategory'>) =>
+  CATEGORY[c] ? translate(CATEGORY[c]) : c
+
+/** ¿El mensaje es solo el nombre de la categoría (en cualquier idioma)? Entonces no se repite. */
+export function isCategoryLabel(message: string, c: Schema<'AlertCategory'>): boolean {
+  const es = CATEGORY[c]
+  return message === es || message === EN[es] || message === categoryLabel(c)
+}
 
 const SEVERITY: Record<Schema<'AlertSeverity'>, { label: string; status: Status }> = {
   warning: { label: 'Atención', status: 'warning' },
@@ -19,7 +28,8 @@ const SEVERITY: Record<Schema<'AlertSeverity'>, { label: string; status: Status 
   emergency: { label: 'Emergencia', status: 'critical' },
 }
 /** Severidad → etiqueta + color del semáforo (emergency se pinta como crítico). */
-export const severityStyle = (s: Schema<'AlertSeverity'>) => SEVERITY[s]
+export const severityStyle = (s: Schema<'AlertSeverity'>) =>
+  SEVERITY[s] && { ...SEVERITY[s], label: translate(SEVERITY[s].label) }
 
 const STATUS: Record<Schema<'AlertStatus'>, string> = {
   open: 'Abierta',
@@ -27,7 +37,7 @@ const STATUS: Record<Schema<'AlertStatus'>, string> = {
   acknowledged: 'Recibida',
   resolved: 'Resuelta',
 }
-export const statusLabel = (s: Schema<'AlertStatus'>) => STATUS[s] ?? s
+export const statusLabel = (s: Schema<'AlertStatus'>) => (STATUS[s] ? translate(STATUS[s]) : s)
 
 const EVENT: Record<Schema<'AlertEventType'>, { icon: IconGlyph; label: string }> = {
   created: { icon: 'plus', label: 'Creada' },
@@ -40,14 +50,14 @@ const EVENT: Record<Schema<'AlertEventType'>, { icon: IconGlyph; label: string }
   resolved: { icon: 'stop', label: 'Resuelta' },
 }
 export const eventStyle = (t: Schema<'AlertEventType'>): { icon: IconGlyph; label: string } =>
-  EVENT[t] ?? { icon: 'refresh', label: t }
+  EVENT[t] ? { ...EVENT[t], label: translate(EVENT[t].label) } : { icon: 'refresh', label: t }
 
 const ACTOR: Record<Schema<'Actor'>, string> = {
   system: 'sistema',
   member: 'member',
   responder: 'equipo de respuesta',
 }
-export const actorLabel = (a: Schema<'Actor'>) => ACTOR[a] ?? a
+export const actorLabel = (a: Schema<'Actor'>) => (ACTOR[a] ? translate(ACTOR[a]) : a)
 
 /** Abiertas primero (las más graves y recientes arriba); las resueltas al final. */
 export function sortAlerts<

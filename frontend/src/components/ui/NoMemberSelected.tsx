@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { useVocab } from '../../environments/useVocab'
 import { useEnvironmentStore } from '../../store/environment'
+import { useT } from '../../i18n/t'
 import { noMemberAction } from './noMember'
 
 /**
@@ -9,6 +10,7 @@ import { noMemberAction } from './noMember'
  * puede abrir, indica lo que sí puede hacer (elegir member o entorno en el ámbito, o ir a su consola).
  */
 export function NoMemberSelected({ className = 'mt-2' }: { className?: string }) {
+  const t = useT()
   const { role } = useAuth()
   const vocab = useVocab()
   const envId = useEnvironmentStore((s) => s.envId)
@@ -19,8 +21,10 @@ export function NoMemberSelected({ className = 'mt-2' }: { className?: string })
       return (
         <div className={`flex flex-col items-start gap-2 text-env-muted ${className}`}>
           <p>
-            No hay nadie seleccionado. Elige a quién quieres ver en el selector de {vocab.member}{' '}
-            (arriba de la barra lateral; en el móvil, en «Más») o mira el estado de todos en{' '}
+            {t(
+              'No hay nadie seleccionado. Elige a quién quieres ver en el selector de {member} (arriba de la barra lateral; en el móvil, en «Más») o mira el estado de todos en',
+              { member: vocab.member },
+            )}{' '}
             <Link to="/members" className={link}>
               {vocab.crew}
             </Link>
@@ -31,21 +35,23 @@ export function NoMemberSelected({ className = 'mt-2' }: { className?: string })
     case 'choose-env':
       return (
         <p className={`text-env-muted ${className}`}>
-          No hay nadie seleccionado. Elige el entorno y {vocab.member} arriba de la barra lateral
-          (en el móvil, en «Más»).
+          {t(
+            'No hay nadie seleccionado. Elige el entorno y {member} arriba de la barra lateral (en el móvil, en «Más»).',
+            { member: vocab.member },
+          )}
         </p>
       )
     case 'ground':
       return (
         <p className={`text-env-muted ${className}`}>
-          Desde tierra, el estado de {vocab.crew} está en la{' '}
+          {t('Desde tierra, el estado de {crew} está en la', { crew: vocab.crew })}{' '}
           <Link to="/ground" className={link}>
-            consola
+            {t('consola')}
           </Link>
           .
         </p>
       )
     case 'none':
-      return <p className={`text-env-muted ${className}`}>No hay nadie seleccionado.</p>
+      return <p className={`text-env-muted ${className}`}>{t('No hay nadie seleccionado.')}</p>
   }
 }

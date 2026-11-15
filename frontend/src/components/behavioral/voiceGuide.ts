@@ -4,15 +4,23 @@
  * app. Suena por Web Audio y baja el paisaje sonoro mientras habla. Si una frase no tiene audio,
  * no suena nada: queda el texto en pantalla.
  *
+ * Por idioma (FE-38): en español, `public/voice/manifest.json`; en inglés,
+ * `public/voice/en/manifest.json` (mismas claves con el texto en inglés, audios en
+ * `public/voice/en/`). Si un idioma no tiene manifiesto, no hay voz en ese idioma.
+ *
  * Solo hay una voz a la vez: decir algo nuevo (o `stopSpeaking`) corta lo que sonaba, también una
  * lectura en secuencia.
  */
 import { runSequence, type ClipResult } from './voice'
 import { duckSoundscape, voiceOutput } from './soundscapes'
+import { currentLang, type Lang } from '../../i18n/lang'
 
-const BASE = `${import.meta.env.BASE_URL}voice/`
+/** Carpeta de la voz del idioma activo (el español, en la raíz de `voice/`). */
+function voiceBase(lang: Lang = currentLang()): string {
+  return `${import.meta.env.BASE_URL}voice/${lang === 'es' ? '' : `${lang}/`}`
+}
 
-let manifest: Promise<Record<string, string>> | null = null
+const manifests = new Map<Lang, Promise<Record<string, string>>>()
 const decoded = new Map<string, Promise<AudioBuffer | null>>()
 let speaking: AudioBufferSourceNode | null = null
 /** Sube con cada frase o lectura nueva y con cada parada: lo anterior deja de sonar. */
@@ -20,10 +28,20 @@ let generation = 0
 
 /** Texto → archivo de audio (vacío si no se han generado). */
 export function voiceManifest(): Promise<Record<string, string>> {
-  manifest ??= fetch(`${BASE}manifest.json`)
-    .then((r) => (r.ok ? r.json() : {}))
-    .then((m: { texts?: Record<string, string> }) => m.texts ?? {})
-    .catch(() => ({}))
+  const lang = currentLang()
+  let manifest = manifests.get(lang)
+  if (!manifest) {
+    // Si no hay manifiesto (aún sin audios en ese idioma) o falla la red, no se recuerda el
+    // vacío: se vuelve a mirar la próxima vez (p. ej. tras generar las voces).
+    manifest = fetch(`${voiceBase(lang)}manifest.json`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then((m: { texts?: Record<string, string> }) => m.texts ?? {})
+      .catch(() => {
+        manifests.delete(lang)
+        return {}
+      })
+    manifests.set(lang, manifest)
+  }
   return manifest
 }
 
@@ -58,16 +76,18 @@ interface Clip {
 
 /** Reproduce una frase si sigue siendo la voz actual (`gen`). */
 async function playClip(text: string, gen: number): Promise<Clip> {
+  const base = voiceBase()
   const file = (await voiceManifest())[text]
   const out = voiceOutput()
   if (!file || !out) return { state: 'missing', ended: Promise.resolve('missing') }
-  let buffer = decoded.get(file)
+  const url = `${base}${file}`
+  let buffer = decoded.get(url)
   if (!buffer) {
-    buffer = fetch(`${BASE}${file}`)
+    buffer = fetch(url)
       .then((r) => r.arrayBuffer())
       .then((b) => out.ctx.decodeAudioData(b))
       .catch(() => null)
-    decoded.set(file, buffer)
+    decoded.set(url, buffer)
   }
   const audio = await buffer
   if (!audio) return { state: 'missing', ended: Promise.resolve('missing') }

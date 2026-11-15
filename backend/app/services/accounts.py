@@ -24,7 +24,7 @@ from datetime import datetime, timedelta
 import bcrypt
 from sqlmodel import Session, select
 
-from app import clock, models
+from app import clock, i18n, models
 from app.schemas.common import EventType
 from app.services import environments, events
 
@@ -56,7 +56,7 @@ class AccountLocked(Exception):
     """La cuenta está bloqueada hasta ``locked_until``."""
 
     def __init__(self, locked_until: datetime):
-        super().__init__(f"Cuenta bloqueada hasta {locked_until.isoformat()}")
+        super().__init__(i18n.tr("Cuenta bloqueada hasta {until}", until=locked_until.isoformat()))
         self.locked_until = locked_until
 
 
@@ -179,9 +179,35 @@ def _capitalize(text: str) -> str:
 def role_label(user: models.UserAccount) -> str:
     """Nombre visible del rol con el vocabulario del entorno del usuario."""
     if user.role == "admin" or user.env_id is None:
-        return "operador" if user.role == "admin" else DEFAULT_ROLE_LABELS.get(user.role, user.role)
+        if user.role == "admin":
+            return i18n.tr("operador")
+        return i18n.tr(DEFAULT_ROLE_LABELS.get(user.role, user.role))
     env = environments.get_environment(user.env_id)
-    return _role_label(user.role, env.vocabulary if env else {})
+    # En el idioma de la petición (FE-38): vocabulario del entorno o el genérico, traducido.
+    # El seed sigue usando `_role_label` (español) para los nombres que se guardan.
+    vocabulary = environments.localized(env).vocabulary if env else {}
+    return i18n.tr(_role_label(user.role, vocabulary))
+
+
+def display_name(user: models.UserAccount) -> str:
+    """Nombre visible de la cuenta en el idioma de la petición (FE-38).
+
+    Solo cambia los nombres que genera el seed («Operador», «Médico de vuelo (Marte)»); lo que
+    escribe una persona (o el nombre de un member) se devuelve tal cual. En la BD, en español.
+    """
+    name = user.display_name
+    if i18n.lang() == "es":
+        return name
+    if user.role == "admin":
+        return i18n.tr(name) if name == "Operador" else name
+    env = environments.get_environment(user.env_id) if user.env_id else None
+    if env is None or user.role == "member":
+        return name
+    if name != f"{_capitalize(_role_label(user.role, env.vocabulary))} ({env.name})":
+        return name
+    shown = environments.localized(env)
+    label = i18n.tr(_role_label(user.role, shown.vocabulary))
+    return f"{_capitalize(label)} ({shown.name})"
 
 
 def seed_users(
@@ -264,30 +290,32 @@ def create_user(
     """Crea una cuenta y hace commit. ``UserInvalid`` (422) o ``UserConflict`` (409)."""
     if role == "admin":
         if env_id is not None or member_id is not None:
-            raise UserInvalid("El admin es global: sin entorno ni member")
+            raise UserInvalid(i18n.tr("El admin es global: sin entorno ni member"))
     else:
         if env_id is None:
-            raise UserInvalid("Falta el entorno (solo el admin es global)")
+            raise UserInvalid(i18n.tr("Falta el entorno (solo el admin es global)"))
         if environments.get_environment(env_id) is None:
-            raise UserInvalid(f"Entorno desconocido: {env_id}")
+            raise UserInvalid(i18n.tr("Entorno desconocido: {id}", id=env_id))
     if role == "member":
         member = session.get(models.Member, member_id) if member_id is not None else None
         if member is None or member.env_id != env_id:
-            raise UserInvalid("Un member necesita un member_id existente de su entorno")
+            raise UserInvalid(
+                i18n.tr("Un member necesita un member_id existente de su entorno")
+            )
     elif member_id is not None:
-        raise UserInvalid("Solo el rol member lleva member_id")
+        raise UserInvalid(i18n.tr("Solo el rol member lleva member_id"))
 
     if session.exec(
         select(models.UserAccount).where(models.UserAccount.username == username)
     ).first():
-        raise UserConflict(f"El usuario «{username}» ya existe")
+        raise UserConflict(i18n.tr("El usuario «{username}» ya existe", username=username))
     if (
         member_id is not None
         and session.exec(
             select(models.UserAccount).where(models.UserAccount.member_id == member_id)
         ).first()
     ):
-        raise UserConflict("Ese member ya tiene una cuenta")
+        raise UserConflict(i18n.tr("Ese member ya tiene una cuenta"))
 
     account = models.UserAccount(
         username=username,
@@ -305,7 +333,7 @@ def create_user(
         env_id=env_id,
         member_id=member_id,
         user_id=account.id,
-        summary=f"Usuario creado: {display_name} ({role})",
+        summary=i18n.tr("Usuario creado: {name} ({role})", name=display_name, role=role),
         payload={"username": username, "display_name": display_name, "role": role},
     )
     session.commit()
@@ -319,7 +347,7 @@ def set_active(
     """Activa o desactiva una cuenta. No puedes desactivarte ni dejar el sistema sin admin."""
     if not active and account.active:
         if account.id == acting.id:
-            raise UserConflict("No puedes desactivar tu propia cuenta")
+            raise UserConflict(i18n.tr("No puedes desactivar tu propia cuenta"))
         if account.role == "admin":
             others = session.exec(
                 select(models.UserAccount).where(
@@ -329,7 +357,7 @@ def set_active(
                 )
             ).first()
             if others is None:
-                raise UserConflict("Tiene que quedar al menos un admin activo")
+                raise UserConflict(i18n.tr("Tiene que quedar al menos un admin activo"))
     account.active = active
     session.add(account)
     session.commit()

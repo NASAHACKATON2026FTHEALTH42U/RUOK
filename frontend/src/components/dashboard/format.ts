@@ -1,4 +1,6 @@
 import type { Schema } from '../../api/client'
+import { dateLocale } from '../../i18n/lang'
+import { translate } from '../../i18n/t'
 
 type Trend = Schema<'Trend'>
 
@@ -6,13 +8,13 @@ type Trend = Schema<'Trend'>
 export function formatTrend(trend: Trend): { arrow: string; label: string } {
   switch (trend) {
     case 'rising':
-      return { arrow: '↑', label: 'Subiendo' }
+      return { arrow: '↑', label: translate('Subiendo') }
     case 'falling':
-      return { arrow: '↓', label: 'Bajando' }
+      return { arrow: '↓', label: translate('Bajando') }
     case 'stable':
-      return { arrow: '→', label: 'Estable' }
+      return { arrow: '→', label: translate('Estable') }
     default:
-      return { arrow: '·', label: 'Sin tendencia' }
+      return { arrow: '·', label: translate('Sin tendencia') }
   }
 }
 
@@ -26,13 +28,14 @@ const HAZARDS: Record<string, string> = {
 }
 
 export function formatHazard(slug: string): string {
-  return HAZARDS[slug] ?? slug
+  const label = HAZARDS[slug]
+  return label ? translate(label) : slug
 }
 
 /** Valor con unidad. Las escalas `1-5` se muestran como "3 / 5". */
 export function formatValue(value: number | null | undefined, unit: string): string {
   if (value === null || value === undefined) return '—'
-  const n = value.toLocaleString('es-ES', { maximumFractionDigits: 1 })
+  const n = value.toLocaleString(dateLocale(), { maximumFractionDigits: 1 })
   if (unit === '1-5') return `${n} / 5`
   return unit ? `${n} ${unit}` : n
 }
@@ -47,5 +50,6 @@ const SOURCES: Record<string, string> = {
 }
 
 export function formatSource(source: string): string {
-  return SOURCES[source] ?? source
+  const label = SOURCES[source]
+  return label ? translate(label) : source
 }

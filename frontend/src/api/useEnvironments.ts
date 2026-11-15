@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { withCatalogCache } from '../offline/cache'
 import { api, unwrap } from './client'
+import { currentLang } from '../i18n/lang'
 
 const getEnvironments = () => unwrap(api.GET('/api/v1/environments'))
 
@@ -16,8 +17,14 @@ export type Loadable<T> =
 // Una sola petición compartida por todos los componentes (selector de la cabecera y página).
 // Si falla, se descarta para que el siguiente intento vuelva a pedirla.
 let cache: Promise<Environment[]> | null = null
+// El catálogo llega en el idioma de la interfaz (FE-38): al cambiarlo, se vuelve a pedir.
+let cacheLang = currentLang()
 
 function fetchEnvironments(): Promise<Environment[]> {
+  if (cacheLang !== currentLang()) {
+    cache = null
+    cacheLang = currentLang()
+  }
   cache ??= withCatalogCache('environments', getEnvironments)().catch((err: unknown) => {
     cache = null
     throw err

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { newId } from '../../api/newId'
 import type { Environment } from '../../api/useEnvironments'
 import type { Intervention } from '../../api/useInterventions'
+import { useT } from '../../i18n/t'
 import { sendAlert, type AlertResult } from '../../offline/outbox'
 import type { Vocabulary } from '../../store/environment'
 import { Modal } from '../ui/Modal'
@@ -55,6 +56,7 @@ export function SosEmergency({
   delayS = SOS_COUNTDOWN_S,
   onClose,
 }: SosEmergencyProps) {
+  const t = useT()
   const [phase, setPhase] = useState<Phase>(
     delayS > 0 ? { kind: 'countdown' } : { kind: 'sending' },
   )
@@ -111,9 +113,9 @@ export function SosEmergency({
 
   const title =
     phase.kind === 'sent'
-      ? 'Alerta de ayuda enviada'
+      ? t('Alerta de ayuda enviada')
       : phase.kind === 'queued'
-        ? 'No enviado'
+        ? t('No enviado')
         : 'SOS'
   // Mientras cuenta, Escape cancela; enviando, no se puede cerrar; después, cierra.
   const closable = phase.kind !== 'sending'
@@ -153,30 +155,35 @@ export function SosEmergency({
             <div id="sos-desc" className="mt-3 space-y-4">
               <p>
                 {anonymous ? (
-                  'Este dispositivo no sabe quién eres: inicia sesión para pedir ayuda desde aquí'
+                  t(
+                    'Este dispositivo no sabe quién eres: inicia sesión para pedir ayuda desde aquí',
+                  )
                 ) : (
                   <>
-                    Primero{' '}
+                    {t('Primero')}{' '}
                     <Link to="/" onClick={onClose} className="underline">
-                      elige entorno y {vocabulary.member}
+                      {t('elige entorno y {member}', { member: vocabulary.member })}
                     </Link>
                   </>
                 )}
-                . Si es una emergencia, avisa ya de viva voz a {roleLabel('crew', vocabulary)}.
+                .{' '}
+                {t('Si es una emergencia, avisa ya de viva voz a {crew}.', {
+                  crew: roleLabel('crew', vocabulary),
+                })}
               </p>
               <button
                 type="button"
                 onClick={onClose}
                 className="w-full  border border-env-border px-4 py-3 font-medium hover:border-env-text"
               >
-                Cerrar
+                {t('Cerrar')}
               </button>
             </div>
           ) : phase.kind === 'countdown' ? (
             <div className="mt-2 flex flex-1 flex-col text-center">
               <div className="flex flex-1 flex-col items-center justify-center">
                 <p id="sos-desc" className="text-lg max-sm:text-2xl">
-                  Se enviará la alerta de ayuda en
+                  {t('Se enviará la alerta de ayuda en')}
                 </p>
                 <p
                   aria-hidden
@@ -186,7 +193,9 @@ export function SosEmergency({
                 </p>
               </div>
               <p className="sr-only" aria-live="assertive">
-                Se enviará la alerta de ayuda en {delayS} segundos si no la cancelas.
+                {t('Se enviará la alerta de ayuda en {n} segundos si no la cancelas.', {
+                  n: delayS,
+                })}
               </p>
               {/* Barra que se vacía en los 3 s (sin animación con «reducir movimiento»). */}
               <div
@@ -208,14 +217,14 @@ export function SosEmergency({
                   onClick={onClose}
                   className="min-h-14  border-2 border-env-text px-4 text-lg font-semibold hover:bg-env-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary max-sm:min-h-18 max-sm:text-2xl"
                 >
-                  Cancelar
+                  {t('Cancelar')}
                 </button>
                 <button
                   type="button"
                   onClick={() => void fireRef.current()}
                   className="min-h-12  bg-[var(--sos-bg)] px-4 font-semibold text-[var(--sos-text)] hover:bg-[var(--sos-bg-strong)] active:bg-[var(--sos-bg-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text max-sm:min-h-16 max-sm:text-xl"
                 >
-                  Enviar ya
+                  {t('Enviar ya')}
                 </button>
               </div>
             </div>
@@ -225,7 +234,7 @@ export function SosEmergency({
               role="status"
               className="mt-4 text-center text-lg max-sm:flex max-sm:flex-1 max-sm:items-center max-sm:justify-center max-sm:text-2xl"
             >
-              Enviando la alerta de ayuda…
+              {t('Enviando la alerta de ayuda…')}
             </p>
           ) : phase.kind === 'sent' ? (
             <div id="sos-desc" className={RESULT}>
@@ -244,15 +253,18 @@ export function SosEmergency({
           ) : (
             <div id="sos-desc" className="mt-3 space-y-4">
               <p role="alert">
-                <span aria-hidden>⚠ </span>No se ha podido guardar la alerta en este dispositivo (
-                {phase.message}). Avisa ya de viva voz a {roleLabel('crew', vocabulary)}.
+                <span aria-hidden>⚠ </span>
+                {t(
+                  'No se ha podido guardar la alerta en este dispositivo ({error}). Avisa ya de viva voz a {crew}.',
+                  { error: phase.message, crew: roleLabel('crew', vocabulary) },
+                )}
               </p>
               <button
                 type="button"
                 onClick={onClose}
                 className="w-full  border border-env-border px-4 py-3 font-medium hover:border-env-text"
               >
-                Cerrar
+                {t('Cerrar')}
               </button>
             </div>
           )}

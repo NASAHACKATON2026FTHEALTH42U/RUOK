@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Intervention } from '../../api/useInterventions'
+import { useT } from '../../i18n/t'
 import { InterventionPlayer } from './InterventionPlayer'
 import { unlockAudio } from './soundscapes'
 
@@ -16,6 +17,7 @@ interface InterventionCardProps {
  */
 export function InterventionCard({ intervention, compact = false }: InterventionCardProps) {
   const [playing, setPlaying] = useState(false)
+  const t = useT()
 
   return (
     <div className=" border border-env-border bg-env-surface p-3">
@@ -34,7 +36,7 @@ export function InterventionCard({ intervention, compact = false }: Intervention
           }}
           className="shrink-0  bg-env-primary px-3 py-1.5 text-sm font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
         >
-          Empezar
+          {t('Empezar')}
         </button>
       </div>
       {!compact && (

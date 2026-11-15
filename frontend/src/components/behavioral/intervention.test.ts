@@ -47,3 +47,21 @@ describe('breathPhase', () => {
     expect(breathPhase('Camina 2 min')).toBeNull()
   })
 })
+
+describe('pasos en inglés (FE-38)', () => {
+  it('duraciones, repeticiones y fases', () => {
+    expect(stepSeconds('Hold your breath for 4 seconds')).toBe(4)
+    expect(stepSeconds('Walk 2 minutes')).toBe(120)
+    expect(expandSteps(['Inhale 4 s', 'Repeat 2 cycles']).map((s) => s.cycle)).toEqual([
+      { n: 1, of: 2 },
+      { n: 2, of: 2 },
+    ])
+    expect(breathPhase('Breathe in through your nose')).toBe('in')
+    expect(breathPhase('Inhale 4 s')).toBe('in')
+    expect(breathPhase('Exhale slowly')).toBe('out')
+    expect(breathPhase('Breathe out 6 s')).toBe('out')
+    expect(breathPhase('Hold 4 s')).toBe('hold')
+    expect(breathPhase('Keep your lungs empty for 4 seconds')).toBe('hold')
+    expect(breathPhase('Walk 2 minutes')).toBeNull()
+  })
+})

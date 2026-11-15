@@ -1,4 +1,5 @@
 import type { MemberSummary } from '../../api/useMembers'
+import { useT } from '../../i18n/t'
 import { capitalize } from '../../environments/useVocab'
 import type { Vocabulary } from '../../store/environment'
 import { livenessState, statusStyle } from '../ui/status'
@@ -23,10 +24,11 @@ export function MemberStrip({
   onSelect: (memberId: number) => void
   className?: string
 }) {
+  const t = useT()
   return (
     <div
       role="group"
-      aria-label={`Elige ${vocabulary.member}`}
+      aria-label={t('Elige {member}', { member: vocabulary.member })}
       className={`flex gap-2 overflow-x-auto pb-1 [scrollbar-color:var(--env-border)_transparent] [scrollbar-width:thin] ${className}`}
     >
       {members.map((m) => {
@@ -60,8 +62,8 @@ export function MemberStrip({
             )}
             <span className={on ? 'font-medium' : ''}>{m.name}</span>
             <span className="sr-only">
-              : {statusStyle(state).label}
-              {live ? `, ${statusStyle(live).label}` : ''}
+              : {t(statusStyle(state).label)}
+              {live ? `, ${t(statusStyle(live).label)}` : ''}
             </span>
           </button>
         )

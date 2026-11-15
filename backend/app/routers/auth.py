@@ -14,7 +14,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
-from app import clock, models
+from app import clock, i18n, models
 from app.auth.security import create_token
 from app.db import get_session
 from app.routers.deps import ERRORS_404, ERRORS_AUTH, AdminDep, CurrentUser
@@ -47,7 +47,7 @@ def to_user(account: models.UserAccount) -> User:
     return User(
         id=account.id,
         username=account.username,
-        display_name=account.display_name,
+        display_name=accounts.display_name(account),
         role=account.role,
         env_id=account.env_id,
         member_id=account.member_id,
@@ -72,7 +72,11 @@ def _auth_event(
         env_id=account.env_id if account else None,
         member_id=account.member_id if account else None,
         user_id=account.id if account else None,
-        summary=f"Login de {username}" if ok else f"Login fallido de {username} ({reason})",
+        summary=(
+            i18n.tr("Login de {username}", username=username)
+            if ok
+            else i18n.tr("Login fallido de {username} ({reason})", username=username, reason=reason)
+        ),
         payload={"username": username, "method": method, **({"reason": reason} if reason else {})},
     )
     session.commit()
@@ -85,7 +89,7 @@ def _authenticate(session: Session, username: str, password: str) -> TokenRespon
     method = "password"
     if account is None:
         _auth_event(session, EventType.auth_failed, None, username, method, "unknown_user")
-        raise HTTPException(401, _BAD_CREDENTIALS)
+        raise HTTPException(401, i18n.tr(_BAD_CREDENTIALS))
     try:
         ok = accounts.check_password(session, account, password)
     except accounts.AccountLocked as exc:
@@ -94,12 +98,12 @@ def _authenticate(session: Session, username: str, password: str) -> TokenRespon
         retry = max(1, math.ceil((exc.locked_until - clock.now()).total_seconds()))
         raise HTTPException(
             429,
-            f"Cuenta bloqueada por demasiados intentos hasta {until}",
+            i18n.tr("Cuenta bloqueada por demasiados intentos hasta {until}", until=until),
             headers={"Retry-After": str(retry)},
         ) from exc
     if not ok:
         _auth_event(session, EventType.auth_failed, account, username, method, "bad_credentials")
-        raise HTTPException(401, _BAD_CREDENTIALS)
+        raise HTTPException(401, i18n.tr(_BAD_CREDENTIALS))
 
     token, expires_at = create_token(session, account)
     _auth_event(session, EventType.auth_login, account, username, method)
@@ -134,7 +138,7 @@ def me(user: CurrentUser) -> User:
 )
 def demo_users(session: SessionDep) -> list[DemoUser]:
     if not accounts.demo_mode():
-        raise HTTPException(404, "Solo disponible con DEMO_MODE=true")
+        raise HTTPException(404, i18n.tr("Solo disponible con DEMO_MODE=true"))
     rows = session.exec(
         select(models.UserAccount).where(models.UserAccount.active == True)  # noqa: E712
     ).all()
@@ -161,7 +165,7 @@ _ERR_USER = {
 def _get_account(session: Session, user_id: int) -> models.UserAccount:
     account = session.get(models.UserAccount, user_id)
     if account is None:
-        raise HTTPException(404, "Usuario inexistente")
+        raise HTTPException(404, i18n.tr("Usuario inexistente"))
     return account
 
 

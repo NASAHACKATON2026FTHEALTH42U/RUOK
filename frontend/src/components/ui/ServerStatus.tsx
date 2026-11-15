@@ -1,5 +1,6 @@
 import { useMockStatus } from '../../api/mocks/useMockStatus'
 import { useServerHealth } from '../../api/useServerHealth'
+import { useT } from '../../i18n/t'
 
 /**
  * Chip con el estado de la conexión con el servidor de a bordo (GET /health).
@@ -7,6 +8,7 @@ import { useServerHealth } from '../../api/useServerHealth'
  * con los tokens del tema (FE-34). Con `quiet`, solo aparece si no está "conectado".
  */
 export function ServerStatus({ quiet = false }: { quiet?: boolean }) {
+  const t = useT()
   const status = useServerHealth()
   const mock = useMockStatus()
   // `quiet` (barra lateral): con el servidor conectado no se pinta nada; solo avisa si hay problema.
@@ -14,12 +16,12 @@ export function ServerStatus({ quiet = false }: { quiet?: boolean }) {
 
   const { icon, label, strong } =
     mock === 'mock'
-      ? { icon: '◆', label: 'Modo demo (sin servidor)', strong: true }
+      ? { icon: '◆', label: t('Modo demo (sin servidor)'), strong: true }
       : status.state === 'online'
-        ? { icon: '●', label: 'Servidor conectado', strong: false }
+        ? { icon: '●', label: t('Servidor conectado'), strong: false }
         : status.state === 'offline'
-          ? { icon: '○', label: 'Servidor sin conexión', strong: true }
-          : { icon: '◌', label: 'Conectando…', strong: false }
+          ? { icon: '○', label: t('Servidor sin conexión'), strong: true }
+          : { icon: '◌', label: t('Conectando…'), strong: false }
 
   return (
     <span

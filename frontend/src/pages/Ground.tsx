@@ -14,6 +14,8 @@ import { canSeeDetails, linkBanner } from '../components/ground/ground'
 import { livenessState, statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { capitalize, useVocab } from '../environments/useVocab'
+import { dateLocale } from '../i18n/lang'
+import { useT } from '../i18n/t'
 import { formatAgo } from '../lib/time'
 import { useEnvironmentStore } from '../store/environment'
 import { useEnvironments } from '../api/useEnvironments'
@@ -29,6 +31,7 @@ const STRIPES =
  * y el detalle con su propio scroll.
  */
 export default function Ground() {
+  const t = useT()
   const vocab = useVocab()
   const { role } = useAuth()
   const envId = useEnvironmentStore((s) => s.envId)
@@ -41,12 +44,16 @@ export default function Ground() {
     ? envs.data.find((e) => e.id === envId)?.escalation_ladder
     : null) ?? ['self', 'crew', 'ground']
 
-  const title = <h1 className="text-2xl font-semibold">Consola de {vocab.ground}</h1>
+  const title = (
+    <h1 className="text-2xl font-semibold first-letter:uppercase">
+      {t('Consola de {ground}', { ground: vocab.ground })}
+    </h1>
+  )
   if (!envId) {
     return (
       <section className="space-y-2">
         {title}
-        <p className="text-env-muted">Tu usuario no tiene entorno asignado.</p>
+        <p className="text-env-muted">{t('Tu usuario no tiene entorno asignado.')}</p>
       </section>
     )
   }
@@ -63,9 +70,9 @@ export default function Ground() {
       <section className="space-y-2">
         {title}
         <p className="text-env-muted">
-          No se ha podido cargar la consola.{' '}
+          {t('No se ha podido cargar la consola.')}{' '}
           <button type="button" onClick={ground.retry} className="underline">
-            Reintentar
+            {t('Reintentar')}
           </button>
         </p>
       </section>
@@ -108,7 +115,9 @@ export default function Ground() {
             status={sev.status}
             severityLabel={sev.label}
             state={statusLabel(a.status)}
-            ago={`entregada ${a.delivered_at ? formatAgo(a.delivered_at, now) : '—'}`}
+            ago={t('entregada {ago}', {
+              ago: a.delivered_at ? formatAgo(a.delivered_at, now) : '—',
+            })}
           />
         </button>
       </li>
@@ -127,12 +136,23 @@ export default function Ground() {
         >
           <span aria-hidden>{unknown ? '○ ' : g.link.state === 'delayed' ? '◐ ' : '● '}</span>
           {ground.refreshFailed && g.link.state !== 'los'
-            ? `Sin conexión con el servidor: estado DESCONOCIDO, último conocido de las ${new Date(g.as_of).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}.`
+            ? t(
+                'Sin conexión con el servidor: estado DESCONOCIDO, último conocido de las {time}.',
+                {
+                  time: new Date(g.as_of).toLocaleTimeString(dateLocale(), {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }),
+                },
+              )
             : banner.text}
           {g.link.queued > 0 && (
             <span className="text-env-muted">
               {' '}
-              · {g.link.queued} {g.link.queued === 1 ? 'mensaje' : 'mensajes'} en cola
+              ·{' '}
+              {g.link.queued === 1
+                ? t('1 mensaje en cola')
+                : t('{n} mensajes en cola', { n: g.link.queued })}
             </span>
           )}
         </div>
@@ -157,7 +177,7 @@ export default function Ground() {
                 <span className="truncate font-medium">{m.name}</span>
                 {unknown ? (
                   <span>
-                    <StatusBadge status="unknown" label="Desconocido" size="xs" />
+                    <StatusBadge status="unknown" label={t('Desconocido')} size="xs" />
                   </span>
                 ) : (
                   <span className="flex flex-wrap gap-1">
@@ -168,10 +188,17 @@ export default function Ground() {
                   </span>
                 )}
                 <span className="text-xs text-env-muted">
-                  Último dato {m.last_seen_at ? formatAgo(m.last_seen_at, now) : 'nunca'}
-                  {unknown && ` · último conocido: ${statusStyle(m.overall_status).label}`}
+                  {m.last_seen_at
+                    ? t('Último dato {ago}', { ago: formatAgo(m.last_seen_at, now) })
+                    : t('Último dato nunca')}
+                  {unknown &&
+                    ` · ${t('último conocido: {status}', { status: statusStyle(m.overall_status).label })}`}
                   {m.open_alerts > 0 &&
-                    ` · ${m.open_alerts} alerta${m.open_alerts > 1 ? 's' : ''} abierta${m.open_alerts > 1 ? 's' : ''}`}
+                    ` · ${
+                      m.open_alerts > 1
+                        ? t('{n} alertas abiertas', { n: m.open_alerts })
+                        : t('1 alerta abierta')
+                    }`}
                 </span>
               </li>
             )
@@ -181,8 +208,8 @@ export default function Ground() {
 
       {alerts.length === 0 ? (
         <p className="text-env-muted">
-          No ha llegado ninguna alerta por el enlace.
-          {g.link.state !== 'online' && ' Las que estén en cola aparecerán al entregarse.'}
+          {t('No ha llegado ninguna alerta por el enlace.')}
+          {g.link.state !== 'online' && ` ${t('Las que estén en cola aparecerán al entregarse.')}`}
         </p>
       ) : (
         // Lista y detalle miden lo que su contenido y, como mucho, el hueco: si no caben, el
@@ -193,18 +220,20 @@ export default function Ground() {
             className="hud-panel flex max-h-[45dvh] min-h-0 flex-col md:max-h-full"
           >
             <h2 id="ground-alerts-title" className="hud-panel-head">
-              Alertas entregadas
+              {t('Alertas entregadas')}
               <span className="mr-2.5 ml-auto tracking-normal text-env-muted normal-case">
-                {open.length} abiertas
+                {t('{n} abiertas', { n: open.length })}
               </span>
             </h2>
             <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
               {open.length === 0 && (
-                <p className="px-3.5 py-3 text-sm text-env-muted">No hay alertas abiertas.</p>
+                <p className="px-3.5 py-3 text-sm text-env-muted">
+                  {t('No hay alertas abiertas.')}
+                </p>
               )}
               <ul
                 className="divide-y divide-env-border/60"
-                aria-label="Alertas entregadas abiertas"
+                aria-label={t('Alertas entregadas abiertas')}
               >
                 {open.map(row)}
               </ul>
@@ -219,12 +248,12 @@ export default function Ground() {
                     }}
                     className="w-full min-h-11 px-3.5 py-2.5 text-left text-sm text-env-muted hover:text-env-text"
                   >
-                    {resolvedOpen ? '▾' : '▸'} Resueltas ({resolved.length})
+                    {resolvedOpen ? '▾' : '▸'} {t('Resueltas ({n})', { n: resolved.length })}
                   </button>
                   {resolvedOpen && (
                     <ul
                       className="divide-y divide-env-border/60"
-                      aria-label="Alertas entregadas resueltas"
+                      aria-label={t('Alertas entregadas resueltas')}
                     >
                       {resolved.map(row)}
                     </ul>
@@ -235,7 +264,7 @@ export default function Ground() {
           </section>
           {current && (
             <section
-              aria-label="Detalle de la alerta"
+              aria-label={t('Detalle de la alerta')}
               className="hud-panel min-h-0 overflow-y-auto p-4 [scrollbar-color:var(--env-border)_transparent] md:max-h-full"
             >
               <AlertDetail

@@ -12,6 +12,13 @@ Uso:
   2. python3 scripts/voice/generate_voice.py --list-voices   # para elegir la voz
   3. python3 scripts/voice/generate_voice.py --dry-run       # qué falta y cuántos caracteres
   4. python3 scripts/voice/generate_voice.py                 # genera lo que falta o cambió
+  5. python3 scripts/voice/generate_voice.py --lang en       # la versión en inglés (FE-38)
+
+En inglés (`--lang en`), los textos salen de las capas de backend/app/data/i18n/en/ (lo que no
+esté traducido no se genera) y los de la interfaz, del diccionario del front
+(frontend/src/i18n/en/*.ts). Los audios van a frontend/public/voice/en/ con su propio
+manifiesto. La voz es ELEVENLABS_VOICE_ID_EN si existe; si no, la misma (el modelo es
+multilingüe).
 
 Recoge todos los textos de guía estáticos y genera un MP3 por frase distinta, en este orden de
 prioridad (si se acaba el saldo, lo primero ya está):
@@ -49,13 +56,17 @@ DATA = ROOT / "backend" / "app" / "data"
 UI_TEXTS = ROOT / "frontend" / "src" / "components" / "behavioral" / "voiceTexts.json"
 OUT = ROOT / "frontend" / "public" / "voice"
 MANIFEST = OUT / "manifest.json"
+I18N_EN = DATA / "i18n" / "en"
+FRONT_DICTS = ROOT / "frontend" / "src" / "i18n" / "en"
 API = "https://api.elevenlabs.io/v1"
 MODEL = "eleven_multilingual_v2"
 FORMAT = "mp3_44100_64"
 # Voz tranquila: estable y poco teatral.
 SETTINGS = {"stability": 0.7, "similarity_boost": 0.75, "style": 0.1, "use_speaker_boost": True}
 # Mismo patrón que `expandSteps` (frontend/src/components/behavioral/intervention.ts).
-REPEAT = re.compile(r"^\s*repite\b.*?(\d+)\s*(ciclos?|veces)", re.IGNORECASE)
+REPEAT = re.compile(
+    r"^\s*(repite|repeat)\b.*?(\d+)\s*(ciclos?|veces|cycles?|times)", re.IGNORECASE
+)
 # Para que se pronuncie bien: abreviaturas enteras y escalas leídas como pausas. Solo cambia lo
 # que se envía a ElevenLabs; el manifiesto sigue usando el texto tal como sale en pantalla.
 SPOKEN = [
@@ -70,9 +81,21 @@ SPOKEN = [
 ]
 
 
+SPOKEN_EN = [
+    (re.compile(r"(\d+)\s*ms\b"), r"\1 milliseconds"),
+    (re.compile(r"\b1\s*min\b"), "1 minute"),
+    (re.compile(r"(\d+)\s*min\b"), r"\1 minutes"),
+    (re.compile(r"\b1\s*s\b"), "1 second"),
+    (re.compile(r"(\d+)\s*s\b"), r"\1 seconds"),
+    (re.compile(r"\bin ml\b"), "in millilitres"),
+    (re.compile(r"(\d)\s*=\s*"), r"\1: "),
+]
+LANG = "es"
+
+
 def spoken(text: str) -> str:
     """Texto que se envía a ElevenLabs ("Mide durante 60 s" → "Mide durante 60 segundos")."""
-    for pattern, replacement in SPOKEN:
+    for pattern, replacement in SPOKEN_EN if LANG == "en" else SPOKEN:
         text = pattern.sub(replacement, text)
     return text
 
@@ -116,7 +139,43 @@ def call(path: str, key: str, body: dict | None = None, accept: str = "applicati
 
 
 def _load(name: str) -> list[dict]:
-    return json.loads((DATA / name).read_text(encoding="utf-8"))
+    """Catálogo en el idioma elegido: en inglés, con su capa (solo lo traducido)."""
+    items = json.loads((DATA / name).read_text(encoding="utf-8"))
+    if LANG == "es":
+        return items
+    layer_file = I18N_EN / name
+    layer = json.loads(layer_file.read_text(encoding="utf-8")) if layer_file.exists() else {}
+    out = []
+    for item in items:
+        override = layer.get(item.get("id"), {}) if isinstance(item, dict) else {}
+        if not override:
+            continue  # sin traducir: no se genera
+        out.append({**item, **override})
+    return out
+
+
+def _front_dictionary() -> dict[str, str]:
+    """Diccionario español → inglés del front (src/i18n/en/*.ts). Se evalúa con Node quitando
+    el tipo (`Record<string, string>`): así valen las entradas en varias líneas y las claves sin
+    comillas."""
+    import subprocess
+
+    out: dict[str, str] = {}
+    for f in sorted(FRONT_DICTS.glob("*.ts")):
+        if f.name == "index.ts":
+            continue
+        source = f.read_text(encoding="utf-8")
+        body = re.sub(r"export const \w+\s*:\s*Record<string,\s*string>\s*=", "const d =", source)
+        js = body + "\nprocess.stdout.write(JSON.stringify(d))"
+        try:
+            run = subprocess.run(
+                ["node", "--input-type=module", "-e", js],
+                capture_output=True, text=True, check=True,
+            )
+            out.update(json.loads(run.stdout))
+        except (OSError, subprocess.CalledProcessError, json.JSONDecodeError) as err:
+            print(f"  ! no se ha podido leer {f.name}: {err}")
+    return out
 
 
 def _strings(value: object) -> list[str]:
@@ -143,6 +202,9 @@ def guidance_texts() -> dict[str, list[str]]:
     ]
     measurement = [t for i in _load("indicators.json") for t in i["measurement_instructions"]]
     ui = _strings(json.loads(UI_TEXTS.read_text(encoding="utf-8"))) if UI_TEXTS.exists() else []
+    if LANG == "en":
+        words = _front_dictionary()
+        ui = [words[t] for t in ui if t in words]
     return {
         "intervenciones": interventions,
         "protocolos": protocols,
@@ -184,10 +246,18 @@ def main() -> None:
     parser.add_argument(
         "--max-chars", type=int, help="tope de caracteres a generar en esta ejecución (por saldo)"
     )
+    parser.add_argument("--lang", choices=["es", "en"], default="es", help="idioma (FE-38)")
     args = parser.parse_args()
+    global LANG, OUT, MANIFEST
+    LANG = args.lang
+    if LANG == "en":
+        OUT = OUT / "en"
+        MANIFEST = OUT / "manifest.json"
     load_env()
     key = os.environ.get("ELEVENLABS_API_KEY", "")
-    voice = args.voice or os.environ.get("ELEVENLABS_VOICE_ID", "")
+    voice = args.voice or (
+        os.environ.get("ELEVENLABS_VOICE_ID_EN") if LANG == "en" else None
+    ) or os.environ.get("ELEVENLABS_VOICE_ID", "")
 
     if args.list_voices:
         if not key:

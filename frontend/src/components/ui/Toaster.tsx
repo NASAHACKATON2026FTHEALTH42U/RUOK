@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { setSoundEnabled, soundEnabled } from '../../realtime/notify'
 import { useToasts, type Toast, type ToastTone } from '../../store/toasts'
+import { useT } from '../../i18n/t'
 import { Icon } from './Icon'
 import { STATUS_COLORS } from './status'
 
@@ -17,6 +18,7 @@ const AUTO_DISMISS_MS = 6000
 const ACTION = 'inline-flex min-h-8 items-center px-3 text-sm focus-visible:outline-2'
 
 function ToastCard({ toast, onClose }: { toast: Toast; onClose: () => void }) {
+  const t = useT()
   const [sound, setSound] = useState(soundEnabled)
 
   useEffect(() => {
@@ -100,7 +102,7 @@ function ToastCard({ toast, onClose }: { toast: Toast; onClose: () => void }) {
                   className={`${ACTION} gap-1.5 border border-env-border text-env-muted hover:border-env-text hover:text-env-text focus-visible:outline-env-primary`}
                 >
                   <Icon name={sound ? 'bell' : 'bell-off'} size={15} />
-                  {sound ? 'Sonido activado' : 'Activar sonido'}
+                  {sound ? t('Sonido activado') : t('Activar sonido')}
                 </button>
               )}
             </div>
@@ -109,7 +111,7 @@ function ToastCard({ toast, onClose }: { toast: Toast; onClose: () => void }) {
         <button
           type="button"
           onClick={onClose}
-          aria-label="Cerrar aviso"
+          aria-label={t('Cerrar aviso')}
           className="-mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center text-env-muted hover:text-env-text focus-visible:outline-2 focus-visible:outline-env-primary"
         >
           <Icon name="close" size={15} />
@@ -129,8 +131,8 @@ export function Toaster() {
   if (toasts.length === 0) return null
   return (
     <div className="pointer-events-none fixed right-4 bottom-[6.5rem] left-4 z-50 flex flex-col items-end gap-2.5 md:bottom-5 md:left-auto">
-      {toasts.map((t) => (
-        <ToastCard key={t.id} toast={t} onClose={() => dismiss(t.id)} />
+      {toasts.map((toast) => (
+        <ToastCard key={toast.id} toast={toast} onClose={() => dismiss(toast.id)} />
       ))}
     </div>
   )

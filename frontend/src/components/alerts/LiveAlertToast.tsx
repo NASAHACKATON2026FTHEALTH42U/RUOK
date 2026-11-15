@@ -1,6 +1,7 @@
 import type { Schema } from '../../api/client'
 import { useEnvironments } from '../../api/useEnvironments'
 import { useAuth } from '../../auth/useAuth'
+import { translate } from '../../i18n/t'
 import { getDevice } from '../../offline/device'
 import { useEvents } from '../../realtime/events'
 import { beep, vibrate } from '../../realtime/notify'
@@ -53,13 +54,17 @@ export function LiveAlertToast() {
         pushToast({
           tone,
           icon: 'mail',
-          label: `Notificación · ${
-            p.level === 'critical' ? 'Importante' : p.level === 'warning' ? 'Aviso' : 'Información'
+          label: `${translate('Notificación')} · ${
+            p.level === 'critical'
+              ? translate('Importante')
+              : p.level === 'warning'
+                ? translate('Aviso')
+                : translate('Información')
           }`,
-          title: p.title || 'Mensaje de control',
+          title: p.title || translate('Mensaje de control'),
           body: p.text,
-          meta: p.from_name ? `De ${p.from_name}` : undefined,
-          actions: [{ label: 'Entendido', primary: true }],
+          meta: p.from_name ? translate('De {name}', { name: p.from_name }) : undefined,
+          actions: [{ label: translate('Entendido'), primary: true }],
           sticky: true,
         })
       } else {
@@ -74,7 +79,11 @@ export function LiveAlertToast() {
           tone: p.severity === 'warning' ? 'warning' : 'critical',
           icon: created ? 'alert' : 'escalate',
           label: [
-            p.severity ? severityStyle(p.severity).label : created ? 'Alerta' : 'Alerta escalada',
+            p.severity
+              ? severityStyle(p.severity).label
+              : created
+                ? translate('Alerta')
+                : translate('Alerta escalada'),
             otherEnv?.name,
           ]
             .filter(Boolean)
@@ -82,9 +91,9 @@ export function LiveAlertToast() {
           // Quien atiende ve siempre quién necesita ayuda (el SOS, en primer lugar).
           title: member
             ? created
-              ? 'Nueva alerta para ti'
-              : 'Tu alerta ha cambiado'
-            : `${p.category === 'emergency' ? 'SOS' : created ? 'Nueva alerta' : 'Alerta escalada'}${
+              ? translate('Nueva alerta para ti')
+              : translate('Tu alerta ha cambiado')
+            : `${p.category === 'emergency' ? 'SOS' : created ? translate('Nueva alerta') : translate('Alerta escalada')}${
                 p.member_name ? ` · ${p.member_name}` : ''
               }`,
           body: member
@@ -97,7 +106,7 @@ export function LiveAlertToast() {
             : [p.category && categoryLabel(p.category), e.summary].filter(Boolean).join(' · '),
           actions: [
             {
-              label: 'Ver',
+              label: translate('Ver'),
               to: alertsRoute,
               primary: true,
               onClick: () => {

@@ -7,9 +7,11 @@ import {
   syncNow,
   useOutboxStore,
 } from '../../offline/outbox'
+import { dateLocale } from '../../i18n/lang'
+import { translate, useT } from '../../i18n/t'
 import { Modal } from './Modal'
 
-/** Qué era cada envío, en palabras. */
+/** Qué era cada envío, en palabras (se traduce al pintarlo). */
 const KIND_LABEL: Record<OutboxEntry['kind'], string> = {
   measurement_batch: 'Mediciones',
   task_completion: 'Tarea completada',
@@ -28,11 +30,11 @@ function reason(entry: OutboxEntry): string {
   try {
     const parsed = JSON.parse(raw) as { detail?: unknown }
     if (typeof parsed.detail === 'string') return parsed.detail
-    if (Array.isArray(parsed.detail)) return 'Datos no válidos para el servidor'
+    if (Array.isArray(parsed.detail)) return translate('Datos no válidos para el servidor')
   } catch {
     // no era JSON
   }
-  return raw || 'El servidor lo ha rechazado'
+  return raw || translate('El servidor lo ha rechazado')
 }
 
 /**
@@ -41,16 +43,19 @@ function reason(entry: OutboxEntry): string {
  * con rechazadas, abre la lista para ver el motivo y reintentarlas o descartarlas.
  */
 export function PendingSyncChip() {
+  const t = useT()
   const { pending, failed, syncing, paused } = useOutboxStore()
   const [open, setOpen] = useState(false)
   if (pending === 0 && failed === 0) return null
 
   const text = syncing
-    ? 'Sincronizando…'
+    ? t('Sincronizando…')
     : paused
-      ? `${pending} pendientes · inicia sesión para enviar`
+      ? t('{n} pendientes · inicia sesión para enviar', { n: pending })
       : pending > 0
-        ? `${pending} ${pending === 1 ? 'pendiente' : 'pendientes'} de sincronizar`
+        ? pending === 1
+          ? t('1 pendiente de sincronizar')
+          : t('{n} pendientes de sincronizar', { n: pending })
         : ''
 
   return (
@@ -60,8 +65,8 @@ export function PendingSyncChip() {
         onClick={() => (failed > 0 ? setOpen(true) : void syncNow(true))}
         title={
           failed > 0
-            ? 'Ver lo rechazado y reintentarlo'
-            : 'Guardado en este dispositivo. Pulsa para reintentar el envío ahora.'
+            ? t('Ver lo rechazado y reintentarlo')
+            : t('Guardado en este dispositivo. Pulsa para reintentar el envío ahora.')
         }
         className={`inline-flex items-center gap-1.5 border bg-env-bg px-2.5 py-1 font-mono text-xs text-env-text hover:border-env-text ${failed > 0 ? 'border-st-warn' : 'border-env-border'}`}
       >
@@ -69,7 +74,7 @@ export function PendingSyncChip() {
         <span role="status">
           {text}
           {failed > 0 &&
-            `${text ? ' · ' : ''}${failed} ${failed === 1 ? 'rechazada' : 'rechazadas'} · ver`}
+            `${text ? ' · ' : ''}${failed === 1 ? t('1 rechazada · ver') : t('{n} rechazadas · ver', { n: failed })}`}
         </span>
       </button>
       {open && <RejectedDialog onClose={() => setOpen(false)} />}
@@ -78,6 +83,7 @@ export function PendingSyncChip() {
 }
 
 function RejectedDialog({ onClose }: { onClose: () => void }) {
+  const t = useT()
   const failed = useOutboxStore((s) => s.failed)
   const [items, setItems] = useState<OutboxEntry[] | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
@@ -106,24 +112,25 @@ function RejectedDialog({ onClose }: { onClose: () => void }) {
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="hud-panel w-full max-w-xl bg-env-surface">
           <h2 id="rejected-title" className="hud-panel-head">
-            Envíos rechazados
+            {t('Envíos rechazados')}
             <button
               type="button"
               onClick={onClose}
-              aria-label="Cerrar"
+              aria-label={t('Cerrar')}
               className="mr-2.5 ml-auto px-2 text-lg leading-none text-env-muted hover:text-env-text"
             >
               ×
             </button>
           </h2>
           <p className="px-4 pt-3 text-sm text-env-muted">
-            El servidor no los aceptó y siguen guardados en este dispositivo. Puedes reintentarlos
-            (por si ya se ha resuelto, p. ej. tras iniciar sesión) o descartarlos.
+            {t(
+              'El servidor no los aceptó y siguen guardados en este dispositivo. Puedes reintentarlos (por si ya se ha resuelto, p. ej. tras iniciar sesión) o descartarlos.',
+            )}
           </p>
           {items === null ? (
             <div className="m-4 h-16 animate-pulse bg-env-bg" aria-busy="true" />
           ) : items.length === 0 ? (
-            <p className="p-4 text-sm">No queda nada rechazado.</p>
+            <p className="p-4 text-sm">{t('No queda nada rechazado.')}</p>
           ) : (
             <ul className="mt-2 max-h-[60dvh] divide-y divide-env-border/60 overflow-y-auto border-t border-env-border/60">
               {items.map((e) => (
@@ -133,9 +140,11 @@ function RejectedDialog({ onClose }: { onClose: () => void }) {
                   style={{ boxShadow: 'inset 3px 0 0 var(--color-st-warn)' }}
                 >
                   <div className="flex items-baseline justify-between gap-3">
-                    <span className="font-medium">{KIND_LABEL[e.kind] ?? e.kind}</span>
+                    <span className="font-medium">
+                      {KIND_LABEL[e.kind] ? t(KIND_LABEL[e.kind]) : e.kind}
+                    </span>
                     <span className="shrink-0 text-xs text-env-muted">
-                      {new Date(e.created_at).toLocaleString('es-ES', {
+                      {new Date(e.created_at).toLocaleString(dateLocale(), {
                         day: '2-digit',
                         month: '2-digit',
                         hour: '2-digit',
@@ -151,7 +160,7 @@ function RejectedDialog({ onClose }: { onClose: () => void }) {
                       onClick={() => void run(e.id, discardEntry)}
                       className="hud-btn !h-10 px-3 disabled:opacity-60"
                     >
-                      Descartar
+                      {t('Descartar')}
                     </button>
                     <button
                       type="button"
@@ -159,7 +168,7 @@ function RejectedDialog({ onClose }: { onClose: () => void }) {
                       onClick={() => void run(e.id, retryEntry)}
                       className="hud-btn hud-btn-primary !h-10 px-3 disabled:opacity-60"
                     >
-                      Reintentar
+                      {t('Reintentar')}
                     </button>
                   </div>
                 </li>

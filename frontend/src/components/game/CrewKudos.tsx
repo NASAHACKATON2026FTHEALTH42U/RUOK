@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Kudos } from '../../api/useGame'
+import { useT } from '../../i18n/t'
 import { cleanKudos, KUDOS_MAX, memberName } from './crew'
 
 interface CrewKudosProps {
@@ -24,6 +25,7 @@ const field =
  * la tripulación, no a una persona: es cooperativo.
  */
 export function CrewKudos({ kudos, members, memberId, canSend, onSend }: CrewKudosProps) {
+  const t = useT()
   const mates = members.filter((m) => m.member_id !== memberId)
   const names = new Map(members.map((m) => [m.member_id, m.name]))
   const [to, setTo] = useState<number | ''>('')
@@ -64,7 +66,7 @@ export function CrewKudos({ kudos, members, memberId, canSend, onSend }: CrewKud
           }}
         >
           <label className="flex flex-col gap-1">
-            <span className="sr-only">Qué le agradeces</span>
+            <span className="sr-only">{t('Qué le agradeces')}</span>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -76,19 +78,19 @@ export function CrewKudos({ kudos, members, memberId, canSend, onSend }: CrewKud
               }}
               maxLength={KUDOS_MAX}
               rows={2}
-              placeholder="Gracias por ayudarme con…"
+              placeholder={t('Gracias por ayudarme con…')}
               className={`${field} min-h-[4.5rem] resize-none py-2.5 leading-snug [field-sizing:content]`}
             />
           </label>
           <div className="flex gap-2">
             <label className="flex min-w-0 flex-1 flex-col">
-              <span className="sr-only">Para</span>
+              <span className="sr-only">{t('Para')}</span>
               <select
                 value={to}
                 onChange={(e) => setTo(e.target.value === '' ? '' : Number(e.target.value))}
                 className={field}
               >
-                <option value="">Para…</option>
+                <option value="">{t('Para…')}</option>
                 {mates.map((m) => (
                   <option key={m.member_id} value={m.member_id}>
                     {m.name}
@@ -101,7 +103,7 @@ export function CrewKudos({ kudos, members, memberId, canSend, onSend }: CrewKud
               disabled={to === '' || !text || busy}
               className="hud-btn hud-btn-primary !h-11 shrink-0 px-4 disabled:opacity-60"
             >
-              {busy ? 'Enviando…' : 'Dar kudos'}
+              {busy ? t('Enviando…') : t('Dar kudos')}
             </button>
           </div>
         </form>
@@ -109,11 +111,11 @@ export function CrewKudos({ kudos, members, memberId, canSend, onSend }: CrewKud
 
       {kudos.length === 0 ? (
         <p className="px-4 py-3 text-sm text-env-muted">
-          Todavía no hay kudos. Estrena tú el tablero.
+          {t('Todavía no hay kudos. Estrena tú el tablero.')}
         </p>
       ) : (
         <ul
-          aria-label="Kudos recientes"
+          aria-label={t('Kudos recientes')}
           className="grid min-h-0 flex-1 auto-rows-min gap-2 overflow-y-auto p-3 [scrollbar-color:var(--env-border)_transparent] sm:grid-cols-2"
         >
           {kudos.slice(0, SHOWN).map((k) => (
@@ -122,12 +124,14 @@ export function CrewKudos({ kudos, members, memberId, canSend, onSend }: CrewKud
               className="flex flex-col gap-1.5 border border-env-border/70 bg-env-bg/60 px-3.5 py-3"
               style={{ boxShadow: 'inset 3px 0 0 var(--env-primary)' }}
             >
-              <p className="text-[0.9375rem] leading-snug break-words">«{k.message}»</p>
+              <p className="text-[0.9375rem] leading-snug break-words">
+                {t('«{message}»', { message: k.message })}
+              </p>
               <p className="text-xs text-env-muted">
                 <span className="text-env-text">
                   {memberName(k.from_member_id, names, memberId)}
                 </span>{' '}
-                para{' '}
+                {t('para')}{' '}
                 <span className="text-env-text">{memberName(k.to_member_id, names, memberId)}</span>
               </p>
             </li>

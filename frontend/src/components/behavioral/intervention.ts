@@ -4,6 +4,8 @@
  * - "Inhala 4 s" / "Camina 2 min" → paso con cuenta atrás.
  * - "Repite 4 ciclos" → repite los pasos anteriores hasta completar 4 ciclos.
  * - Cualquier otro texto → paso manual ("Siguiente").
+ * En inglés (FE-38, el servidor traduce los pasos) se reconocen igual: "Inhale 4 s",
+ * "Walk 2 minutes", "Repeat 4 cycles".
  */
 
 export interface GuidedStep {
@@ -14,8 +16,9 @@ export interface GuidedStep {
   cycle: { n: number; of: number } | null
 }
 
-const DURATION = /(\d+(?:[.,]\d+)?)\s*(s|seg|segundos?|min|minutos?)\b/i
-const REPEAT = /^\s*repite\b.*?(\d+)\s*(ciclos?|veces)/i
+const DURATION =
+  /(\d+(?:[.,]\d+)?)\s*(s|seg|segundos?|secs?|seconds?|min|minutos?|mins|minutes?)\b/i
+const REPEAT = /^\s*(?:repite|repeat)\b.*?(\d+)\s*(ciclos?|veces|cycles?|times|rounds?)/i
 
 /** Segundos que indica el texto de un paso ("Inhala 4 s" → 4, "Camina 2 min" → 120), o null. */
 export function stepSeconds(text: string): number | null {
@@ -53,8 +56,9 @@ export type BreathPhase = 'in' | 'hold' | 'out'
 /** Fase de respiración del paso, para animar el círculo (inhala → crece, exhala → encoge). */
 export function breathPhase(text: string): BreathPhase | null {
   const t = text.trim().toLowerCase()
-  if (/^(inhala|inspira)/.test(t)) return 'in'
-  if (/^(exhala|espira|suelta el aire)/.test(t)) return 'out'
-  if (/^(mantén|manten|aguanta|retén)/.test(t)) return 'hold'
+  if (/^(inhala|inspira|inhale|breathe in)/.test(t)) return 'in'
+  if (/^(exhala|espira|suelta el aire|exhale|breathe out|let the air out)/.test(t)) return 'out'
+  if (/^(mantén|manten|aguanta|retén|hold|keep (your|the) (lungs|breath|air))/.test(t))
+    return 'hold'
   return null
 }

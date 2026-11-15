@@ -22,7 +22,7 @@ from typing import Any
 from sqlalchemy import func
 from sqlmodel import Session, col, select
 
-from app import clock, models
+from app import clock, i18n, models
 from app.schemas import CrewMission, Kudos
 from app.services import environments, routine
 
@@ -82,16 +82,18 @@ def give_kudos(
             and existing.message == message
         )
         if not same:
-            raise Conflict("Ese id ya se usó con otro kudos")
+            raise Conflict(i18n.tr("Ese id ya se usó con otro kudos"))
         return _kudos_schema(existing)
 
     receiver = session.get(models.Member, to_member_id)
     if receiver is None or receiver.env_id != sender.env_id:
-        raise InvalidKudos("El destinatario tiene que ser de tu mismo entorno")
+        raise InvalidKudos(i18n.tr("El destinatario tiene que ser de tu mismo entorno"))
     if receiver.id == sender.id:
-        raise InvalidKudos("No puedes darte un kudos a ti mismo")
+        raise InvalidKudos(i18n.tr("No puedes darte un kudos a ti mismo"))
     if len(message) > cfg["max_message_length"]:
-        raise InvalidKudos(f"Mensaje de más de {cfg['max_message_length']} caracteres")
+        raise InvalidKudos(
+            i18n.tr("Mensaje de más de {n} caracteres", n=cfg["max_message_length"])
+        )
 
     day_start = clock.now().replace(hour=0, minute=0, second=0, microsecond=0)
     today_count = session.exec(
@@ -100,7 +102,7 @@ def give_kudos(
         .where(models.Kudos.from_member_id == sender.id, col(models.Kudos.created_at) >= day_start)
     ).one()
     if today_count >= cfg["max_per_day"]:
-        raise Conflict(f"Máximo {cfg['max_per_day']} kudos al día")
+        raise Conflict(i18n.tr("Máximo {n} kudos al día", n=cfg["max_per_day"]))
 
     row = models.Kudos(
         id=str(kudos_id),
@@ -132,7 +134,7 @@ def list_kudos(session: Session, env_id: str, limit: int = 50) -> list[Kudos]:
 def _mission(cfg: dict[str, Any], day: date, members: list[int]) -> CrewMission:
     return CrewMission(
         id=cfg["id"],
-        title=cfg["title"],
+        title=i18n.localized("crew_game", cfg["id"], {"title": cfg["title"]})["title"],
         points=cfg["points"],
         min_participants=cfg["min_participants"],
         date=day,
@@ -158,11 +160,11 @@ def join_mission(
     session: Session, member: models.Member, mission_id: str, join_id: uuid.UUID
 ) -> CrewMission:
     if mission_id not in {m["id"] for m in _missions_of(member.env_id)}:
-        raise UnknownMission(f"Misión desconocida en este entorno: {mission_id}")
+        raise UnknownMission(i18n.tr("Misión desconocida en este entorno: {id}", id=mission_id))
     day = routine.today()
     taken = session.get(models.MissionParticipation, str(join_id))
     if taken is not None and (taken.member_id, taken.mission_id) != (member.id, mission_id):
-        raise Conflict("Ese id ya se usó para otra participación")
+        raise Conflict(i18n.tr("Ese id ya se usó para otra participación"))
     already = session.exec(
         select(models.MissionParticipation).where(
             models.MissionParticipation.date == day,

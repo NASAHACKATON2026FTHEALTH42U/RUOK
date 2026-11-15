@@ -2,6 +2,7 @@ import { serverNow } from '../../api/client'
 import { useAssessment } from '../../api/useAssessment'
 import type { MemberSummary } from '../../api/useMembers'
 import { capitalize } from '../../environments/useVocab'
+import { useT } from '../../i18n/t'
 import { formatAgo } from '../../lib/time'
 import type { Vocabulary } from '../../store/environment'
 import { initials } from '../auth/demoUsers'
@@ -42,6 +43,7 @@ const MAX_FLAGGED = 3
  * alertas abiertas y los sistemas que hay que mirar. Clic → su detalle (vista individual).
  */
 export function MemberSummaryCard({ member: m, density, vocabulary, names, onOpen }: CardProps) {
+  const t = useT()
   const assessment = useAssessment(m.id)
   const now = serverNow()
   const state = memberDisplayState(m)
@@ -49,8 +51,8 @@ export function MemberSummaryCard({ member: m, density, vocabulary, names, onOpe
   const position = vocabulary[m.position]
   const digest = assessment.state === 'ready' ? systemsDigest(assessment.data.systems) : null
   const measured = m.last_measurement_at
-    ? `Medido ${formatAgo(m.last_measurement_at, now)}`
-    : 'Sin mediciones'
+    ? t('Medido {ago}', { ago: formatAgo(m.last_measurement_at, now) })
+    : t('Sin mediciones')
   const seen = m.last_seen_at ? formatAgo(m.last_seen_at, now) : null
   const sys = (id: string) => names.systems.get(id) ?? id
   const list = (ids: string[]) => ids.map(sys).join(', ')
@@ -67,7 +69,9 @@ export function MemberSummaryCard({ member: m, density, vocabulary, names, onOpe
   const alerts = m.open_alerts > 0 && (
     <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-env-text">
       <StatusIcon glyph="alert" color={STATUS_COLORS.warning} size={14} />
-      {m.open_alerts === 1 ? '1 alerta abierta' : `${m.open_alerts} alertas abiertas`}
+      {m.open_alerts === 1
+        ? t('1 alerta abierta')
+        : t('{n} alertas abiertas', { n: m.open_alerts })}
     </span>
   )
 
@@ -94,7 +98,7 @@ export function MemberSummaryCard({ member: m, density, vocabulary, names, onOpe
           <span className="inline-flex min-w-0 items-center gap-1.5 text-env-text">
             {flagIcon(digest.flagged[0])}
             <span className="truncate">{sys(digest.flagged[0].systemId)}</span>
-            <span className="sr-only">: {statusStyle(digest.flagged[0].status).label}</span>
+            <span className="sr-only">: {t(statusStyle(digest.flagged[0].status).label)}</span>
             {digest.flagged.length > 1 && (
               <span className="text-env-muted">+{digest.flagged.length - 1}</span>
             )}
@@ -119,8 +123,8 @@ export function MemberSummaryCard({ member: m, density, vocabulary, names, onOpe
           )}
         </span>
         <span className="status-word shrink-0 text-right uppercase md:text-lg" data-state={state}>
-          <span className="sr-only">Estado: </span>
-          {statusStyle(state).label}
+          <span className="sr-only">{t('Estado:')} </span>
+          {t(statusStyle(state).label)}
         </span>
       </span>
       <span className="flex min-h-0 flex-1 flex-col gap-3 px-4 py-3">
@@ -129,7 +133,7 @@ export function MemberSummaryCard({ member: m, density, vocabulary, names, onOpe
             <StatusBadge
               status={live}
               size="sm"
-              label={`${statusStyle(live).label}${seen ? ` · ${seen}` : ''}`}
+              label={`${t(statusStyle(live).label)}${seen ? ` · ${seen}` : ''}`}
             />
           )}
           <span className="text-env-muted">{measured}</span>
@@ -138,12 +142,14 @@ export function MemberSummaryCard({ member: m, density, vocabulary, names, onOpe
 
         <span className="flex min-h-0 flex-col gap-2">
           {/* Sin datos frescos, lo que se ve es el último dato: se dice. */}
-          <span className="hud-label">{live ? 'Sistemas · último dato' : 'Sistemas'}</span>
+          <span className="hud-label">{live ? t('Sistemas · último dato') : t('Sistemas')}</span>
           {assessment.state === 'loading' && (
             <span className="h-8 w-2/3 animate-pulse bg-env-border/40" aria-hidden />
           )}
           {assessment.state === 'error' && (
-            <span className="text-sm text-env-muted">No se ha podido cargar la evaluación.</span>
+            <span className="text-sm text-env-muted">
+              {t('No se ha podido cargar la evaluación.')}
+            </span>
           )}
           {digest && digest.flagged.length > 0 && (
             <span className="flex flex-col divide-y divide-env-border/50 border-y border-env-border/50">
@@ -151,7 +157,7 @@ export function MemberSummaryCard({ member: m, density, vocabulary, names, onOpe
                 <span key={f.systemId} className="flex min-w-0 items-center gap-2 py-1.5 text-sm">
                   {flagIcon(f)}
                   <span className="shrink-0 font-medium">{sys(f.systemId)}</span>
-                  <span className="sr-only">: {statusStyle(f.status).label}</span>
+                  <span className="sr-only">: {t(statusStyle(f.status).label)}</span>
                   {f.indicator && (
                     <span className="min-w-0 truncate text-env-muted">
                       {names.indicators.get(f.indicator.id) ?? f.indicator.id}{' '}
@@ -165,7 +171,7 @@ export function MemberSummaryCard({ member: m, density, vocabulary, names, onOpe
               ))}
               {digest.flagged.length > MAX_FLAGGED && (
                 <span className="py-1.5 text-sm text-env-muted">
-                  y {digest.flagged.length - MAX_FLAGGED} más
+                  {t('y {n} más', { n: digest.flagged.length - MAX_FLAGGED })}
                 </span>
               )}
             </span>
@@ -180,7 +186,7 @@ export function MemberSummaryCard({ member: m, density, vocabulary, names, onOpe
               />
               <span className="line-clamp-2 min-w-0">
                 <span className="text-env-text">
-                  {live ? 'En rango (último dato)' : 'En rango'}:
+                  {live ? t('En rango (último dato):') : t('En rango:')}
                 </span>{' '}
                 {list(digest.inRange)}
               </span>
@@ -190,7 +196,7 @@ export function MemberSummaryCard({ member: m, density, vocabulary, names, onOpe
             <span className="flex min-w-0 items-start gap-2 text-sm text-env-muted">
               <StatusIcon glyph="question" color={STATUS_COLORS.unknown} size={14} />
               <span className="line-clamp-2 min-w-0">
-                <span className="text-env-text">Sin datos:</span> {list(digest.noData)}
+                <span className="text-env-text">{t('Sin datos:')}</span> {list(digest.noData)}
               </span>
             </span>
           )}
@@ -200,7 +206,7 @@ export function MemberSummaryCard({ member: m, density, vocabulary, names, onOpe
         aria-hidden
         className="mt-auto border-t border-env-border/60 px-4 py-2 text-right font-mono text-[0.75rem] tracking-[0.14em] text-env-muted uppercase group-hover:text-env-primary"
       >
-        Ver detalle →
+        {t('Ver detalle')} →
       </span>
     </span>
   )
@@ -233,6 +239,7 @@ export function MemberRow({
   vocabulary: Vocabulary
   onOpen: (memberId: number) => void
 }) {
+  const t = useT()
   const now = serverNow()
   const state = memberDisplayState(m)
   const live = livenessState(m.liveness)
@@ -255,13 +262,15 @@ export function MemberRow({
       </span>
       <span className="w-28 shrink-0 text-xs text-env-muted">
         {m.open_alerts > 0
-          ? `${m.open_alerts} ${m.open_alerts === 1 ? 'alerta' : 'alertas'}`
-          : 'Sin alertas'}
+          ? m.open_alerts === 1
+            ? t('1 alerta')
+            : t('{n} alertas', { n: m.open_alerts })
+          : t('Sin alertas')}
       </span>
       <span className="w-36 shrink-0 text-xs text-env-muted">
         {m.last_measurement_at
-          ? `Medido ${formatAgo(m.last_measurement_at, now)}`
-          : 'Sin mediciones'}
+          ? t('Medido {ago}', { ago: formatAgo(m.last_measurement_at, now) })
+          : t('Sin mediciones')}
       </span>
     </button>
   )

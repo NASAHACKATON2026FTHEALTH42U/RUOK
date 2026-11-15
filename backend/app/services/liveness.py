@@ -28,7 +28,7 @@ from typing import Any
 
 from sqlmodel import Session, col, select
 
-from app import clock, models
+from app import clock, i18n, models
 from app.schemas.common import Activity, EventType, Liveness, Status
 from app.schemas.members import HeartbeatIn, HeartbeatResult
 from app.services import devices, environments, events
@@ -144,7 +144,8 @@ def record_heartbeat(
         "device_id": body.device_id,
     }
     events.emit(
-        session, EventType.heartbeat, **common, summary=f"Heartbeat de {member.name}",
+        session, EventType.heartbeat, **common,
+        summary=i18n.tr("Heartbeat de {name}", name=member.name),
         payload={"activity": member.last_activity, "pending_outbox": body.pending_outbox},
     )
     if previous != Liveness.active:

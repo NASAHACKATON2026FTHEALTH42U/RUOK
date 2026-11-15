@@ -4,6 +4,7 @@ import type { Alert } from '../../api/useAlerts'
 import type { Assessment } from '../../api/useAssessment'
 import type { Intervention } from '../../api/useInterventions'
 import { useAuth } from '../../auth/useAuth'
+import { translate, useT } from '../../i18n/t'
 import { formatAgo } from '../../lib/time'
 import {
   ackAlert,
@@ -24,6 +25,7 @@ import {
   countdown,
   escalationTargets,
   eventStyle,
+  isCategoryLabel,
   severityStyle,
   statusLabel,
 } from './alertFormat'
@@ -76,6 +78,7 @@ export function AlertDetail({
   allowReply = false,
   showDetails = true,
 }: AlertDetailProps) {
+  const t = useT()
   const now = useServerClock()
   const { can, role } = useAuth()
   const sev = severityStyle(alert.severity)
@@ -115,9 +118,11 @@ export function AlertDetail({
         pushToast({
           tone: 'success',
           icon: 'check',
-          label: 'Protocolo completado',
-          title: `«${i.title}»`,
-          body: 'Guardado en el dispositivo: los puntos y el aviso llegarán al sincronizar.',
+          label: translate('Protocolo completado'),
+          title: translate('«{title}»', { title: i.title }),
+          body: translate(
+            'Guardado en el dispositivo: los puntos y el aviso llegarán al sincronizar.',
+          ),
         })
       })
       .catch(() => {
@@ -138,9 +143,11 @@ export function AlertDetail({
     } catch (err) {
       setError(
         err instanceof NetworkError
-          ? 'Sin conexión con el servidor de a bordo: no se ha podido. Avisa de viva voz.'
+          ? translate(
+              'Sin conexión con el servidor de a bordo: no se ha podido. Avisa de viva voz.',
+            )
           : err instanceof ApiError
-            ? `El servidor lo ha rechazado: ${err.message}`
+            ? translate('El servidor lo ha rechazado: {error}', { error: err.message })
             : String(err),
       )
     } finally {
@@ -164,8 +171,8 @@ export function AlertDetail({
                 {statusLabel(alert.status)}
               </span>
               <span className="text-sm text-env-muted">
-                {alert.origin === 'auto' ? 'Automática' : 'Manual'}
-                {!alert.authenticated && ' · sin sesión'}
+                {alert.origin === 'auto' ? t('Automática') : t('Manual')}
+                {!alert.authenticated && ` · ${t('sin sesión')}`}
               </span>
             </div>
             <h2 id={`alert-${alert.id}`} className="text-xl font-semibold">
@@ -173,18 +180,22 @@ export function AlertDetail({
             </h2>
             {!showDetails ? (
               <p className="border border-env-border p-2 text-sm text-env-muted">
-                <Icon name="lock" size={15} /> Alerta conductual activa. El detalle es confidencial
-                (solo el canal de apoyo psicológico), salvo emergencia o si el member decide
-                compartirlo.
+                <Icon name="lock" size={15} />{' '}
+                {t(
+                  'Alerta conductual activa. El detalle es confidencial (solo el canal de apoyo psicológico), salvo emergencia o si el member decide compartirlo.',
+                )}
               </p>
             ) : (
               alert.message &&
-              alert.message !== categoryLabel(alert.category) && <p>{alert.message}</p>
+              !isCategoryLabel(alert.message, alert.category) && <p>{alert.message}</p>
             )}
             <p className="text-sm text-env-muted">
-              Destino:{' '}
+              {t('Destino:')}{' '}
               <strong className="text-env-text">{roleLabel(alert.target_role, vocabulary)}</strong>{' '}
-              (nivel {alert.level}) · creada {formatAgo(alert.created_at, new Date(now))}
+              {t('(nivel {n}) · creada {ago}', {
+                n: alert.level,
+                ago: formatAgo(alert.created_at, new Date(now)),
+              })}
             </p>
           </header>
 
@@ -193,14 +204,19 @@ export function AlertDetail({
             <section className="border border-env-border bg-env-surface p-3" aria-live="polite">
               {alert.delivered_at ? (
                 <p>
-                  ✓ Entregada a {roleLabel(alert.target_role, vocabulary)} a las{' '}
-                  {hhmm(alert.delivered_at)}.
+                  ✓{' '}
+                  {t('Entregada a {role} a las {time}.', {
+                    role: roleLabel(alert.target_role, vocabulary),
+                    time: hhmm(alert.delivered_at),
+                  })}
                 </p>
               ) : alert.delivery_mode === 'realtime' || alert.delay_s < 5 ? (
-                <p>Contactando con {roleLabel(alert.target_role, vocabulary)}…</p>
+                <p>
+                  {t('Contactando con {role}…', { role: roleLabel(alert.target_role, vocabulary) })}
+                </p>
               ) : left ? (
                 <p>
-                  Llegará a {roleLabel(alert.target_role, vocabulary)} en{' '}
+                  {t('Llegará a {role} en', { role: roleLabel(alert.target_role, vocabulary) })}{' '}
                   <strong className="text-2xl tabular-nums">{left}</strong>
                   {alert.eta && (
                     <span className="text-sm text-env-muted"> (ETA {hhmm(alert.eta)})</span>
@@ -208,8 +224,9 @@ export function AlertDetail({
                 </p>
               ) : (
                 <p>
-                  Debería haber llegado (ETA {alert.eta ? hhmm(alert.eta) : '—'}); pendiente de
-                  confirmación del enlace.
+                  {t('Debería haber llegado (ETA {eta}); pendiente de confirmación del enlace.', {
+                    eta: alert.eta ? hhmm(alert.eta) : '—',
+                  })}
                 </p>
               )}
             </section>
@@ -219,10 +236,12 @@ export function AlertDetail({
           {!resolved && showProtocol && autonomous && (
             <section>
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h3 className="font-semibold">Protocolo autónomo (mientras llega la respuesta)</h3>
+                <h3 className="font-semibold">
+                  {t('Protocolo autónomo (mientras llega la respuesta)')}
+                </h3>
                 {/* Voz guía (FE-37): el mensaje y los pasos, en voz alta (manos libres). */}
                 <ListenButton
-                  label="Escuchar protocolo"
+                  label={t('Escuchar protocolo')}
                   texts={[
                     ...(system?.escalation.message ? [system.escalation.message] : []),
                     ...steps.flatMap((i) => i.steps),
@@ -269,7 +288,7 @@ export function AlertDetail({
                         >
                           {all || finished.has(i.id) ? (
                             <span className="inline-flex items-center gap-1">
-                              <Icon name="check" size={14} /> Hecho
+                              <Icon name="check" size={14} /> {t('Hecho')}
                             </span>
                           ) : (
                             `${count}/${i.steps.length}`
@@ -307,13 +326,16 @@ export function AlertDetail({
               </div>
               {role === 'member' && steps.length > 0 && (
                 <p className="mt-2 text-xs text-env-muted">
-                  Al marcar todos los pasos de un protocolo, suma puntos y queda anotado en la
-                  alerta.
+                  {t(
+                    'Al marcar todos los pasos de un protocolo, suma puntos y queda anotado en la alerta.',
+                  )}
                 </p>
               )}
               {!system?.escalation.message && steps.length === 0 && (
                 <p className="mt-1 text-sm text-env-muted">
-                  No hay pasos guardados para este sistema. Sigue las indicaciones de tu panel.
+                  {t(
+                    'No hay pasos guardados para este sistema. Sigue las indicaciones de tu panel.',
+                  )}
                 </p>
               )}
             </section>
@@ -325,7 +347,7 @@ export function AlertDetail({
               {can('action:escalate-alerts') && targets.length > 0 && (
                 <>
                   <label className="text-sm">
-                    <span className="block text-env-muted">Escalar a</span>
+                    <span className="block text-env-muted">{t('Escalar a')}</span>
                     <select
                       value={target}
                       onChange={(e) => setTarget(e.target.value)}
@@ -334,7 +356,7 @@ export function AlertDetail({
                       {targets.map((r, i) => (
                         <option key={r} value={r}>
                           {roleLabel(r, vocabulary)}
-                          {i === 0 ? ' (siguiente nivel)' : ''}
+                          {i === 0 ? ` ${t('(siguiente nivel)')}` : ''}
                         </option>
                       ))}
                     </select>
@@ -345,7 +367,7 @@ export function AlertDetail({
                     onClick={() => act(() => escalateAlert(alert.id, target || null))}
                     className="min-h-11 bg-env-primary px-4 font-medium text-env-primary-text disabled:opacity-60"
                   >
-                    ⇡ Escalar
+                    ⇡ {t('Escalar')}
                   </button>
                 </>
               )}
@@ -356,7 +378,7 @@ export function AlertDetail({
                   onClick={() => act(() => ackAlert(alert.id, actor))}
                   className="min-h-11 border border-env-border px-4 py-2 hover:border-env-text disabled:opacity-60"
                 >
-                  Marcar como recibida
+                  {t('Marcar como recibida')}
                 </button>
               )}
               {can('action:ack-alerts') && (
@@ -366,7 +388,7 @@ export function AlertDetail({
                   onClick={() => act(() => resolveAlert(alert.id, actor), 'resolved')}
                   className="min-h-11 border border-env-border px-4 py-2 hover:border-env-text disabled:opacity-60"
                 >
-                  Resolver
+                  {t('Resolver')}
                 </button>
               )}
             </section>
@@ -382,11 +404,11 @@ export function AlertDetail({
               }}
             >
               <label className="flex-1 text-sm">
-                <span className="sr-only">Respuesta</span>
+                <span className="sr-only">{t('Respuesta')}</span>
                 <input
                   value={reply}
                   onChange={(e) => setReply(e.target.value)}
-                  placeholder="Responder (llega a bordo con el retardo del enlace)"
+                  placeholder={t('Responder (llega a bordo con el retardo del enlace)')}
                   className="w-full border border-env-border bg-env-surface px-3 py-2 text-env-text"
                 />
               </label>
@@ -395,7 +417,7 @@ export function AlertDetail({
                 disabled={busy || !reply.trim()}
                 className="bg-env-primary px-4 py-2 font-medium text-env-primary-text disabled:opacity-60"
               >
-                Enviar
+                {t('Enviar')}
               </button>
             </form>
           )}
@@ -408,7 +430,7 @@ export function AlertDetail({
           {/* Línea de tiempo */}
         </div>
         <section className="@[38rem]:border-l @[38rem]:border-env-border/60 @[38rem]:pl-6">
-          <h3 className="hud-label">Línea de tiempo</h3>
+          <h3 className="hud-label">{t('Línea de tiempo')}</h3>
           <ol className="mt-3 ml-2.5 border-l border-env-border">
             {alert.events.map((e, i) => {
               const st = eventStyle(e.type)
@@ -418,7 +440,7 @@ export function AlertDetail({
                   : typeof e.payload?.note === 'string'
                     ? e.payload.note
                     : typeof e.payload?.eta_s === 'number'
-                      ? `retardo ${Math.round(e.payload.eta_s / 60)} min`
+                      ? t('retardo {n} min', { n: Math.round(e.payload.eta_s / 60) })
                       : typeof e.payload?.target_role === 'string'
                         ? `→ ${roleLabel(e.payload.target_role, vocabulary)}`
                         : ''

@@ -7,6 +7,10 @@ comprueba que los dos ficheros y environments.json son coherentes entre sí.
 Se lee una sola vez y queda en memoria; la app lo valida al arrancar.
 
 Los rangos son provisionales hasta CNT-01: ver la tabla de docs/sources.md.
+
+Idioma (FE-38): las funciones `localized_*` dan la copia en el idioma de la petición, con las
+capas de app/data/i18n/en/. Solo para lo que sale por la API: el motor de evaluación y los
+umbrales usan siempre los objetos originales (en caché, sin modificar).
 """
 
 import re
@@ -16,7 +20,15 @@ from pathlib import Path
 
 from pydantic import TypeAdapter
 
-from app.schemas import BodySystem, Environment, Indicator, Intervention, Protocol
+from app import i18n
+from app.schemas import (
+    Assessment,
+    BodySystem,
+    Environment,
+    Indicator,
+    Intervention,
+    Protocol,
+)
 from app.services import environments
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -129,6 +141,30 @@ def list_systems() -> list[BodySystem]:
     return list(_catalog()[1])
 
 
+def localized_indicator(item: Indicator) -> Indicator:
+    """Copia del indicador en el idioma de la petición (FE-38)."""
+    return i18n.localized("indicators", item.id, item)
+
+
+def localized_system(item: BodySystem) -> BodySystem:
+    """Copia del sistema del cuerpo en el idioma de la petición (FE-38)."""
+    return i18n.localized("systems", item.id, item)
+
+
+def localized_unit(indicator_id: str, unit: str) -> str:
+    """Unidad visible de una medición o evaluación en el idioma de la petición (FE-38).
+
+    Las mediciones guardan la unidad del catálogo en español (``lpm``); solo se traduce si
+    coincide con ella (una unidad distinta se deja como está).
+    """
+    if i18n.lang() == "es":
+        return unit
+    ind = get_indicator(indicator_id)
+    if ind is None or unit != ind.unit:
+        return unit
+    return localized_indicator(ind).unit
+
+
 # ── Intervenciones (BE-21) ─────────────────────────────────────────────
 
 
@@ -198,6 +234,11 @@ def get_intervention(intervention_id: str) -> Intervention | None:
     return next((i for i in _interventions() if i.id == intervention_id), None)
 
 
+def localized_intervention(item: Intervention) -> Intervention:
+    """Copia de la intervención en el idioma de la petición (FE-38)."""
+    return i18n.localized("interventions", item.id, item)
+
+
 # ── Protocolos (CNT-02) ────────────────────────────────────────────────
 
 
@@ -257,3 +298,46 @@ def list_protocols() -> list[Protocol]:
 def protocol_for_alert(category: str) -> Protocol | None:
     """El protocolo de una categoría de alerta (p. ej. ``no_contact``), o None."""
     return next((p for p in _protocols() if p.alert_category == category), None)
+
+
+def localized_protocol(item: Protocol) -> Protocol:
+    """Copia del protocolo en el idioma de la petición (FE-38). Para quien saque sus textos
+    por la API (evaluación, alertas): la selección por sistema y estado usa el original."""
+    return i18n.localized("protocols", item.id, item)
+
+
+def localized_assessment(assessment: Assessment) -> Assessment:
+    """Copia del assessment con sus textos en el idioma de la petición (FE-38).
+
+    El motor evalúa con los catálogos en español; aquí se traducen, ya a la salida, las
+    recomendaciones (de protocolo o de intervención), el mensaje del escalado y las unidades.
+    No añade ni quita nada (la privacidad conductual ya se ha aplicado antes).
+    """
+    if i18n.lang() == "es":
+        return assessment
+    originals = {p.id: p for p in _protocols()}
+    protocols = {pid: localized_protocol(p) for pid, p in originals.items()}
+    rec_texts = {r.id: r.text for p in protocols.values() for r in p.recommendations}
+    systems = []
+    for system in assessment.systems:
+        recs = []
+        for rec in system.recommendations:
+            text = rec_texts.get(rec.id)
+            item = get_intervention(rec.intervention_id) if rec.intervention_id else None
+            if text is None and item is not None and rec.id == f"rec_{item.id}":
+                text = f"{localized_intervention(item).title} ({item.duration_min} min)"
+            recs.append(rec.model_copy(update={"text": text}) if text else rec)
+        escalation = system.escalation
+        pid = escalation.protocol_id or ""
+        if pid in originals and escalation.message == originals[pid].message:
+            escalation = escalation.model_copy(update={"message": protocols[pid].message})
+        indicators = [
+            i.model_copy(update={"unit": localized_unit(i.indicator_id, i.unit)})
+            for i in system.indicators
+        ]
+        systems.append(
+            system.model_copy(
+                update={"recommendations": recs, "escalation": escalation, "indicators": indicators}
+            )
+        )
+    return assessment.model_copy(update={"systems": systems})

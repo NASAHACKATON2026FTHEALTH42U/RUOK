@@ -4,6 +4,8 @@
  * presentan.
  */
 
+import { translate } from '../../i18n/t'
+
 export interface KudosLike {
   id: string
   from_member_id: number
@@ -36,19 +38,24 @@ export function memberName(
   names: ReadonlyMap<number, string>,
   meId: number | null,
 ): string {
-  if (id === meId) return 'tú'
-  return names.get(id) ?? 'alguien'
+  if (id === meId) return translate('tú')
+  return names.get(id) ?? translate('alguien')
 }
 
 /** Estado de una misión para el member activo: si está apuntado, cuántos faltan y el texto. */
 export function missionStatus(mission: CrewMissionLike, meId: number | null) {
   const joined = meId !== null && mission.participants.includes(meId)
   const missing = Math.max(0, mission.min_participants - mission.participants.length)
-  const count = `${mission.participants.length}/${mission.min_participants} apuntados`
+  const vars = {
+    joined: mission.participants.length,
+    min: mission.min_participants,
+    missing,
+    points: mission.points,
+  }
   const label = mission.completed
-    ? `Completada · +${mission.points} puntos para todos`
+    ? translate('Completada · +{points} puntos para todos', vars)
     : missing === 1
-      ? `${count} · falta 1`
-      : `${count} · faltan ${missing}`
+      ? translate('{joined}/{min} apuntados · falta 1', vars)
+      : translate('{joined}/{min} apuntados · faltan {missing}', vars)
   return { joined, missing, label }
 }

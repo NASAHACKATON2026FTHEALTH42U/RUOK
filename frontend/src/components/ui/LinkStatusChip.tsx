@@ -2,6 +2,7 @@ import { useLink } from '../../api/useLink'
 import { useAuth } from '../../auth/useAuth'
 import { useVocab } from '../../environments/useVocab'
 import { useEnvironmentStore } from '../../store/environment'
+import { useT } from '../../i18n/t'
 import { describeLink } from './link'
 
 /** Cada cuánto se consulta el enlace (hasta que llegue el tiempo real, FE-29). */
@@ -15,6 +16,7 @@ const REFRESH_MS = 5_000
  * no está "en línea".
  */
 export function LinkStatusChip({ quiet = false }: { quiet?: boolean }) {
+  const t = useT()
   const envId = useEnvironmentStore((s) => s.envId)
   const { ground, crew } = useVocab()
   const { role } = useAuth()
@@ -34,20 +36,18 @@ export function LinkStatusChip({ quiet = false }: { quiet?: boolean }) {
     // el título y para lectores de pantalla.
     <span
       role="status"
-      title={`Enlace con ${other}: ${d.long}`}
+      title={t('Enlace con {other}: {detail}', { other, detail: d.long })}
       className={`inline-flex max-w-full items-center gap-1.5 border px-2 py-1 font-mono text-xs whitespace-nowrap ${
         los ? 'border-env-text font-semibold' : 'border-env-border'
       } bg-env-bg text-env-text`}
     >
       <span aria-hidden>{d.icon}</span>
-      <span className="text-env-muted">Enlace</span>
+      <span className="text-env-muted">{t('Enlace')}</span>
       <span aria-hidden className="text-env-muted">
         ·
       </span>
       <span className="truncate">{d.short}</span>
-      <span className="sr-only">
-        : con {other}, {d.long}
-      </span>
+      <span className="sr-only">{t(': con {other}, {detail}', { other, detail: d.long })}</span>
     </span>
   )
 }

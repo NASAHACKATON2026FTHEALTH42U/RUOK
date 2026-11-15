@@ -4,6 +4,7 @@ import { newId } from '../api/newId'
 import { backoffMs, classify, isDue } from './backoff'
 import { getDb, type OutboxEntry } from './db'
 import { getDevice } from './device'
+import { translate } from '../i18n/t'
 
 /**
  * Outbox offline (FE-11, docs/data-model.md §2). TODA escritura de la app pasa por aquí:
@@ -217,10 +218,13 @@ async function send(
         }
       }
       default:
-        return { status: 400, error: `Tipo de entrada sin envío implementado: ${entry.kind}` }
+        return {
+          status: 400,
+          error: translate('Tipo de entrada sin envío implementado: {kind}', { kind: entry.kind }),
+        }
     }
   } catch (err) {
-    if (err instanceof NetworkError) return { status: 0, error: 'Sin conexión' }
+    if (err instanceof NetworkError) return { status: 0, error: translate('Sin conexión') }
     return { status: 0, error: String(err) }
   }
 }
@@ -280,7 +284,11 @@ async function runSync(force: boolean): Promise<void> {
         await onDone(entry, r.data)
         results.set(entry.id, r.data)
       } else if (outcome === 'pause') {
-        await db.put('outbox', { ...entry, status: 'pending', last_error: 'Sesión caducada (401)' })
+        await db.put('outbox', {
+          ...entry,
+          status: 'pending',
+          last_error: translate('Sesión caducada (401)'),
+        })
         useOutboxStore.setState({ paused: true })
         break
       } else {
@@ -373,7 +381,9 @@ async function submit<T>(
     const r = await send(entry)
     if (classify(r.status) === 'done') return { status: 'sent', result: r.data as T }
     throw new Error(
-      'Este navegador no permite guardar datos en el dispositivo (¿modo privado?) y no hay conexión con el servidor: no se ha podido guardar. Avisa de viva voz si es urgente.',
+      translate(
+        'Este navegador no permite guardar datos en el dispositivo (¿modo privado?) y no hay conexión con el servidor: no se ha podido guardar. Avisa de viva voz si es urgente.',
+      ),
     )
   }
   await local(db)
@@ -542,7 +552,7 @@ async function throwIfRejected(id: string): Promise<void> {
   if (entry?.status !== 'failed') return
   await db.delete('outbox', id)
   await refreshCounts()
-  let detail = entry.last_error ?? 'El servidor lo ha rechazado'
+  let detail = entry.last_error ?? translate('El servidor lo ha rechazado')
   try {
     const parsed = JSON.parse(detail) as { detail?: unknown }
     if (typeof parsed.detail === 'string') detail = parsed.detail

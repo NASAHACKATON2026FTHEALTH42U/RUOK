@@ -5,6 +5,8 @@
  * que medirse otra vez o seguir las recomendaciones no sirve de nada.
  */
 import type { Alert } from '../../api/useAlerts'
+import { dateLocale } from '../../i18n/lang'
+import { translate } from '../../i18n/t'
 
 const OPEN: readonly string[] = ['open', 'escalated', 'acknowledged']
 /** Gravedad comparable (0 = lo peor); la emergencia cuenta como crítico. */
@@ -16,7 +18,7 @@ const RANK: Record<string, number> = {
   normal: 3,
 }
 
-/** Palabra de cada estado o gravedad, en minúscula, para las frases. */
+/** Palabra de cada estado o gravedad, en minúscula, para las frases (en español: `stateWord`). */
 export const STATE_WORD: Record<string, string> = {
   emergency: 'emergencia',
   critical: 'crítico',
@@ -31,7 +33,10 @@ export interface CaseFeedback {
   text: string
 }
 
-const cap = (s: string) => s.charAt(0).toLocaleUpperCase('es') + s.slice(1)
+/** Palabra de un estado o gravedad en el idioma activo. */
+const stateWord = (s: string) => (STATE_WORD[s] ? translate(STATE_WORD[s]) : s)
+
+const cap = (s: string) => s.charAt(0).toLocaleUpperCase(dateLocale()) + s.slice(1)
 
 /**
  * El aviso abierto más grave de un sistema y qué decir: si el sistema está mejor que cuando saltó
@@ -59,17 +64,29 @@ export function caseFeedback(
   if (improved)
     return {
       tone: 'improving',
-      title: 'Nos alegra ver que estás mejor',
-      text: `${names.system} ha pasado de ${STATE_WORD[alert.severity] ?? alert.severity} a ${
-        STATE_WORD[current] ?? current
-      }. ${cap(who)} sigue revisando tu caso y cerrará el aviso cuando lo confirme.`,
+      title: translate('Nos alegra ver que estás mejor'),
+      text: translate(
+        '{system} ha pasado de {from} a {to}. {Who} sigue revisando tu caso y cerrará el aviso cuando lo confirme.',
+        {
+          system: names.system,
+          from: stateWord(alert.severity),
+          to: stateWord(current),
+          Who: cap(who),
+        },
+      ),
     }
   return {
     tone: 'reviewing',
-    title: 'Estamos revisando tu caso',
+    title: translate('Estamos revisando tu caso'),
     text:
       alert.status === 'acknowledged'
-        ? `${cap(who)} ha visto tu aviso y lo está revisando. Sigue las recomendaciones; si empeoras, pulsa SOS.`
-        : `Tu aviso ha llegado a ${who}. Sigue las recomendaciones y vuelve a medirte; si empeoras, pulsa SOS.`,
+        ? translate(
+            '{Who} ha visto tu aviso y lo está revisando. Sigue las recomendaciones; si empeoras, pulsa SOS.',
+            { Who: cap(who) },
+          )
+        : translate(
+            'Tu aviso ha llegado a {who}. Sigue las recomendaciones y vuelve a medirte; si empeoras, pulsa SOS.',
+            { who },
+          ),
   }
 }

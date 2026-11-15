@@ -1,0 +1,37 @@
+{
+  "cardiovascular": {
+    "name": "Cardiovascular",
+    "function": "Pumps blood and carries oxygen to the whole body.",
+    "space_effects": "Fluid shift towards the head and cardiac deconditioning."
+  },
+  "musculoskeletal": {
+    "name": "Musculoskeletal",
+    "function": "Bones and muscles: support and movement.",
+    "space_effects": "Without gravity, 1–1.5% of bone density is lost each month, along with muscle mass."
+  },
+  "immune": {
+    "name": "Immune",
+    "function": "Defends the body against infections.",
+    "space_effects": "Stress and confinement alter the immune response."
+  },
+  "metabolic": {
+    "name": "Metabolism and nutrition",
+    "function": "Turns food into energy.",
+    "space_effects": "A limited diet and hormonal changes affect metabolism."
+  },
+  "neuro_behavioral": {
+    "name": "Neurobehavioral",
+    "function": "Mood, sleep, cognition and relationships with the crew.",
+    "space_effects": "Isolation, confinement and disrupted sleep affect mood."
+  },
+  "eyes": {
+    "name": "Eyes (SANS)",
+    "function": "Vision.",
+    "space_effects": "Fluid pressure towards the head can deform the eyeball (SANS)."
+  },
+  "radiation": {
+    "name": "Radiation (whole body)",
+    "function": "Cumulative exposure to space radiation.",
+    "space_effects": "Outside Earth's magnetosphere the dose rises sharply."
+  }
+}

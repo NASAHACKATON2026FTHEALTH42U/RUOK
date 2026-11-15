@@ -4,6 +4,7 @@ import { useInterventions } from '../../api/useInterventions'
 import { useSession } from '../../auth/session'
 import { useAuth } from '../../auth/useAuth'
 import { useVocab } from '../../environments/useVocab'
+import { useT } from '../../i18n/t'
 import { useEnvironmentStore } from '../../store/environment'
 import { SosDialog } from './SosDialog'
 import { SosEmergency } from './SosEmergency'
@@ -48,6 +49,7 @@ export function SosButton({
 }: {
   variant?: 'sidebar' | 'tab' | 'inline' | 'floating'
 } = {}) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const close = useCallback(() => setOpen(false), [])
   const ctx = useHelpContext()
@@ -58,7 +60,7 @@ export function SosButton({
     type: 'button' as const,
     onClick: () => setOpen(true),
     'aria-haspopup': 'dialog' as const,
-    'aria-label': 'SOS: pedir ayuda de emergencia',
+    'aria-label': t('SOS: pedir ayuda de emergencia'),
   }
 
   return (
@@ -112,6 +114,7 @@ export function SosButton({
  * (`SosDialog`), para lo que no es una emergencia. Solo con sesión y con permiso de SOS.
  */
 export function NoticeButton({ className = '' }: { className?: string }) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const close = useCallback(() => setOpen(false), [])
   const ctx = useHelpContext()
@@ -125,7 +128,7 @@ export function NoticeButton({ className = '' }: { className?: string }) {
         className={`inline-flex min-h-11 items-center gap-2  border border-env-border px-3.5 text-sm font-medium hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${className}`}
       >
         <Icon name="mail" size={17} />
-        Enviar aviso a control
+        {t('Enviar aviso a control')}
       </button>
       {open && (
         <SosDialog

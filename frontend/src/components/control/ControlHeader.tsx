@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useVocab } from '../../environments/useVocab'
+import { useT } from '../../i18n/t'
 import { useControlScope } from './useControlScope'
 
 /**
@@ -19,6 +20,7 @@ export function ControlHeader({
   /** La sección se puede centrar en un member (si no, es siempre de todo el entorno). */
   memberScope?: boolean
 }) {
+  const t = useT()
   const { env, memberId, memberName } = useControlScope()
   const vocab = useVocab()
 
@@ -26,10 +28,10 @@ export function ControlHeader({
     <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
       <div className="min-w-0">
         <p className="hud-label">
-          {env ? env.name : 'Sin entorno'}
+          {env ? env.name : t('Sin entorno')}
           {memberScope &&
             env &&
-            ` · ${memberId !== null ? memberName(memberId) : `todo ${vocab.crew}`}`}
+            ` · ${memberId !== null ? memberName(memberId) : t('todo {crew}', { crew: vocab.crew })}`}
         </p>
         <h1 className="mt-0.5 text-2xl font-semibold">{title}</h1>
         {subtitle && <p className="mt-1 text-sm text-env-muted">{subtitle}</p>}

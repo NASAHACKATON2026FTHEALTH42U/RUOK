@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react'
 import { ApiError, NetworkError, type Schema } from '../../api/client'
 import { newId } from '../../api/newId'
 import { capitalize } from '../../environments/useVocab'
+import { currentLang } from '../../i18n/lang'
+import { translate, useT } from '../../i18n/t'
 import { sendAlert, sendNotification } from '../../offline/outbox'
 import { categoryLabel, severityStyle } from '../alerts/alertFormat'
 import { defaultTarget, roleLabel } from '../alerts/sos'
@@ -72,7 +74,7 @@ export function Segmented<T extends string>({
 }
 
 function errorText(err: unknown): string {
-  if (err instanceof NetworkError) return 'sin conexión con el servidor'
+  if (err instanceof NetworkError) return translate('sin conexión con el servidor')
   if (err instanceof ApiError) return err.message
   return String(err)
 }
@@ -97,6 +99,7 @@ export function OperatorMessageForm({
   vocabulary: Record<string, string>
   onSent?: () => void
 }) {
+  const t = useT()
   const [mode, setMode] = useState<'alert' | 'notification'>('alert')
   const [category, setCategory] = useState<Category>('emergency')
   const [severity, setSeverity] = useState<Severity>('emergency')
@@ -136,58 +139,68 @@ export function OperatorMessageForm({
         }
       }
       const who =
-        targets.length === 1 ? targets[0].name : `todo ${vocabulary.crew} (${targets.length})`
+        targets.length === 1
+          ? targets[0].name
+          : t('todo {crew} ({n})', { crew: vocabulary.crew, n: targets.length })
       setLog(
         queued
-          ? `⇡ Sin conexión: la alerta para ${who} se enviará sola al volver`
-          : `✓ ${mode === 'alert' ? 'Alerta enviada' : 'Notificación enviada'} a ${who}`,
+          ? `⇡ ${t('Sin conexión: la alerta para {who} se enviará sola al volver', { who })}`
+          : `✓ ${
+              mode === 'alert'
+                ? t('Alerta enviada a {who}', { who })
+                : t('Notificación enviada a {who}', { who })
+            }`,
       )
       // Confirmación a la vista (el aviso de verdad salta en el dispositivo de quien lo recibe).
       if (!queued)
         pushToast({
           tone: 'success',
           icon: mode === 'alert' ? 'alert' : 'mail',
-          label: 'Enviado',
-          title: mode === 'alert' ? 'Alerta enviada' : 'Notificación enviada',
-          body: `A ${who}${text.trim() ? `: «${text.trim()}»` : ''}`,
-          meta: 'Salta al momento en los dispositivos con su sesión abierta.',
+          label: t('Enviado'),
+          title: mode === 'alert' ? t('Alerta enviada') : t('Notificación enviada'),
+          body: text.trim()
+            ? t('A {who}: «{text}»', { who, text: text.trim() })
+            : t('A {who}', { who }),
+          meta: t('Salta al momento en los dispositivos con su sesión abierta.'),
         })
       setText('')
       setTitle('')
       onSent?.()
     } catch (err) {
-      setLog(`⚠ No se ha podido enviar: ${errorText(err)}`)
+      setLog(`⚠ ${t('No se ha podido enviar: {error}', { error: errorText(err) })}`)
     } finally {
       setBusy(false)
     }
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-4" aria-label="Alerta o notificación">
+    <form onSubmit={submit} className="flex flex-col gap-4" aria-label={t('Alerta o notificación')}>
       <Segmented
-        label="Tipo"
+        label={t('Tipo')}
         value={mode}
         onChange={setMode}
         options={[
-          { id: 'alert', label: 'Alerta' },
-          { id: 'notification', label: 'Notificación' },
+          { id: 'alert', label: t('Alerta') },
+          { id: 'notification', label: t('Notificación') },
         ]}
       />
 
       <p className="text-sm">
-        <span className="hud-label mr-2">Para</span>
+        <span className="hud-label mr-2">{t('Para')}</span>
         {memberId !== null
           ? (targets[0]?.name ?? '…')
-          : `todo ${vocabulary.crew} (${recipients.length})`}
+          : t('todo {crew} ({n})', { crew: vocabulary.crew, n: recipients.length })}
         <span className="block text-xs text-env-muted">
-          Se cambia en el selector de {vocabulary.member} de la barra lateral.
+          {t('Se cambia en el selector de {member} de la barra lateral.', {
+            member: vocabulary.member,
+          })}
         </span>
       </p>
 
       {mode === 'alert' ? (
         <div className="grid gap-4 sm:grid-cols-2">
           <label className={FIELD}>
-            <span className="hud-label">Categoría</span>
+            <span className="hud-label">{t('Categoría')}</span>
             <select
               value={category}
               onChange={(e) => {
@@ -205,7 +218,8 @@ export function OperatorMessageForm({
             </select>
           </label>
           <label className={FIELD}>
-            <span className="hud-label">Gravedad</span>
+            {/* «Gravedad» es también la gravedad del entorno (Gravity): aquí, la de la alerta. */}
+            <span className="hud-label">{currentLang() === 'en' ? 'Severity' : 'Gravedad'}</span>
             <select
               value={severity}
               onChange={(e) => setSeverity(e.target.value as Severity)}
@@ -219,11 +233,11 @@ export function OperatorMessageForm({
             </select>
           </label>
           <label className={`${FIELD} sm:col-span-2`}>
-            <span className="hud-label">Destino</span>
+            <span className="hud-label">{t('Destino')}</span>
             <select value={target} onChange={(e) => setTarget(e.target.value)} className={INPUT}>
               {ladder.map((r, i) => (
                 <option key={r} value={r}>
-                  Nivel {i}: {roleLabel(r, vocabulary)}
+                  {t('Nivel {i}: {role}', { i, role: roleLabel(r, vocabulary) })}
                 </option>
               ))}
             </select>
@@ -232,24 +246,31 @@ export function OperatorMessageForm({
       ) : (
         <div className="grid gap-4">
           <label className={FIELD}>
-            <span className="hud-label">Título (opcional)</span>
+            <span className="hud-label">{t('Título (opcional)')}</span>
             <input
               value={title}
               maxLength={80}
               onChange={(e) => setTitle(e.target.value)}
               className={INPUT}
-              placeholder="Aviso de control"
+              placeholder={t('Aviso de control')}
             />
           </label>
           <div className={FIELD}>
-            <span className="hud-label">Nivel</span>
-            <Segmented label="Nivel" value={level} onChange={setLevel} options={LEVELS} />
+            <span className="hud-label">{t('Nivel')}</span>
+            <Segmented
+              label={t('Nivel')}
+              value={level}
+              onChange={setLevel}
+              options={LEVELS.map((l) => ({ id: l.id, label: t(l.label) }))}
+            />
           </div>
         </div>
       )}
 
       <label className={FIELD}>
-        <span className="hud-label">{mode === 'alert' ? 'Mensaje (opcional)' : 'Mensaje'}</span>
+        <span className="hud-label">
+          {mode === 'alert' ? t('Mensaje (opcional)') : t('Mensaje')}
+        </span>
         <AutoTextarea
           required={mode === 'notification'}
           rows={3}
@@ -259,8 +280,8 @@ export function OperatorMessageForm({
           className={`${INPUT} py-2.5 leading-snug`}
           placeholder={
             mode === 'alert'
-              ? 'Qué pasa (lo verá en el detalle de la alerta)'
-              : 'Lo verá al momento en su móvil'
+              ? t('Qué pasa (lo verá en el detalle de la alerta)')
+              : t('Lo verá al momento en su móvil')
           }
         />
       </label>
@@ -271,7 +292,7 @@ export function OperatorMessageForm({
           disabled={busy || targets.length === 0}
           className="hud-btn hud-btn-primary disabled:opacity-50"
         >
-          {busy ? 'Enviando…' : mode === 'alert' ? 'Enviar alerta' : 'Enviar notificación'}
+          {busy ? t('Enviando…') : mode === 'alert' ? t('Enviar alerta') : t('Enviar notificación')}
         </button>
         <p role="status" className="text-sm text-env-muted">
           {log}
@@ -283,6 +304,7 @@ export function OperatorMessageForm({
 
 /** Botón «Nueva alerta o notificación» con el formulario en un modal (cabeceras del operador). */
 export function OperatorMessageButton(props: Parameters<typeof OperatorMessageForm>[0]) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   return (
     <>
@@ -292,18 +314,18 @@ export function OperatorMessageButton(props: Parameters<typeof OperatorMessageFo
         className="hud-btn hud-btn-primary !h-auto min-h-10 px-4"
       >
         <Icon name="plus" size={16} className="mr-1.5" />
-        Alerta o notificación
+        {t('Alerta o notificación')}
       </button>
       {open && (
         <Modal onClose={() => setOpen(false)} labelledBy="operator-message-title">
           <div className="flex min-h-full items-center justify-center p-4">
             <div className="hud-panel w-full max-w-xl bg-env-surface">
               <h2 id="operator-message-title" className="hud-panel-head">
-                Nueva alerta o notificación
+                {t('Nueva alerta o notificación')}
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  aria-label="Cerrar"
+                  aria-label={t('Cerrar')}
                   className="mr-2.5 ml-auto px-2 text-lg leading-none text-env-muted hover:text-env-text"
                 >
                   ×

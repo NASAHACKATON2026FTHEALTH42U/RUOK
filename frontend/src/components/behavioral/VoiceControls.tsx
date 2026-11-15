@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useT } from '../../i18n/t'
 import { unlockAudio } from './soundscapes'
 import { setVoicePref, useVoiceAvailable, useVoicePref } from './useVoice'
 import { VOICE_NOTE } from './voice'
@@ -40,6 +41,7 @@ export function VoiceToggle({
   onToggle?: (on: boolean) => void
 }) {
   const on = useVoicePref()
+  const t = useT()
   return (
     <button
       type="button"
@@ -50,7 +52,7 @@ export function VoiceToggle({
         setVoicePref(!on)
         onToggle?.(!on)
       }}
-      title={`Voz guía. ${VOICE_NOTE}`}
+      title={`${t('Voz guía')}. ${t(VOICE_NOTE)}`}
       className={`inline-flex shrink-0 items-center gap-2  border ${FOCUS} ${
         compact ? 'size-11 justify-center' : 'min-h-11 px-3 text-sm'
       } ${
@@ -60,7 +62,7 @@ export function VoiceToggle({
       }`}
     >
       <SpeakerIcon muted={!on} />
-      {compact ? <span className="sr-only">Voz guía</span> : 'Voz guía'}
+      {compact ? <span className="sr-only">{t('Voz guía')}</span> : t('Voz guía')}
     </button>
   )
 }
@@ -86,6 +88,7 @@ export function ListenButton({
   className = '',
 }: ListenButtonProps) {
   const available = useVoiceAvailable(texts)
+  const t = useT()
   const [playing, setPlaying] = useState(false)
   // La lectura que lanzó este botón: al desmontarlo se para solo si sigue siendo la que suena.
   const mine = useRef<number | null>(null)
@@ -119,13 +122,15 @@ export function ListenButton({
     })
   }
 
-  const text = playing ? 'Parar' : label
+  // `label` suele llegar en español (la clave): si ya viene traducido, `t` lo deja igual.
+  const shown = t(label)
+  const text = playing ? t('Parar') : shown
   return (
     <button
       type="button"
       onClick={toggle}
       aria-pressed={playing}
-      title={`${playing ? 'Parar la voz' : label}. ${VOICE_NOTE}`}
+      title={`${playing ? t('Parar la voz') : shown}. ${t(VOICE_NOTE)}`}
       className={`inline-flex shrink-0 items-center gap-1.5  border text-sm ${FOCUS} ${
         iconOnly ? 'size-11 justify-center' : 'min-h-11 px-3'
       } ${
@@ -149,6 +154,7 @@ export function VoiceNote({
   className?: string
 }) {
   const available = useVoiceAvailable(texts)
+  const t = useT()
   if (!available) return null
-  return <p className={`text-xs text-env-muted ${className}`}>{VOICE_NOTE}</p>
+  return <p className={`text-xs text-env-muted ${className}`}>{t(VOICE_NOTE)}</p>
 }

@@ -13,7 +13,7 @@ from datetime import datetime
 
 from sqlmodel import Session, col, select
 
-from app import clock, models
+from app import clock, i18n, models
 from app.schemas.common import DeviceKind, EventType
 from app.services import events
 
@@ -68,7 +68,7 @@ def touch(
     session.add(device)
 
     if is_new:
-        who = user.display_name if user is not None else "sin sesión"
+        who = user.display_name if user is not None else i18n.tr("sin sesión")
         events.emit(
             session,
             EventType.device_registered,
@@ -76,7 +76,7 @@ def touch(
             member_id=user.member_id if user is not None else None,
             user_id=user.id if user is not None else None,
             device_id=device.id,
-            summary=f"Nuevo dispositivo ({device.kind}) de {who}",
+            summary=i18n.tr("Nuevo dispositivo ({kind}) de {who}", kind=device.kind, who=who),
             payload={"kind": device.kind, "ip": device.ip},
         )
     return device

@@ -16,12 +16,14 @@ import {
   shortDisplayName,
 } from '../components/auth/demoUsers'
 import { useVocab } from '../environments/useVocab'
+import { LANGS, useLangStore, type Lang } from '../i18n/lang'
+import { useT } from '../i18n/t'
 import { useEnvironmentStore } from '../store/environment'
 
 /** Lista vacía estable mientras carga el catálogo (no cambia de identidad en cada render). */
 const NO_ENVS: Schema<'Environment'>[] = []
 
-/** Grupo de cada rol que no es member, debajo de su nombre en la lista de la demo. */
+/** Grupo de cada rol que no es member, debajo de su nombre en la lista de la demo (se traduce al pintarlo). */
 const ROLE_GROUP: Partial<Record<string, string>> = {
   medic: 'atención sanitaria',
   commander: 'mando',
@@ -43,6 +45,7 @@ const ROLE_GROUP: Partial<Record<string, string>> = {
  *   demo y la ayuda a la derecha.
  */
 export default function Login() {
+  const t = useT()
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const previous = useSession((s) => s.user)
@@ -52,6 +55,8 @@ export default function Login() {
   const envList = envs.state === 'ready' ? envs.data : NO_ENVS
   const envName = envList.find((e) => e.id === envId)?.name
   const selectEnvironment = useEnvironmentStore((s) => s.selectEnvironment)
+  const lang = useLangStore((s) => s.lang)
+  const setLang = useLangStore((s) => s.setLang)
   const [username, setUsername] = useState(previous?.username ?? '')
   const [secret, setSecret] = useState('')
   const [error, setError] = useState<LoginError | null>(null)
@@ -90,6 +95,13 @@ export default function Login() {
 
   return (
     <div className="hud-grid flex min-h-full flex-col">
+      {/* Fondo vivo (decorativo): franjas de luz por la rejilla, barrido vertical y halo. */}
+      <div aria-hidden className="grid-fx">
+        <span className="grid-fx-band grid-fx-login" />
+        <span className="grid-fx-band grid-fx-login-slow" />
+        <span className="grid-fx-scan" />
+      </div>
+      <div aria-hidden className="login-glow" />
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-3.5 pt-4 pb-4 md:max-w-xl md:px-6 lg:max-w-5xl lg:justify-center lg:py-8">
         {/* Rejilla con áreas: en móvil, una columna (marca, acceso, entorno y usuarios, y el SOS
             abajo del todo). En escritorio, la marca centrada arriba y dos bloques que empiezan y
@@ -99,17 +111,20 @@ export default function Login() {
           <div className="flex flex-col items-center text-center [grid-area:head]">
             <RuokRings />
             <h1 className="mt-1 text-[1.875rem] leading-tight font-light lg:text-[2.125rem]">
-              Hola de nuevo, <span className="text-env-primary">{vocab.member}.</span>
+              {t('Hola de nuevo,')} <span className="text-env-primary">{vocab.member}.</span>
             </h1>
-            <p className="mt-0.5 text-sm text-env-muted">Inicia sesión en el sistema de a bordo.</p>
+            <p className="mt-0.5 text-sm text-env-muted">
+              {t('Inicia sesión en el sistema de a bordo.')}
+            </p>
           </div>
 
           {/* Acceso */}
           <div className="flex flex-col gap-3 [grid-area:form]">
             {expired && (
               <p role="status" className="hud-panel p-3 text-sm">
-                Tu sesión ha caducado. Vuelve a entrar: lo que tengas pendiente en este dispositivo
-                se enviará después, no se ha perdido nada.
+                {t(
+                  'Tu sesión ha caducado. Vuelve a entrar: lo que tengas pendiente en este dispositivo se enviará después, no se ha perdido nada.',
+                )}
               </p>
             )}
 
@@ -120,10 +135,10 @@ export default function Login() {
                 void enter(username.trim(), secret)
               }}
             >
-              <div className="hud-head">Acceso</div>
+              <div className="hud-head">{t('Acceso')}</div>
               <div className="flex flex-col gap-3 px-3.5 pt-3 pb-3.5">
                 <label className="flex flex-col gap-1.5">
-                  <span className="hud-label">Usuario</span>
+                  <span className="hud-label">{t('Usuario')}</span>
                   <input
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -134,7 +149,7 @@ export default function Login() {
                   />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="hud-label">Contraseña</span>
+                  <span className="hud-label">{t('Contraseña')}</span>
                   <input
                     type="password"
                     value={secret}
@@ -148,11 +163,11 @@ export default function Login() {
                   <p role="alert" className="text-sm">
                     ⚠ {error.message}
                     {error.kind === 'offline' &&
-                      ' Si es una emergencia, pulsa SOS: funciona sin sesión.'}
+                      ` ${t('Si es una emergencia, pulsa SOS: funciona sin sesión.')}`}
                   </p>
                 )}
                 <button type="submit" disabled={busy} className="hud-btn hud-btn-primary w-full">
-                  {busy ? 'Entrando…' : 'Entrar'}
+                  {busy ? t('Entrando…') : t('Entrar')}
                 </button>
               </div>
             </form>
@@ -160,25 +175,43 @@ export default function Login() {
 
           {/* Entorno y usuarios demo (en escritorio, el panel de usuarios llega hasta abajo) */}
           <div className="flex flex-col gap-3 [grid-area:side] lg:[&>section]:flex-1">
-            {envList.length > 0 && (
-              <label className="hud-panel flex items-center gap-3 py-1.5 pr-[22px] pl-3.5">
-                <span className="hud-label shrink-0">Entorno</span>
+            {/* Entorno e idioma (FE-38): mismo panel y estilo; el idioma se puede cambiar antes de
+                entrar. */}
+            <div className="hud-panel divide-y divide-env-border/60">
+              {envList.length > 0 && (
+                <label className="flex items-center gap-3 py-1.5 pr-[22px] pl-3.5">
+                  <span className="hud-label w-20 shrink-0">{t('Entorno')}</span>
+                  <select
+                    value={envId ?? ''}
+                    onChange={(e) => {
+                      const next = envList.find((x) => x.id === e.target.value)
+                      if (next) selectEnvironment(next)
+                    }}
+                    className="hud-input min-w-0 flex-1 !border-0 !bg-transparent !pl-1 !font-sans !text-[0.9375rem]"
+                  >
+                    {envList.map((e) => (
+                      <option key={e.id} value={e.id}>
+                        {e.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <label className="flex items-center gap-3 py-1.5 pr-[22px] pl-3.5">
+                <span className="hud-label w-20 shrink-0">{t('Idioma')}</span>
                 <select
-                  value={envId ?? ''}
-                  onChange={(e) => {
-                    const next = envList.find((x) => x.id === e.target.value)
-                    if (next) selectEnvironment(next)
-                  }}
+                  value={lang}
+                  onChange={(e) => setLang(e.target.value as Lang)}
                   className="hud-input min-w-0 flex-1 !border-0 !bg-transparent !pl-1 !font-sans !text-[0.9375rem]"
                 >
-                  {envList.map((e) => (
-                    <option key={e.id} value={e.id}>
-                      {e.name}
+                  {LANGS.map((l) => (
+                    <option key={l.id} value={l.id} lang={l.id}>
+                      {l.label}
                     </option>
                   ))}
                 </select>
               </label>
-            )}
+            </div>
 
             {/* Plegada en un botón en el escaparate público y en móvil. */}
             {demoUsers.length > 0 && !showDemo && (
@@ -188,12 +221,12 @@ export default function Login() {
                 onClick={() => setShowDemo(true)}
                 className="hud-btn !h-11 w-full"
               >
-                Usuarios demo ({demoUsers.length})
+                {t('Usuarios demo ({n})', { n: demoUsers.length })}
               </button>
             )}
             {demoUsers.length > 0 && showDemo && (
-              <section className="hud-panel" aria-label="Usuarios de la demo">
-                <div className="hud-head">Usuarios</div>
+              <section className="hud-panel" aria-label={t('Usuarios de la demo')}>
+                <div className="hud-head">{t('Usuarios')}</div>
                 <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2">
                   {demoUsers.map((u) => (
                     <li key={u.username} className="border-r border-b border-env-border/60">
@@ -213,7 +246,9 @@ export default function Login() {
                         <span className="hud-label text-[0.6875rem]">
                           {u.role === 'member'
                             ? u.role_label
-                            : (ROLE_GROUP[u.role] ?? u.role_label)}
+                            : ROLE_GROUP[u.role]
+                              ? t(ROLE_GROUP[u.role] as string)
+                              : u.role_label}
                         </span>
                       </button>
                     </li>
@@ -227,8 +262,9 @@ export default function Login() {
           <div className="flex flex-col gap-2.5 self-end pt-1 [grid-area:sos]">
             <SosButton variant="inline" />
             <p className="text-center text-xs leading-snug text-env-muted">
-              Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
-              el criterio de un profesional sanitario.
+              {t('Prototipo de autoevaluación.')}{' '}
+              <strong>{t('No es un dispositivo médico')}</strong>{' '}
+              {t('ni sustituye el criterio de un profesional sanitario.')}
             </p>
           </div>
         </div>

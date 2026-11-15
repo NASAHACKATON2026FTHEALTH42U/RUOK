@@ -3,6 +3,7 @@ import { ApiError, NetworkError, serverNow } from '../../api/client'
 import { newId } from '../../api/newId'
 import type { Environment } from '../../api/useEnvironments'
 import { useIndicators } from '../../api/useIndicators'
+import { useT } from '../../i18n/t'
 import { sendMeasurements } from '../../offline/outbox'
 import type { Recipient } from './OperatorMessageForm'
 import { effectiveRanges, presetValue, type PresetKind, type Ranges } from './simulate'
@@ -30,6 +31,7 @@ export function MeasurementInjector({
   recipients: Recipient[]
   memberId: number | null
 }) {
+  const t = useT()
   const indicators = useIndicators()
   const [indicatorId, setIndicatorId] = useState('')
   const [value, setValue] = useState('')
@@ -60,32 +62,39 @@ export function MeasurementInjector({
           value: Number(value),
           taken_at: serverNow().toISOString(),
           source: 'manual',
-          note: 'Simulada desde el centro de control',
+          note: t('Simulada desde el centro de control'),
         },
       ])
+      const summary = t('{indicator} de {who}: {value} {unit}', {
+        indicator: indicator.name,
+        who,
+        value,
+        unit: indicator.unit,
+      })
       setLog(
         res.status === 'queued'
-          ? '⇡ Sin conexión: se enviará sola al volver'
-          : `✓ ${indicator.name} de ${who}: ${value} ${indicator.unit}`,
+          ? `⇡ ${t('Sin conexión: se enviará sola al volver')}`
+          : `✓ ${summary}`,
       )
       if (res.status !== 'queued')
         pushToast({
           tone: 'success',
           icon: 'pulse',
-          label: 'Enviado',
-          title: 'Medición enviada',
-          body: `${indicator.name} de ${who}: ${value} ${indicator.unit}`,
-          meta: 'El panel se actualiza al momento; si sale de rango, salta la alerta.',
+          label: t('Enviado'),
+          title: t('Medición enviada'),
+          body: summary,
+          meta: t('El panel se actualiza al momento; si sale de rango, salta la alerta.'),
         })
     } catch (err) {
       setLog(
-        `⚠ No se ha podido enviar: ${
-          err instanceof NetworkError
-            ? 'sin conexión con el servidor'
-            : err instanceof ApiError
-              ? err.message
-              : String(err)
-        }`,
+        `⚠ ${t('No se ha podido enviar: {error}', {
+          error:
+            err instanceof NetworkError
+              ? t('sin conexión con el servidor')
+              : err instanceof ApiError
+                ? err.message
+                : String(err),
+        })}`,
       )
     } finally {
       setBusy(false)
@@ -93,19 +102,21 @@ export function MeasurementInjector({
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-4" aria-label="Provocar una medición">
+    <form onSubmit={submit} className="flex flex-col gap-4" aria-label={t('Provocar una medición')}>
       <p className="text-sm">
-        <span className="hud-label mr-2">De</span>
+        <span className="hud-label mr-2">{t('De')}</span>
         {chosen !== null ? (
           recipients.find((r) => r.id === chosen)?.name
         ) : (
           <span className="text-env-muted">
-            elige un {env.vocabulary.member} en el selector de la barra lateral
+            {t('elige un {member} en el selector de la barra lateral', {
+              member: env.vocabulary.member,
+            })}
           </span>
         )}
       </p>
       <label className={FIELD}>
-        <span className="hud-label">Indicador</span>
+        <span className="hud-label">{t('Indicador')}</span>
         <select
           required
           value={indicatorId}
@@ -116,7 +127,7 @@ export function MeasurementInjector({
           className={INPUT}
         >
           <option value="" disabled>
-            {indicators.state === 'loading' ? 'Cargando…' : 'Elige…'}
+            {indicators.state === 'loading' ? t('Cargando…') : t('Elige…')}
           </option>
           {list.map((i) => (
             <option key={i.id} value={i.id}>
@@ -129,7 +140,10 @@ export function MeasurementInjector({
       {/* Siempre a la vista (desactivado hasta elegir indicador): el panel no cambia de tamaño. */}
       <div className="flex flex-wrap items-end gap-3">
         <label className={`${FIELD} w-28`}>
-          <span className="hud-label">Valor{indicator ? ` (${indicator.unit})` : ''}</span>
+          <span className="hud-label">
+            {t('Valor')}
+            {indicator ? ` (${indicator.unit})` : ''}
+          </span>
           <input
             required
             type="number"
@@ -144,7 +158,7 @@ export function MeasurementInjector({
           />
         </label>
         <div className="flex flex-col gap-1.5">
-          <span className="hud-label">Valor de ejemplo</span>
+          <span className="hud-label">{t('Valor de ejemplo')}</span>
           <div className="flex gap-1.5">
             {PRESETS.map((p) => (
               <button
@@ -160,7 +174,7 @@ export function MeasurementInjector({
                 }
                 className="min-h-9 border border-env-border px-2.5 text-sm text-env-muted hover:border-env-text hover:text-env-text disabled:opacity-50 disabled:hover:border-env-border disabled:hover:text-env-muted"
               >
-                {p.label}
+                {t(p.label)}
               </button>
             ))}
           </div>
@@ -168,8 +182,13 @@ export function MeasurementInjector({
       </div>
       <p className="-mt-1 text-xs text-env-muted">
         {indicator && ranges
-          ? `Normal en ${env.name}: ${ranges.normal[0]}–${ranges.normal[1]} ${indicator.unit}`
-          : 'Los valores de ejemplo salen de los rangos del entorno.'}
+          ? t('Normal en {env}: {low}–{high} {unit}', {
+              env: env.name,
+              low: ranges.normal[0],
+              high: ranges.normal[1],
+              unit: indicator.unit,
+            })
+          : t('Los valores de ejemplo salen de los rangos del entorno.')}
       </p>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -178,7 +197,7 @@ export function MeasurementInjector({
           disabled={busy || !indicator || chosen === null || value === ''}
           className="hud-btn hud-btn-primary disabled:opacity-50"
         >
-          {busy ? 'Enviando…' : 'Enviar medición'}
+          {busy ? t('Enviando…') : t('Enviar medición')}
         </button>
         <p role="status" className="text-sm text-env-muted">
           {log}

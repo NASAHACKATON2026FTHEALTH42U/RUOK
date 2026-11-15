@@ -1,3 +1,5 @@
+import { dateLocale } from '../../i18n/lang'
+
 /**
  * Usuarios de demo del login (solo con DEMO_MODE en el servidor; docs/auth-and-roles.md).
  * Lógica pura: qué usuarios se enseñan para un entorno y con qué contraseña entran.
@@ -39,14 +41,15 @@ export function shortDisplayName(displayName: string, envName: string | undefine
 
 /** Iniciales del avatar: sin el tratamiento abreviado ("Cmdr.", "Dra.") ni artículos, hasta dos letras. */
 export function initials(name: string): string {
-  // Sin artículos ni preposiciones: «Supervisión de planta» → SP.
+  // Sin artículos ni preposiciones: «Supervisión de planta» → SP (también en inglés: «Head of
+  // nursing» → HN).
   const words = name
     .split(/\s+/)
-    .filter((w) => w && !w.endsWith('.') && !/^(de|del|la|las|el|los|y|e)$/i.test(w))
+    .filter((w) => w && !w.endsWith('.') && !/^(de|del|la|las|el|los|y|e|of|the|and)$/i.test(w))
   return (
     words
       .slice(0, 2)
-      .map((w) => w[0].toLocaleUpperCase('es'))
+      .map((w) => w[0].toLocaleUpperCase(dateLocale()))
       .join('') || '?'
   )
 }
