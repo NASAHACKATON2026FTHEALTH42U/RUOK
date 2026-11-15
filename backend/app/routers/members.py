@@ -1,6 +1,7 @@
-"""Members, mediciones, evaluación y liveness.
+"""Members, mediciones, evaluación, previsión y liveness.
 
-Reales: members (BE-05), mediciones (BE-06), assessment (BE-11) y heartbeat (BE-12).
+Reales: members (BE-05), mediciones (BE-06), assessment (BE-11), heartbeat (BE-12) y
+previsión (FS-09).
 STUB(FS-02) → BE-16 (R U OK?).
 """
 
@@ -23,6 +24,7 @@ from app.routers.deps import (
 )
 from app.schemas import (
     Assessment,
+    Forecast,
     HeartbeatIn,
     HeartbeatResult,
     Measurement,
@@ -35,8 +37,22 @@ from app.schemas import (
     RuokResult,
     Slug,
 )
-from app.services import alerts, environments, liveness, measurements, members
-from app.services.member_assessment import UnknownEnvironment, assess_member, for_viewer
+from app.services import (
+    alerts,
+    behavioral,
+    catalog,
+    environments,
+    forecast,
+    liveness,
+    measurements,
+    members,
+)
+from app.services.member_assessment import (
+    UnknownEnvironment,
+    assess_member,
+    can_view_behavioral,
+    for_viewer,
+)
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -167,6 +183,37 @@ def get_assessment(
         return for_viewer(session, assess_member(session, m, env), m, user)
     except UnknownEnvironment as exc:
         raise HTTPException(404, f"Entorno desconocido: {exc}") from exc
+
+
+@router.get(
+    "/members/{member_id}/forecast",
+    response_model=Forecast,
+    tags=["assessment"],
+    summary="Previsión estadística de un indicador",
+    description="Valores esperados de los próximos días (modelo de Holt con tendencia "
+    "amortiguada, ajustado con las mediciones del propio member), intervalo de predicción "
+    "del 80 % y primer cambio de estado previsto. Informativa: no crea alertas ni cambia el "
+    "`assessment`. Sin datos suficientes o con el último dato caducado, `status` lo dice y "
+    "no hay puntos. Un indicador desconocido → 404; la previsión de un indicador conductual "
+    "privado solo la ve quien puede ver sus detalles (403 para el resto).",
+)
+def get_forecast(
+    member_id: int,
+    session: SessionDep,
+    user: Annotated[models.UserAccount, Depends(allow_member("history:read"))],
+    indicator_id: Slug,
+    horizon_days: Annotated[
+        int, Query(ge=1, le=forecast.MAX_HORIZON_DAYS)
+    ] = forecast.DEFAULT_HORIZON_DAYS,
+) -> Forecast:
+    m = _member(session, member_id)
+    indicator = catalog.get_indicator(indicator_id)
+    if indicator is None:
+        raise HTTPException(404, f"Indicador desconocido: {indicator_id}")
+    # Privacidad conductual (BE-20 + BE-27): la previsión delata los valores.
+    if behavioral.is_private(indicator_id) and not can_view_behavioral(session, m, user):
+        raise HTTPException(403, "Los detalles conductuales de este member son privados")
+    return forecast.forecast_member(session, m, indicator, horizon_days)
 
 
 @router.post(

@@ -50,6 +50,15 @@ class Trend(StrEnum):
     insufficient_data = "insufficient_data"
 
 
+class ForecastStatus(StrEnum):
+    """Resultado de la previsión (FS-09). Solo `ok` trae puntos: sin datos suficientes
+    o con el último dato caducado no se prevé nada (sin datos = desconocido)."""
+
+    ok = "ok"
+    insufficient_data = "insufficient_data"
+    stale = "stale"
+
+
 class EscalationMode(StrEnum):
     realtime = "realtime"
     delayed = "delayed"

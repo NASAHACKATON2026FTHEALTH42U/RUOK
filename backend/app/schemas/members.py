@@ -10,6 +10,7 @@ from app.schemas.common import (
     ApiModel,
     DeviceKind,
     EscalationMode,
+    ForecastStatus,
     Liveness,
     Range,
     Slug,
@@ -132,6 +133,64 @@ class MeasurementBatchResult(ApiModel):
     accepted: int
     duplicates: int
     assessment: Assessment
+
+
+# ── Previsión (FS-09) ───────────────────────────────────────
+
+
+class ForecastPoint(ApiModel):
+    at: datetime = Field(description="Instante previsto: el último dato más n pasos de la serie")
+    value: float = Field(description="Valor esperado")
+    low: float = Field(description="Límite inferior del intervalo de predicción del 80 %")
+    high: float = Field(description="Límite superior del intervalo de predicción del 80 %")
+    status: Status = Field(description="Estado del valor esperado con los rangos del entorno")
+
+
+class ForecastChange(ApiModel):
+    """Primer punto previsto cuyo estado difiere del actual (a peor o a mejor)."""
+
+    status: Status = Field(description="Estado al que pasaría el indicador")
+    at: datetime
+    in_days: int = Field(ge=1, description="Días desde ahora, redondeados hacia arriba")
+
+
+class Forecast(ApiModel):
+    """Previsión estadística de un indicador. Informativa: no es un diagnóstico, no crea
+    alertas y no cambia el `Assessment`."""
+
+    member_id: int
+    indicator_id: Slug
+    unit: str
+    generated_at: datetime
+    status: ForecastStatus = Field(
+        description="`insufficient_data`: menos de 7 días con mediciones en el tramo reciente. "
+        "`stale`: el último dato ha caducado (`max_age_s`). Solo `ok` trae `points`."
+    )
+    method: str = Field(
+        description="Modelo usado: suavizado exponencial de Holt con tendencia amortiguada",
+        examples=["holt_damped"],
+    )
+    horizon_days: int = Field(
+        ge=1, description="Días previstos desde ahora (como mínimo un paso de la serie)"
+    )
+    step_days: int | None = Field(
+        default=None, description="Cadencia de la serie: 1 = diaria, 7 = semanal"
+    )
+    history_days: int = Field(
+        default=0, ge=0, description="Días con mediciones usados para ajustar el modelo"
+    )
+    current_status: Status = Field(
+        description="Estado del último valor con los rangos del entorno (`unknown` si ha caducado)"
+    )
+    points: list[ForecastPoint] = Field(default_factory=list)
+    change: ForecastChange | None = Field(
+        default=None, description="null si el estado no cambia en el horizonte"
+    )
+    backtest_mae: float | None = Field(
+        default=None,
+        description="Error absoluto medio de la previsión a un paso en los últimos días "
+        "(validación de origen móvil); null si aún no se puede medir",
+    )
 
 
 # ── Liveness ────────────────────────────────────────────────

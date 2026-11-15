@@ -16,7 +16,7 @@ Cada issue pertenece a **un componente**: la parte del sistema que resuelve. Apa
 | 🗄️ **BD** | `comp:db` | Base de datos (modelos SQLModel, tablas, seed) | BE-02, BE-07, BE-35 |
 | 📚 **Config** | `comp:config` | Catálogos y configuración JSON (entornos, indicadores, textos) | BE-03, BE-04, CNT-01, CNT-02, BE-33, CNT-03, BE-34 |
 | 🌐 **API** | `comp:api` | Endpoints REST | BE-05, BE-06 |
-| 🧠 **Motor** | `comp:engine` | Motor de evaluación (umbrales, tendencias) | BE-08, BE-09, BE-10, BE-11, BE-31 |
+| 🧠 **Motor** | `comp:engine` | Motor de evaluación (umbrales, tendencias) | BE-08, BE-09, BE-10, BE-11, BE-31, FS-09 |
 | 🚨 **Alertas** | `comp:alerts` | Alertas y escalado (SOS, consola ground) | BE-14, BE-15, BE-17, FE-13, FE-14, FE-16 |
 | 📡 **Enlace** | `comp:link` | Enlace simulado con Tierra (retardo, LOS) | BE-13, FE-17 |
 | 💓 **Liveness** | `comp:liveness` | Liveness (heartbeat, R U OK?) | BE-12, BE-16, FE-15 |
@@ -58,11 +58,11 @@ Dashboard con cuerpo + semáforo con datos reales y cambio de entorno.
 | ID | Componente | Issue | Área | Prio | Depende de | Bloquea |
 |---|---|---|---|---|---|---|
 | BE-05 | 🌐 API | [#12](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/12) Endpoints de members | backend | P0-blocker | BE-02, BE-03 | BE-07, BE-27 |
-| BE-06 | 🌐 API | [#13](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/13) POST de mediciones por lotes e idempotente, y GET con filtros | backend | P0-blocker | BE-02, BE-04 | BE-07, BE-08, FE-11, BE-27 |
+| BE-06 | 🌐 API | [#13](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/13) POST de mediciones por lotes e idempotente, y GET con filtros | backend | P0-blocker | BE-02, BE-04 | BE-07, BE-08, FE-11, BE-27, FS-09 |
 | BE-07 | 🗄️ BD | [#14](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/14) Seed de 30 días sintéticos y escenarios de demo | backend | P0-blocker | BE-05, BE-06 | BE-25, BE-37 |
 | BE-08 | 🧠 Motor | [#15](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/15) Motor de evaluación por indicador con umbrales y ajustes de entorno | backend | P0-blocker | BE-03, BE-04, BE-06 | BE-09, BE-10 |
 | BE-09 | 🧠 Motor | [#16](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/16) Evaluación agregada por sistema y global con recomendaciones | backend | P0-blocker | BE-08 | BE-11, BE-31 |
-| BE-10 | 🧠 Motor | [#17](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/17) Tendencias y línea base personal | backend | P1 | BE-08 | BE-20 |
+| BE-10 | 🧠 Motor | [#17](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/17) Tendencias y línea base personal | backend | P1 | BE-08 | BE-20, FS-09 |
 | BE-11 | 🧠 Motor | [#18](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/18) GET /members/{id}/assessment?env= | backend | P0-blocker | BE-09 | BE-14, BE-12, BE-30 |
 | FE-02 | 🎨 UI | [#19](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/19) Temas por entorno y store del entorno activo | frontend | P0-blocker | FE-01, FS-04 | FE-03, FE-27, FE-21 |
 | FE-03 | 🎨 UI | [#20](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/20) Página de selección de entorno con transición | frontend | P1 | FE-02 | — |
@@ -101,7 +101,7 @@ MVP integrado: alertas, offline, liveness, gamificación, consola ground.
 | BE-19 | 🎮 Juego | [#37](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/37) Gamificación (puntos, rachas, insignias, leaderboard cooperativo) | backend | P1 | BE-18 | FE-18, BE-23, BE-37 |
 | BE-21 | 🧘 Conductual | [#38](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/38) Catálogo de intervenciones y GET /interventions | backend | P1 | BE-04 | FE-20 |
 | BE-24 | ⚙️ Setup | [#39](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/39) FastAPI sirve el build del front y docker-compose | fullstack | P1 | BE-01, FE-01 | — |
-| FE-09 | 🫀 Dashboard | [#40](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/40) Página de historial (7/30 días) | frontend | P1 | FE-08 | — |
+| FE-09 | 🫀 Dashboard | [#40](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/40) Página de historial (7/30 días) | frontend | P1 | FE-08 | FS-09 |
 | FE-11 | 📴 Offline | [#41](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/41) Outbox offline en IndexedDB y sincronización | frontend | P0-blocker | FE-30, FE-10, BE-06 | FE-12, FE-13 |
 | FE-12 | 📴 Offline | [#42](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/42) Semáforo provisional offline | frontend | P1 | FE-11, FE-04 | — |
 | FE-13 | 🚨 Alertas | [#43](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/43) Botón SOS / Pedir ayuda | frontend | P1 | FS-04, FE-11 | FE-14 |
@@ -142,6 +142,7 @@ P2 y pulido. Lo no terminado a las 11:00 se corta.
 | FE-26 | 🎨 UI | [#58](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/58) Pulido de animaciones, responsive y disclaimer médico | frontend | P1 | FE-07 | — |
 | CNT-04 | 🎤 Pitch | [#59](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/59) Guion, slides, vídeo y envío a Space Apps | content | P1 | — | — |
 | FE-35 | 🎨 UI | [#210](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/210) Admin como cuenta de supervisión (selector de member, alertas del entorno, estados vacíos útiles) | frontend | P2 | FE-27, FE-28, FE-14 | — |
+| FS-09 | 🧠 Motor | [#227](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/227) Previsión de valores esperados por indicador (modelo Holt amortiguado, 100 % local) | fullstack | P2 | BE-10, BE-06, FE-09 | — |
 
 ## Ruta crítica (P0)
 

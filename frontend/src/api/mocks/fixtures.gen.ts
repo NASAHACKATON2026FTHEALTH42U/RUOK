@@ -95,6 +95,10 @@ export const CONTRACT_OPERATIONS = [
   ],
   [
     "GET",
+    "/members/{member_id}/forecast"
+  ],
+  [
+    "GET",
     "/members/{member_id}/game"
   ],
   [
@@ -9196,6 +9200,1063 @@ export const measurements: Schema<'Measurement'>[] = [
     "received_at": "2026-11-14T10:00:00Z"
   }
 ]
+
+export const forecastByIndicator: Record<string, Schema<'Forecast'>> = {
+  "heart_rate": {
+    "member_id": 1,
+    "indicator_id": "heart_rate",
+    "unit": "lpm",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "ok",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "normal",
+    "points": [
+      {
+        "at": "2026-11-15T09:33:30.350583Z",
+        "value": 84.03,
+        "low": 78.28,
+        "high": 89.78,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-16T09:33:30.350583Z",
+        "value": 84.15,
+        "low": 78.36,
+        "high": 89.95,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-17T09:33:30.350583Z",
+        "value": 84.25,
+        "low": 78.4,
+        "high": 90.11,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-18T09:33:30.350583Z",
+        "value": 84.33,
+        "low": 78.41,
+        "high": 90.26,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-19T09:33:30.350583Z",
+        "value": 84.39,
+        "low": 78.39,
+        "high": 90.4,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T09:33:30.350583Z",
+        "value": 84.44,
+        "low": 78.35,
+        "high": 90.54,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-21T09:33:30.350583Z",
+        "value": 84.48,
+        "low": 78.29,
+        "high": 90.68,
+        "status": "normal"
+      }
+    ],
+    "change": null,
+    "backtest_mae": 3.41
+  },
+  "bp_systolic": {
+    "member_id": 1,
+    "indicator_id": "bp_systolic",
+    "unit": "mmHg",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "ok",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "critical",
+    "points": [
+      {
+        "at": "2026-11-15T10:00:00Z",
+        "value": 143.73,
+        "low": 133.91,
+        "high": 153.56,
+        "status": "critical"
+      },
+      {
+        "at": "2026-11-16T10:00:00Z",
+        "value": 145.65,
+        "low": 131.76,
+        "high": 159.55,
+        "status": "critical"
+      },
+      {
+        "at": "2026-11-17T10:00:00Z",
+        "value": 147.19,
+        "low": 130.17,
+        "high": 164.21,
+        "status": "critical"
+      },
+      {
+        "at": "2026-11-18T10:00:00Z",
+        "value": 148.42,
+        "low": 128.77,
+        "high": 168.07,
+        "status": "critical"
+      },
+      {
+        "at": "2026-11-19T10:00:00Z",
+        "value": 149.4,
+        "low": 127.43,
+        "high": 171.37,
+        "status": "critical"
+      },
+      {
+        "at": "2026-11-20T10:00:00Z",
+        "value": 150.19,
+        "low": 126.12,
+        "high": 174.26,
+        "status": "critical"
+      },
+      {
+        "at": "2026-11-21T10:00:00Z",
+        "value": 150.82,
+        "low": 124.82,
+        "high": 176.81,
+        "status": "critical"
+      }
+    ],
+    "change": null,
+    "backtest_mae": 9.75
+  },
+  "bp_diastolic": {
+    "member_id": 1,
+    "indicator_id": "bp_diastolic",
+    "unit": "mmHg",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "ok",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "normal",
+    "points": [
+      {
+        "at": "2026-11-15T08:30:56.022220Z",
+        "value": 68.78,
+        "low": 66.46,
+        "high": 71.1,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-16T08:30:56.022220Z",
+        "value": 68.78,
+        "low": 66.44,
+        "high": 71.11,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-17T08:30:56.022220Z",
+        "value": 68.78,
+        "low": 66.43,
+        "high": 71.13,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-18T08:30:56.022220Z",
+        "value": 68.78,
+        "low": 66.42,
+        "high": 71.14,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-19T08:30:56.022220Z",
+        "value": 68.78,
+        "low": 66.41,
+        "high": 71.15,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T08:30:56.022220Z",
+        "value": 68.78,
+        "low": 66.4,
+        "high": 71.16,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-21T08:30:56.022220Z",
+        "value": 68.78,
+        "low": 66.39,
+        "high": 71.17,
+        "status": "normal"
+      }
+    ],
+    "change": null,
+    "backtest_mae": 1.11
+  },
+  "spo2": {
+    "member_id": 1,
+    "indicator_id": "spo2",
+    "unit": "%",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "ok",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "normal",
+    "points": [
+      {
+        "at": "2026-11-15T04:14:44.945317Z",
+        "value": 97.79,
+        "low": 97.04,
+        "high": 98.53,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-16T04:14:44.945317Z",
+        "value": 97.78,
+        "low": 97.04,
+        "high": 98.53,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-17T04:14:44.945317Z",
+        "value": 97.78,
+        "low": 97.03,
+        "high": 98.54,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-18T04:14:44.945317Z",
+        "value": 97.78,
+        "low": 97.03,
+        "high": 98.54,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-19T04:14:44.945317Z",
+        "value": 97.78,
+        "low": 97.03,
+        "high": 98.54,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T04:14:44.945317Z",
+        "value": 97.78,
+        "low": 97.02,
+        "high": 98.55,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-21T04:14:44.945317Z",
+        "value": 97.78,
+        "low": 97.02,
+        "high": 98.55,
+        "status": "normal"
+      }
+    ],
+    "change": null,
+    "backtest_mae": 0.37
+  },
+  "mood": {
+    "member_id": 1,
+    "indicator_id": "mood",
+    "unit": "1-5",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "ok",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "normal",
+    "points": [
+      {
+        "at": "2026-11-15T05:16:01.516209Z",
+        "value": 3.99,
+        "low": 3.62,
+        "high": 4.36,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-16T05:16:01.516209Z",
+        "value": 3.99,
+        "low": 3.62,
+        "high": 4.36,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-17T05:16:01.516209Z",
+        "value": 3.99,
+        "low": 3.62,
+        "high": 4.36,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-18T05:16:01.516209Z",
+        "value": 3.99,
+        "low": 3.61,
+        "high": 4.37,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-19T05:16:01.516209Z",
+        "value": 3.99,
+        "low": 3.61,
+        "high": 4.37,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T05:16:01.516209Z",
+        "value": 3.99,
+        "low": 3.61,
+        "high": 4.37,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-21T05:16:01.516209Z",
+        "value": 3.99,
+        "low": 3.61,
+        "high": 4.37,
+        "status": "normal"
+      }
+    ],
+    "change": null,
+    "backtest_mae": 0.02
+  },
+  "temperature": {
+    "member_id": 1,
+    "indicator_id": "temperature",
+    "unit": "°C",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "ok",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "normal",
+    "points": [
+      {
+        "at": "2026-11-15T04:38:19.478569Z",
+        "value": 36.54,
+        "low": 36.31,
+        "high": 36.78,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-16T04:38:19.478569Z",
+        "value": 36.54,
+        "low": 36.28,
+        "high": 36.81,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-17T04:38:19.478569Z",
+        "value": 36.54,
+        "low": 36.25,
+        "high": 36.83,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-18T04:38:19.478569Z",
+        "value": 36.54,
+        "low": 36.23,
+        "high": 36.86,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-19T04:38:19.478569Z",
+        "value": 36.54,
+        "low": 36.21,
+        "high": 36.88,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T04:38:19.478569Z",
+        "value": 36.54,
+        "low": 36.19,
+        "high": 36.9,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-21T04:38:19.478569Z",
+        "value": 36.54,
+        "low": 36.17,
+        "high": 36.92,
+        "status": "normal"
+      }
+    ],
+    "change": null,
+    "backtest_mae": 0.19
+  },
+  "glucose": {
+    "member_id": 1,
+    "indicator_id": "glucose",
+    "unit": "mg/dL",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "insufficient_data",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": null,
+    "history_days": 0,
+    "current_status": "unknown",
+    "points": [],
+    "change": null,
+    "backtest_mae": null
+  },
+  "exercise_min": {
+    "member_id": 1,
+    "indicator_id": "exercise_min",
+    "unit": "min",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "ok",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "warning",
+    "points": [
+      {
+        "at": "2026-11-15T10:00:00Z",
+        "value": 214.37,
+        "low": 189.51,
+        "high": 239.24,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-16T10:00:00Z",
+        "value": 214.37,
+        "low": 189.38,
+        "high": 239.36,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-17T10:00:00Z",
+        "value": 214.37,
+        "low": 189.25,
+        "high": 239.48,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-18T10:00:00Z",
+        "value": 214.36,
+        "low": 189.13,
+        "high": 239.6,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-19T10:00:00Z",
+        "value": 214.36,
+        "low": 189.01,
+        "high": 239.72,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T10:00:00Z",
+        "value": 214.36,
+        "low": 188.88,
+        "high": 239.84,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-21T10:00:00Z",
+        "value": 214.36,
+        "low": 188.76,
+        "high": 239.96,
+        "status": "normal"
+      }
+    ],
+    "change": {
+      "status": "normal",
+      "at": "2026-11-15T10:00:00Z",
+      "in_days": 1
+    },
+    "backtest_mae": 18.6
+  },
+  "sleep_hours": {
+    "member_id": 1,
+    "indicator_id": "sleep_hours",
+    "unit": "h",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "ok",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "critical",
+    "points": [
+      {
+        "at": "2026-11-15T09:55:00Z",
+        "value": 3.1,
+        "low": 2.11,
+        "high": 4.09,
+        "status": "critical"
+      },
+      {
+        "at": "2026-11-16T09:55:00Z",
+        "value": 2.78,
+        "low": 1.27,
+        "high": 4.29,
+        "status": "critical"
+      },
+      {
+        "at": "2026-11-17T09:55:00Z",
+        "value": 2.52,
+        "low": 0.55,
+        "high": 4.5,
+        "status": "critical"
+      },
+      {
+        "at": "2026-11-18T09:55:00Z",
+        "value": 2.32,
+        "low": 0.0,
+        "high": 4.73,
+        "status": "critical"
+      },
+      {
+        "at": "2026-11-19T09:55:00Z",
+        "value": 2.16,
+        "low": 0.0,
+        "high": 4.97,
+        "status": "critical"
+      },
+      {
+        "at": "2026-11-20T09:55:00Z",
+        "value": 2.02,
+        "low": 0.0,
+        "high": 5.22,
+        "status": "critical"
+      },
+      {
+        "at": "2026-11-21T09:55:00Z",
+        "value": 1.92,
+        "low": 0.0,
+        "high": 5.48,
+        "status": "critical"
+      }
+    ],
+    "change": null,
+    "backtest_mae": 1.15
+  },
+  "vision_changes": {
+    "member_id": 1,
+    "indicator_id": "vision_changes",
+    "unit": "1-5",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "insufficient_data",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": null,
+    "history_days": 0,
+    "current_status": "unknown",
+    "points": [],
+    "change": null,
+    "backtest_mae": null
+  },
+  "radiation_dose": {
+    "member_id": 1,
+    "indicator_id": "radiation_dose",
+    "unit": "mSv",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "insufficient_data",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": null,
+    "history_days": 0,
+    "current_status": "unknown",
+    "points": [],
+    "change": null,
+    "backtest_mae": null
+  },
+  "hydration_ml": {
+    "member_id": 1,
+    "indicator_id": "hydration_ml",
+    "unit": "ml",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "insufficient_data",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": null,
+    "history_days": 0,
+    "current_status": "unknown",
+    "points": [],
+    "change": null,
+    "backtest_mae": null
+  },
+  "weight_kg": {
+    "member_id": 1,
+    "indicator_id": "weight_kg",
+    "unit": "kg",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "insufficient_data",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": null,
+    "history_days": 0,
+    "current_status": "unknown",
+    "points": [],
+    "change": null,
+    "backtest_mae": null
+  },
+  "stress": {
+    "member_id": 1,
+    "indicator_id": "stress",
+    "unit": "1-5",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "ok",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "normal",
+    "points": [
+      {
+        "at": "2026-11-15T06:26:18.206621Z",
+        "value": 1.95,
+        "low": 1.58,
+        "high": 2.32,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-16T06:26:18.206621Z",
+        "value": 1.95,
+        "low": 1.58,
+        "high": 2.32,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-17T06:26:18.206621Z",
+        "value": 1.95,
+        "low": 1.58,
+        "high": 2.33,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-18T06:26:18.206621Z",
+        "value": 1.95,
+        "low": 1.58,
+        "high": 2.33,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-19T06:26:18.206621Z",
+        "value": 1.95,
+        "low": 1.58,
+        "high": 2.33,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T06:26:18.206621Z",
+        "value": 1.95,
+        "low": 1.57,
+        "high": 2.33,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-21T06:26:18.206621Z",
+        "value": 1.95,
+        "low": 1.57,
+        "high": 2.33,
+        "status": "normal"
+      }
+    ],
+    "change": null,
+    "backtest_mae": 0.07
+  },
+  "energy": {
+    "member_id": 1,
+    "indicator_id": "energy",
+    "unit": "1-5",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "ok",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "normal",
+    "points": [
+      {
+        "at": "2026-11-15T09:16:31.086323Z",
+        "value": 4.03,
+        "low": 3.66,
+        "high": 4.4,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-16T09:16:31.086323Z",
+        "value": 4.03,
+        "low": 3.66,
+        "high": 4.41,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-17T09:16:31.086323Z",
+        "value": 4.03,
+        "low": 3.66,
+        "high": 4.41,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-18T09:16:31.086323Z",
+        "value": 4.03,
+        "low": 3.66,
+        "high": 4.41,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-19T09:16:31.086323Z",
+        "value": 4.03,
+        "low": 3.66,
+        "high": 4.41,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T09:16:31.086323Z",
+        "value": 4.03,
+        "low": 3.66,
+        "high": 4.41,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-21T09:16:31.086323Z",
+        "value": 4.03,
+        "low": 3.65,
+        "high": 4.42,
+        "status": "normal"
+      }
+    ],
+    "change": null,
+    "backtest_mae": 0.05
+  },
+  "loneliness": {
+    "member_id": 1,
+    "indicator_id": "loneliness",
+    "unit": "1-5",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "ok",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "normal",
+    "points": [
+      {
+        "at": "2026-11-15T06:58:53.450517Z",
+        "value": 2.0,
+        "low": 1.63,
+        "high": 2.37,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-16T06:58:53.450517Z",
+        "value": 2.0,
+        "low": 1.63,
+        "high": 2.37,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-17T06:58:53.450517Z",
+        "value": 2.0,
+        "low": 1.63,
+        "high": 2.37,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-18T06:58:53.450517Z",
+        "value": 2.0,
+        "low": 1.62,
+        "high": 2.38,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-19T06:58:53.450517Z",
+        "value": 2.0,
+        "low": 1.62,
+        "high": 2.38,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T06:58:53.450517Z",
+        "value": 2.0,
+        "low": 1.62,
+        "high": 2.38,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-21T06:58:53.450517Z",
+        "value": 2.0,
+        "low": 1.62,
+        "high": 2.38,
+        "status": "normal"
+      }
+    ],
+    "change": null,
+    "backtest_mae": 0.0
+  },
+  "sleep_quality": {
+    "member_id": 1,
+    "indicator_id": "sleep_quality",
+    "unit": "1-5",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "ok",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "normal",
+    "points": [
+      {
+        "at": "2026-11-15T08:30:59.412608Z",
+        "value": 3.96,
+        "low": 3.59,
+        "high": 4.33,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-16T08:30:59.412608Z",
+        "value": 3.96,
+        "low": 3.59,
+        "high": 4.34,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-17T08:30:59.412608Z",
+        "value": 3.96,
+        "low": 3.59,
+        "high": 4.34,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-18T08:30:59.412608Z",
+        "value": 3.96,
+        "low": 3.59,
+        "high": 4.34,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-19T08:30:59.412608Z",
+        "value": 3.96,
+        "low": 3.59,
+        "high": 4.34,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T08:30:59.412608Z",
+        "value": 3.96,
+        "low": 3.59,
+        "high": 4.34,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-21T08:30:59.412608Z",
+        "value": 3.96,
+        "low": 3.58,
+        "high": 4.35,
+        "status": "normal"
+      }
+    ],
+    "change": null,
+    "backtest_mae": 0.05
+  },
+  "crew_relation": {
+    "member_id": 1,
+    "indicator_id": "crew_relation",
+    "unit": "1-5",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "ok",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "normal",
+    "points": [
+      {
+        "at": "2026-11-15T07:43:00.053317Z",
+        "value": 4.0,
+        "low": 3.63,
+        "high": 4.37,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-16T07:43:00.053317Z",
+        "value": 4.0,
+        "low": 3.63,
+        "high": 4.37,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-17T07:43:00.053317Z",
+        "value": 4.0,
+        "low": 3.63,
+        "high": 4.37,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-18T07:43:00.053317Z",
+        "value": 4.0,
+        "low": 3.62,
+        "high": 4.38,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-19T07:43:00.053317Z",
+        "value": 4.0,
+        "low": 3.62,
+        "high": 4.38,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T07:43:00.053317Z",
+        "value": 4.0,
+        "low": 3.62,
+        "high": 4.38,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-21T07:43:00.053317Z",
+        "value": 4.0,
+        "low": 3.62,
+        "high": 4.38,
+        "status": "normal"
+      }
+    ],
+    "change": null,
+    "backtest_mae": 0.0
+  },
+  "pvt_mean_rt_ms": {
+    "member_id": 1,
+    "indicator_id": "pvt_mean_rt_ms",
+    "unit": "ms",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "ok",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "normal",
+    "points": [
+      {
+        "at": "2026-11-15T07:37:27.240673Z",
+        "value": 199.33,
+        "low": 171.95,
+        "high": 226.71,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-16T07:37:27.240673Z",
+        "value": 199.33,
+        "low": 171.81,
+        "high": 226.85,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-17T07:37:27.240673Z",
+        "value": 199.34,
+        "low": 171.68,
+        "high": 226.99,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-18T07:37:27.240673Z",
+        "value": 199.34,
+        "low": 171.55,
+        "high": 227.13,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-19T07:37:27.240673Z",
+        "value": 199.34,
+        "low": 171.42,
+        "high": 227.27,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T07:37:27.240673Z",
+        "value": 199.35,
+        "low": 171.29,
+        "high": 227.4,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-21T07:37:27.240673Z",
+        "value": 199.35,
+        "low": 171.16,
+        "high": 227.54,
+        "status": "normal"
+      }
+    ],
+    "change": null,
+    "backtest_mae": 17.06
+  },
+  "pvt_lapses": {
+    "member_id": 1,
+    "indicator_id": "pvt_lapses",
+    "unit": "lapsos",
+    "generated_at": "2026-11-14T10:00:00Z",
+    "status": "ok",
+    "method": "holt_damped",
+    "horizon_days": 7,
+    "step_days": 1,
+    "history_days": 30,
+    "current_status": "normal",
+    "points": [
+      {
+        "at": "2026-11-15T07:14:42.159041Z",
+        "value": 1.0,
+        "low": 0.63,
+        "high": 1.37,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-16T07:14:42.159041Z",
+        "value": 1.0,
+        "low": 0.48,
+        "high": 1.52,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-17T07:14:42.159041Z",
+        "value": 1.0,
+        "low": 0.36,
+        "high": 1.64,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-18T07:14:42.159041Z",
+        "value": 1.0,
+        "low": 0.26,
+        "high": 1.74,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-19T07:14:42.159041Z",
+        "value": 1.0,
+        "low": 0.17,
+        "high": 1.83,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-20T07:14:42.159041Z",
+        "value": 1.0,
+        "low": 0.09,
+        "high": 1.91,
+        "status": "normal"
+      },
+      {
+        "at": "2026-11-21T07:14:42.159041Z",
+        "value": 1.0,
+        "low": 0.02,
+        "high": 1.98,
+        "status": "normal"
+      }
+    ],
+    "change": null,
+    "backtest_mae": 0.0
+  }
+}
 
 export const alerts: Schema<'Alert'>[] = [
   {

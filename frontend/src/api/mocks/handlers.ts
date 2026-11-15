@@ -281,6 +281,14 @@ export const handlers: Record<string, Handler> = {
     if (!m) return notFound('Member desconocido')
     return assessmentFor(m.id, req.query.get('env') ?? m.env_id)
   },
+  // Previsión (FS-09): la que calculó el modelo real para el member de ejemplo (fixtures).
+  'GET /members/{member_id}/forecast': (req) => {
+    const m = findMember(req.params.member_id)
+    if (!m) return notFound('Member desconocido')
+    const base = fx.forecastByIndicator[req.query.get('indicator_id') ?? '']
+    if (!base) return notFound('Indicador desconocido')
+    return { ...clone(base), member_id: m.id }
+  },
   'POST /members/{member_id}/heartbeat': () => fx.heartbeatResult,
   'POST /members/{member_id}/ruok': (req) => ({
     liveness: 'active',

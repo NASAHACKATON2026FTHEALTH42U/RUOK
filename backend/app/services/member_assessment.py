@@ -49,6 +49,7 @@ __all__ = [
     "assess_member",
     "build_assessment",
     "build_indicator_assessment",
+    "can_view_behavioral",
     "load_protocols",
 ]
 
@@ -226,6 +227,22 @@ def _emergency_open(session: Session, member: models.Member) -> bool:
     )
 
 
+def can_view_behavioral(
+    session: Session, member: models.Member, viewer: models.UserAccount | None
+) -> bool:
+    """¿Puede ``viewer`` ver los detalles conductuales de ``member``? (BE-20 + BE-27).
+
+    El propio member, ``psych`` y ``admin`` siempre; ``medic``/``responder`` si comparte
+    o hay una emergencia abierta; el resto nunca.
+    """
+    return behavioral.details_visible(
+        share_behavioral_details=member.share_behavioral_details,
+        emergency_open=_emergency_open(session, member),
+        viewer_role=viewer.role if viewer else None,
+        viewer_is_owner=viewer is not None and viewer.member_id == member.id,
+    )
+
+
 def for_viewer(
     session: Session,
     assessment: Assessment,
@@ -234,18 +251,11 @@ def for_viewer(
 ) -> Assessment:
     """El assessment tal y como lo puede ver ``viewer`` (BE-27, privacidad conductual).
 
-    Recalcula ``behavioral.details_visible`` con el rol de quien consulta (el propio
-    member, ``psych`` y ``admin`` siempre; ``medic``/``responder`` si comparte o hay
-    emergencia; el resto nunca) y quita los indicadores privados si no puede verlos.
+    Recalcula ``behavioral.details_visible`` con quien consulta (``can_view_behavioral``)
+    y quita los indicadores privados si no puede verlos.
     """
-    visible = behavioral.details_visible(
-        share_behavioral_details=member.share_behavioral_details,
-        emergency_open=_emergency_open(session, member),
-        viewer_role=viewer.role if viewer else None,
-        viewer_is_owner=viewer is not None and viewer.member_id == member.id,
-    )
     out = assessment.model_copy(deep=True)
-    out.behavioral.details_visible = visible
+    out.behavioral.details_visible = can_view_behavioral(session, member, viewer)
     return behavioral.redact(out)
 
 

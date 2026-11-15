@@ -98,6 +98,7 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | `/members/{member_id}/assessment?env=` | `Assessment`. Con `env` se evalúa con otro perfil, sin modificar datos |
+| GET | `/members/{member_id}/forecast?indicator_id=&horizon_days=` | `Forecast`: previsión estadística de un indicador para los próximos días (FS-09). `indicator_id` es obligatorio (desconocido → `404`); `horizon_days` va de 1 a 14 y por defecto es 7 (fuera de rango → `422`). Mismo permiso que el historial; si el indicador es conductual y privado, solo la ve quien puede ver sus detalles (`403` para el resto). **Informativa:** no crea alertas ni cambia el `Assessment` |
 
 ### Liveness
 | Método | Ruta | Descripción |
@@ -259,6 +260,27 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
   "provisional": false                                            // true solo en el cálculo offline del front
 }
 // MeasurementBatchResult = { accepted, duplicates, assessment }
+
+// Forecast  (FS-09): previsión estadística de UN indicador de un member. Es una estimación, no un diagnóstico.
+//   Modelo: suavizado exponencial de Holt con tendencia amortiguada, ajustado con las mediciones del propio
+//   member (services/forecast.py; fuentes S32–S34). Los estados salen de los mismos rangos que el motor.
+{
+  "member_id": 1, "indicator_id": "bp_systolic", "unit": "mmHg", "generated_at": "...",
+  "status": "ok",              // ok | insufficient_data (menos de 7 días con mediciones en el tramo reciente)
+                               //    | stale (el último dato ha caducado, max_age_s). Solo "ok" trae points
+  "method": "holt_damped",
+  "horizon_days": 7,           // días previstos desde ahora (como mínimo, un paso de la serie)
+  "step_days": 1,              // cadencia de la serie: 1 = diaria, 7 = semanal. null si no hay previsión
+  "history_days": 30,          // días con mediciones usados para ajustar el modelo
+  "current_status": "warning", // estado del último valor con los rangos del entorno (unknown si ha caducado)
+  "points": [                  // un punto por paso, a partir del último dato; low–high = intervalo del 80 %
+    { "at": "...", "value": 138.6, "low": 128.89, "high": 148.31, "status": "warning" }
+  ],
+  "change": { "status": "critical", "at": "...", "in_days": 3 },  // primer punto cuyo estado difiere de
+                               // current_status (a peor o a mejor); null si no cambia en el horizonte
+  "backtest_mae": 9.13         // error absoluto medio a un paso en los últimos días (validación de origen
+                               // móvil, en la unidad del indicador); null si aún no se puede medir
+}
 // HeartbeatResult = { liveness, checkin_required }   ·   RuokResult = { liveness, alert_id? }
 
 // AlertIn  (petición manual)
@@ -354,3 +376,4 @@ data: {"id":2,"type":"alert.created","at":"...","env_id":"mars","member_id":1,..
 1. **Nunca pintar en verde** `unknown`, `stale` ni `lost`. Para esos casos se usa el estilo gris con rayado.
 2. Cada `POST` que crea datos lleva un `id` UUID generado en el cliente. Si falla, se guarda en el outbox y se reintenta.
 3. La consola `/ground` muestra siempre la antigüedad del dato (`last_seen_at`, `delivered_at`) y el estado del enlace.
+4. La previsión (`Forecast`) se pinta siempre como **estimación** (línea discontinua y banda, nunca como un dato medido) y con el aviso de que no es un diagnóstico. Con `status` distinto de `ok` no se dibuja nada: sin datos = desconocido.

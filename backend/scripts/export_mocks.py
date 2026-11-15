@@ -172,6 +172,15 @@ def main() -> None:
                 {e: get(f"/members/1/assessment?env={e}") for e in env_ids},
             ),
             ("measurements", "Schema<'Measurement'>[]", get("/members/1/measurements")),
+            (
+                # Previsión (FS-09) de cada indicador de Vega, calculada por el modelo real.
+                "forecastByIndicator",
+                "Record<string, Schema<'Forecast'>>",
+                {
+                    i["id"]: get(f"/members/1/forecast?indicator_id={i['id']}")
+                    for i in get("/indicators")
+                },
+            ),
             ("alerts", "Schema<'Alert'>[]", get("/members/1/alerts")),
             (
                 "groundByEnv",

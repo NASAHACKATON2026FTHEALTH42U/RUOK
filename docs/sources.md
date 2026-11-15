@@ -35,6 +35,15 @@
 | S30 | Alvarsson J. J., Wiens S., Nilsson M. E. (2010), *Stress recovery during exposure to nature sound and environmental noise*. Int J Environ Res Public Health 7(3):1036–1046. [doi:10.3390/ijerph7031036](https://doi.org/10.3390/ijerph7031036). *Cita de memoria: verificar antes de la presentación.* | Paisajes sonoros (FE-36): los sonidos de la naturaleza ayudan a recuperarse del estrés |
 | S31 | Manzoni G. M. et al. (2008), *Relaxation training for anxiety: a ten-years systematic review with meta-analysis*. BMC Psychiatry 8:41. [doi:10.1186/1471-244X-8-41](https://doi.org/10.1186/1471-244X-8-41). *Cita de memoria: verificar antes de la presentación.* | Relajación muscular progresiva (FE-36) |
 
+## Métodos estadísticos (previsión, FS-09)
+| ID | Fuente | Uso en RUOK |
+|---|---|---|
+| S32 | Hyndman R. J., Athanasopoulos G. (2021), *Forecasting: Principles and Practice*, 3.ª ed., OTexts. [otexts.com/fpp3](https://otexts.com/fpp3/) (cap. 8: suavizado exponencial, tendencia amortiguada e intervalos de predicción). *Cita de memoria: verificar antes de la presentación.* | Modelo de la previsión (`services/forecast.py`): Holt con tendencia amortiguada en forma ETS(A,Ad,N), varianza a h pasos e intervalo del 80 %, validación de origen móvil (`backtest_mae`) |
+| S33 | Gardner E. S., McKenzie E. (1985), *Forecasting trends in time series*. Management Science 31(10):1237–1246. [doi:10.1287/mnsc.31.10.1237](https://doi.org/10.1287/mnsc.31.10.1237). *Cita de memoria: verificar antes de la presentación.* | Tendencia amortiguada (φ): la previsión se frena en vez de dispararse |
+| S34 | Gelper S., Fried R., Croux C. (2010), *Robust forecasting with exponential and Holt–Winters smoothing*. Journal of Forecasting 29(3):285–300. [doi:10.1002/for.1125](https://doi.org/10.1002/for.1125). *Cita de memoria: verificar antes de la presentación.* | Previsión robusta a valores sueltos: error recortado y pérdida de Huber con una σ robusta |
+
+> La previsión es una **estimación estadística, no un diagnóstico**: no crea alertas ni cambia el estado del semáforo. No usa ningún umbral propio: el estado de cada valor previsto sale de los rangos de la tabla de abajo (los mismos del motor).
+
 ## Tabla de umbrales (CNT-01)
 
 > **Valores de los JSON.** Están en `backend/app/data/indicators.json` (rangos del catálogo) y `backend/app/data/environments.json` (`threshold_overrides`). **Si cambias un valor, cámbialo en el JSON y en esta tabla**, y pasa los tests (`tests/test_catalog.py` comprueba los casos con fuente).
