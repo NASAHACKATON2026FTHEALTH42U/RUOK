@@ -18,7 +18,7 @@ export function MemberList({ envId, vocabulary, onSelect }: MemberListProps) {
     return (
       <ul className="grid gap-3 sm:grid-cols-2" aria-busy="true">
         {[0, 1].map((i) => (
-          <li key={i} className="h-16 animate-pulse rounded-lg bg-env-surface" />
+          <li key={i} className="h-16 animate-pulse  bg-env-surface" />
         ))}
       </ul>
     )
@@ -26,12 +26,12 @@ export function MemberList({ envId, vocabulary, onSelect }: MemberListProps) {
 
   if (members.state === 'error') {
     return (
-      <div className="rounded-lg border border-env-border bg-env-surface p-4">
+      <div className=" border border-env-border bg-env-surface p-4">
         <p>No se ha podido cargar la lista.</p>
         <button
           type="button"
           onClick={members.retry}
-          className="mt-3 rounded-md bg-env-primary px-3 py-1.5 text-sm font-medium text-env-primary-text"
+          className="mt-3  bg-env-primary px-3 py-1.5 text-sm font-medium text-env-primary-text"
         >
           Reintentar
         </button>
@@ -64,7 +64,7 @@ export function MemberList({ envId, vocabulary, onSelect }: MemberListProps) {
             <button
               type="button"
               onClick={() => onSelect(m.id)}
-              className="flex w-full items-center justify-between gap-3 rounded-lg border border-env-border bg-env-surface px-4 py-3 text-left hover:border-env-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary"
+              className="flex w-full items-center justify-between gap-3  border border-env-border bg-env-surface px-4 py-3 text-left hover:border-env-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary"
             >
               <span>
                 <span className="block font-medium">{m.name}</span>

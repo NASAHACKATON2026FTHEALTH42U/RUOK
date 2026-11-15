@@ -53,7 +53,7 @@ export default function Ground() {
     return (
       <section className="space-y-4">
         {title}
-        <div className="h-40 animate-pulse rounded-xl bg-env-surface" />
+        <div className="h-40 animate-pulse  bg-env-surface" />
       </section>
     )
   }

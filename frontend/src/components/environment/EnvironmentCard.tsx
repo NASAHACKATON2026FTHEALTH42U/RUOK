@@ -49,7 +49,7 @@ export function EnvironmentCard({ env, current, onSelect }: EnvironmentCardProps
     borderColor: t.border,
     colorScheme: t.scheme,
   }
-  const className = 'relative block w-full overflow-hidden rounded-xl border p-4 pt-5 text-left'
+  const className = 'relative block w-full overflow-hidden  border p-4 pt-5 text-left'
 
   return (
     <motion.div layoutId={`env-card-${env.id}`} className="h-full">

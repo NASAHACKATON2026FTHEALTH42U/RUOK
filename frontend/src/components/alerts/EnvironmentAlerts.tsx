@@ -27,7 +27,7 @@ export function EnvironmentAlerts({
   const now = serverNow()
 
   if (members.state === 'loading' || (members.state === 'ready' && alerts.state === 'loading')) {
-    return <div className="h-32 animate-pulse rounded-xl bg-env-surface" aria-busy="true" />
+    return <div className="h-32 animate-pulse  bg-env-surface" aria-busy="true" />
   }
   if (members.state === 'error' || alerts.state === 'error') {
     return (

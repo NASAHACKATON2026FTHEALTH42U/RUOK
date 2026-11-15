@@ -58,7 +58,7 @@ export function PeriodSwitch({
     <div
       role="group"
       aria-label="Periodo"
-      className={`flex rounded-md border border-env-border ${size === 'sm' ? 'text-xs' : 'text-sm'}`}
+      className={`flex  border border-env-border ${size === 'sm' ? 'text-xs' : 'text-sm'}`}
     >
       {PERIODS.map((p) => (
         <button
@@ -164,7 +164,7 @@ export function TrendPlot({ points, unit, range, days, height = 144, forecast }:
               // Un punto previsto no lleva `value`: el tooltip dice que es una estimación.
               const estimated = p.value === undefined
               return (
-                <div className="rounded-md border border-env-border bg-env-bg px-2 py-1 text-xs shadow">
+                <div className=" border border-env-border bg-env-bg px-2 py-1 text-xs shadow">
                   <div className="text-env-muted">
                     {formatDateTime(p.t)}
                     {estimated && ' · previsión'}
@@ -331,7 +331,7 @@ export function TrendChart({ indicatorId, name, unit, range }: TrendChartProps) 
       </div>
 
       {series.state === 'loading' && (
-        <div className="mt-2 h-36 animate-pulse rounded-md bg-env-bg" aria-busy="true" />
+        <div className="mt-2 h-36 animate-pulse  bg-env-bg" aria-busy="true" />
       )}
       {series.state === 'error' && (
         <p className="mt-2 text-sm text-env-muted">

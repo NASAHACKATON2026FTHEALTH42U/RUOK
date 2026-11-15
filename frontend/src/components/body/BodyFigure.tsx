@@ -227,6 +227,8 @@ export function BodyFigure({
     w: number,
     h: number = w,
     pad = true,
+    /** Se ve sin señalarlo: más opaco y con un contorno fino. */
+    emphasis = false,
   ) => {
     const kx = w / 512
     const ky = h / 512
@@ -235,6 +237,12 @@ export function BodyFigure({
     // Sin datos: gris liso (no rayado) en los iconos; tampoco es verde, y el "Sin datos" se lee
     // en el tooltip y en la columna de sistemas.
     if (stale || statusStyle(r.status).striped) style.fill = STATUS_COLORS.unknown
+    if (emphasis && style.stroke === 'none') {
+      style.fillOpacity = Math.max(style.fillOpacity, 0.8)
+      style.stroke = '#ffffff'
+      style.strokeOpacity = 0.75
+      style.strokeWidth = 5
+    }
     return (
       <g transform={`translate(${x} ${y}) scale(${kx} ${ky})`}>
         {/* Zona sensible invisible que cubre el icono (los iconos tienen huecos). El cerebro no
@@ -279,9 +287,19 @@ export function BodyFigure({
       ),
     ],
     // Metabólico: estómago (icono), en la parte alta del abdomen
-    ['metabolic', (r) => organ(r, STOMACH, 365, 575, 200)],
+    // Con contorno y más opaco: sobre la radiografía apenas se veía antes de señalarlo.
+    ['metabolic', (r) => organ(r, STOMACH, 365, 575, 200, 200, true, true)],
     // Corazón (icono)
-    ['heart', (r) => organ(r, HEART, 380, 400, 154)],
+    // Igual que el estómago: visible sin señalarlo.
+    // Late (lub-dub) salvo con «reducir movimiento» o sin datos recientes.
+    [
+      'heart',
+      (r) => (
+        <g className={stale ? undefined : 'heart-beat'}>
+          {organ(r, HEART, 380, 400, 154, 154, true, true)}
+        </g>
+      ),
+    ],
     // Inmune: ganglios linfáticos (cuello, axilas, ingles)
     [
       'immune',
@@ -317,15 +335,47 @@ export function BodyFigure({
       ),
     ],
     // Cerebro (neuro-conductual). Termina por encima de los ojos para no robarles el clic.
-    ['brain', (r) => organ(r, BRAIN, 366, 22, 154, 104, false)],
-    // Ojos (SANS). Zona sensible (rect invisible) más alta que los ojos: es fácil pulsarlos.
+    // Algo más pequeño que antes (mismo centro): pesaba demasiado en la cabeza.
+    ['brain', (r) => organ(r, BRAIN, 388, 30, 110, 72, false)],
+    // Ojos (SANS), sobre las órbitas. Zona sensible (rect invisible) algo mayor: fácil de pulsar.
     [
       'eyes',
       (r) => (
-        <g {...shape(r)}>
-          <rect x="360" y="118" width="168" height="56" fill="transparent" stroke="none" />
-          <ellipse cx="418" cy="137" rx="24" ry="13" />
-          <ellipse cx="473" cy="137" rx="24" ry="13" />
+        <g>
+          <rect x="380" y="108" width="128" height="50" fill="transparent" stroke="none" />
+          {/* En las órbitas de la radiografía: blanco del ojo con contorno, iris del color del
+              estado y pupila, para que se vean sin señalarlos (como los demás órganos). */}
+          {[
+            [414, 131],
+            [477, 131],
+          ].map(([cx, cy]) => {
+            const st = shape(r)
+            return (
+              <g key={cx}>
+                <ellipse
+                  cx={cx}
+                  cy={cy}
+                  rx="19"
+                  ry="12"
+                  // Al señalarlos, el blanco del ojo se tiñe del color del entorno.
+                  fill={st.strokeWidth ? 'var(--env-primary)' : '#ffffff'}
+                  fillOpacity={st.strokeWidth ? 0.7 : 0.55}
+                  stroke="#ffffff"
+                  strokeOpacity={0.85}
+                  strokeWidth={st.strokeWidth ? 5 : 3}
+                  style={{ transition: 'fill 150ms ease-out, fill-opacity 150ms ease-out' }}
+                />
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r="9"
+                  fill={stale || statusStyle(r.status).striped ? STATUS_COLORS.unknown : st.fill}
+                  fillOpacity={0.95}
+                />
+                <circle cx={cx} cy={cy} r="3.5" fill="#000000" fillOpacity={0.65} />
+              </g>
+            )
+          })}
         </g>
       ),
     ],
@@ -489,7 +539,7 @@ export function BodyFigure({
           createPortal(
             <div
               role="tooltip"
-              className={`pointer-events-none fixed z-50 rounded-lg border border-env-border bg-env-bg px-3 py-2 text-sm whitespace-nowrap shadow-lg ${
+              className={`pointer-events-none fixed z-50  border border-env-border bg-env-bg px-3 py-2 text-sm whitespace-nowrap shadow-lg ${
                 tooltip.side === 'right' ? '-translate-y-1/2' : '-translate-x-1/2 -translate-y-full'
               }`}
               style={{ left: tooltip.x, top: tooltip.side === 'right' ? tooltip.y : tooltip.y - 6 }}

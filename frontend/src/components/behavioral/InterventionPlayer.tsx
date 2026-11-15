@@ -130,7 +130,7 @@ export function InterventionPlayer({
               data-autofocus
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-env-border px-3 py-1.5 text-sm hover:border-env-text"
+              className=" border border-env-border px-3 py-1.5 text-sm hover:border-env-text"
             >
               {done ? 'Cerrar' : 'Terminar'}
             </button>
@@ -186,7 +186,7 @@ export function InterventionPlayer({
                   <button
                     type="button"
                     onClick={() => setPaused((p) => !p)}
-                    className="rounded-lg border border-env-border px-5 py-2.5 hover:border-env-text"
+                    className=" border border-env-border px-5 py-2.5 hover:border-env-text"
                   >
                     {paused ? 'Seguir' : 'Pausa'}
                   </button>
@@ -194,7 +194,7 @@ export function InterventionPlayer({
                 <button
                   type="button"
                   onClick={next}
-                  className="rounded-lg bg-env-primary px-5 py-2.5 font-medium text-env-primary-text"
+                  className=" bg-env-primary px-5 py-2.5 font-medium text-env-primary-text"
                 >
                   {index === steps.length - 1 ? 'Terminar' : 'Siguiente'}
                 </button>

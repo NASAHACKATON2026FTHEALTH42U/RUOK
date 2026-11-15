@@ -49,7 +49,7 @@ export function ConnectQr() {
             <div
               role="img"
               aria-label={`Código QR para abrir ${url}`}
-              className="h-48 w-48 rounded-lg bg-white p-2"
+              className="h-48 w-48  bg-white p-2"
               // SVG generado localmente por la librería a partir de la URL del servidor.
               dangerouslySetInnerHTML={svg ? { __html: svg } : undefined}
             />
@@ -62,7 +62,7 @@ export function ConnectQr() {
                   <select
                     value={index}
                     onChange={(e) => setIndex(Number(e.target.value))}
-                    className="mt-1 block rounded-md border border-env-border bg-env-bg px-2 py-1 text-env-text"
+                    className="mt-1 block  border border-env-border bg-env-bg px-2 py-1 text-env-text"
                   >
                     {urls.map((u, i) => (
                       <option key={u} value={i}>

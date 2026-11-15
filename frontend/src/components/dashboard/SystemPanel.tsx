@@ -141,7 +141,7 @@ export function SystemPanel({
         />
 
         <motion.div
-          className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-env-border bg-env-bg p-5 shadow-2xl md:p-6"
+          className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto  border border-env-border bg-env-bg p-5 shadow-2xl md:p-6"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
@@ -158,7 +158,7 @@ export function SystemPanel({
               data-autofocus
               type="button"
               onClick={onClose}
-              className="rounded-md px-2 py-1 text-env-muted hover:bg-env-surface hover:text-env-text focus-visible:outline-2 focus-visible:outline-env-primary"
+              className=" px-2 py-1 text-env-muted hover:bg-env-surface hover:text-env-text focus-visible:outline-2 focus-visible:outline-env-primary"
               aria-label="Cerrar"
             >
               ✕
@@ -197,7 +197,7 @@ export function SystemPanel({
                 id={`${titleId}-extra`}
                 role="region"
                 aria-label={current.label}
-                className="absolute inset-0 z-10 overflow-y-auto rounded-lg border border-env-border bg-env-bg p-3 [scrollbar-color:var(--env-border)_transparent]"
+                className="absolute inset-0 z-10 overflow-y-auto  border border-env-border bg-env-bg p-3 [scrollbar-color:var(--env-border)_transparent]"
               >
                 {current.content}
               </div>
@@ -214,7 +214,7 @@ export function SystemPanel({
                     aria-expanded={open === sec.id}
                     aria-controls={open === sec.id ? `${titleId}-extra` : undefined}
                     onClick={() => setOpen(open === sec.id ? null : sec.id)}
-                    className={`rounded-lg border px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
+                    className={` border px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
                       open === sec.id
                         ? 'border-env-text bg-env-surface'
                         : 'border-env-border text-env-muted hover:border-env-text hover:text-env-text'
@@ -231,7 +231,7 @@ export function SystemPanel({
           {canMeasure && (
             <Link
               to={`/measure?system=${encodeURIComponent(system.id)}`}
-              className="mx-auto mt-4 block max-w-sm rounded-lg bg-env-primary px-4 py-2 text-center font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
+              className="mx-auto mt-4 block max-w-sm  bg-env-primary px-4 py-2 text-center font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
             >
               Medir ahora
             </Link>

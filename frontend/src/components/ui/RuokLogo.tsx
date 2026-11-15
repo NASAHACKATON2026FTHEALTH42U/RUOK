@@ -56,7 +56,10 @@ export function RuokEmblem({ size = 36 }: { size?: number }) {
 /** «R U OK?» con la interrogación en el color de acento. */
 function Wordmark({ className }: { className: string }) {
   return (
-    <span className={`font-mono leading-none text-env-text ${className}`}>
+    // Espacios entre palabras más estrechos: en monoespaciada cada espacio ocupa una letra entera.
+    <span
+      className={`font-mono leading-none whitespace-nowrap text-env-text [word-spacing:-0.4em] ${className}`}
+    >
       R U OK<span className="text-env-primary">?</span>
     </span>
   )
@@ -67,7 +70,7 @@ export function RuokMark() {
   return (
     <span className="flex items-center gap-2.5">
       <RuokEmblem size={36} />
-      <Wordmark className="text-[1rem] tracking-[0.24em]" />
+      <Wordmark className="text-[1rem] tracking-[0.06em]" />
     </span>
   )
 }
@@ -82,7 +85,7 @@ export function RuokRings() {
     >
       <RuokEmblem size={104} />
       <span className="flex flex-col gap-2.5">
-        <Wordmark className="text-[1.875rem] tracking-[0.22em]" />
+        <Wordmark className="text-[1.875rem] tracking-[0.05em]" />
         <span className="hud-label text-[0.6875rem] tracking-[0.32em]">Salud en misión</span>
       </span>
     </div>

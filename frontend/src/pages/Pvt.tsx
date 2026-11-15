@@ -34,8 +34,8 @@ type Phase =
   | { kind: 'failed'; summary: PvtSummary; message: string }
 
 const btnPrimary =
-  'rounded-lg bg-env-primary px-4 py-3 font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary'
-const btnSecondary = 'rounded-lg border border-env-border px-4 py-2 hover:border-env-text'
+  ' bg-env-primary px-4 py-3 font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary'
+const btnSecondary = ' border border-env-border px-4 py-2 hover:border-env-text'
 
 async function enterFullscreen() {
   try {
@@ -128,7 +128,7 @@ export default function Pvt() {
     return (
       <section className="mx-auto my-auto w-full max-w-xl space-y-4 lg:max-w-3xl lg:space-y-6">
         {title}
-        <div className="space-y-2 rounded-xl border border-env-border bg-env-surface p-4 text-sm lg:space-y-3 lg:p-6 lg:text-lg">
+        <div className="space-y-2  border border-env-border bg-env-surface p-4 text-sm lg:space-y-3 lg:p-6 lg:text-lg">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <p>{lead}</p>
             <ListenButton texts={voiceTexts.pvt} label="Escuchar instrucciones" />
@@ -180,13 +180,13 @@ export default function Pvt() {
       </h1>
 
       <dl className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl border border-env-border bg-env-surface p-4">
+        <div className=" border border-env-border bg-env-surface p-4">
           <dt className="text-sm text-env-muted">{rtName}</dt>
           <dd className="mt-1 text-3xl font-semibold tabular-nums">
             {formatValue(summary.meanRtMs, 'ms')}
           </dd>
         </div>
-        <div className="rounded-xl border border-env-border bg-env-surface p-4">
+        <div className=" border border-env-border bg-env-surface p-4">
           <dt className="text-sm text-env-muted">{lapsesName}</dt>
           <dd className="mt-1 text-3xl font-semibold tabular-nums">{summary.lapses}</dd>
         </div>
@@ -197,7 +197,7 @@ export default function Pvt() {
 
       {phase.kind === 'sent' && (
         <p
-          className="flex flex-wrap items-center gap-2 rounded-xl border border-env-border bg-env-surface p-4 text-sm text-env-muted"
+          className="flex flex-wrap items-center gap-2  border border-env-border bg-env-surface p-4 text-sm text-env-muted"
           role="status"
         >
           Evaluación actualizada:
@@ -217,20 +217,20 @@ export default function Pvt() {
         />
       )}
       {phase.kind === 'queued' && (
-        <p className="rounded-xl border border-env-border bg-env-surface p-4 text-sm" role="status">
+        <p className=" border border-env-border bg-env-surface p-4 text-sm" role="status">
           <span aria-hidden>⇡ </span>
           No hay conexión con el servidor. El resultado está guardado aquí y{' '}
           <strong>se enviará solo</strong> cuando vuelva la conexión, sin duplicarse.
         </p>
       )}
       {phase.kind === 'empty' && (
-        <p className="rounded-lg border border-env-border bg-env-surface p-3 text-sm" role="alert">
+        <p className=" border border-env-border bg-env-surface p-3 text-sm" role="alert">
           <span aria-hidden>⚠ </span>
           No se ha registrado ninguna respuesta válida, así que no se guarda nada. Repite el test.
         </p>
       )}
       {phase.kind === 'failed' && (
-        <p className="rounded-lg border border-env-border bg-env-surface p-3 text-sm" role="alert">
+        <p className=" border border-env-border bg-env-surface p-3 text-sm" role="alert">
           <span aria-hidden>⚠ </span>
           {phase.message}
         </p>

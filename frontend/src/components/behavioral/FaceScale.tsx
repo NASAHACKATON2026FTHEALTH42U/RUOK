@@ -20,7 +20,7 @@ export function FaceScale({ indicator, value, onChange }: FaceScaleProps) {
   const question = indicator.measurement_instructions[0] ?? indicator.name
 
   return (
-    <div className="rounded-xl border border-env-border bg-env-surface p-4 lg:p-6">
+    <div className=" border border-env-border bg-env-surface p-4 lg:p-6">
       <p id={id} className="font-semibold lg:text-xl">
         {indicator.name}
       </p>
@@ -40,7 +40,7 @@ export function FaceScale({ indicator, value, onChange }: FaceScaleProps) {
               aria-checked={checked}
               aria-label={`${n} de 5`}
               onClick={() => onChange(checked ? undefined : n)}
-              className={`flex h-16 flex-col items-center lg:h-24 justify-center rounded-lg border transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary active:scale-95 ${
+              className={`flex h-16 flex-col items-center lg:h-24 justify-center  border transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary active:scale-95 ${
                 checked
                   ? 'border-env-primary bg-env-primary text-env-primary-text'
                   : 'border-env-border bg-env-bg hover:border-env-text'

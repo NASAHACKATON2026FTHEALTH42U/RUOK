@@ -100,7 +100,7 @@ export default function Measure() {
     return (
       <section className="space-y-4">
         {title}
-        <div className="h-40 animate-pulse rounded-xl bg-env-surface" aria-busy="true" />
+        <div className="h-40 animate-pulse  bg-env-surface" aria-busy="true" />
       </section>
     )
   }
@@ -126,7 +126,7 @@ export default function Measure() {
         <ul className="grid flex-1 auto-rows-fr gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
           {withIndicators.map(({ s, inds }) => {
             const card =
-              'relative isolate flex h-full flex-col justify-center gap-1 overflow-hidden rounded-xl border border-env-border bg-env-surface p-4 pt-12 hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary lg:p-6 lg:pt-14 [&>span:nth-of-type(1)]:lg:text-xl [&>span:nth-of-type(2)]:lg:text-base'
+              'relative isolate flex h-full flex-col justify-center gap-1 overflow-hidden  border border-env-border bg-env-surface p-4 pt-12 hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary lg:p-6 lg:pt-14 [&>span:nth-of-type(1)]:lg:text-xl [&>span:nth-of-type(2)]:lg:text-base'
             if (toCheckin && s.id === CHECKIN_SYSTEM) {
               // Check-in diario en lugar del formulario, y una tarjeta por indicador sin test propio.
               const rest = inds.filter((i) => !OWN_TEST.includes(i.id))
@@ -292,7 +292,7 @@ function MeasureForm({
     return (
       <section className="mx-auto max-w-xl space-y-4">
         <h1 className="text-2xl font-semibold">Medición guardada en el dispositivo</h1>
-        <div className="rounded-xl border border-env-border bg-env-surface p-4" role="status">
+        <div className=" border border-env-border bg-env-surface p-4" role="status">
           <p>
             <span aria-hidden>⇡ </span>
             No hay conexión con el servidor. La medición está guardada aquí y{' '}
@@ -307,14 +307,11 @@ function MeasureForm({
           <button
             type="button"
             onClick={onDone}
-            className="rounded-lg bg-env-primary px-4 py-2 font-medium text-env-primary-text"
+            className=" bg-env-primary px-4 py-2 font-medium text-env-primary-text"
           >
             Ver el panel
           </button>
-          <Link
-            to="/measure"
-            className="rounded-lg border border-env-border px-4 py-2 hover:border-env-text"
-          >
+          <Link to="/measure" className=" border border-env-border px-4 py-2 hover:border-env-text">
             Medir otra cosa
           </Link>
         </div>
@@ -327,7 +324,7 @@ function MeasureForm({
     return (
       <section className="mx-auto max-w-xl space-y-4">
         <h1 className="text-2xl font-semibold">Medición guardada</h1>
-        <div className="rounded-xl border border-env-border bg-env-surface p-4" role="status">
+        <div className=" border border-env-border bg-env-surface p-4" role="status">
           <p>
             {accepted === 1 ? '1 medición enviada' : `${accepted} mediciones enviadas`}
             {duplicates > 0 && ` (${duplicates} ya estaban guardadas)`}.
@@ -345,14 +342,11 @@ function MeasureForm({
           <button
             type="button"
             onClick={onDone}
-            className="rounded-lg bg-env-primary px-4 py-2 font-medium text-env-primary-text"
+            className=" bg-env-primary px-4 py-2 font-medium text-env-primary-text"
           >
             Ver el panel
           </button>
-          <Link
-            to="/measure"
-            className="rounded-lg border border-env-border px-4 py-2 hover:border-env-text"
-          >
+          <Link to="/measure" className=" border border-env-border px-4 py-2 hover:border-env-text">
             Medir otra cosa
           </Link>
         </div>

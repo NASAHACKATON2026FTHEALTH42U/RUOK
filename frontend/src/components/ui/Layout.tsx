@@ -59,7 +59,7 @@ export function Layout() {
   const logo = (
     <NavLink
       to={role ? homeFor(role) : '/'}
-      className="inline-flex min-h-11 shrink-0 items-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-env-primary"
+      className="inline-flex min-h-11 shrink-0 items-center  focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-env-primary"
       aria-label="R U OK?: inicio"
     >
       <RuokMark />
@@ -151,7 +151,7 @@ export function Layout() {
               lateral. */}
           <div className="hidden shrink-0 px-4 pt-4 md:block lg:px-6">
             <div
-              className={`mx-auto flex w-full flex-wrap items-center gap-x-5 gap-y-3 rounded-xl border border-env-border bg-env-surface px-5 py-3.5 lg:gap-x-8 lg:px-7 max-w-[1800px]`}
+              className={`mx-auto flex w-full flex-wrap items-center gap-x-5 gap-y-3  border border-env-border bg-env-surface px-5 py-3.5 lg:gap-x-8 lg:px-7 max-w-[1800px]`}
             >
               {logo}
               <span aria-hidden="true" className="h-8 w-px shrink-0 bg-env-border" />

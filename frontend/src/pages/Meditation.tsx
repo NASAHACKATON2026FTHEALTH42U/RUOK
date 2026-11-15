@@ -110,7 +110,7 @@ export default function Meditation() {
           aria-label={s.name}
           title={s.name}
           onClick={() => toggle(s.id)}
-          className={`flex size-10 items-center justify-center rounded-lg border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
+          className={`flex size-10 items-center justify-center  border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
             playing === s.id
               ? 'border-env-primary bg-env-primary/15 text-env-primary'
               : 'border-env-border text-env-muted hover:text-env-text'
@@ -222,7 +222,7 @@ export default function Meditation() {
               <button
                 type="button"
                 onClick={stop}
-                className="rounded-md border border-env-border px-3 py-1.5 text-sm hover:border-env-text focus-visible:outline-2 focus-visible:outline-env-primary"
+                className=" border border-env-border px-3 py-1.5 text-sm hover:border-env-text focus-visible:outline-2 focus-visible:outline-env-primary"
               >
                 Parar
               </button>
@@ -236,7 +236,7 @@ export default function Meditation() {
             <span className="mr-2.5 ml-auto">{voiceReady && <VoiceToggle />}</span>
           </div>
           {interventions.state === 'loading' && (
-            <div className="m-4 h-40 animate-pulse rounded-lg bg-env-bg" aria-busy="true" />
+            <div className="m-4 h-40 animate-pulse  bg-env-bg" aria-busy="true" />
           )}
           {interventions.state === 'error' && (
             <p className="p-4 text-sm text-env-muted">
@@ -258,7 +258,7 @@ export default function Meditation() {
                 <button
                   type="button"
                   onClick={() => startSession(m)}
-                  className="shrink-0 rounded-lg bg-env-primary px-4 py-2.5 font-semibold text-env-primary-text hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary"
+                  className="shrink-0  bg-env-primary px-4 py-2.5 font-semibold text-env-primary-text hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary"
                 >
                   Empezar
                 </button>

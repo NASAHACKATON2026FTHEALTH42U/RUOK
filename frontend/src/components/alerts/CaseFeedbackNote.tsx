@@ -17,7 +17,7 @@ export function CaseFeedbackNote({
   return (
     <div
       role="status"
-      className={`flex items-start gap-3 rounded-lg border p-3 ${
+      className={`flex items-start gap-3  border p-3 ${
         improving ? 'border-st-ok/50 bg-st-ok/10' : 'border-env-primary/50 bg-env-primary/10'
       } ${className}`}
     >

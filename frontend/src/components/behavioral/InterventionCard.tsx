@@ -18,7 +18,7 @@ export function InterventionCard({ intervention, compact = false }: Intervention
   const [playing, setPlaying] = useState(false)
 
   return (
-    <div className="rounded-lg border border-env-border bg-env-surface p-3">
+    <div className=" border border-env-border bg-env-surface p-3">
       <div className="flex items-start justify-between gap-3">
         <p className="font-medium">
           {intervention.title}{' '}
@@ -32,7 +32,7 @@ export function InterventionCard({ intervention, compact = false }: Intervention
             unlockAudio() // dentro del clic, para que la voz guía pueda sonar en el iPhone
             setPlaying(true)
           }}
-          className="shrink-0 rounded-md bg-env-primary px-3 py-1.5 text-sm font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
+          className="shrink-0  bg-env-primary px-3 py-1.5 text-sm font-medium text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
         >
           Empezar
         </button>

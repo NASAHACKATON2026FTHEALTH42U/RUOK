@@ -45,7 +45,7 @@ export function CrewMissions({ missions, memberId, canJoin, busyId, onJoin }: Cr
                     type="button"
                     onClick={() => onJoin(m)}
                     disabled={busyId !== null}
-                    className="min-h-11 shrink-0 rounded-lg border border-env-border px-3 text-sm hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary disabled:opacity-60"
+                    className="min-h-11 shrink-0  border border-env-border px-3 text-sm hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary disabled:opacity-60"
                   >
                     {busyId === m.id ? 'Apuntando…' : 'Me apunto'}
                   </button>

@@ -31,18 +31,18 @@ export default function EnvironmentSelect() {
         {envs.state === 'loading' && (
           <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
             {Array.from({ length: 6 }, (_, i) => (
-              <li key={i} className="h-36 animate-pulse rounded-xl bg-env-surface" />
+              <li key={i} className="h-36 animate-pulse  bg-env-surface" />
             ))}
           </ul>
         )}
 
         {envs.state === 'error' && (
-          <div className="mt-6 rounded-lg border border-env-border bg-env-surface p-4">
+          <div className="mt-6  border border-env-border bg-env-surface p-4">
             <p>No se han podido cargar los entornos. Comprueba la conexión con el servidor.</p>
             <button
               type="button"
               onClick={envs.retry}
-              className="mt-3 rounded-md bg-env-primary px-3 py-1.5 text-sm font-medium text-env-primary-text"
+              className="mt-3  bg-env-primary px-3 py-1.5 text-sm font-medium text-env-primary-text"
             >
               Reintentar
             </button>

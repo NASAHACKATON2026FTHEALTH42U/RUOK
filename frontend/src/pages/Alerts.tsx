@@ -148,9 +148,7 @@ export default function Alerts() {
           {operator ? operatorButton : <NoticeButton />}
         </div>
       </header>
-      {alerts.state === 'loading' && (
-        <div className="h-32 animate-pulse rounded-xl bg-env-surface" />
-      )}
+      {alerts.state === 'loading' && <div className="h-32 animate-pulse  bg-env-surface" />}
       {alerts.state === 'error' && (
         <p className="text-env-muted">
           No se han podido cargar las alertas.{' '}

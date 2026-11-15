@@ -51,7 +51,7 @@ export function VoiceToggle({
         onToggle?.(!on)
       }}
       title={`Voz guía. ${VOICE_NOTE}`}
-      className={`inline-flex shrink-0 items-center gap-2 rounded-lg border ${FOCUS} ${
+      className={`inline-flex shrink-0 items-center gap-2  border ${FOCUS} ${
         compact ? 'size-11 justify-center' : 'min-h-11 px-3 text-sm'
       } ${
         on
@@ -126,7 +126,7 @@ export function ListenButton({
       onClick={toggle}
       aria-pressed={playing}
       title={`${playing ? 'Parar la voz' : label}. ${VOICE_NOTE}`}
-      className={`inline-flex shrink-0 items-center gap-1.5 rounded-md border text-sm ${FOCUS} ${
+      className={`inline-flex shrink-0 items-center gap-1.5  border text-sm ${FOCUS} ${
         iconOnly ? 'size-11 justify-center' : 'min-h-11 px-3'
       } ${
         playing
