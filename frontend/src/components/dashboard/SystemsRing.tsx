@@ -1,12 +1,20 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import { bySeverity, statusStyle, type Status } from '../ui/status'
+import { BodyFigure } from '../body/BodyFigure'
 import type { RegionState } from '../body/regions'
+import {
+  bySeverity,
+  statusStyle,
+  type DisplayState,
+  type Liveness,
+  type Status,
+} from '../ui/status'
+import { StatusHeadline } from '../ui/StatusHeadline'
 
 /**
- * Panel principal en móvil con el estilo HUD (maqueta `Main`, docs/design/hud-style.md §6):
- * saludo, anillo con un arco por sistema (color por estado) y la lista de sistemas.
- * Sin datos = arco apagado (`hud-dim`), nunca en el color nominal. Tocar una fila abre el
- * detalle del sistema (el mismo `SystemPanel` del escritorio).
+ * Panel principal en móvil con el estilo HUD (docs/design/hud-style.md §6): saludo, el cuerpo en
+ * pequeño con la palabra de estado y lo más urgente, y la lista de sistemas. Sin datos nunca va en
+ * el color nominal. Tocar una zona del cuerpo o una fila abre el detalle del sistema (el mismo
+ * `SystemPanel` del escritorio).
  */
 interface SystemsRingProps {
   regions: RegionState[]
@@ -14,8 +22,10 @@ interface SystemsRingProps {
   stale: boolean
   /** Nombre corto para el saludo ("Vega"). */
   name?: string
-  env?: { name: string; comm_delay_s: number; gravity_g: number; kind: string }
   now: Date
+  /** Liveness del member y su texto («sin contacto · hace 5 min») para el cuerpo. */
+  liveness: Liveness
+  staleLabel?: string
   onSelectSystem: (systemId: string) => void
 }
 
@@ -25,19 +35,10 @@ const ST_CLASS: Record<Status, string> = {
   critical: 'text-st-crit',
   unknown: 'text-st-none',
 }
-const ST_STROKE: Record<Status, string> = {
-  normal: 'var(--color-st-ok)',
-  warning: 'var(--color-st-warn)',
-  critical: 'var(--color-st-crit)',
-  unknown: 'var(--color-hud-dim)',
-}
 /** Relleno de la barra: cuanto peor el estado, menos "salud" (decorativo; el texto manda). */
 const BAR: Record<Status, number> = { normal: 90, warning: 60, critical: 30, unknown: 0 }
 
-/** Estilo de `hud-label` para los textos del SVG. */
-const LABEL = { fontSize: 9, letterSpacing: 1.26, fill: 'var(--env-muted)' } as const
-
-/** Alto del anillo: el de la maqueta, o menos si hace falta para que el panel quepa sin scroll. */
+/** Alto del bloque del cuerpo: el de la maqueta, o menos si hace falta para que quepa sin scroll. */
 const RING_MAX = 222
 const RING_MIN = 150
 
@@ -90,12 +91,15 @@ function summaryText(statuses: Status[]) {
   return `${parts.join(', ')}. El resto, nominal.`
 }
 
-function delayLabel(s: number) {
-  if (s <= 0) return 'directo'
-  return s < 60 ? `${s} s` : `${Math.round(s / 60)} min`
-}
-
-export function SystemsRing({ regions, stale, name, env, now, onSelectSystem }: SystemsRingProps) {
+export function SystemsRing({
+  regions,
+  stale,
+  name,
+  now,
+  liveness,
+  staleLabel,
+  onSelectSystem,
+}: SystemsRingProps) {
   const ringRef = useRef<HTMLElement>(null)
   const ringHeight = useFitHeight(ringRef)
   const items = regions.map((r) => ({ ...r, status: stale ? ('unknown' as Status) : r.status }))
@@ -105,15 +109,13 @@ export function SystemsRing({ regions, stale, name, env, now, onSelectSystem }: 
   const crit = statuses.filter((s) => s === 'critical').length
   const warn = statuses.filter((s) => s === 'warning').length
 
-  // Anillo: un arco por sistema, con un hueco entre arcos.
-  const R = 88
-  const C = 2 * Math.PI * R
-  const n = Math.max(items.length, 1)
-  const step = C / n
-  const arc = step - 8
-  const ringText = env
-    ? `${env.name} // Enlace ${delayLabel(env.comm_delay_s)} // Gravedad ${env.gravity_g} g // `.toUpperCase()
-    : ''
+  // Lo más urgente: el peor sistema, si no está nominal (sin datos también cuenta: no es verde).
+  const urgent = sorted[0] && sorted[0].status !== 'normal' ? sorted[0] : null
+  const headline: DisplayState = stale
+    ? liveness === 'lost'
+      ? 'lost'
+      : 'stale'
+    : (sorted[0]?.status ?? 'unknown')
 
   return (
     <div className="flex flex-col gap-1 md:hidden">
@@ -133,98 +135,49 @@ export function SystemsRing({ regions, stale, name, env, now, onSelectSystem }: 
         </p>
       </div>
 
+      {/* Estado global: el mismo cuerpo del escritorio, en pequeño (las zonas se pueden tocar), con
+          la palabra de estado y lo más urgente al lado. Sustituye al anillo de sistemas, que en
+          móvil se leía mal y no aportaba. */}
       <section
         ref={ringRef}
         aria-label="Estado global"
-        className="relative mx-auto w-full max-w-[390px]"
+        className="hud-panel flex w-full items-stretch gap-3 p-3"
         style={{ height: ringHeight }}
       >
-        <p className="sr-only">
-          {nominal} de {items.length} sistemas nominales.
-        </p>
-        {/* Todo dentro del SVG (también los textos), para que escale junto. El centro del anillo
-            es el centro del viewBox, así que queda centrado con cualquier ancho o alto. */}
-        <svg viewBox="0 0 390 222" className="absolute inset-0 h-full w-full" aria-hidden="true">
-          <path d="M22 44 L74 44 L112 76" fill="none" stroke="#1F4450" />
-          <rect x="110" y="74" width="5" height="5" fill="var(--env-primary)" />
-          <path d="M368 178 L316 178 L280 148" fill="none" stroke="#1F4450" />
-          <rect x="276" y="145" width="5" height="5" fill="var(--env-primary)" />
-          <defs>
-            <path
-              id="ruok-ring-text"
-              d="M195 111 m-101 0 a101 101 0 1 1 202 0 a101 101 0 1 1 -202 0"
-            />
-          </defs>
-          <circle
-            cx="195"
-            cy="111"
-            r="108"
-            fill="none"
-            stroke="var(--color-hud-dim)"
-            strokeWidth="5"
-            strokeDasharray="1 4.65"
+        <div className="min-h-0 w-[40%] max-w-[10rem] shrink-0 [container-type:size]">
+          <BodyFigure
+            regions={regions}
+            liveness={liveness}
+            staleLabel={staleLabel}
+            onSelectSystem={onSelectSystem}
+            showLegend={false}
+            crop={0.71}
+            fill
           />
-          {ringText && (
-            <g className="hud-spin hud-spin-slow">
-              <text
-                fontFamily="IBM Plex Mono, monospace"
-                fontSize="7.5"
-                letterSpacing="2.2"
-                fill="#4D7580"
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-2.5">
+          <StatusHeadline state={headline} />
+          {urgent ? (
+            <>
+              <p className="min-w-0">
+                <span className="hud-label block">Lo más urgente</span>
+                <span className="block truncate font-medium">{urgent.name}</span>
+              </p>
+              <button
+                type="button"
+                onClick={() => onSelectSystem(urgent.systemId)}
+                className="hud-btn hud-btn-primary !h-11 self-start px-4"
               >
-                <textPath href="#ruok-ring-text">{ringText.repeat(2)}</textPath>
-              </text>
-            </g>
+                Ver qué hacer
+              </button>
+            </>
+          ) : (
+            <p className="text-sm text-env-muted">
+              {nominal} de {items.length} sistemas nominales. Toca una zona del cuerpo para ver su
+              sistema.
+            </p>
           )}
-          <g transform="rotate(-88 195 111)" fill="none" strokeWidth="11">
-            {items.map((r, i) => (
-              <circle
-                key={r.systemId}
-                cx="195"
-                cy="111"
-                r={R}
-                stroke={ST_STROKE[r.status]}
-                strokeOpacity={r.status === 'normal' ? 0.85 : 1}
-                strokeDasharray={`${arc} ${C - arc}`}
-                strokeDashoffset={-i * step}
-              />
-            ))}
-          </g>
-          <circle
-            className="hud-spin"
-            cx="195"
-            cy="111"
-            r="71"
-            fill="none"
-            stroke="var(--env-primary)"
-            strokeOpacity="0.45"
-            strokeWidth="3"
-            strokeDasharray="12 7"
-          />
-          <circle cx="195" cy="111" r="58" fill="#0B1B21" stroke="var(--env-border)" />
-          <g fontFamily="var(--font-mono)" textAnchor="middle" dominantBaseline="central">
-            <text x="195" y="84" {...LABEL}>
-              SISTEMAS
-            </text>
-            <text x="195" y="112" fontSize="34" fontWeight="300" fill="var(--env-text)">
-              {nominal}
-              <tspan fill="var(--env-muted)">/{items.length}</tspan>
-            </text>
-            <text x="195" y="139" {...LABEL}>
-              NOMINALES
-            </text>
-          </g>
-          {env && (
-            <g fontFamily="var(--font-mono)" {...LABEL}>
-              <text x="22" y="34">
-                ENL / {delayLabel(env.comm_delay_s).toUpperCase()}
-              </text>
-              <text x="368" y="194" textAnchor="end">
-                G / {env.gravity_g}
-              </text>
-            </g>
-          )}
-        </svg>
+        </div>
       </section>
 
       <section className="hud-panel" aria-label="Sistemas del cuerpo">
