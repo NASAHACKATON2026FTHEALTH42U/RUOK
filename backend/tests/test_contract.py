@@ -47,6 +47,7 @@ CONTRACT_ENDPOINTS = [
     ("post", "/members/{member_id}/ruok"),
     ("get", "/members/{member_id}/alerts"),
     ("post", "/members/{member_id}/alerts"),
+    ("post", "/members/{member_id}/notifications"),
     ("post", "/alerts/{alert_id}/escalate"),
     ("post", "/alerts/{alert_id}/ack"),
     ("post", "/alerts/{alert_id}/resolve"),

@@ -9,7 +9,7 @@ import json
 import os
 import time
 from collections.abc import AsyncIterator
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
@@ -163,18 +163,26 @@ async def events_stream(
     response_model=list[Event],
     tags=["realtime"],
     summary="Historial de eventos (admin; fallback de polling)",
-    description="Eventos de `event_log` con `id > since_id`, en orden. `limit` máximo 500.",
+    description="Eventos de `event_log` con `id > since_id`, en orden. `limit` máximo 500. "
+    "`type` se puede repetir (varios tipos). Con `order=desc`, los más recientes primero "
+    "(el feed y el Registro del centro de control).",
     dependencies=[AdminDep],
 )
 def list_events(
     session: SessionDep,
     since_id: int = 0,
     env_id: Slug | None = None,
-    type: EventType | None = None,  # noqa: A002
+    type: Annotated[list[EventType] | None, Query()] = None,  # noqa: A002
     limit: Annotated[int, Query(ge=1, le=500)] = 100,
+    order: Literal["asc", "desc"] = "asc",
 ) -> list[Event]:
     rows = events.fetch_since(
-        session, since_id, env_id=env_id, types={type.value} if type else None, limit=limit
+        session,
+        since_id,
+        env_id=env_id,
+        types={t.value for t in type} if type else None,
+        limit=limit,
+        newest_first=order == "desc",
     )
     return [events.to_schema(r) for r in rows]
 
@@ -207,11 +215,14 @@ def list_devices(session: SessionDep, env_id: Slug | None = None) -> list[Device
     description="Todos los entornos con sus members (`overall_status`, `liveness`), "
     "alertas abiertas por severidad, enlace, `liveness_paused` y métricas: mediciones "
     "recibidas en la última hora, alertas abiertas, dispositivos activos (últimos 5 min) y "
-    "tiempo medio hasta el primer reconocimiento (`null` si no hay ninguno).",
+    "tiempo medio hasta el primer reconocimiento (`null` si no hay ninguno). Con `env_id`, "
+    "solo ese entorno y sus métricas (404 si no existe).",
     dependencies=[AdminDep],
 )
-def control_overview(session: SessionDep) -> ControlOverview:
-    return control.overview(session)
+def control_overview(session: SessionDep, env_id: Slug | None = None) -> ControlOverview:
+    if env_id is not None and environments.get_environment(env_id) is None:
+        raise HTTPException(404, f"Entorno desconocido: {env_id}")
+    return control.overview(session, env_id)
 
 
 @router.post(

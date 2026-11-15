@@ -18,6 +18,7 @@ from app.schemas.alerts import (
     AlertMessageIn,
     EscalateIn,
     GroundView,
+    NotificationIn,
     ResolveIn,
 )
 from app.schemas.auth import (
@@ -151,6 +152,7 @@ __all__ = [
     "EscalateIn",
     "EscalationMode",
     "Event",
+    "NotificationIn",
     "EventType",
     "FastForwardIn",
     "CrewMission",

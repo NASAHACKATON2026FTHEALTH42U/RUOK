@@ -203,14 +203,17 @@ def fetch_since(
     env_id: str | None = None,
     types: set[str] | None = None,
     limit: int = 500,
+    newest_first: bool = False,
 ) -> list[models.EventLog]:
-    """Eventos con ``id > since_id`` en orden, filtrados por rol y por los parámetros."""
+    """Eventos con ``id > since_id`` en orden (o los más recientes primero), filtrados por rol
+    y por los parámetros."""
     q = select(models.EventLog).where(col(models.EventLog.id) > since_id)
     if env_id:
         q = q.where(models.EventLog.env_id == env_id)
     if types:
         q = q.where(col(models.EventLog.type).in_(types))
-    rows = session.exec(q.order_by(col(models.EventLog.id)).limit(limit)).all()
+    order = col(models.EventLog.id).desc() if newest_first else col(models.EventLog.id)
+    rows = session.exec(q.order_by(order).limit(limit)).all()
     return [r for r in rows if viewer is None or visible_to(r, viewer)]
 
 

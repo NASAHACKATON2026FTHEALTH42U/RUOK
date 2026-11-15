@@ -114,6 +114,7 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 | POST | `/alerts/{alert_id}/ack` | `{actor: "member"\|"responder"}` |
 | POST | `/alerts/{alert_id}/resolve` | `{actor, note?}` |
 | POST | `/alerts/{alert_id}/messages` | `{actor, text}` (viaja por el enlace si va a tierra) |
+| POST | `/members/{member_id}/notifications` | **Notificación personalizada** (`NotificationIn`) del operador o del staff (medic, commander de su entorno) a un member. No es una alerta: no escala ni tiene estado. Se guarda como evento `notification.sent` y le llega por SSE. Idempotente por `id` (mismo `id` con otro contenido → `409`) |
 | GET | `/environments/{env_id}/alerts?view=ground` | Consola del responder: solo lo **entregado** por el enlace y filtrado por privacidad |
 
 ### Rutina y gamificación
@@ -155,9 +156,9 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 | Método | Ruta | Rol | Descripción |
 |---|---|---|---|
 | GET | `/events/stream?token=&types=&env_id=` | todos (filtrado por rol) | **SSE**. Cada mensaje es un `Event`. Admite `Last-Event-ID` para reanudar |
-| GET | `/events?since_id=&env_id=&type=&limit=` | admin | Historial de `event_log` (y fallback de polling) |
+| GET | `/events?since_id=&env_id=&type=&limit=&order=` | admin | Historial de `event_log` (y fallback de polling). `type` se puede repetir; `order=desc` da los más recientes primero |
 | GET | `/devices?env_id=` | admin | Dispositivos registrados con `last_seen_at`, `pending_outbox`, `last_sync_at` e IP |
-| GET | `/control/overview` | admin | Todos los entornos: members con `overall_status`, `liveness`, alertas abiertas, enlace y métricas |
+| GET | `/control/overview?env_id=` | admin | Todos los entornos (o solo `env_id`, con sus métricas; 404 si no existe): members con `overall_status`, `liveness`, alertas abiertas, enlace y métricas |
 | POST | `/control/liveness/pause` | admin | `{env_id, paused: bool}`: pausa las alertas de liveness durante la presentación |
 | GET | `/system/network-info` | — | `{lan_urls: ["http://192.168.8.10:8000"], hostname}` para el QR de conexión |
 
@@ -168,7 +169,8 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
   "summary": "SOS emergency de Cmdr. Vega", "payload": {} }
 // type = measurement.created | heartbeat | liveness.changed | alert.created | alert.escalated |
 //        alert.acknowledged | alert.resolved | link.queued | link.delivered | link.state_changed |
-//        sync.batch | auth.login | auth.failed | task.completed | device.registered
+//        sync.batch | auth.login | auth.failed | task.completed | device.registered |
+//        user.created | notification.sent
 ```
 
 ### Enlace con tierra y demo
@@ -264,6 +266,11 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 // AlertIn  (petición manual)
 { "id": "uuid", "category": "psychological", "severity": "warning",
   "message": "Necesito hablar", "system_id": null, "target_role": "ground" }
+
+// NotificationIn (POST /members/{id}/notifications)
+{ "id": "uuid-del-cliente", "title": "Aviso de control" /* opcional, ≤ 80 */,
+  "text": "Recuerda hidratarte" /* 1–500 */, "level": "info" /* info | warning | critical */ }
+// → Event { type: "notification.sent", member_id, payload: { title, text, level, from_role, from_name } }
 
 // Alert
 { "id": "uuid", "member_id": 1, "env_id": "mars", "origin": "manual", "authenticated": true, "created_by_user_id": 7,
