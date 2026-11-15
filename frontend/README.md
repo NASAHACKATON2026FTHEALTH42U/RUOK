@@ -315,7 +315,6 @@ Contenido:
 - **Desde 1024 px, tres columnas centradas:** panel `SYS.01 Sistemas` (`BodyLegend` con `rows`: el nombre y debajo su estado) | `BodyFigure` | panel `IND.02 Indicadores`.
 - **Indicadores en celdas** (`IndicatorCard` con `tile`): el nombre arriba y, debajo, el símbolo de estado y el valor; 2 por fila (3 desde 1280 px), **ordenados por gravedad** (`bySeverity`: crítico, atención, sin datos, normal). Con 16 indicadores (entornos espaciales) son 6–8 filas. Clic en una celda → `SystemPanel` de su sistema.
 - **Tableta (768–1023 px):** el cuerpo a la izquierda y, a la derecha, los indicadores y debajo los sistemas (en dos columnas).
-- **Fase de misión** (entornos espaciales): `MissionPhaseBar` con `compact`, en una línea a todo el ancho.
 - **Móvil:** anillo de sistemas y lista `SYS.01` (`SystemsRing`).
 
 **Refresco cada 15 s.** `useAssessment(memberId, 15_000)` usa `useLoad({ refreshMs })`, que recarga en segundo plano sin volver al esqueleto de carga. Si un refresco falla, se mantienen los últimos datos y la cabecera avisa **"No se pudo actualizar: los datos pueden estar desfasados"** (nunca se finge que están al día).

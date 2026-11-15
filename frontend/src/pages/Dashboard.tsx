@@ -7,7 +7,6 @@ import { useEnvironments } from '../api/useEnvironments'
 import { useIndicators } from '../api/useIndicators'
 import { useSystems } from '../api/useSystems'
 import { BodyFigure } from '../components/body/BodyFigure'
-import { MissionPhaseBar } from '../components/behavioral/MissionPhaseBar'
 import { buildRegions, formatSinceLabel, isFigureStale } from '../components/body/regions'
 import { IndicatorCard } from '../components/dashboard/IndicatorCard'
 import { SystemPanel } from '../components/dashboard/SystemPanel'
@@ -279,15 +278,6 @@ export default function Dashboard() {
             />
           </section>
         </div>
-
-        {env?.kind === 'space' && env.mission && (
-          <MissionPhaseBar
-            mission={env.mission}
-            now={serverNow()}
-            canCheckIn={can('view:checkin')}
-            compact
-          />
-        )}
       </div>
 
       <AnimatePresence>
