@@ -2,8 +2,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import { SessionMenu } from '../components/auth/SessionMenu'
 import { MemberActivitySelector } from '../components/liveness/LivenessGuard'
-import { EnvironmentSelector } from '../components/ui/EnvironmentSelector'
-import { MemberSwitcher } from '../components/ui/MemberSwitcher'
+import { ScopeSelector } from '../components/ui/ScopeSelector'
 import { LinkStatusChip } from '../components/ui/LinkStatusChip'
 import { ChevronIcon } from '../components/ui/NavIcon'
 import { allowedItems, menuFor, navItems, tabsFor } from '../components/ui/navigation'
@@ -53,6 +52,8 @@ export default function More() {
 
       <MemberActivitySelector />
 
+      <ScopeSelector />
+
       <section aria-label="Estado del dispositivo" className="hud-panel">
         <div className="hud-panel-head">Conexión</div>
         <div className="flex flex-wrap items-center gap-2 px-3.5 py-3 text-xs">
@@ -60,16 +61,6 @@ export default function More() {
           <LinkStatusChip />
           <PendingSyncChip />
         </div>
-        {can('action:change-environment') && (
-          <div className="border-t border-hud-row px-3.5 py-3 text-sm">
-            <EnvironmentSelector />
-          </div>
-        )}
-        {can('view:members') && (
-          <div className="border-t border-hud-row px-3.5 py-3 text-sm">
-            <MemberSwitcher />
-          </div>
-        )}
       </section>
 
       <p className="px-1 text-center text-xs text-env-muted">

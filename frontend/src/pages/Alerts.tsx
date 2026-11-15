@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { NoticeButton } from '../components/alerts/SosButton'
 import { serverNow } from '../api/client'
 import { useMemberAlerts } from '../api/useAlerts'
+import { useMembers } from '../api/useMembers'
 import { useAssessment } from '../api/useAssessment'
 import { useEnvironments } from '../api/useEnvironments'
 import { useInterventions } from '../api/useInterventions'
@@ -17,7 +18,7 @@ import {
   statusLabel,
 } from '../components/alerts/alertFormat'
 import { roleLabel } from '../components/alerts/sos'
-import { MemberSwitcher } from '../components/ui/MemberSwitcher'
+import { OperatorMessageButton } from '../components/control/OperatorMessageForm'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { useVocab } from '../environments/useVocab'
 import { formatAgo } from '../lib/time'
@@ -41,9 +42,22 @@ export default function Alerts() {
   const interventions = useInterventions()
   const envs = useEnvironments()
   const [selected, setSelected] = useState<string | null>(null)
+  // Las resueltas salen de la lista: quedan plegadas en «Resueltas» (y en el Registro del operador).
+  const [showResolved, setShowResolved] = useState(false)
   const ladder = (envs.state === 'ready'
     ? envs.data.find((e) => e.id === envId)?.escalation_ladder
     : null) ?? ['self', 'crew', 'ground']
+  // El operador no avisa a control (es control): crea alertas o notificaciones para quien elija.
+  const operator = role === 'admin'
+  const crew = useMembers(operator ? envId : null)
+  const operatorButton = operator && (
+    <OperatorMessageButton
+      recipients={crew.state === 'ready' ? crew.data.map((m) => ({ id: m.id, name: m.name })) : []}
+      memberId={memberId}
+      ladder={ladder}
+      vocabulary={vocab}
+    />
+  )
 
   const title = <h1 className="text-2xl font-semibold">Alertas</h1>
 
@@ -66,7 +80,7 @@ export default function Alerts() {
       <section className="flex min-h-0 flex-1 flex-col gap-4">
         <header className="flex flex-wrap items-center justify-between gap-3">
           {title}
-          <MemberSwitcher />
+          {operatorButton}
         </header>
         {supervisor && envId ? (
           <EnvironmentAlerts
@@ -90,29 +104,47 @@ export default function Alerts() {
   }
 
   const list = alerts.state === 'ready' ? sortAlerts(alerts.data) : []
-  // La elegida; si no, la primera sin resolver; si todas están resueltas, la primera.
+  const open = list.filter((a) => a.status !== 'resolved')
+  const resolved = list.filter((a) => a.status === 'resolved')
+  // La elegida; si no, la primera abierta (las resueltas solo si se despliegan).
   const current =
-    list.find((a) => a.id === selected) ?? list.find((a) => a.status !== 'resolved') ?? list[0]
+    list.find((a) => a.id === selected && (a.status !== 'resolved' || showResolved)) ?? open[0]
   const now = serverNow()
+
+  const row = (a: (typeof list)[number]) => {
+    const sev = severityStyle(a.severity)
+    const active = current?.id === a.id
+    return (
+      <li key={a.id}>
+        <button
+          type="button"
+          onClick={() => setSelected(a.id)}
+          aria-current={active}
+          className={`flex w-full flex-col gap-0.5 px-3.5 py-2.5 text-left focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary ${
+            active
+              ? 'bg-env-primary/10 shadow-[inset_3px_0_0_var(--env-primary)]'
+              : 'hover:bg-env-primary/5'
+          } ${a.status === 'resolved' ? 'opacity-60' : ''}`}
+        >
+          <span className="flex items-center justify-between gap-2">
+            <span className="truncate font-medium">{categoryLabel(a.category)}</span>
+            <StatusBadge status={sev.status} label={sev.label} size="sm" />
+          </span>
+          <span className="truncate text-xs text-env-muted">
+            {a.origin === 'auto' ? 'Automática' : 'Manual'} · {statusLabel(a.status)} · a{' '}
+            {roleLabel(a.target_role, vocab)} · {formatAgo(a.created_at, now)}
+          </span>
+        </button>
+      </li>
+    )
+  }
 
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-4">
       <header className="flex flex-wrap items-center justify-between gap-3">
         {title}
         <div className="flex flex-wrap items-center gap-3">
-          {supervisor && (
-            <>
-              <button
-                type="button"
-                onClick={() => useEnvironmentStore.setState({ memberId: null })}
-                className="text-sm text-env-muted underline hover:text-env-text"
-              >
-                ← Todo {vocab.crew}
-              </button>
-              <MemberSwitcher />
-            </>
-          )}
-          <NoticeButton />
+          {operator ? operatorButton : <NoticeButton />}
         </div>
       </header>
       {alerts.state === 'loading' && (
@@ -133,7 +165,9 @@ export default function Alerts() {
       )}
       {alerts.state === 'ready' && list.length === 0 && (
         <p className="text-env-muted">
-          No hay alertas. En una emergencia, pulsa SOS; para lo demás, «Enviar aviso a control».
+          {operator
+            ? 'No hay alertas.'
+            : 'No hay alertas. En una emergencia, pulsa SOS; para lo demás, «Enviar aviso a control».'}
         </p>
       )}
 
@@ -147,43 +181,47 @@ export default function Alerts() {
             className="hud-panel flex max-h-[45dvh] min-h-0 flex-col md:max-h-full"
           >
             <h2 id="alerts-list-title" className="hud-panel-head">
-              Avisos
-              <span className="ml-auto mr-2.5 normal-case tracking-normal text-env-muted">
-                {list.filter((a) => a.status !== 'resolved').length} abiertos de {list.length}
+              Abiertas
+              <span className="mr-2.5 ml-auto tracking-normal text-env-muted normal-case">
+                {open.length}
               </span>
             </h2>
-            <ul
-              className="min-h-0 flex-1 divide-y divide-env-border/60 overflow-y-auto [scrollbar-color:var(--env-border)_transparent]"
-              aria-label="Alertas"
-            >
-              {list.map((a) => {
-                const sev = severityStyle(a.severity)
-                const active = current?.id === a.id
-                return (
-                  <li key={a.id}>
-                    <button
-                      type="button"
-                      onClick={() => setSelected(a.id)}
-                      aria-current={active}
-                      className={`flex w-full flex-col gap-0.5 px-3.5 py-2.5 text-left focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary ${
-                        active
-                          ? 'bg-env-primary/10 shadow-[inset_3px_0_0_var(--env-primary)]'
-                          : 'hover:bg-env-primary/5'
-                      } ${a.status === 'resolved' ? 'opacity-60' : ''}`}
-                    >
-                      <span className="flex items-center justify-between gap-2">
-                        <span className="truncate font-medium">{categoryLabel(a.category)}</span>
-                        <StatusBadge status={sev.status} label={sev.label} size="sm" />
-                      </span>
-                      <span className="truncate text-xs text-env-muted">
-                        {a.origin === 'auto' ? 'Automática' : 'Manual'} · {statusLabel(a.status)} ·
-                        a {roleLabel(a.target_role, vocab)} · {formatAgo(a.created_at, now)}
-                      </span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
+            <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-color:var(--env-border)_transparent]">
+              {open.length === 0 && (
+                <p className="px-3.5 py-3 text-sm text-env-muted">No hay alertas abiertas.</p>
+              )}
+              <ul className="divide-y divide-env-border/60" aria-label="Alertas abiertas">
+                {open.map(row)}
+              </ul>
+              {resolved.length > 0 && (
+                <div className="border-t border-env-border">
+                  <button
+                    type="button"
+                    aria-expanded={showResolved}
+                    onClick={() => setShowResolved((v) => !v)}
+                    className="flex w-full items-center justify-between gap-2 px-3.5 py-2.5 text-left text-sm text-env-muted hover:text-env-text"
+                  >
+                    <span>
+                      {showResolved ? '▾' : '▸'} Resueltas ({resolved.length})
+                    </span>
+                    {operator && (
+                      <Link
+                        to="/control/log"
+                        onClick={(e) => e.stopPropagation()}
+                        className="underline hover:text-env-text"
+                      >
+                        Registro
+                      </Link>
+                    )}
+                  </button>
+                  {showResolved && (
+                    <ul className="divide-y divide-env-border/60" aria-label="Alertas resueltas">
+                      {resolved.map(row)}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
           </section>
           {current && (
             <section

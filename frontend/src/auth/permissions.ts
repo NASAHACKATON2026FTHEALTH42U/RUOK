@@ -51,7 +51,11 @@ export const ROUTE_PERMISSIONS: Record<string, Permission> = {
   '/alerts': 'view:alerts',
   '/ground': 'view:ground',
   '/control': 'view:control',
-  '/control/users': 'view:control', // gestión de usuarios (pestaña del centro de control)
+  // Secciones del centro de control (operador)
+  '/control/simulate': 'view:control',
+  '/control/users': 'view:control',
+  '/control/devices': 'view:control',
+  '/control/log': 'view:control',
 }
 
 /**

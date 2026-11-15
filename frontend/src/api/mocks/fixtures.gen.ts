@@ -199,6 +199,10 @@ export const CONTRACT_OPERATIONS = [
   ],
   [
     "POST",
+    "/members/{member_id}/notifications"
+  ],
+  [
+    "POST",
     "/members/{member_id}/ruok"
   ],
   [

@@ -509,7 +509,7 @@ Diseño completo en [`docs/auth-and-roles.md`](../docs/auth-and-roles.md).
 | `member`, `family`   | `/dashboard`                       |
 | `medic`, `commander` | `/members` (members de su entorno) |
 | `responder`, `psych` | `/ground`                          |
-| `admin`              | `/` (selector de entorno)          |
+| `admin`              | `/control` (centro de control)     |
 
 - **Rutas protegidas:** `RequireSession` envuelve todo menos `/login`. Sin sesión → `/login?next=<ruta>`.
 - **401 o `exp` vencido:** la sesión pasa a "caducada" y se va a `/login?expired=1` ("Tu sesión ha caducado… no se ha perdido nada"); al volver a entrar se regresa a la página donde se estaba. El outbox se pausa solo con el 401 (FE-11) y se reanuda tras el login.
@@ -530,8 +530,13 @@ const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el
 
 - **Rutas:** cada ruta de `App.tsx` va envuelta en `<RequireRole>` con el permiso de `ROUTE_PERMISSIONS`. Una ruta prohibida **redirige a la vista inicial del rol** (`homeFor`).
 - **Menú:** la navegación solo muestra las vistas permitidas (p. ej. el flight surgeon ve Historial, Alertas y su consola; el medic, además, "Tripulación"). El logo lleva a la vista inicial del rol.
-- **Menú del operador (`admin`):** solo gestión y monitorización (`menuFor()` en `navigation.ts`): Centro de control, Usuarios (`/control/users`), Entornos, Equipo, Alertas y la consola de tierra. Las vistas de autocuidado de un member (Medir, Check-in, Misiones, Meditación…) no salen en su menú, aunque sigue pudiendo abrirlas desde la ficha de cada member. Al elegir entorno en `/` va al centro de control de ese entorno.
-- **Selector de entorno** de la cabecera y página `/`: solo `admin`.
+- **Menú del operador (`admin`):** gestión, monitorización y pruebas del entorno del ámbito (`menuFor()` en `navigation.ts`). Las vistas de autocuidado de un member no salen (sigue pudiendo abrir el panel de cada uno desde el centro de control):
+  - **Centro de control** (`/control`): métricas, estado de cada member y eventos en vivo.
+  - **Simulación** (`/control/simulate`): alertas y notificaciones personalizadas, mediciones provocadas, escenarios del entorno, enlace, vigilancia de contacto y reloj de la demo.
+  - **Alertas**: con «＋ Alerta o notificación» en lugar de «Enviar aviso a control». Las resueltas salen de la lista y quedan plegadas en «Resueltas».
+  - **Equipo**, **Registro** (`/control/log`: incidencias resueltas y eventos importantes: alertas, notificaciones, usuarios, accesos, misiones, dispositivos, contacto y enlace), **Usuarios** (`/control/users`), **Dispositivos** (`/control/devices`, con el QR) y la consola de tierra.
+- **Avisos en vivo** (`LiveAlertToast`): el operador recibe los de cualquier entorno (abre el stream sin filtro de entorno); el member, las alertas que otros crean para él y las notificaciones (`notification.sent`).
+- **Ámbito (`ScopeSelector`)**: el único sitio donde se elige el entorno (solo `admin`) y el member (quien supervisa: `admin`, `medic`, `commander`, con la opción «Todo …»). Va arriba de la barra lateral y, en el móvil, en «Más»; todas las vistas muestran y actúan sobre lo elegido.
 - **"Medir ahora"** del `SystemPanel`: el member para sí mismo; medic y admin para cualquiera ("medir para otro solo medic").
 - **SOS:** sin sesión, siempre visible. Con sesión, oculto para `responder` y `psych` (están en tierra).
 - **Cabecera:** usuario y rol con el **vocabulario del entorno** (`userRoleLabel()`: astronauta, oficial médico, flight surgeon…; si no hay término, el `role_label` del servidor).

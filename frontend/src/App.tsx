@@ -5,7 +5,11 @@ import { RequireRole } from './components/auth/RequireRole'
 import { RequireSession } from './components/auth/RequireSession'
 import { Layout } from './components/ui/Layout'
 import Alerts from './pages/Alerts'
-import Control from './pages/Control'
+import ControlDevices from './pages/control/ControlDevices'
+import ControlLog from './pages/control/ControlLog'
+import ControlOverview from './pages/control/ControlOverview'
+import ControlSimulate from './pages/control/ControlSimulate'
+import ControlUsers from './pages/control/ControlUsers'
 import CheckIn from './pages/CheckIn'
 import Dashboard from './pages/Dashboard'
 import EnvironmentSelect from './pages/EnvironmentSelect'
@@ -50,8 +54,11 @@ const router = createBrowserRouter([
           { path: '/missions', element: guard('/missions', <Missions />) },
           { path: '/alerts', element: guard('/alerts', <Alerts />) },
           { path: '/ground', element: guard('/ground', <Ground />) },
-          { path: '/control', element: guard('/control', <Control />) },
-          { path: '/control/users', element: guard('/control/users', <Control />) },
+          { path: '/control', element: guard('/control', <ControlOverview />) },
+          { path: '/control/simulate', element: guard('/control/simulate', <ControlSimulate />) },
+          { path: '/control/users', element: guard('/control/users', <ControlUsers />) },
+          { path: '/control/devices', element: guard('/control/devices', <ControlDevices />) },
+          { path: '/control/log', element: guard('/control/log', <ControlLog />) },
           // «Más» (estilo HUD): cualquier rol con sesión.
           { path: '/more', element: <More /> },
           { path: '*', element: <NotFound /> },

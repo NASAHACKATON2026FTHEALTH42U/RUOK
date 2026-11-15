@@ -16,10 +16,19 @@ function menu(role: Role) {
 describe('menú por rol', () => {
   it('el operador solo ve gestión y monitorización', () => {
     const { items, tabs } = menu('admin')
-    expect(items).toEqual(['/control', '/control/users', '/', '/members', '/alerts', '/ground'])
+    expect(items).toEqual([
+      '/control',
+      '/control/simulate',
+      '/alerts',
+      '/members',
+      '/control/log',
+      '/control/users',
+      '/control/devices',
+      '/ground',
+    ])
     for (const selfCare of ['/measure', '/checkin', '/pvt', '/missions', '/meditation', '/home'])
       expect(items).not.toContain(selfCare)
-    expect(tabs).toEqual(['/control', '/members', '/alerts', '/more'])
+    expect(tabs).toEqual(['/control', '/control/simulate', '/alerts', '/more'])
   })
 
   it('el resto de roles conserva todas sus vistas permitidas', () => {
