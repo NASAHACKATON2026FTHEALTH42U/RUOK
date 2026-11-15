@@ -28,7 +28,7 @@ function guard(path: string, page: ReactNode) {
 }
 
 const router = createBrowserRouter([
-  // El login va fuera del Layout, pero con su propio botón "Pedir ayuda" (FE-27).
+  // El login va fuera del Layout, pero con su propio botón SOS (FE-27).
   { path: '/login', element: <Login /> },
   {
     element: <RequireSession />,

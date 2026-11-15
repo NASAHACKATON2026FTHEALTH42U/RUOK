@@ -311,13 +311,18 @@ Contenido:
 `/dashboard` (`src/pages/Dashboard.tsx`) muestra el panel del member activo (`memberId` del store). Sin member, enlaza a `/` para elegirlo.
 
 - **Cabecera:** `StatusBadge` con el estado general (`overall_status`), el liveness si no es `active` ("Sin datos desde hace X min") y la frescura de los datos ("Actualizado hace…"). El estado del enlace está en la cabecera global (FE-17).
-- **Izquierda:** `BodyFigure` (fija al hacer scroll en escritorio).
-- **Derecha:** cuadrícula de `IndicatorCard` con todos los indicadores de la evaluación, **ordenados por gravedad** (`bySeverity`: crítico, atención, sin datos, normal). Clic en una tarjeta → `SystemPanel` de su sistema.
-- En móvil, todo en una columna.
+- **Sin scroll en tableta y escritorio.** La página ocupa el alto disponible (`Layout` en modo `fill`) y el bloque se centra en vertical; si una pantalla muy baja no da para todo, la página hace scroll como cualquier otra.
+- **Desde 1024 px, tres columnas centradas:** panel `SYS.01 Sistemas` (`BodyLegend` con `rows`: el nombre y debajo su estado) | `BodyFigure` | panel `IND.02 Indicadores`.
+- **Indicadores en celdas** (`IndicatorCard` con `tile`): el nombre arriba y, debajo, el símbolo de estado y el valor; 2 por fila (3 desde 1280 px), **ordenados por gravedad** (`bySeverity`: crítico, atención, sin datos, normal). Con 16 indicadores (entornos espaciales) son 6–8 filas. Clic en una celda → `SystemPanel` de su sistema.
+- **Tableta (768–1023 px):** el cuerpo a la izquierda y, a la derecha, los indicadores y debajo los sistemas (en dos columnas).
+- **Fase de misión** (entornos espaciales): `MissionPhaseBar` con `compact`, en una línea a todo el ancho.
+- **Móvil:** anillo de sistemas y lista `SYS.01` (`SystemsRing`).
 
 **Refresco cada 15 s.** `useAssessment(memberId, 15_000)` usa `useLoad({ refreshMs })`, que recarga en segundo plano sin volver al esqueleto de carga. Si un refresco falla, se mantienen los últimos datos y la cabecera avisa **"No se pudo actualizar: los datos pueden estar desfasados"** (nunca se finge que están al día).
 
-`IndicatorCard` (`components/dashboard/`) es la tarjeta de un indicador (valor, semáforo, tendencia y antigüedad). La usan la cuadrícula y el `SystemPanel`; con `showTrend` añade la `TrendChart` (FE-08).
+`IndicatorCard` (`components/dashboard/`) es la tarjeta de un indicador (valor, semáforo, tendencia y antigüedad). La usan el panel (variante `tile`) y el `SystemPanel`; con `showTrend` añade la `TrendChart` (FE-08).
+
+**Selector de actividad** (`ACT.01`, barra lateral y «Más»; solo el member): Normal, EVA (o «actividad de riesgo» en la Tierra) y Sueño. Va en cada heartbeat y cambia cuándo el servidor pregunta «R U OK?» y cuándo da la alerta de "sin contacto". Debajo de los botones, una frase explica qué hace el modo elegido con los tiempos del perfil del entorno (`activityHint()` en `components/liveness/heartbeat.ts`).
 
 ## Gráfica de tendencia: `TrendChart` (FE-08)
 
@@ -430,16 +435,22 @@ Cada dispositivo (o pestaña, en los ensayos) tiene su propia identidad, su base
 
 **Probado** (criterio de aceptación): con el backend parado se registran 2 mediciones (temperatura y frecuencia cardiaca) → quedan en el outbox, sobreviven a una recarga y el panel se ve desde la caché → al arrancar el backend se sincronizan en 7 s; cada medición llega una sola vez (sin duplicados).
 
-## Pedir ayuda / SOS (FE-13)
+## SOS y avisos a control (FE-13)
 
-Botón rojo **"✚ Pedir ayuda"** fijo abajo a la derecha en todas las páginas (`SosButton` en `Layout`). Abre `SosDialog` (`role="dialog"`, Esc o clic fuera para cerrar):
+**SOS** (`SosButton` → `SosEmergency`): botón rojo que pone solo **«SOS»**. Está arriba del menú lateral en tableta y escritorio (lo primero al tabular) y en el centro de la barra inferior en móvil, más grande que las pestañas. En el login va a todo el ancho y funciona sin sesión. No tiene formulario:
+
+- Al pulsarlo, un modal avisa de que **se enviará la alerta de ayuda si no se cancela en 3 s**, con la cuenta atrás en grande y una barra que se vacía. **Cancelar** (o Escape) la anula y **Enviar ya** no espera.
+- Pasados los 3 s se envía sola: `category` y `severity` `emergency`, mensaje "SOS", al siguiente nivel de la escalera del entorno, con un UUID por pulsación (idempotente). Mientras se envía no se puede cerrar.
+- "Necesito ayuda" en el «R U OK?» sin conexión lo envía al momento, sin cuenta atrás (ya se ha pedido ayuda).
+
+**Enviar aviso a control** (`NoticeButton` → `SosDialog`): el formulario para lo que no es una emergencia. Está en la página de Alertas y en «Añadir detalles» después de pedir ayuda en el «R U OK?». Solo con sesión.
 
 - **¿Qué pasa?** `symptom` (síntoma), `physical` (malestar físico), `psychological` (**"Necesito hablar"**, canal confidencial: lo dice el diálogo) o `emergency`.
 - **¿Cuánto urge?** `warning` (puede esperar), `critical` (urgente), `emergency`. Elegir "Emergencia" pone la severidad `emergency`.
 - **¿A quién avisar?** La escalera del entorno sin `self`, por defecto el siguiente nivel y **se pueden saltar niveles**. Las etiquetas salen del vocabulario (`roleLabel()`: `nurse`/`caregiver` → `medic`, `doctor` → `ground`, `family` → "familia").
 - **Mensaje** opcional (si no hay, se envía la categoría).
 
-Se envía **por el outbox** (`sendAlert()`, mismo UUID en el dispositivo y en el servidor; la alerta se guarda en el store `alerts` con `pending=true`):
+Los dos se envían **por el outbox** (`sendAlert()`, mismo UUID en el dispositivo y en el servidor; la alerta se guarda en el store `alerts` con `pending=true`):
 
 - **Con conexión:** "✓ Enviado a {destino}". Si el entorno tiene retardo: "le llegará en unos 14 min (hacia las HH:MM, hora del servidor)".
 - **Sin conexión:** "**No enviado. Avisa a {tripulación} de viva voz**", la petición queda guardada y se envía sola al volver la conexión. Debajo, **"Mientras tanto"**, el protocolo que hay en el dispositivo:
@@ -448,13 +459,15 @@ Se envía **por el outbox** (`sendAlert()`, mismo UUID en el dispositivo y en el
 - No hay textos clínicos en el código: todo el protocolo viene de la evaluación o del catálogo. **Falta un endpoint de protocolos** (`protocol_id` existe en la evaluación, pero no hay `GET /protocols`); cuando exista, se cachea con `withCatalogCache('protocols')`.
 - Sin member elegido, el diálogo pide elegirlo y recuerda avisar de viva voz.
 
+**Modales bloqueantes** (`components/ui/Modal.tsx`): el SOS, el aviso a control, el «R U OK?», el detalle de un sistema, la intervención guiada y el PVT usan el `<dialog>` nativo con `showModal()`. El resto de la interfaz queda inerte (no se puede pulsar ni tabular) hasta que se resuelven o se cierran. Un clic fuera no cierra nada; Escape cierra los que se pueden cerrar (el «R U OK?» no). El foco entra en el modal y vuelve a su sitio al cerrar.
+
 ## Login y sesión (FE-27)
 
 Diseño completo en [`docs/auth-and-roles.md`](../docs/auth-and-roles.md).
 
-- **`/login`** (`src/pages/Login.tsx`), fuera del `Layout` pero **con el botón "Pedir ayuda"**:
-  - usuario + **contraseña** (`POST /auth/login`) o pestaña **PIN rápido** (`POST /auth/pin`);
-  - **usuarios demo** (`GET /auth/demo-users`) para entrar con un clic (PIN `1234`); la lista se reintenta cada 10 s si el servidor no responde;
+- **`/login`** (`src/pages/Login.tsx`), fuera del `Layout` pero **con el botón SOS** (funciona sin sesión):
+  - usuario + **contraseña** (`POST /auth/login`);
+  - **usuarios demo** (`GET /auth/demo-users`) del entorno elegido (por defecto, Marte) para entrar con un clic; la lista se reintenta cada 10 s si el servidor no responde;
   - errores: credenciales incorrectas, sin servidor (recuerda el SOS) y bloqueo por intentos (429).
 - **Sesión** (`src/auth/session.ts`): `{token, user, exp}` en IndexedDB `kv.auth` y `kv.last_member_id` (para el SOS sin sesión). `initSession()` la recupera al arrancar y conecta el cliente: **`Authorization: Bearer`** en todas las peticiones.
 - **Tras el login** se fija el entorno del usuario (y su `member_id` si es member), se reanuda el outbox (`resumeSync()`) y cada rol va a su **vista inicial** (`homeFor()`):

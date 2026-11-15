@@ -331,11 +331,14 @@ export function BodyFigure({
       {stale && <StatusBadge status={liveness === 'lost' ? 'lost' : 'stale'} label={staleLabel} />}
 
       {/* Hasta 300 px de ancho, y menos en pantallas bajas (la figura mide el doble de alto) para
-          que el panel quepa sin scroll con las fases de la misión debajo. */}
+          que el panel quepa sin scroll con las fases de la misión debajo. El panel puede fijar
+          otro máximo con la variable CSS `--body-max`. */}
       <div
         ref={boxRef}
         className="relative w-full"
-        style={{ maxWidth: 'min(300px, max(220px, calc((100vh - 350px) / 2)))' }}
+        style={{
+          maxWidth: 'var(--body-max, min(300px, max(220px, calc((100vh - 350px) / 2))))',
+        }}
       >
         {/* Aura de luz amarilla detrás del cuerpo, con un latido suave (degradado CSS, sin
             imágenes). Respeta "reducir movimiento"; sin datos fiables se apaga a gris y no late. */}

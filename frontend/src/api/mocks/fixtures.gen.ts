@@ -2282,7 +2282,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           },
           {
             "id": "rec_neuro_behavioral_critical_3",
-            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en Pedir ayuda",
+            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en «Enviar aviso a control»",
             "priority": 3,
             "intervention_id": null
           },
@@ -2751,7 +2751,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           },
           {
             "id": "rec_neuro_behavioral_critical_3",
-            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en Pedir ayuda",
+            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en «Enviar aviso a control»",
             "priority": 3,
             "intervention_id": null
           },
@@ -3220,7 +3220,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           },
           {
             "id": "rec_neuro_behavioral_critical_3",
-            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en Pedir ayuda",
+            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en «Enviar aviso a control»",
             "priority": 3,
             "intervention_id": null
           },
@@ -3503,7 +3503,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           },
           {
             "id": "rec_neuro_behavioral_critical_3",
-            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en Pedir ayuda",
+            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en «Enviar aviso a control»",
             "priority": 3,
             "intervention_id": null
           },
@@ -3752,7 +3752,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           },
           {
             "id": "rec_neuro_behavioral_critical_3",
-            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en Pedir ayuda",
+            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en «Enviar aviso a control»",
             "priority": 3,
             "intervention_id": null
           },
@@ -4050,7 +4050,7 @@ export const assessmentByEnv: Record<string, Schema<'Assessment'>> = {
           },
           {
             "id": "rec_neuro_behavioral_critical_3",
-            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en Pedir ayuda",
+            "text": "Si prefieres un canal confidencial, usa «Necesito hablar» en «Enviar aviso a control»",
             "priority": 3,
             "intervention_id": null
           },

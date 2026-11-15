@@ -68,7 +68,7 @@ function RuokRings() {
 
 /**
  * Login (FE-27) con el estilo de consola de a bordo (Login.dc.html): usuario + contraseña,
- * accesos de los usuarios demo del entorno elegido y "Pedir ayuda sin sesión" (el SOS nunca
+ * accesos de los usuarios demo del entorno elegido y el botón SOS (el SOS nunca
  * depende del login). Colores del entorno activo; tras entrar, cada rol va a su vista inicial
  * (o a donde iba, si la sesión había caducado).
  *
@@ -192,7 +192,7 @@ export default function Login() {
                   <p role="alert" className="text-sm">
                     ⚠ {error.message}
                     {error.kind === 'offline' &&
-                      ' Si necesitas ayuda, usa "Pedir ayuda sin sesión".'}
+                      ' Si es una emergencia, pulsa SOS: funciona sin sesión.'}
                   </p>
                 )}
                 <button type="submit" disabled={busy} className="hud-btn hud-btn-primary w-full">
@@ -265,7 +265,7 @@ export default function Login() {
             )}
 
             <div className="mt-auto flex flex-col gap-2.5 pt-1 lg:mt-0">
-              <SosButton variant="inline" label="Pedir ayuda sin sesión" />
+              <SosButton variant="inline" />
               <p className="text-center text-xs leading-snug text-env-muted">
                 Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni
                 sustituye el criterio de un profesional sanitario.

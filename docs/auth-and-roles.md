@@ -5,7 +5,7 @@
 ## Principios
 1. **Autenticación 100 % local.** El servidor de a bordo valida los usuarios contra SQLite. No hay OAuth ni proveedores externos: en Marte no hay internet.
 2. **El backend es la autoridad.** El front oculta las vistas y los botones según el rol, pero **cada endpoint comprueba el rol y la propiedad del dato**. Ocultar algo en la UI no es seguridad.
-3. **El SOS nunca depende del login.** El botón *Pedir ayuda*, el modal "R U OK?" y el protocolo autónomo están disponibles **también con la sesión caducada o bloqueada**.
+3. **El SOS nunca depende del login.** El botón *SOS*, el modal "R U OK?" y el protocolo autónomo están disponibles **también con la sesión caducada o bloqueada**.
 4. **Sin pérdida de datos por sesión.** Si el token caduca estando offline, el outbox **conserva todo**, se pide volver a iniciar sesión y después se sincroniza. Un 401 nunca borra datos.
 5. **Roles genéricos y vocabulario por entorno.** Igual que `members`, los roles son genéricos y el nombre visible sale de `environment.vocabulary`.
 
@@ -31,7 +31,7 @@
 | Vista / acción | member | medic | commander | responder | psych | family (P2) | admin |
 |---|---|---|---|---|---|---|---|
 | Login | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Pedir ayuda / SOS** (también **sin sesión**) | ✅ | ✅ | ✅ | — | — | ✅ | ✅ |
+| **SOS** (también **sin sesión**) y avisos a control | ✅ | ✅ | ✅ | — | — | ✅ | ✅ |
 | Selector de entorno | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
 | Dashboard (cuerpo + semáforo) | ✅ propio | ✅ todos los del entorno | 👁️ todos | 🔒 (usa `/ground`) | 🔒 | 👁️ agregado de su familiar | ✅ |
 | Registrar mediciones | ✅ propio | ✅ para cualquier member (asistida) | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |

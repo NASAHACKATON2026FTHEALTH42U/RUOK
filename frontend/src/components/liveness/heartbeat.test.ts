@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { activityOptions, buildHeartbeat, detectDeviceKind } from './heartbeat'
+import { activityHint, activityOptions, buildHeartbeat, detectDeviceKind } from './heartbeat'
 
 describe('detectDeviceKind', () => {
   it('ratón → ordenador; táctil estrecho → móvil; táctil ancho → tablet', () => {
@@ -44,5 +44,45 @@ describe('activityOptions', () => {
   it('EVA en el espacio, "actividad de riesgo" en la Tierra', () => {
     expect(activityOptions(true).map((o) => o.label)).toEqual(['Normal', 'EVA', 'Sueño'])
     expect(activityOptions(false)[1]).toEqual({ id: 'eva', label: 'Actividad de riesgo' })
+  })
+})
+
+describe('activityHint', () => {
+  const liveness = {
+    stale_after_s: 300,
+    lost_after_s: 900,
+    eva_stale_after_s: 30,
+    eva_lost_after_s: 120,
+    sleep_factor: 3,
+    ruok_timeout_s: 120,
+    morning_checkin_by: null,
+    warning_escalate_after_s: 21600,
+  }
+
+  it('usa los umbrales del perfil del entorno', () => {
+    expect(activityHint('normal', true, liveness)).toContain('5 min sin dar señal')
+    expect(activityHint('eva', true, liveness)).toContain('a los 30 s sin señal')
+    expect(activityHint('eva', true, liveness)).toContain('a los 2 min')
+    expect(activityHint('sleep', true, liveness)).toContain('×3 (15 min sin señal)')
+  })
+
+  it('EVA en el espacio; «actividad de riesgo» en la Tierra', () => {
+    expect(activityHint('eva', true, liveness)).toMatch(/^Salida al exterior \(EVA\)/)
+    expect(activityHint('eva', false, liveness)).toMatch(/^Actividad de riesgo/)
+  })
+
+  it('versión corta para la barra lateral, con los mismos tiempos', () => {
+    expect(activityHint('normal', true, liveness, { short: true })).toBe(
+      'Sin señal 5 min: «R U OK?». Sin respuesta: alerta.',
+    )
+    expect(activityHint('eva', true, liveness, { short: true })).toContain('a los 30 s sin señal')
+    expect(activityHint('eva', false, liveness, { short: true })).toMatch(/^Riesgo:/)
+    expect(activityHint('sleep', true, liveness, { short: true })).toContain('×3 (15 min)')
+  })
+
+  it('sin perfil cargado, sin números', () => {
+    for (const a of ['normal', 'eva', 'sleep'] as const) {
+      expect(activityHint(a, true)).not.toMatch(/\d/)
+    }
   })
 })

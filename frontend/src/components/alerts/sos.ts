@@ -1,4 +1,4 @@
-/** Lógica pura del botón "Pedir ayuda" (FE-13, docs/alerts-and-escalation.md). */
+/** Lógica pura del SOS y de los avisos a control (FE-13, docs/alerts-and-escalation.md). */
 import type { Schema } from '../../api/client'
 
 export type AlertCategory = Extract<

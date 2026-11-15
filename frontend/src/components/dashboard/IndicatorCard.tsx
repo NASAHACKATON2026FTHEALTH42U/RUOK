@@ -27,6 +27,12 @@ interface IndicatorCardProps {
    * valor; sin sistema, tendencia ni antigüedad (están en el detalle del sistema).
    */
   compact?: boolean
+  /**
+   * Celda de la rejilla de indicadores del panel (`IND.02`): el nombre arriba y, debajo, el
+   * símbolo de estado y el valor. Misma información que `compact` en menos ancho, para que
+   * caben dos o tres por fila.
+   */
+  tile?: boolean
 }
 
 /**
@@ -42,6 +48,7 @@ export function IndicatorCard({
   showTrend,
   provisional,
   compact = false,
+  tile = false,
 }: IndicatorCardProps) {
   const trend = formatTrend(indicator.trend)
   const st = statusStyle(stale ? 'stale' : indicator.status)
@@ -61,6 +68,22 @@ export function IndicatorCard({
       </span>
       <span className="shrink-0 text-lg font-semibold tabular-nums">
         {formatValue(indicator.last_value, indicator.unit)}
+      </span>
+    </span>
+  )
+  const tileBody = (
+    <span className="flex h-full flex-col justify-between gap-1" title={stateLabel}>
+      <span className="text-xs leading-snug text-env-muted">
+        {name ?? indicator.indicator_id}
+        {provisional && !stale && <span aria-hidden> ⇡</span>}
+      </span>
+      <span className="flex items-center gap-1.5">
+        {/* Símbolo de estado (forma, no solo color) y su texto para lectores de pantalla. */}
+        <StatusIcon glyph={st.glyph} color={st.color} size={16} />
+        <span className="sr-only">{stateLabel}:</span>
+        <span className="text-lg leading-tight font-semibold tabular-nums">
+          {formatValue(indicator.last_value, indicator.unit)}
+        </span>
       </span>
     </span>
   )
@@ -94,21 +117,28 @@ export function IndicatorCard({
       </span>
     </>
   )
-  const cls = `block w-full rounded-lg border border-env-border bg-env-surface text-left ${
-    compact ? 'px-3 py-2' : 'p-3'
-  }`
+  // La celda no lleva borde propio: la rejilla del panel dibuja las líneas.
+  const cls = tile
+    ? 'block h-full w-full px-3 py-2 text-left'
+    : `block w-full rounded-lg border border-env-border bg-env-surface text-left ${
+        compact ? 'px-3 py-2' : 'p-3'
+      }`
 
   return onClick ? (
     <button
       type="button"
       onClick={onClick}
-      className={`${cls} hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary`}
+      className={`${cls} focus-visible:outline-2 focus-visible:outline-env-primary ${
+        tile
+          ? 'hover:bg-env-primary/10 focus-visible:outline-offset-[-2px]'
+          : 'hover:border-env-text focus-visible:outline-offset-2'
+      }`}
     >
-      {compact ? compactBody : body}
+      {tile ? tileBody : compact ? compactBody : body}
     </button>
   ) : (
     <div className={cls}>
-      {compact ? compactBody : body}
+      {tile ? tileBody : compact ? compactBody : body}
       {showTrend && (
         <TrendChart
           indicatorId={indicator.indicator_id}

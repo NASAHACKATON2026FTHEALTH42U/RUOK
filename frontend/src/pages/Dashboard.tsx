@@ -27,8 +27,8 @@ const NO_INDICATORS: never[] = []
 
 /**
  * Panel del member (FE-07): cabecera con estado general, liveness y frescura de los datos (el enlace está en la cabecera global, FE-17);
- * figura del cuerpo (FE-05); cuadrícula de indicadores ordenada por gravedad; detalle del sistema
- * al hacer clic (FE-06). La evaluación se refresca cada 15 s.
+ * figura del cuerpo (FE-05); paneles de sistemas e indicadores (celdas ordenadas por gravedad);
+ * detalle del sistema al hacer clic (FE-06). La evaluación se refresca cada 15 s.
  * Los pendientes de sincronizar del outbox se ven en la cabecera global (PendingSyncChip, FE-11).
  */
 export default function Dashboard() {
@@ -181,7 +181,9 @@ export default function Dashboard() {
     )
 
   return (
-    <section className="space-y-4 xl:pt-[clamp(2.5rem,calc(100vh-788px),7rem)]">
+    // Ocupa el alto disponible (Layout `fill`): en tableta y escritorio el bloque se centra en
+    // vertical y, si no cabe, la página hace scroll como siempre (`my-auto` no corta nada).
+    <section className="flex min-h-0 flex-1 flex-col gap-4">
       {/* `contents`: sin hueco arriba cuando no hay nada que avisar (en escritorio va todo arriba). */}
       <header className="contents">
         {/* Título solo para lectores de pantalla; el estado general va en la barra superior. */}
@@ -197,10 +199,6 @@ export default function Dashboard() {
         )}
       </header>
 
-      {/* Tres columnas en escritorio (≥ 1280 px): sistemas | cuerpo | indicadores, las laterales
-          centradas en vertical, y debajo las fases de la misión a todo el ancho. Entre 768 y
-          1280 px: el cuerpo a la izquierda y, a la derecha, los indicadores y debajo los
-          sistemas, en tantas columnas como quepan (menos scroll vertical). En móvil, el anillo. */}
       {/* Móvil: anillo de sistemas y lista SYS.01 (estilo HUD, maqueta Main). */}
       <SystemsRing
         regions={regions}
@@ -211,74 +209,84 @@ export default function Dashboard() {
         onSelectSystem={setSelected}
       />
 
-      <div className="hidden gap-6 md:grid md:max-lg:grid-cols-[150px_1fr] md:max-xl:grid-rows-[auto_1fr] lg:max-xl:grid-cols-[210px_1fr] md:max-xl:gap-x-4 md:max-xl:gap-y-3 xl:grid-cols-[230px_minmax(240px,320px)_1fr]">
-        <div className="order-3 md:max-xl:col-start-2 md:max-xl:row-start-2 xl:order-1 xl:self-center">
-          <h2 className="mb-3 text-lg font-semibold md:max-xl:mb-2 md:max-xl:text-base">
-            Sistemas
-          </h2>
-          <BodyLegend
-            regions={regions}
-            stale={stale}
-            selectedSystemId={selected}
-            onSelectSystem={setSelected}
-            onHoverSystem={setHovered}
-            className="justify-start md:max-xl:grid md:max-xl:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] md:max-xl:[&_button]:[overflow-wrap:anywhere] md:max-xl:[&_li]:min-w-0"
-            compact
-            vertical
-          />
-        </div>
-
-        <div className="order-1 md:max-xl:col-start-1 md:max-xl:row-span-2 md:max-xl:row-start-1 md:max-[890px]:self-center min-[891px]:max-xl:sticky min-[891px]:max-xl:top-2 min-[891px]:max-xl:self-start xl:sticky xl:top-4 xl:order-2 xl:self-start">
-          <BodyFigure
-            regions={regions}
-            liveness={a.liveness}
-            staleLabel={formatSinceLabel(a.last_seen_at, serverNow())}
-            selectedSystemId={selected}
-            onSelectSystem={setSelected}
-            hoveredSystemId={hovered}
-            onHoverSystem={setHovered}
-            showLegend={false}
-          />
-        </div>
-
-        <div className="order-2 md:max-xl:col-start-2 md:max-xl:row-start-1 xl:order-3 xl:self-center">
-          <h2 className="mb-3 text-lg font-semibold md:max-xl:mb-2 md:max-xl:text-base">
-            Indicadores
-          </h2>
-          {cards.length === 0 ? (
-            <p className="text-env-muted">Todavía no hay mediciones.</p>
-          ) : (
-            // Lista fija: símbolo de estado, nombre y valor (el resto, en el detalle del sistema).
-            <ul
-              // Tableta y portátil pequeño: tantas columnas como quepan y tarjetas más bajas.
-              className="flex flex-col gap-2 md:max-xl:grid md:max-xl:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] md:max-xl:content-start md:max-xl:gap-1.5 md:max-xl:[&_.text-lg]:text-base md:max-xl:[&_button]:py-1.5 md:max-xl:[&_button]:text-sm"
-            >
-              {cards.map(({ systemId, ind }) => (
-                <li key={`${systemId}-${ind.indicator_id}`}>
-                  <IndicatorCard
-                    indicator={ind}
-                    name={indicatorById.get(ind.indicator_id)?.name}
-                    systemName={systemById.get(systemId)?.name}
-                    stale={stale}
-                    provisional={provisionalIds?.has(ind.indicator_id)}
-                    onClick={() => setSelected(systemId)}
-                    compact
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Fases de la misión debajo del cuerpo, a todo el ancho de las tres columnas. */}
-        {env?.kind === 'space' && env.mission && (
-          <div className="order-4 md:col-span-2 xl:col-span-3 xl:mt-8">
-            <MissionPhaseBar
-              mission={env.mission}
-              now={serverNow()}
-              canCheckIn={can('view:checkin')}
+      {/* Tableta y escritorio, sin scroll. Tableta (768–1023 px): el cuerpo a la izquierda y, a
+          la derecha, los indicadores y debajo los sistemas. Desde 1024 px, tres columnas
+          centradas en vertical: sistemas | cuerpo | indicadores. Debajo, la fase de la misión
+          a todo el ancho y en una línea. Los indicadores van en celdas (2 por fila, 3 desde
+          1280 px): 16 indicadores ocupan 6–8 filas en vez de 16. */}
+      <div className="hidden md:my-auto md:flex md:flex-col md:gap-4">
+        <div className="grid gap-3 md:grid-cols-[150px_minmax(0,1fr)] lg:grid-cols-[190px_auto_minmax(0,1fr)] lg:items-center lg:gap-x-5 xl:grid-cols-[220px_auto_minmax(0,1fr)] xl:gap-x-6">
+          <div className="md:row-span-2 md:self-center lg:col-start-2 lg:row-span-1 lg:row-start-1 lg:max-xl:[--body-max:min(200px,max(170px,calc((100vh-300px)/2)))]">
+            <BodyFigure
+              regions={regions}
+              liveness={a.liveness}
+              staleLabel={formatSinceLabel(a.last_seen_at, serverNow())}
+              selectedSystemId={selected}
+              onSelectSystem={setSelected}
+              hoveredSystemId={hovered}
+              onHoverSystem={setHovered}
+              showLegend={false}
             />
           </div>
+
+          <section
+            aria-labelledby="dash-indicators"
+            className="hud-panel min-w-0 md:col-start-2 md:row-start-1 lg:col-start-3"
+          >
+            <h2 id="dash-indicators" className="hud-panel-head">
+              <b>IND.02</b>Indicadores
+            </h2>
+            {cards.length === 0 ? (
+              <p className="px-3.5 py-3 text-sm text-env-muted">Todavía no hay mediciones.</p>
+            ) : (
+              // Celdas separadas por líneas; las del borde se esconden bajo el marco del panel.
+              <ul className="-mr-px -mb-px grid grid-cols-2 xl:grid-cols-3">
+                {cards.map(({ systemId, ind }) => (
+                  <li
+                    key={`${systemId}-${ind.indicator_id}`}
+                    className="border-r border-b border-env-border/60"
+                  >
+                    <IndicatorCard
+                      indicator={ind}
+                      name={indicatorById.get(ind.indicator_id)?.name}
+                      systemName={systemById.get(systemId)?.name}
+                      stale={stale}
+                      provisional={provisionalIds?.has(ind.indicator_id)}
+                      onClick={() => setSelected(systemId)}
+                      tile
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section
+            aria-labelledby="dash-systems"
+            className="hud-panel min-w-0 md:col-start-2 md:row-start-2 lg:col-start-1 lg:row-start-1"
+          >
+            <h2 id="dash-systems" className="hud-panel-head">
+              <b>SYS.01</b>Sistemas
+            </h2>
+            <BodyLegend
+              regions={regions}
+              stale={stale}
+              selectedSystemId={selected}
+              onSelectSystem={setSelected}
+              onHoverSystem={setHovered}
+              className="-mr-px -mb-px grid-cols-2 lg:grid-cols-1"
+              rows
+            />
+          </section>
+        </div>
+
+        {env?.kind === 'space' && env.mission && (
+          <MissionPhaseBar
+            mission={env.mission}
+            now={serverNow()}
+            canCheckIn={can('view:checkin')}
+            compact
+          />
         )}
       </div>
 
