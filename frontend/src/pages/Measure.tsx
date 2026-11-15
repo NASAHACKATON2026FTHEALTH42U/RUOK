@@ -8,6 +8,7 @@ import { useIndicators, type Indicator } from '../api/useIndicators'
 import { useSystems } from '../api/useSystems'
 import { CHECKIN_INDICATORS } from '../components/behavioral/checkin'
 import { PVT_INDICATORS } from '../components/behavioral/pvt'
+import { VoiceNote } from '../components/behavioral/VoiceControls'
 import { IndicatorField } from '../components/measure/IndicatorField'
 import { SystemArt } from '../components/measure/SystemArt'
 import { emptyValue, parseValue, type RawValue } from '../components/measure/measureForm'
@@ -17,6 +18,7 @@ import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox
 import { useEnvironmentStore } from '../store/environment'
 import { useActiveMemberId, useAuth } from '../auth/useAuth'
 import { NoMemberSelected } from '../components/ui/NoMemberSelected'
+import { AutoTextarea } from '../components/ui/AutoTextarea'
 
 /** Sistema cuyas escalas (ánimo, estrés…) se registran con el check-in diario, no con este formulario. */
 const CHECKIN_SYSTEM = 'neuro_behavioral'
@@ -367,7 +369,7 @@ function MeasureForm({
 
         <label className="block text-sm">
           <span className="text-env-muted">Nota (opcional)</span>
-          <textarea
+          <AutoTextarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={2}
@@ -390,6 +392,10 @@ function MeasureForm({
       >
         {phase.kind === 'sending' ? 'Guardando…' : 'Guardar medición'}
       </button>
+      <VoiceNote
+        texts={fields.flatMap((f) => f.measurement_instructions)}
+        className="text-center"
+      />
     </form>
   )
 }

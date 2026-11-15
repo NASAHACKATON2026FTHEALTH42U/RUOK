@@ -17,6 +17,7 @@ from app.db import get_session
 from app.routers.deps import (
     ERRORS_404,
     ERRORS_AUTH,
+    CurrentUser,
     OptionalUser,
     allow_alert,
     allow_env,
@@ -31,13 +32,15 @@ from app.schemas import (
     AlertMessageIn,
     AlertStatus,
     EscalateIn,
+    Event,
     GroundView,
+    NotificationIn,
     ResolveIn,
     Slug,
 )
 from app.schemas.common import ErrorResponse
 from app.services import alerts as alerts_service
-from app.services import comm_link, ground
+from app.services import comm_link, events, ground, notifications
 
 router = APIRouter(tags=["alerts"], responses={**ERRORS_AUTH, **ERRORS_404})
 
@@ -135,6 +138,30 @@ def create_alert(member_id: int, body: AlertIn, session: SessionDep, user: Optio
     except alerts_service.InvalidAlert as exc:
         raise HTTPException(422, str(exc)) from exc
     return alerts_service.to_schema(session, alert)
+
+
+@router.post(
+    "/members/{member_id}/notifications",
+    response_model=Event,
+    responses=ERRORS_409,
+    summary="Notificación personalizada a un member (idempotente por UUID)",
+    description="Del operador o del staff (medic, commander) a un member de su entorno. No es "
+    "una alerta: no escala ni tiene estado. Se guarda como evento `notification.sent` y le "
+    "llega por SSE. Mismo `id` y contenido → la misma; contenido distinto → 409.",
+)
+def send_notification(
+    member_id: int, body: NotificationIn, session: SessionDep, user: CurrentUser
+) -> Event:
+    member = session.get(models.Member, member_id)
+    if member is None:
+        raise HTTPException(404, f"Member desconocido: {member_id}")
+    check(user, "notifications:send")
+    check_member(user, member)
+    try:
+        row = notifications.send(session, member, body, user)
+    except notifications.NotificationConflict as exc:
+        raise HTTPException(409, str(exc)) from exc
+    return events.to_schema(row)
 
 
 @router.post(

@@ -23,11 +23,6 @@ class LoginIn(ApiModel):
     password: str
 
 
-class PinLoginIn(ApiModel):
-    username: str
-    pin: str = Field(pattern=r"^\d{4,6}$")
-
-
 class TokenResponse(ApiModel):
     access_token: str
     token_type: str = "bearer"
@@ -54,16 +49,9 @@ class UserCreate(ApiModel):
     env_id: Slug | None = Field(default=None, description="Obligatorio salvo para admin")
     member_id: int | None = Field(default=None, description="Obligatorio solo si role=member")
     password: str = Field(min_length=8, max_length=72)
-    pin: str | None = Field(default=None, pattern=r"^\d{4,6}$", description="Solo member/medic")
 
 
 class UserUpdate(ApiModel):
     """Activar o desactivar una cuenta (FS-07)."""
 
     active: bool
-
-
-class PinReset(ApiModel):
-    """Nuevo PIN de una cuenta member/medic (FS-07)."""
-
-    pin: str = Field(pattern=r"^\d{4,6}$")

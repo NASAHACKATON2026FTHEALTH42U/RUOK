@@ -3,7 +3,14 @@ import { create } from 'zustand'
 import { api, unwrap } from '../api/client'
 import { createMockEventStream } from '../api/mocks/events'
 import { isMockMode } from '../api/mocks/mode'
-import { isNew, matches, streamUrl, type EventFilter, type RealtimeEvent } from './match'
+import {
+  isNew,
+  matches,
+  streamUrl,
+  type EventFilter,
+  type EventType,
+  type RealtimeEvent,
+} from './match'
 
 /**
  * Tiempo real (FE-29, docs/control-center-and-devices.md §3):
@@ -104,23 +111,28 @@ export function startRealtime(token: string | null, envId: string | null, isAdmi
   }
 }
 
-const EVENT_TYPES = [
-  'measurement.created',
-  'heartbeat',
-  'liveness.changed',
-  'alert.created',
-  'alert.escalated',
-  'alert.acknowledged',
-  'alert.resolved',
-  'link.queued',
-  'link.delivered',
-  'link.state_changed',
-  'sync.batch',
-  'auth.login',
-  'auth.failed',
-  'task.completed',
-  'device.registered',
-] as const
+// Todos los tipos del contrato (EventType): si se añade uno al contrato y no aquí, no compila
+// (un tipo sin escuchar no llegaría nunca: el stream los envía con nombre).
+const EVENT_TYPE_SET: Record<EventType, true> = {
+  'measurement.created': true,
+  heartbeat: true,
+  'liveness.changed': true,
+  'alert.created': true,
+  'alert.escalated': true,
+  'alert.acknowledged': true,
+  'alert.resolved': true,
+  'link.queued': true,
+  'link.delivered': true,
+  'link.state_changed': true,
+  'sync.batch': true,
+  'auth.login': true,
+  'auth.failed': true,
+  'task.completed': true,
+  'device.registered': true,
+  'user.created': true,
+  'notification.sent': true,
+}
+const EVENT_TYPES = Object.keys(EVENT_TYPE_SET) as EventType[]
 
 /** Escucha eventos (o el tic del polling). El handler más reciente se usa siempre. */
 export function useEvents(filter: EventFilter, handler: (event: RealtimeEvent | null) => void) {

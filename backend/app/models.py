@@ -83,7 +83,6 @@ class UserAccount(SQLModel, table=True):
     env_id: str | None = None  # null solo para admin
     member_id: int | None = Field(default=None, foreign_key="member.id")
     password_hash: str
-    pin_hash: str | None = None
     failed_attempts: int = 0
     locked_until: dt.datetime | None = Field(default=None, sa_type=UTCDateTime)
     active: bool = True

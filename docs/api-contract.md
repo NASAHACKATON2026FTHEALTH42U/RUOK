@@ -56,13 +56,11 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 | Método | Ruta | Auth | Descripción |
 |---|---|---|---|
 | POST | `/auth/login` | — | `{username, password}` → `{access_token, expires_at, user: User}`. `401` = credenciales incorrectas; `429` (+ `Retry-After`) = cuenta bloqueada 5 min tras 5 fallos |
-| POST | `/auth/pin` | — | `{username, pin}` → igual que login, también `429` si está bloqueada (PIN rápido en tablets) |
 | GET | `/auth/me` | ✅ | `User` actual |
 | GET | `/auth/demo-users` | — | Solo con `DEMO_MODE=true`: usuarios sembrados para el selector de la demo |
 | GET | `/users?env_id=` *(FS-07)* | admin | Listado de usuarios, activos o no (pestaña Usuarios de `/control`) |
-| POST | `/users` *(FS-07)* | admin | Crear usuario: `{username, display_name, role, env_id, member_id?, password, pin?}` → `201 User`. `409` = usuario ya existente o member ya con cuenta; `422` = rol/entorno/member incoherentes |
+| POST | `/users` *(FS-07)* | admin | Crear usuario: `{username, display_name, role, env_id, member_id?, password}` → `201 User`. `409` = usuario ya existente o member ya con cuenta; `422` = rol/entorno/member incoherentes |
 | PATCH | `/users/{id}` *(FS-07)* | admin | `{active}` → `User`. Desactivar impide el login. `409` si es tu propia cuenta o el último admin activo |
-| PUT | `/users/{id}/pin` *(FS-07)* | admin | `{pin}` → `User`. Restablece el PIN y desbloquea la cuenta. Solo roles `member`/`medic` (`422` si no) |
 
 **Permisos por endpoint:** los define la matriz de [auth-and-roles.md](auth-and-roles.md#matriz-de-acceso-a-vistas). Reglas generales:
 - un `member` solo accede a `/members/{su_member_id}/…`;
@@ -116,6 +114,7 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 | POST | `/alerts/{alert_id}/ack` | `{actor: "member"\|"responder"}` |
 | POST | `/alerts/{alert_id}/resolve` | `{actor, note?}` |
 | POST | `/alerts/{alert_id}/messages` | `{actor, text}` (viaja por el enlace si va a tierra) |
+| POST | `/members/{member_id}/notifications` | **Notificación personalizada** (`NotificationIn`) del operador o del staff (medic, commander de su entorno) a un member. No es una alerta: no escala ni tiene estado. Se guarda como evento `notification.sent` y le llega por SSE. Idempotente por `id` (mismo `id` con otro contenido → `409`) |
 | GET | `/environments/{env_id}/alerts?view=ground` | Consola del responder: solo lo **entregado** por el enlace y filtrado por privacidad |
 
 ### Rutina y gamificación
@@ -157,9 +156,9 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 | Método | Ruta | Rol | Descripción |
 |---|---|---|---|
 | GET | `/events/stream?token=&types=&env_id=` | todos (filtrado por rol) | **SSE**. Cada mensaje es un `Event`. Admite `Last-Event-ID` para reanudar |
-| GET | `/events?since_id=&env_id=&type=&limit=` | admin | Historial de `event_log` (y fallback de polling) |
+| GET | `/events?since_id=&env_id=&type=&limit=&order=` | admin | Historial de `event_log` (y fallback de polling). `type` se puede repetir; `order=desc` da los más recientes primero |
 | GET | `/devices?env_id=` | admin | Dispositivos registrados con `last_seen_at`, `pending_outbox`, `last_sync_at` e IP |
-| GET | `/control/overview` | admin | Todos los entornos: members con `overall_status`, `liveness`, alertas abiertas, enlace y métricas |
+| GET | `/control/overview?env_id=` | admin | Todos los entornos (o solo `env_id`, con sus métricas; 404 si no existe): members con `overall_status`, `liveness`, alertas abiertas, enlace y métricas |
 | POST | `/control/liveness/pause` | admin | `{env_id, paused: bool}`: pausa las alertas de liveness durante la presentación |
 | GET | `/system/network-info` | — | `{lan_urls: ["http://192.168.8.10:8000"], hostname}` para el QR de conexión |
 
@@ -170,7 +169,8 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
   "summary": "SOS emergency de Cmdr. Vega", "payload": {} }
 // type = measurement.created | heartbeat | liveness.changed | alert.created | alert.escalated |
 //        alert.acknowledged | alert.resolved | link.queued | link.delivered | link.state_changed |
-//        sync.batch | auth.login | auth.failed | task.completed | device.registered
+//        sync.batch | auth.login | auth.failed | task.completed | device.registered |
+//        user.created | notification.sent
 ```
 
 ### Enlace con tierra y demo
@@ -293,6 +293,11 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 { "id": "uuid", "category": "psychological", "severity": "warning",
   "message": "Necesito hablar", "system_id": null, "target_role": "ground" }
 
+// NotificationIn (POST /members/{id}/notifications)
+{ "id": "uuid-del-cliente", "title": "Aviso de control" /* opcional, ≤ 80 */,
+  "text": "Recuerda hidratarte" /* 1–500 */, "level": "info" /* info | warning | critical */ }
+// → Event { type: "notification.sent", member_id, payload: { title, text, level, from_role, from_name } }
+
 // Alert
 { "id": "uuid", "member_id": 1, "env_id": "mars", "origin": "manual", "authenticated": true, "created_by_user_id": 7,
   "category": "psychological", "severity": "warning", "system_id": null, "indicator_ids": [],
@@ -319,7 +324,7 @@ Todas son esquemas con nombre en el OpenAPI (`components["schemas"]["Status"]`, 
 { "env_id": "mars", "crew_points": 1820,
   "members": [{ "member_id": 1, "name": "Cmdr. Vega", "points": 340, "streak_days": 5 }] }
 
-// TokenResponse (login / PIN)
+// TokenResponse (login)
 { "access_token": "…", "token_type": "bearer", "expires_at": "...", "user": { /* User */ } }
 // DemoUser = { username, display_name, role, env_id, role_label }
 

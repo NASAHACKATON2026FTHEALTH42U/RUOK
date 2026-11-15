@@ -8,6 +8,7 @@ import type { Intervention } from '../../api/useInterventions'
 import { loadCachedAssessment } from '../../offline/cache'
 import { sendAlert, type AlertResult } from '../../offline/outbox'
 import type { Vocabulary } from '../../store/environment'
+import { ListenButton } from '../behavioral/VoiceControls'
 import { Modal } from '../ui/Modal'
 import {
   CATEGORIES,
@@ -21,6 +22,7 @@ import {
   type AlertCategory,
   type AlertSeverity,
 } from './sos'
+import { AutoTextarea } from '../ui/AutoTextarea'
 
 type Phase =
   | { kind: 'form' }
@@ -186,7 +188,7 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
 
               <label className="block text-sm">
                 <span className="font-medium">Mensaje (opcional)</span>
-                <textarea
+                <AutoTextarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={2}
@@ -317,7 +319,11 @@ export function Queued({
 
       {(steps.length > 0 || offline.length > 0) && (
         <section>
-          <h3 className="font-semibold">Mientras tanto</h3>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-semibold">Mientras tanto</h3>
+            {/* Voz guía (FE-37): los pasos en voz alta, con las manos libres. */}
+            <ListenButton texts={[...steps, ...offline.flatMap((i) => i.steps)]} />
+          </div>
           {steps.length > 0 && (
             <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
               {steps.map((s) => (

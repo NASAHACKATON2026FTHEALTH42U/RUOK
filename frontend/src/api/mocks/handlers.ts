@@ -174,7 +174,6 @@ export const handlers: Record<string, Handler> = {
   // Sistema y auth
   'GET /health': () => ({ status: 'ok', server_time: nowIso() }),
   'POST /auth/login': (req) => tokenFor(body<{ username: string }>(req).username),
-  'POST /auth/pin': (req) => tokenFor(body<{ username: string }>(req).username),
   'GET /auth/me': () =>
     state.currentUser ?? new MockResponse(401, { detail: 'Sin sesión válida (mock)' }),
   'GET /auth/demo-users': () => fx.demoUsers,
@@ -200,8 +199,6 @@ export const handlers: Record<string, Handler> = {
     if (!u) return notFound('Usuario inexistente')
     return { ...u, active: body<Schema<'UserUpdate'>>(req).active }
   },
-  'PUT /users/{user_id}/pin': (req) =>
-    fx.users.find((x) => String(x.id) === req.params.user_id) ?? notFound('Usuario inexistente'),
 
   // Configuración
   'GET /environments': () => fx.environments,
@@ -341,6 +338,24 @@ export const handlers: Record<string, Handler> = {
     }
     state.alerts.push(alert)
     return alert
+  },
+  'POST /members/{member_id}/notifications': (req) => {
+    const b = body<Schema<'NotificationIn'>>(req)
+    const m = findMember(req.params.member_id)
+    if (!m) return notFound('Member desconocido')
+    const event: Schema<'Event'> = {
+      id: Date.now(),
+      type: 'notification.sent',
+      at: nowIso(),
+      env_id: m.env_id,
+      member_id: m.id,
+      user_id: state.currentUser?.id ?? null,
+      device_id: null,
+      ref_id: b.id,
+      summary: b.title || b.text.slice(0, 80),
+      payload: { title: b.title ?? null, text: b.text, level: b.level ?? 'info' },
+    }
+    return event
   },
   'POST /alerts/{alert_id}/escalate': (req) => {
     const a = findAlert(req.params.alert_id)

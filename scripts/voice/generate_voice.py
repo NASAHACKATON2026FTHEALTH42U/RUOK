@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Genera la voz guía de las meditaciones (FE-37) con ElevenLabs, ANTES de usar la app.
+"""Genera la voz guía de la app (FE-37) con ElevenLabs, ANTES de usarla.
 
 La app no llama a ningún servicio en la nube (principio local-first): este script se ejecuta una
 vez, en un ordenador con internet, y deja los audios en frontend/public/voice/ para que vayan
@@ -13,12 +13,23 @@ Uso:
   3. python3 scripts/voice/generate_voice.py --dry-run       # qué falta y cuántos caracteres
   4. python3 scripts/voice/generate_voice.py                 # genera lo que falta o cambió
 
-Lee las meditaciones de backend/app/data/interventions.json (category "meditation") y genera un
-MP3 por frase distinta. El manifiesto (frontend/public/voice/manifest.json) relaciona cada texto
-con su audio, que se llama como un hash del texto, la voz y los ajustes: si cambias una frase,
-solo se regenera esa, y los audios que ya no se usan se borran.
+Recoge todos los textos de guía estáticos y genera un MP3 por frase distinta, en este orden de
+prioridad (si se acaba el saldo, lo primero ya está):
+  1. pasos de las intervenciones (interventions.json, meditaciones incluidas);
+  2. protocolos: mensaje y recomendaciones (protocols.json);
+  3. instrucciones de medición de cada indicador (indicators.json; también son las preguntas del
+     check-in);
+  4. textos de guía de la interfaz (frontend/src/components/behavioral/voiceTexts.json, p. ej.
+     las instrucciones del test PVT).
+Los «Repite 4 ciclos» no se dicen (el reproductor los convierte en repeticiones). Para que se
+pronuncien bien, las abreviaturas se envían enteras («60 s» → «60 segundos»).
 
-Solo se envían a ElevenLabs los textos de las meditaciones: ningún dato de salud.
+El manifiesto (frontend/public/voice/manifest.json) relaciona cada texto con su audio, que se
+llama como un hash del texto, la voz y los ajustes: si cambias una frase, solo se regenera esa, y
+los audios que ya no se usan se borran. Se guarda tras cada audio: si el saldo se acaba a mitad,
+lo generado no se pierde. `--max-chars` pone un tope de caracteres por ejecución.
+
+Solo se envían a ElevenLabs textos de guía de la configuración: ningún dato de salud.
 """
 
 from __future__ import annotations
@@ -27,13 +38,15 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import time
 import urllib.error
 import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-CATALOG = ROOT / "backend" / "app" / "data" / "interventions.json"
+DATA = ROOT / "backend" / "app" / "data"
+UI_TEXTS = ROOT / "frontend" / "src" / "components" / "behavioral" / "voiceTexts.json"
 OUT = ROOT / "frontend" / "public" / "voice"
 MANIFEST = OUT / "manifest.json"
 API = "https://api.elevenlabs.io/v1"
@@ -41,6 +54,31 @@ MODEL = "eleven_multilingual_v2"
 FORMAT = "mp3_44100_64"
 # Voz tranquila: estable y poco teatral.
 SETTINGS = {"stability": 0.7, "similarity_boost": 0.75, "style": 0.1, "use_speaker_boost": True}
+# Mismo patrón que `expandSteps` (frontend/src/components/behavioral/intervention.ts).
+REPEAT = re.compile(r"^\s*repite\b.*?(\d+)\s*(ciclos?|veces)", re.IGNORECASE)
+# Para que se pronuncie bien: abreviaturas enteras y escalas leídas como pausas. Solo cambia lo
+# que se envía a ElevenLabs; el manifiesto sigue usando el texto tal como sale en pantalla.
+SPOKEN = [
+    (re.compile(r"(\d+)\s*ms\b"), r"\1 milisegundos"),
+    (re.compile(r"\b1\s*min\b"), "1 minuto"),
+    (re.compile(r"(\d+)\s*min\b"), r"\1 minutos"),
+    (re.compile(r"\b1\s*s\b"), "1 segundo"),
+    (re.compile(r"(\d+)\s*s\b"), r"\1 segundos"),
+    (re.compile(r"\ben ml\b"), "en mililitros"),
+    (re.compile(r"(\d)\s*=\s*"), r"\1: "),
+    (re.compile(r"\bsolo/a\b"), "solo o sola"),
+]
+
+
+def spoken(text: str) -> str:
+    """Texto que se envía a ElevenLabs ("Mide durante 60 s" → "Mide durante 60 segundos")."""
+    for pattern, replacement in SPOKEN:
+        text = pattern.sub(replacement, text)
+    return text
+
+
+class ApiError(Exception):
+    """Error de la API de ElevenLabs (saldo agotado, clave sin permiso…)."""
 
 
 def load_env() -> None:
@@ -73,19 +111,64 @@ def call(path: str, key: str, body: dict | None = None, accept: str = "applicati
                 time.sleep(2 * 2**attempt)
                 continue
             detail = err.read().decode(errors="replace")[:400]
-            raise SystemExit(f"ElevenLabs respondió {err.code}: {detail}") from err
-    raise SystemExit("ElevenLabs no responde: inténtalo más tarde")
+            raise ApiError(f"ElevenLabs respondió {err.code}: {detail}") from err
+    raise ApiError("ElevenLabs no responde: inténtalo más tarde")
 
 
-def meditation_phrases() -> dict[str, list[str]]:
-    """Pasos de cada meditación del catálogo."""
-    items = json.loads(CATALOG.read_text(encoding="utf-8"))
-    return {i["id"]: i["steps"] for i in items if i.get("category") == "meditation"}
+def _load(name: str) -> list[dict]:
+    return json.loads((DATA / name).read_text(encoding="utf-8"))
+
+
+def _strings(value: object) -> list[str]:
+    """Todas las cadenas de un JSON (listas y objetos anidados), en orden."""
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list):
+        return [s for v in value for s in _strings(v)]
+    if isinstance(value, dict):
+        return [s for v in value.values() for s in _strings(v)]
+    return []
+
+
+def guidance_texts() -> dict[str, list[str]]:
+    """Textos de guía por origen, en orden de prioridad."""
+    interventions = [
+        step for i in _load("interventions.json") for step in i["steps"] if not REPEAT.match(step)
+    ]
+    protocols = [
+        text
+        for p in _load("protocols.json")
+        for text in [p.get("message"), *(r["text"] for r in p.get("recommendations", []))]
+        if text
+    ]
+    measurement = [t for i in _load("indicators.json") for t in i["measurement_instructions"]]
+    ui = _strings(json.loads(UI_TEXTS.read_text(encoding="utf-8"))) if UI_TEXTS.exists() else []
+    return {
+        "intervenciones": interventions,
+        "protocolos": protocols,
+        "medición": measurement,
+        "interfaz": ui,
+    }
 
 
 def clip_name(text: str, voice: str, speed: float) -> str:
     raw = json.dumps([text, voice, MODEL, FORMAT, SETTINGS, speed], ensure_ascii=False)
     return hashlib.sha1(raw.encode()).hexdigest()[:16] + ".mp3"
+
+
+def write_manifest(voice: str, speed: float, texts: list[str], known: dict[str, str]) -> dict:
+    """Escribe el manifiesto con los textos actuales que ya tienen audio y lo devuelve."""
+    current = {t: known[t] for t in texts if t in known and (OUT / known[t]).exists()}
+    MANIFEST.write_text(
+        json.dumps(
+            {"voice_id": voice, "model": MODEL, "format": FORMAT, "speed": speed, "texts": current},
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return current
 
 
 def main() -> None:
@@ -98,6 +181,9 @@ def main() -> None:
     parser.add_argument(
         "--speed", type=float, default=0.9, help="ritmo (0.7–1.2; 1 = normal). Por defecto, 0.9"
     )
+    parser.add_argument(
+        "--max-chars", type=int, help="tope de caracteres a generar en esta ejecución (por saldo)"
+    )
     args = parser.parse_args()
     load_env()
     key = os.environ.get("ELEVENLABS_API_KEY", "")
@@ -106,25 +192,42 @@ def main() -> None:
     if args.list_voices:
         if not key:
             raise SystemExit("Falta ELEVENLABS_API_KEY (en .env o en el entorno)")
-        for v in json.loads(call("/voices", key))["voices"]:
+        try:
+            voices = json.loads(call("/voices", key))["voices"]
+        except ApiError as err:
+            raise SystemExit(str(err)) from err
+        for v in voices:
             labels = ", ".join(f"{k}: {val}" for k, val in (v.get("labels") or {}).items())
             print(f"{v['voice_id']}  {v['name']}  ({labels})")
         return
 
-    phrases = meditation_phrases()
-    texts = sorted({t for steps in phrases.values() for t in steps})
+    sources = guidance_texts()
+    texts: list[str] = []  # sin repetir, en orden de prioridad
+    for group in sources.values():
+        texts += [t for t in dict.fromkeys(group) if t not in texts]
     previous = json.loads(MANIFEST.read_text(encoding="utf-8")) if MANIFEST.exists() else {}
     known: dict[str, str] = previous.get("texts", {})
-    todo = [
-        t
-        for t in texts
-        if known.get(t) != clip_name(t, voice, args.speed) or not (OUT / known[t]).exists()
-    ]
-    chars = sum(len(t) for t in todo)
-    print(
-        f"{len(texts)} frases en {len(phrases)} meditaciones; "
-        f"faltan {len(todo)} ({chars} caracteres)"
-    )
+
+    def missing(t: str) -> bool:
+        return known.get(t) != clip_name(t, voice, args.speed) or not (OUT / known[t]).exists()
+
+    todo = [t for t in texts if missing(t)]
+    for name, group in sources.items():
+        group_todo = [t for t in dict.fromkeys(group) if t in todo]
+        print(
+            f"  {name}: {len(set(group))} frases, faltan {len(group_todo)} "
+            f"({sum(map(len, group_todo))} caracteres)"
+        )
+    print(f"{len(texts)} frases; faltan {len(todo)} ({sum(map(len, todo))} caracteres)")
+    if args.max_chars is not None:
+        budget, capped = args.max_chars, []
+        for t in todo:
+            if len(t) <= budget:
+                capped.append(t)
+                budget -= len(t)
+        if len(capped) < len(todo):
+            print(f"Con --max-chars {args.max_chars}: se generan {len(capped)} de {len(todo)}")
+        todo = capped
     if args.dry_run:
         for t in todo:
             print(f"  - {t}")
@@ -134,39 +237,34 @@ def main() -> None:
 
     OUT.mkdir(parents=True, exist_ok=True)
     settings = {**SETTINGS, **({"speed": args.speed} if args.speed != 1 else {})}
+    spent = 0
+    failure: ApiError | None = None
     for n, text in enumerate(todo, 1):
         name = clip_name(text, voice, args.speed)
-        audio = call(
-            f"/text-to-speech/{voice}?output_format={FORMAT}",
-            key,
-            {"text": text, "model_id": MODEL, "voice_settings": settings},
-            accept="audio/mpeg",
-        )
+        try:
+            audio = call(
+                f"/text-to-speech/{voice}?output_format={FORMAT}",
+                key,
+                {"text": spoken(text), "model_id": MODEL, "voice_settings": settings},
+                accept="audio/mpeg",
+            )
+        except ApiError as err:  # p. ej. saldo agotado: se guarda lo generado hasta aquí
+            failure = err
+            break
         (OUT / name).write_bytes(audio)
         known[text] = name
+        spent += len(text)
+        write_manifest(voice, args.speed, texts, known)
         print(f"[{n}/{len(todo)}] {text}")
         time.sleep(0.3)
 
-    current = {t: known[t] for t in texts if t in known}
+    current = write_manifest(voice, args.speed, texts, known)
     for f in OUT.glob("*.mp3"):  # audios de frases que ya no existen
         if f.name not in current.values():
             f.unlink()
-    MANIFEST.write_text(
-        json.dumps(
-            {
-                "voice_id": voice,
-                "model": MODEL,
-                "format": FORMAT,
-                "speed": args.speed,
-                "texts": current,
-            },
-            ensure_ascii=False,
-            indent=2,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-    print(f"Listo: {len(current)} audios en {OUT.relative_to(ROOT)}")
+    print(f"Listo: {len(current)} audios en {OUT.relative_to(ROOT)}; gastados {spent} caracteres")
+    if failure is not None:
+        raise SystemExit(f"Parado a mitad: {failure}")
 
 
 if __name__ == "__main__":

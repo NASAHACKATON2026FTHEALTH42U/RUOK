@@ -1,57 +1,26 @@
 import type { Environment } from '../../api/useEnvironments'
 import { useIndicators } from '../../api/useIndicators'
-import { useEnvironmentStore } from '../../store/environment'
 import { roleLabel } from '../alerts/sos'
 import { formatDelay, formatGravity, formatKind } from '../../environments/format'
+import { ControlPanel } from './ControlHeader'
 import { formatDuration } from './feed'
 
 /**
- * Cambio de entorno y configuración de solo lectura (FE-32). La edición de umbrales es P2:
- * los perfiles viven en backend/app/data/environments.json ("configuración, no código").
+ * Parámetros del entorno activo, de solo lectura (FE-32): explican lo que pasa al simular
+ * (retardo, escalera, plazos de contacto, umbrales). La edición de umbrales es P2: los perfiles
+ * viven en backend/app/data/environments.json ("configuración, no código").
  */
-export function EnvironmentConfig({ environments }: { environments: Environment[] }) {
-  const envId = useEnvironmentStore((s) => s.envId)
-  const selectEnvironment = useEnvironmentStore((s) => s.selectEnvironment)
+export function EnvironmentConfig({ env }: { env: Environment | undefined }) {
   const catalog = useIndicators()
-  const env = environments.find((e) => e.id === envId)
   const name = (id: string) =>
     (catalog.state === 'ready' ? catalog.data.find((i) => i.id === id)?.name : undefined) ?? id
 
   return (
-    <section
-      aria-label="Entorno activo"
-      className="rounded-xl border border-env-border bg-env-surface p-4"
-    >
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <h2 className="text-xl font-semibold">Entorno activo</h2>
-        <label className="text-sm">
-          <span className="block text-env-muted">
-            Cambiar a (cambia tema, textos y datos de toda la app)
-          </span>
-          <select
-            value={envId ?? ''}
-            onChange={(e) => {
-              const next = environments.find((x) => x.id === e.target.value)
-              if (next) selectEnvironment(next)
-            }}
-            className="mt-1 rounded-md border border-env-border bg-env-bg px-2 py-1.5 text-env-text"
-          >
-            <option value="" disabled>
-              Elige un entorno…
-            </option>
-            {environments.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
+    <ControlPanel title="Parámetros del entorno" aria-label="Parámetros del entorno">
       {!env ? (
-        <p className="mt-3 text-env-muted">Elige un entorno para ver su configuración.</p>
+        <p className="text-env-muted">Elige un entorno para ver su configuración.</p>
       ) : (
-        <div className="mt-4 grid gap-4 text-sm md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-x-6 gap-y-4 text-sm md:grid-cols-2 xl:grid-cols-3">
           <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
             <dt className="text-env-muted">Tipo</dt>
             <dd>{formatKind(env.kind)}</dd>
@@ -122,6 +91,6 @@ export function EnvironmentConfig({ environments }: { environments: Environment[
           </div>
         </div>
       )}
-    </section>
+    </ControlPanel>
   )
 }

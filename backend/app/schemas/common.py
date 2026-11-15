@@ -168,6 +168,14 @@ class EventType(StrEnum):
     auth_failed = "auth.failed"
     task_completed = "task.completed"
     device_registered = "device.registered"
+    user_created = "user.created"
+    notification_sent = "notification.sent"
+
+
+class NotificationLevel(StrEnum):
+    info = "info"
+    warning = "warning"
+    critical = "critical"
 
 
 class LinkDirection(StrEnum):

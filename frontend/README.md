@@ -159,6 +159,7 @@ Todas cuelgan de `Layout`, que pinta la cabecera con el selector de entorno, la 
 | Ruta         | Página              | La implementa |
 | ------------ | ------------------- | ------------- |
 | `/`          | `EnvironmentSelect` | FE-03         |
+| `/members`   | `Members`           | FE-35         |
 | `/dashboard` | `Dashboard`         | FE-07         |
 | `/measure`   | `Measure`           | FE-10         |
 | `/checkin`   | `CheckIn`           | FE-19         |
@@ -341,6 +342,25 @@ Contenido:
 
 **Selector de actividad** (barra lateral y «Más»; solo el member): Normal, EVA (o «actividad de riesgo» en la Tierra) y Sueño. Va en cada heartbeat y cambia cuándo el servidor pregunta «R U OK?» y cuándo da la alerta de "sin contacto". Debajo de los botones, una frase explica qué hace el modo elegido con los tiempos del perfil del entorno (`activityHint()` en `components/liveness/heartbeat.ts`).
 
+## Estado de {crew}: conjunto e individual (FE-35)
+
+`/members` (`src/pages/Members.tsx`) es la vista del staff (medic, commander, admin). Tiene dos modos, con el control **Conjunto | Individual**:
+
+- **Conjunto** (`/members`): una franja con el recuento (críticos, en atención, sin datos, normales, sin contacto y alertas abiertas) y una tarjeta por member, **lo más urgente primero** (`sortByUrgency`: crítico o sin contacto, atención, sin datos, normal).
+  - La densidad depende de cuántos haya (`densityFor`):
+    - hasta 4, **tarjetas ricas**: estado, liveness, última medición, alertas, los sistemas fuera de rango con el indicador que lo explica, y en una línea los que están en rango y los que no tienen datos;
+    - hasta 12, **compactas**: dos líneas;
+    - más, **filas**, sin pedir la evaluación de cada uno.
+  - Con dos filas de tarjetas ricas, se reparten el alto; con una, miden lo que su contenido.
+  - Sin datos frescos, la tarjeta dice «último dato» y lo que está en rango no lleva la marca de normal (nunca verde sin datos).
+  - En móvil, siempre compactas.
+  - Si no caben, hace scroll la lista, no la página (`Layout` en modo `fill`).
+- **Individual** (`/members?vista=individual`): un selector con un botón por member (su estado con icono) y, debajo, **su panel completo** (el mismo `Dashboard`). Clic en una tarjeta del conjunto → individual con ese member.
+  - El member elegido es el **member activo** de toda la app: el mismo que el selector de la barra lateral (`MemberSwitcher`). Si el activo no es de este entorno, se elige el más urgente (`pickIndividual`).
+  - En móvil, el detalle ocupa la pantalla y «← Todos» vuelve al conjunto.
+
+La lógica pura está en `components/members/crewOverview.ts`, con sus tests.
+
 ## Gráfica de tendencia: `TrendChart` (FE-08)
 
 Serie temporal de un indicador con Recharts, dentro de cada `IndicatorCard` del `SystemPanel` (`showTrend`). En la cuadrícula del dashboard no se muestra, para no lanzar una petición por indicador cada 15 s.
@@ -487,10 +507,15 @@ Los dos se envían **por el outbox** (`sendAlert()`, mismo UUID en el dispositiv
 - **Paisajes sonoros** (`components/behavioral/soundscapes.ts`): océano, lluvia, viento, bosque, hoguera y cuenco, **generados en el navegador** con Web Audio (ruido blanco, rosa o marrón filtrado, osciladores lentos y eventos sueltos: gotas, trinos, chasquidos). Sin archivos, sin internet y en bucle sin cortes. Sin `AudioWorklet`, que exige HTTPS (los móviles entran por HTTP). Se cambian en cualquier momento con un fundido.
 - **Volumen y temporizador** (sin límite, 10, 20, 30 o 45 min, con un fundido largo al acabar). El temporizador usa el reloj del dispositivo, no el de la demo. Al salir de la sección, el sonido se apaga. En Safari 17+ suena aunque el iPhone esté en silencio (`navigator.audioSession`).
 - **Meditaciones guiadas**: las intervenciones con `category: "meditation"` de `interventions.json` (respiración consciente, atención a los sonidos, escaneo corporal, relajación muscular progresiva y antes de dormir), con fuentes [S29]–[S31]. Van sin `system_id`: tienen su sección y no entran en las recomendaciones del motor. Se reproducen en el modo guiado (`InterventionPlayer`, con `toolbar` para cambiar de paisaje sin salir y `onStepChange` para la campana del cuenco al empezar, en cada paso y al terminar).
-- **Voz guía (FE-37)**: cada frase de las meditaciones se genera **antes**, con ElevenLabs, y va empaquetada en `public/voice/` (la app no llama a la nube). Se dice al empezar cada paso por Web Audio y baja el paisaje mientras habla. Hay un interruptor «Voz guía», en la lista y en el reproductor, que se recuerda en el dispositivo. Sin audios generados no aparece y queda el texto, como antes. Para generarlos:
-  1. `.env` en la raíz (está en `.gitignore`) con `ELEVENLABS_API_KEY=…` y `ELEVENLABS_VOICE_ID=…` (una voz española tranquila).
-  2. `python3 scripts/voice/generate_voice.py --list-voices` para elegir la voz y `--dry-run` para ver qué falta y cuántos caracteres gasta (hoy, 37 frases y unos 2.000 caracteres).
-  3. `python3 scripts/voice/generate_voice.py` genera solo lo que falta o cambió y escribe `public/voice/manifest.json` (texto → audio). Después, commit de `frontend/public/voice/`.
+- **Voz guía (FE-37)**: en **todas las partes guiadas**. Cada frase se genera **antes**, con ElevenLabs, y va empaquetada en `public/voice/` (la app no llama a la nube). Suena por Web Audio y baja el paisaje mientras habla. Sin audio para unos textos, sus controles no aparecen y queda el texto, como antes. Hay dos formas de usarla:
+  - **Interruptor «Voz guía»** (`VoiceToggle`): con él encendido, cada paso se lee al mostrarse y se para al cambiar de paso o salir. La preferencia es del dispositivo y vale para toda la app (`ruok.voice`; se respeta la antigua `ruok.meditation.voice`). Está en el reproductor de **intervenciones y meditaciones** (`InterventionPlayer`, también desde «Qué puedes hacer ahora» y el resultado del check-in), en la lista de meditaciones y en el **check-in**. En el check-in se lee cada pregunta al llegar a ella o al encender la voz, pero no al abrir la página.
+  - **«Escuchar»** (`ListenButton`): lee unos pasos a demanda, aunque el interruptor esté apagado. Está en las **instrucciones de medición** de cada indicador, las **recomendaciones** del sistema, el **protocolo autónomo** de una alerta, el «Mientras tanto» del **SOS sin enviar** y las **instrucciones del test PVT**. Durante la prueba PVT nunca suena.
+  - Siempre se indica que la voz es sintética: «La voz guía está generada con IA (ElevenLabs)».
+  - Para generar los audios:
+    1. `.env` en la raíz (está en `.gitignore`) con `ELEVENLABS_API_KEY=…` y `ELEVENLABS_VOICE_ID=…` (una voz española tranquila).
+    2. `python3 scripts/voice/generate_voice.py --list-voices` para elegir la voz y `--dry-run` para ver qué falta y cuántos caracteres gasta. Hoy son 152 frases y unos 8.500 caracteres en total, sacadas de los pasos de `interventions.json`, el mensaje y las recomendaciones de `protocols.json`, las instrucciones de medición de `indicators.json` y `src/components/behavioral/voiceTexts.json` (textos de guía de la interfaz, p. ej. la PVT).
+    3. `python3 scripts/voice/generate_voice.py` genera solo lo que falta o cambió y escribe `public/voice/manifest.json` (texto → audio). Con `--max-chars N` no pasa de N caracteres, por el saldo. Si se corta a mitad, lo generado se guarda. Después, commit de `frontend/public/voice/`.
+    4. Si cambias un texto de guía, vuelve a lanzarlo: sin audio, esa frase solo se ve.
 - Accesible: paisajes como botones con `aria-pressed`, estado en `aria-live`, animación de «Sonando» quieta con «reducir movimiento».
 
 ## Login y sesión (FE-27)
@@ -509,7 +534,7 @@ Diseño completo en [`docs/auth-and-roles.md`](../docs/auth-and-roles.md).
 | `member`, `family`   | `/dashboard`                       |
 | `medic`, `commander` | `/members` (members de su entorno) |
 | `responder`, `psych` | `/ground`                          |
-| `admin`              | `/` (selector de entorno)          |
+| `admin`              | `/control` (centro de control)     |
 
 - **Rutas protegidas:** `RequireSession` envuelve todo menos `/login`. Sin sesión → `/login?next=<ruta>`.
 - **401 o `exp` vencido:** la sesión pasa a "caducada" y se va a `/login?expired=1` ("Tu sesión ha caducado… no se ha perdido nada"); al volver a entrar se regresa a la página donde se estaba. El outbox se pausa solo con el 401 (FE-11) y se reanuda tras el login.
@@ -530,9 +555,15 @@ const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el
 
 - **Rutas:** cada ruta de `App.tsx` va envuelta en `<RequireRole>` con el permiso de `ROUTE_PERMISSIONS`. Una ruta prohibida **redirige a la vista inicial del rol** (`homeFor`).
 - **Menú:** la navegación solo muestra las vistas permitidas (p. ej. el flight surgeon ve Historial, Alertas y su consola; el medic, además, "Tripulación"). El logo lleva a la vista inicial del rol.
-- **Selector de entorno** de la cabecera y página `/`: solo `admin`.
+- **Menú del operador (`admin`):** gestión, monitorización y pruebas del entorno del ámbito (`menuFor()` en `navigation.ts`). Las vistas de autocuidado de un member no salen (sigue pudiendo abrir el panel de cada uno desde el centro de control):
+  - **Centro de control** (`/control`): métricas, estado de cada member y eventos en vivo.
+  - **Simulación** (`/control/simulate`): alertas y notificaciones personalizadas, mediciones provocadas, escenarios del entorno, enlace, vigilancia de contacto y reloj de la demo.
+  - **Alertas**: con «＋ Alerta o notificación» en lugar de «Enviar aviso a control». Las resueltas salen de la lista y quedan plegadas en «Resueltas».
+  - **Equipo**, **Registro** (`/control/log`: incidencias resueltas y eventos importantes: alertas, notificaciones, usuarios, accesos, misiones, dispositivos, contacto y enlace), **Usuarios** (`/control/users`), **Dispositivos** (`/control/devices`, con el QR) y la consola de tierra.
+- **Avisos en vivo** (`LiveAlertToast`): el operador recibe los de cualquier entorno (abre el stream sin filtro de entorno); el member, las alertas que otros crean para él y las notificaciones (`notification.sent`).
+- **Ámbito (`ScopeSelector`)**: el único sitio donde se elige el entorno (solo `admin`) y el member (quien supervisa: `admin`, `medic`, `commander`, con la opción «Todo …»). Va arriba de la barra lateral y, en el móvil, en «Más»; todas las vistas muestran y actúan sobre lo elegido.
 - **"Medir ahora"** del `SystemPanel`: el member para sí mismo; medic y admin para cualquiera ("medir para otro solo medic").
-- **SOS:** sin sesión, siempre visible. Con sesión, oculto para `responder` y `psych` (están en tierra).
+- **SOS:** sin sesión, siempre visible. Con sesión, oculto para `responder` y `psych` (están en tierra) y para el operador (`admin`): es control, y en su barra lateral ve una placa «CONTROL» sin función (en el móvil, nada).
 - **Cabecera:** usuario y rol con el **vocabulario del entorno** (`userRoleLabel()`: astronauta, oficial médico, flight surgeon…; si no hay término, el `role_label` del servidor).
 - El panel de demo y `/control` ya tienen permiso (`action:demo-panel`, `view:control`) para FE-31/FE-32.
 - Ocultar en la UI **no es seguridad**: el back comprueba rol y propiedad en cada endpoint (BE-27).

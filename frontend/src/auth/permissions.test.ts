@@ -19,7 +19,7 @@ const MATRIX: Record<Permission, Role[]> = {
   // existe en el backend (BE-22: home:read y home:write solo para member y admin).
   'view:home-messages': ['member', 'admin'],
   'view:control': ['admin'],
-  'action:sos': ['member', 'medic', 'commander', 'family', 'admin'],
+  'action:sos': ['member', 'medic', 'commander', 'family'],
   'action:measure-others': ['medic', 'admin'],
   'action:change-environment': ['admin'],
   'action:demo-panel': ['admin'],

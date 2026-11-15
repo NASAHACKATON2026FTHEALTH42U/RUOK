@@ -8,7 +8,7 @@ describe('homeFor', () => {
     expect(homeFor('commander')).toBe('/members')
     expect(homeFor('responder')).toBe('/ground')
     expect(homeFor('psych')).toBe('/ground')
-    expect(homeFor('admin')).toBe('/')
+    expect(homeFor('admin')).toBe('/control')
     expect(homeFor('family')).toBe('/dashboard')
   })
 })

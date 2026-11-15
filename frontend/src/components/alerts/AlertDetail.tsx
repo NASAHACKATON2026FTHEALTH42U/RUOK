@@ -7,6 +7,7 @@ import { useAuth } from '../../auth/useAuth'
 import { formatAgo } from '../../lib/time'
 import { ackAlert, escalateAlert, resolveAlert, sendAlertMessage } from '../../offline/outbox'
 import type { Vocabulary } from '../../store/environment'
+import { ListenButton } from '../behavioral/VoiceControls'
 import { hhmm } from '../ui/link'
 import { StatusBadge } from '../ui/StatusBadge'
 import {
@@ -165,7 +166,17 @@ export function AlertDetail({
       {/* Protocolo autónomo */}
       {!resolved && showProtocol && autonomous && (
         <section>
-          <h3 className="font-semibold">Protocolo autónomo (mientras llega la respuesta)</h3>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-semibold">Protocolo autónomo (mientras llega la respuesta)</h3>
+            {/* Voz guía (FE-37): el mensaje y los pasos, en voz alta (manos libres). */}
+            <ListenButton
+              label="Escuchar protocolo"
+              texts={[
+                ...(system?.escalation.message ? [system.escalation.message] : []),
+                ...steps.flatMap((i) => i.steps),
+              ]}
+            />
+          </div>
           {system?.escalation.message && (
             <p className="mt-1 text-sm">{system.escalation.message}</p>
           )}

@@ -78,7 +78,7 @@ export default function Login() {
     setBusy(true)
     setError(null)
     try {
-      const u = await login(user, { password })
+      const u = await login(user, password)
       const next = params.get('next')
       navigate(next && expired ? next : homeFor(u.role), { replace: true })
     } catch (err) {
@@ -98,29 +98,30 @@ export default function Login() {
           <span className="hud-label text-[0.6875rem]">Sin internet · Local</span>
         </div>
 
-        <div className="mt-2 lg:mt-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-10">
-          {/* Columna 1: marca y acceso */}
-          <div className="flex flex-col">
+        {/* Rejilla con áreas: en móvil, una columna (marca, acceso, entorno y usuarios, y el SOS
+            abajo del todo). En escritorio, la marca centrada arriba y dos bloques que empiezan y
+            acaban a la misma altura: acceso con el SOS debajo | entorno y usuarios. */}
+        <div className="mt-2 grid flex-1 grid-rows-[auto_auto_auto_1fr] gap-3 [grid-template-areas:'head'_'form'_'side'_'sos'] lg:mt-4 lg:flex-none lg:grid-cols-2 lg:grid-rows-[auto_1fr_auto] lg:gap-x-8 lg:gap-y-4 lg:[grid-template-areas:'head_head'_'form_side'_'sos_side']">
+          {/* Marca y saludo, centrados */}
+          <div className="flex flex-col items-center text-center [grid-area:head]">
             <RuokRings />
+            <h1 className="mt-1 text-[1.875rem] leading-tight font-light lg:text-[2.125rem]">
+              Hola de nuevo, <span className="text-env-primary">{vocab.member}.</span>
+            </h1>
+            <p className="mt-0.5 text-sm text-env-muted">Inicia sesión en el sistema de a bordo.</p>
+          </div>
 
-            <div className="mt-1 text-center">
-              <h1 className="text-[1.875rem] leading-tight font-light lg:text-[2.125rem]">
-                Hola de nuevo, <span className="text-env-primary">{vocab.member}.</span>
-              </h1>
-              <p className="mt-0.5 text-sm text-env-muted">
-                Inicia sesión en el sistema de a bordo.
-              </p>
-            </div>
-
+          {/* Acceso */}
+          <div className="flex flex-col gap-3 [grid-area:form]">
             {expired && (
-              <p role="status" className="hud-panel mt-4 p-3 text-sm">
+              <p role="status" className="hud-panel p-3 text-sm">
                 Tu sesión ha caducado. Vuelve a entrar: lo que tengas pendiente en este dispositivo
                 se enviará después, no se ha perdido nada.
               </p>
             )}
 
             <form
-              className="hud-panel mt-4"
+              className="hud-panel"
               onSubmit={(e) => {
                 e.preventDefault()
                 void enter(username.trim(), secret)
@@ -167,8 +168,8 @@ export default function Login() {
             </form>
           </div>
 
-          {/* Columna 2: entorno, usuarios demo y ayuda */}
-          <div className="mt-3 flex flex-1 flex-col gap-3 lg:mt-0">
+          {/* Entorno y usuarios demo (en escritorio, el panel de usuarios llega hasta abajo) */}
+          <div className="flex flex-col gap-3 [grid-area:side] lg:[&>section]:flex-1">
             {envList.length > 0 && (
               <label className="hud-panel flex items-center gap-3 py-1.5 pr-[22px] pl-3.5">
                 <span className="hud-label shrink-0">Entorno</span>
@@ -178,7 +179,7 @@ export default function Login() {
                     const next = envList.find((x) => x.id === e.target.value)
                     if (next) selectEnvironment(next)
                   }}
-                  className="hud-input min-w-0 flex-1 !border-0 !bg-transparent !px-1 !font-sans !text-[0.9375rem]"
+                  className="hud-input min-w-0 flex-1 !border-0 !bg-transparent !pl-1 !font-sans !text-[0.9375rem]"
                 >
                   {envList.map((e) => (
                     <option key={e.id} value={e.id}>
@@ -216,7 +217,7 @@ export default function Login() {
                         className="flex min-h-11 w-full flex-col gap-0.5 px-3 py-2.5 text-left hover:bg-env-primary/10 disabled:opacity-60"
                       >
                         {/* Members por su nombre; el resto, por su rol con las palabras del
-                            entorno ("Oficial médico") y debajo su grupo. */}
+                          entorno ("Oficial médico") y debajo su grupo. */}
                         <span className="text-sm">
                           {u.role === 'member' || u.role === 'admin'
                             ? shortDisplayName(u.display_name, envName)
@@ -233,14 +234,15 @@ export default function Login() {
                 </ul>
               </section>
             )}
+          </div>
 
-            <div className="mt-auto flex flex-col gap-2.5 pt-1 lg:mt-0">
-              <SosButton variant="inline" />
-              <p className="text-center text-xs leading-snug text-env-muted">
-                Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni
-                sustituye el criterio de un profesional sanitario.
-              </p>
-            </div>
+          {/* SOS y aviso médico: abajo del todo (en escritorio, bajo el acceso) */}
+          <div className="flex flex-col gap-2.5 self-end pt-1 [grid-area:sos]">
+            <SosButton variant="inline" />
+            <p className="text-center text-xs leading-snug text-env-muted">
+              Prototipo de autoevaluación. <strong>No es un dispositivo médico</strong> ni sustituye
+              el criterio de un profesional sanitario.
+            </p>
           </div>
         </div>
       </main>

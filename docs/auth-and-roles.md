@@ -31,7 +31,7 @@
 | Vista / acción | member | medic | commander | responder | psych | family (P2) | admin |
 |---|---|---|---|---|---|---|---|
 | Login | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **SOS** (también **sin sesión**) y avisos a control | ✅ | ✅ | ✅ | — | — | ✅ | ✅ |
+| **SOS** (también **sin sesión**) y avisos a control | ✅ | ✅ | ✅ | — | — | ✅ | — (es control: crea alertas y notificaciones desde Simulación) |
 | Selector de entorno | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
 | Dashboard (cuerpo + semáforo) | ✅ propio | ✅ todos los del entorno | 👁️ todos | 🔒 (usa `/ground`) | 🔒 | 👁️ agregado de su familiar | ✅ |
 | Registrar mediciones | ✅ propio | ✅ para cualquier member (asistida) | 🔒 | 🔒 | 🔒 | 🔒 | ✅ |
@@ -56,8 +56,7 @@ La matriz vive en código en **un único sitio** por lado: `backend/app/auth/per
 
 | Método | Para quién | Cómo |
 |---|---|---|
-| **Usuario + contraseña** | Todos | `POST /auth/login`. Hash **bcrypt**. |
-| **PIN rápido (4–6 dígitos)** | `member`, `medic` en tablets compartidas | `POST /auth/pin` con `{username, pin}`. Se bloquea 5 min tras 5 fallos. **La pantalla de login ya no lo ofrece** (solo usuario y contraseña); el endpoint sigue en el backend. |
+| **Usuario + contraseña** | Todos | `POST /auth/login`. Hash **bcrypt**. Se bloquea 5 min tras 5 fallos seguidos. Es el único método: el login rápido con PIN se retiró (pantalla, endpoints y datos). |
 | **Selector de usuarios demo** | Solo en la demo (`DEMO_MODE=true`) | Botones en la pantalla de login con los usuarios sembrados **del entorno elegido** (por defecto la misión espacial, Marte) y el operador global. Entran con la contraseña de demo `ruok-<env>`. |
 
 **Sesión:**
@@ -95,7 +94,7 @@ Por cada entorno:
 
 Además hay un `admin` global. En geriatría y hospital se añade 1 `family` (P2).
 
-- Las contraseñas de demo son del tipo `ruok-<env>` y el PIN es `1234`. Son **solo para la demo**: con `DEMO_MODE=false` el seed no crea usuarios con contraseña conocida.
+- Las contraseñas de demo son del tipo `ruok-<env>`. Son **solo para la demo**: con `DEMO_MODE=false` el seed no crea usuarios con contraseña conocida.
 
 ## Fuera de alcance (roadmap)
 - SSO o directorio de la agencia.

@@ -1,0 +1,8 @@
+{
+  "pvt": [
+    "Mide tu tiempo de reacción, un marcador objetivo de fatiga.",
+    "La pantalla espera un rato al azar, entre 2 y 10 segundos.",
+    "Cuando cambie de color y diga «¡Pulsa!», toca la pantalla lo antes posible, o pulsa la barra espaciadora.",
+    "No pulses antes de tiempo: cuenta como falso inicio."
+  ]
+}

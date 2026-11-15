@@ -184,7 +184,7 @@ export default function History() {
             value={indicatorId ?? ''}
             onChange={(e) => set('indicator', e.target.value)}
             disabled={options.length === 0}
-            className="hud-input !px-2.5 !font-sans !text-sm focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary"
+            className="hud-input !pl-2.5 !font-sans !text-sm focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary"
           >
             {options.length === 0 && <option value="">Cargando…</option>}
             {options.map((id) => (

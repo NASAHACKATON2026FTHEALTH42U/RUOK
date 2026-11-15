@@ -1,16 +1,14 @@
-"""Cuentas de usuario: hash de contraseña/PIN, bloqueo y usuarios demo (BE-25).
+"""Cuentas de usuario: hash de contraseña, bloqueo y usuarios demo (BE-25).
 
 Ver docs/auth-and-roles.md:
 
-- Contraseña y PIN con **bcrypt**.
+- Contraseña con **bcrypt** (el login con PIN se retiró: solo usuario y contraseña).
 - **5 fallos seguidos → bloqueo de 5 min** (``failed_attempts``, ``locked_until``).
-  El contador es común a contraseña y PIN, para que no se pueda alternar entre
-  los dos y duplicar los intentos.
-- Usuarios demo (contraseña ``ruok-<env>``, PIN ``1234``) **solo con
+- Usuarios demo (contraseña ``ruok-<env>``) **solo con
   ``DEMO_MODE=true``**. Con ``DEMO_MODE=false`` solo se crea el ``admin`` con
   una contraseña aleatoria, que se escribe una vez en el log del servidor.
 
-Los endpoints ``/auth/*`` (login, PIN, me y JWT) son BE-26.
+Los endpoints ``/auth/*`` (login, me y JWT) son BE-26.
 """
 
 from __future__ import annotations
@@ -27,7 +25,8 @@ import bcrypt
 from sqlmodel import Session, select
 
 from app import clock, models
-from app.services import environments
+from app.schemas.common import EventType
+from app.services import environments, events
 
 __all__ = [
     "LOCK_SECONDS",
@@ -36,12 +35,10 @@ __all__ = [
     "UserConflict",
     "UserInvalid",
     "check_password",
-    "check_pin",
     "create_user",
     "demo_mode",
     "hash_secret",
     "is_locked",
-    "reset_pin",
     "role_label",
     "seed_users",
     "set_active",
@@ -52,9 +49,7 @@ log = logging.getLogger(__name__)
 
 MAX_FAILED_ATTEMPTS = 5
 LOCK_SECONDS = 5 * 60
-DEMO_PIN = "1234"
 STAFF_ROLES = ("medic", "commander", "responder", "psych")
-PIN_ROLES = {"member", "medic"}  # tablets compartidas (docs/auth-and-roles.md)
 
 
 class AccountLocked(Exception):
@@ -82,7 +77,7 @@ def _rounds() -> int:
 
 
 def hash_secret(secret: str) -> str:
-    """Hash bcrypt (con sal) de una contraseña o un PIN."""
+    """Hash bcrypt (con sal) de una contraseña."""
     return bcrypt.hashpw(secret.encode(), bcrypt.gensalt(_rounds())).decode()
 
 
@@ -139,13 +134,6 @@ def check_password(
     Lanza ``AccountLocked`` si la cuenta está bloqueada (sin mirar la contraseña).
     """
     return _check(session, user, password, user.password_hash, now)
-
-
-def check_pin(
-    session: Session, user: models.UserAccount, pin: str, now: datetime | None = None
-) -> bool:
-    """Como ``check_password``, con el PIN. Sin PIN configurado, siempre falla."""
-    return _check(session, user, pin, user.pin_hash, now)
 
 
 # ── Usuarios demo ────────────────────────────────────────────────────
@@ -243,7 +231,6 @@ def seed_users(
                 role=role,
                 env_id=env_id,
                 password_hash=cached(secret),
-                pin_hash=cached(DEMO_PIN) if role in PIN_ROLES else None,
                 **kw,
             )
         )
@@ -273,7 +260,6 @@ def create_user(
     env_id: str | None,
     member_id: int | None,
     password: str,
-    pin: str | None,
 ) -> models.UserAccount:
     """Crea una cuenta y hace commit. ``UserInvalid`` (422) o ``UserConflict`` (409)."""
     if role == "admin":
@@ -290,8 +276,6 @@ def create_user(
             raise UserInvalid("Un member necesita un member_id existente de su entorno")
     elif member_id is not None:
         raise UserInvalid("Solo el rol member lleva member_id")
-    if pin is not None and role not in PIN_ROLES:
-        raise UserInvalid("Solo member y medic usan PIN")
 
     if session.exec(
         select(models.UserAccount).where(models.UserAccount.username == username)
@@ -312,9 +296,18 @@ def create_user(
         env_id=env_id,
         member_id=member_id,
         password_hash=hash_secret(password),
-        pin_hash=hash_secret(pin) if pin else None,
     )
     session.add(account)
+    session.flush()  # id para el evento
+    events.emit(
+        session,
+        EventType.user_created,
+        env_id=env_id,
+        member_id=member_id,
+        user_id=account.id,
+        summary=f"Usuario creado: {display_name} ({role})",
+        payload={"username": username, "display_name": display_name, "role": role},
+    )
     session.commit()
     session.refresh(account)
     return account
@@ -343,15 +336,3 @@ def set_active(
     session.refresh(account)
     return account
 
-
-def reset_pin(session: Session, account: models.UserAccount, pin: str) -> models.UserAccount:
-    """Restablece el PIN y desbloquea la cuenta."""
-    if account.role not in PIN_ROLES:
-        raise UserInvalid("Solo member y medic usan PIN")
-    account.pin_hash = hash_secret(pin)
-    account.failed_attempts = 0
-    account.locked_until = None
-    session.add(account)
-    session.commit()
-    session.refresh(account)
-    return account

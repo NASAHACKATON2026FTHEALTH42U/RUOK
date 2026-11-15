@@ -38,26 +38,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/pin": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Login rápido con PIN
-         * @description Solo para `member` y `medic` (tablets compartidas).
-         */
-        post: operations["login_pin_api_v1_auth_pin_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/auth/me": {
         parameters: {
             query?: never;
@@ -125,23 +105,6 @@ export interface paths {
         head?: never;
         /** Activar o desactivar un usuario (admin) */
         patch: operations["update_user_api_v1_users__user_id__patch"];
-        trace?: never;
-    };
-    "/api/v1/users/{user_id}/pin": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Restablecer el PIN de un usuario (admin) */
-        put: operations["reset_user_pin_api_v1_users__user_id__pin_put"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/api/v1/environments": {
@@ -452,6 +415,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/members/{member_id}/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Notificación personalizada a un member (idempotente por UUID)
+         * @description Del operador o del staff (medic, commander) a un member de su entorno. No es una alerta: no escala ni tiene estado. Se guarda como evento `notification.sent` y le llega por SSE. Mismo `id` y contenido → la misma; contenido distinto → 409.
+         */
+        post: operations["send_notification_api_v1_members__member_id__notifications_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/alerts/{alert_id}/escalate": {
         parameters: {
             query?: never;
@@ -736,7 +719,7 @@ export interface paths {
         };
         /**
          * Historial de eventos (admin; fallback de polling)
-         * @description Eventos de `event_log` con `id > since_id`, en orden. `limit` máximo 500.
+         * @description Eventos de `event_log` con `id > since_id`, en orden. `limit` máximo 500. `type` se puede repetir (varios tipos). Con `order=desc`, los más recientes primero (el feed y el Registro del centro de control).
          */
         get: operations["list_events_api_v1_events_get"];
         put?: never;
@@ -776,7 +759,7 @@ export interface paths {
         };
         /**
          * Vista global del centro de control (admin, sin retardo)
-         * @description Todos los entornos con sus members (`overall_status`, `liveness`), alertas abiertas por severidad, enlace, `liveness_paused` y métricas: mediciones recibidas en la última hora, alertas abiertas, dispositivos activos (últimos 5 min) y tiempo medio hasta el primer reconocimiento (`null` si no hay ninguno).
+         * @description Todos los entornos con sus members (`overall_status`, `liveness`), alertas abiertas por severidad, enlace, `liveness_paused` y métricas: mediciones recibidas en la última hora, alertas abiertas, dispositivos activos (últimos 5 min) y tiempo medio hasta el primer reconocimiento (`null` si no hay ninguno). Con `env_id`, solo ese entorno y sus métricas (404 si no existe).
          */
         get: operations["control_overview_api_v1_control_overview_get"];
         put?: never;
@@ -1497,7 +1480,7 @@ export interface components {
          * EventType
          * @enum {string}
          */
-        EventType: "measurement.created" | "heartbeat" | "liveness.changed" | "alert.created" | "alert.escalated" | "alert.acknowledged" | "alert.resolved" | "link.queued" | "link.delivered" | "link.state_changed" | "sync.batch" | "auth.login" | "auth.failed" | "task.completed" | "device.registered";
+        EventType: "measurement.created" | "heartbeat" | "liveness.changed" | "alert.created" | "alert.escalated" | "alert.acknowledged" | "alert.resolved" | "link.queued" | "link.delivered" | "link.state_changed" | "sync.batch" | "auth.login" | "auth.failed" | "task.completed" | "device.registered" | "user.created" | "notification.sent";
         /** FastForwardIn */
         FastForwardIn: {
             /** Seconds */
@@ -2253,6 +2236,28 @@ export interface components {
             /** Hostname */
             hostname: string;
         };
+        /**
+         * NotificationIn
+         * @description Notificación personalizada a un member (operador o staff). Idempotente por `id`.
+         */
+        NotificationIn: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title?: string | null;
+            /** Text */
+            text: string;
+            /** @default info */
+            level?: components["schemas"]["NotificationLevel"];
+        };
+        /**
+         * NotificationLevel
+         * @enum {string}
+         */
+        NotificationLevel: "info" | "warning" | "critical";
         /** OkResponse */
         OkResponse: {
             /**
@@ -2262,21 +2267,6 @@ export interface components {
             ok: boolean;
             /** Detail */
             detail: string | null;
-        };
-        /** PinLoginIn */
-        PinLoginIn: {
-            /** Username */
-            username: string;
-            /** Pin */
-            pin: string;
-        };
-        /**
-         * PinReset
-         * @description Nuevo PIN de una cuenta member/medic (FS-07).
-         */
-        PinReset: {
-            /** Pin */
-            pin: string;
         };
         /** PrivacyIn */
         PrivacyIn: {
@@ -2521,11 +2511,6 @@ export interface components {
             member_id?: number | null;
             /** Password */
             password: string;
-            /**
-             * Pin
-             * @description Solo member/medic
-             */
-            pin?: string | null;
         };
         /**
          * UserUpdate
@@ -2602,60 +2587,6 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["LoginIn"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TokenResponse"];
-                };
-            };
-            /** @description Credenciales incorrectas */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Cuenta bloqueada tras 5 fallos (Retry-After) */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    login_pin_api_v1_auth_pin_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
-                "x-device-id"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PinLoginIn"];
             };
         };
         responses: {
@@ -2959,71 +2890,6 @@ export interface operations {
             };
             /** @description Choca con el estado actual */
             409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    reset_user_pin_api_v1_users__user_id__pin_put: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
-                "x-device-id"?: string | null;
-            };
-            path: {
-                user_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PinReset"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["User"];
-                };
-            };
-            /** @description Sin sesión válida */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Rol sin permiso o dato ajeno */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Recurso inexistente */
-            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3930,6 +3796,80 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Alert"];
+                };
+            };
+            /** @description Sin sesión válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rol sin permiso o dato ajeno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Mismo id con otro contenido, o alerta resuelta */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    send_notification_api_v1_members__member_id__notifications_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
+                "x-device-id"?: string | null;
+            };
+            path: {
+                member_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotificationIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Event"];
                 };
             };
             /** @description Sin sesión válida */
@@ -5002,8 +4942,9 @@ export interface operations {
             query?: {
                 since_id?: number;
                 env_id?: string | null;
-                type?: components["schemas"]["EventType"] | null;
+                type?: components["schemas"]["EventType"][] | null;
                 limit?: number;
+                order?: "asc" | "desc";
             };
             header?: {
                 /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
@@ -5106,7 +5047,9 @@ export interface operations {
     };
     control_overview_api_v1_control_overview_get: {
         parameters: {
-            query?: never;
+            query?: {
+                env_id?: string | null;
+            };
             header?: {
                 /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
                 "x-device-id"?: string | null;

@@ -45,7 +45,7 @@ Es la **vista global, en tiempo real y sin retardo** para operar y gestionar la 
 4. **Enlace con tierra:** estado de cada entorno (`online`, `delayed`, `los`) y cola de mensajes con su ETA.
 5. **Métricas:** mediciones por hora, alertas abiertas por severidad, tiempo medio de respuesta a alertas y dispositivos activos.
 6. **Gestión:**
-   - **Usuarios y roles:** crear, desactivar y restablecer PIN.
+   - **Usuarios y roles:** crear y activar o desactivar.
    - **Entornos:** consultar la configuración. Es de **solo lectura en el MVP**; la edición de umbrales es P2.
    - **Demo:** escenarios, estado del enlace, fast-forward del reloj y reset.
    - **QR de conexión:** la URL del servidor en la red local.

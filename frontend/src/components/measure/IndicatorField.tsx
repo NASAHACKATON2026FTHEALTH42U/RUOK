@@ -1,6 +1,7 @@
 import { STATUS_COLORS } from '../ui/status'
 import { useId } from 'react'
 import type { Indicator } from '../../api/useIndicators'
+import { ListenButton } from '../behavioral/VoiceControls'
 import type { RawValue } from './measureForm'
 
 interface IndicatorFieldProps {
@@ -38,7 +39,15 @@ export function IndicatorField({ indicator, value, error, onChange }: IndicatorF
 
       {indicator.measurement_instructions.length > 0 && (
         <div className="mt-1">
-          <p className="text-xs font-medium tracking-wide text-env-muted uppercase">Cómo medir</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs font-medium tracking-wide text-env-muted uppercase">Cómo medir</p>
+            {/* Voz guía (FE-37): los pasos en voz alta, con las manos ocupadas en el aparato. */}
+            <ListenButton
+              texts={indicator.measurement_instructions}
+              label={`Escuchar cómo medir: ${indicator.name}`}
+              iconOnly
+            />
+          </div>
           <ol className="mt-1 space-y-1 text-sm">
             {indicator.measurement_instructions.map((step, i) => (
               <li key={i} className="flex gap-2">

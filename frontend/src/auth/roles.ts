@@ -19,7 +19,7 @@ export function homeFor(role: Role): string {
     case 'psych':
       return '/ground'
     case 'admin':
-      return '/'
+      return '/control' // el entorno se elige en el ámbito de la barra lateral
   }
 }
 
