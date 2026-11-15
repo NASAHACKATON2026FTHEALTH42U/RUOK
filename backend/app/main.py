@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
 
-from app import clock
+from app import clock, i18n
 from app.db import engine, init_db
 from app.routers import alerts, auth, catalog, game, health, home, members, realtime
 from app.routers.deps import device_id_header
@@ -63,8 +63,11 @@ app.add_middleware(
 
 @app.middleware("http")
 async def add_server_time_header(request: Request, call_next):
-    """Todas las respuestas llevan la hora del reloj de la demo."""
+    """Todas las respuestas llevan la hora del reloj de la demo. Fija el idioma de la petición
+    (`Accept-Language`, FE-38): catálogos y textos del servidor en inglés con `en`."""
+    i18n.set_lang(i18n.parse_accept_language(request.headers.get("accept-language")))
     response = await call_next(request)
+    response.headers["Content-Language"] = i18n.lang()
     response.headers["X-Server-Time"] = clock.now().isoformat()
     return response
 

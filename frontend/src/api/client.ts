@@ -19,6 +19,7 @@
  * caen a mocks si el servidor no responde; las escrituras siempre lanzan NetworkError.
  */
 import createClient, { type Middleware } from 'openapi-fetch'
+import { currentLang } from '../i18n/lang'
 import { mockFetch } from './mocks/mockFetch'
 import { isMockFallbackEnabled, isMockMode, setFallbackActive } from './mocks/mode'
 import type { components, paths } from './types.gen'
@@ -107,6 +108,8 @@ const ruokMiddleware: Middleware = {
     if (token) request.headers.set('Authorization', `Bearer ${token}`)
     const deviceId = hooks.getDeviceId()
     if (deviceId) request.headers.set('X-Device-Id', deviceId)
+    // Idioma de los catálogos y textos del servidor (FE-38).
+    request.headers.set('Accept-Language', currentLang())
     return request
   },
   onResponse({ response }) {

@@ -35,6 +35,7 @@ export function navItems(vocab: { crew: string; ground: string }): NavItem[] {
     { to: '/control/devices', label: 'Dispositivos', icon: 'list' },
     { to: '/control/log', label: 'Registro', icon: 'list' },
     { to: '/', label: 'Entornos', icon: 'list' },
+    { to: '/settings', label: 'Ajustes', icon: 'list' },
   ]
 }
 
@@ -65,6 +66,7 @@ const OPERATOR_MENU = [
   '/control/users',
   '/control/devices',
   '/ground',
+  '/settings',
 ]
 
 /**

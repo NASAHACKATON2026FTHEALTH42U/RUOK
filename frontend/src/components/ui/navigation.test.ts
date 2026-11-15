@@ -25,6 +25,7 @@ describe('menú por rol', () => {
       '/control/users',
       '/control/devices',
       '/ground',
+      '/settings',
     ])
     for (const selfCare of ['/measure', '/checkin', '/pvt', '/missions', '/meditation', '/home'])
       expect(items).not.toContain(selfCare)
