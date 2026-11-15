@@ -8,7 +8,7 @@ import {
   type Liveness,
   type Status,
 } from '../ui/status'
-import { StatusHeadline } from '../ui/StatusHeadline'
+import { StatusIcon } from '../ui/StatusBadge'
 
 /**
  * Panel principal en móvil con el estilo HUD (docs/design/hud-style.md §6): saludo, el cuerpo en
@@ -141,10 +141,10 @@ export function SystemsRing({
       <section
         ref={ringRef}
         aria-label="Estado global"
-        className="hud-panel flex w-full items-stretch gap-3 p-3"
+        className="hud-panel grid w-full grid-cols-[minmax(0,5fr)_minmax(0,6fr)] items-stretch gap-4 p-3.5"
         style={{ height: ringHeight }}
       >
-        <div className="min-h-0 w-[40%] max-w-[10rem] shrink-0 [container-type:size]">
+        <div className="min-h-0 [container-type:size]">
           <BodyFigure
             regions={regions}
             liveness={liveness}
@@ -155,18 +155,32 @@ export function SystemsRing({
             fill
           />
         </div>
-        <div className="flex min-w-0 flex-1 flex-col justify-center gap-2.5">
-          <StatusHeadline state={headline} />
+        <div className="flex min-w-0 flex-col justify-between gap-3 py-1">
+          {/* Estado general como icono (forma y color según el estado; nunca solo color) con la
+              palabra en pequeño. */}
+          <div role="status" aria-live="polite" className="flex items-center gap-3">
+            <StatusIcon
+              glyph={statusStyle(headline).glyph}
+              color={statusStyle(headline).color}
+              size={44}
+            />
+            <p className="min-w-0">
+              <span className="hud-label block">Estado general</span>
+              <span className="block text-sm font-semibold tracking-wide uppercase">
+                {statusStyle(headline).label}
+              </span>
+            </p>
+          </div>
           {urgent ? (
             <>
               <p className="min-w-0">
                 <span className="hud-label block">Lo más urgente</span>
-                <span className="block truncate font-medium">{urgent.name}</span>
+                <span className="mt-1 block text-lg leading-snug font-medium">{urgent.name}</span>
               </p>
               <button
                 type="button"
                 onClick={() => onSelectSystem(urgent.systemId)}
-                className="hud-btn hud-btn-primary !h-11 self-start px-4"
+                className="hud-btn hud-btn-primary !h-12 w-full"
               >
                 Ver qué hacer
               </button>

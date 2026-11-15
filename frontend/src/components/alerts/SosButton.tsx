@@ -67,7 +67,7 @@ export function SosButton({
         <button
           {...common}
           // 1,5 rem hasta el menú: el hueco de la barra (0,75 rem; 0,5 en pantallas bajas) + este margen.
-          className="sos-font hud-btn hud-btn-danger-solid mb-3 !h-16 w-full shrink-0 !text-2xl !font-semibold !tracking-[0.35em] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text [@media(max-height:800px)]:mb-4 [@media(max-height:800px)]:!h-14"
+          className="sos-font hud-btn hud-btn-danger-solid mb-3 !h-16 w-full shrink-0 !text-[2.4rem] !font-bold !tracking-[0.22em] !leading-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text [@media(max-height:800px)]:mb-4 [@media(max-height:800px)]:!h-14"
         >
           SOS
         </button>
@@ -122,7 +122,7 @@ export function NoticeButton({ className = '' }: { className?: string }) {
         type="button"
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
-        className={`inline-flex min-h-11 items-center gap-2 rounded-lg border border-env-border px-3.5 text-sm font-medium hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${className}`}
+        className={`inline-flex min-h-11 items-center gap-2  border border-env-border px-3.5 text-sm font-medium hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${className}`}
       >
         <Icon name="mail" size={17} />
         Enviar aviso a control

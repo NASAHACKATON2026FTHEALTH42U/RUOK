@@ -84,14 +84,14 @@ export function RuokModal({ memberId, onAnswered, onSendSos, onAddDetails }: Ruo
                   onAnswered()
                   onAddDetails()
                 }}
-                className="rounded-xl bg-[#d03b3b] px-6 py-4 text-lg font-semibold text-white"
+                className=" bg-[var(--sos-bg)] hover:bg-[var(--sos-bg-strong)] px-6 py-4 text-lg font-semibold text-[var(--sos-text)]"
               >
                 Añadir detalles
               </button>
               <button
                 type="button"
                 onClick={onAnswered}
-                className="rounded-xl border border-env-border px-6 py-3"
+                className=" border border-env-border px-6 py-3"
               >
                 Cerrar
               </button>
@@ -113,7 +113,7 @@ export function RuokModal({ memberId, onAnswered, onSendSos, onAddDetails }: Ruo
                 type="button"
                 disabled={sending}
                 onClick={() => void answer(true)}
-                className="rounded-xl bg-env-primary px-6 py-5 text-xl font-semibold text-env-primary-text disabled:opacity-60"
+                className=" bg-env-primary px-6 py-5 text-xl font-semibold text-env-primary-text disabled:opacity-60"
               >
                 {sending && phase.ok ? 'Enviando…' : 'Estoy bien'}
               </button>
@@ -121,7 +121,7 @@ export function RuokModal({ memberId, onAnswered, onSendSos, onAddDetails }: Ruo
                 type="button"
                 disabled={sending}
                 onClick={() => void answer(false)}
-                className="rounded-xl bg-[#d03b3b] px-6 py-5 text-xl font-semibold text-white disabled:opacity-60"
+                className=" bg-[var(--sos-bg)] hover:bg-[var(--sos-bg-strong)] px-6 py-5 text-xl font-semibold text-white disabled:opacity-60"
               >
                 {sending && !phase.ok ? 'Enviando…' : 'Necesito ayuda'}
               </button>

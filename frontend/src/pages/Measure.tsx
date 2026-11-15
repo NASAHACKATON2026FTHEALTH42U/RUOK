@@ -14,7 +14,8 @@ import { SystemArt } from '../components/measure/SystemArt'
 import { emptyValue, parseValue, type RawValue } from '../components/measure/measureForm'
 import { statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
-import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox'
+import { sendMeasurements } from '../offline/outbox'
+import { pushToast } from '../store/toasts'
 import { useEnvironmentStore } from '../store/environment'
 import { useActiveMemberId, useAuth } from '../auth/useAuth'
 import { NoMemberSelected } from '../components/ui/NoMemberSelected'
@@ -25,12 +26,7 @@ const CHECKIN_SYSTEM = 'neuro_behavioral'
 /** Indicadores que tienen su propio test (check-in diario y PVT): no se piden en «Medir». */
 const OWN_TEST: readonly string[] = [...CHECKIN_INDICATORS, ...PVT_INDICATORS]
 
-type Phase =
-  | { kind: 'editing' }
-  | { kind: 'sending' }
-  | { kind: 'sent'; result: MeasurementBatchResult }
-  | { kind: 'queued' }
-  | { kind: 'failed'; message: string }
+type Phase = { kind: 'editing' } | { kind: 'sending' } | { kind: 'failed'; message: string }
 
 /**
  * Medición guiada (FE-10). Sin parámetros: elegir sistema. Con `?system=` (lo usa "Medir ahora")
@@ -100,7 +96,7 @@ export default function Measure() {
     return (
       <section className="space-y-4">
         {title}
-        <div className="h-40 animate-pulse rounded-xl bg-env-surface" aria-busy="true" />
+        <div className="h-40 animate-pulse  bg-env-surface" aria-busy="true" />
       </section>
     )
   }
@@ -108,6 +104,29 @@ export default function Measure() {
   // Neuro-conductual → check-in diario (solo quien puede hacerlo; el resto ve el formulario).
   if (toCheckin && systemParam === CHECKIN_SYSTEM && !indicatorParam) {
     return <Navigate to="/checkin" replace />
+  }
+
+  // Se pidió un sistema o indicador que este entorno no mide: decirlo (antes volvía a la lista
+  // sin explicar nada y parecía que el botón no hacía nada).
+  if (fields.length === 0 && (systemParam || indicatorParam) && catalog.state === 'ready') {
+    const sysName =
+      systems.state === 'ready' ? systems.data.find((x) => x.id === systemParam)?.name : undefined
+    return (
+      <section className="mx-auto flex w-full max-w-md flex-col gap-4">
+        {title}
+        <div className="hud-panel p-4" role="status">
+          <p className="font-medium">
+            {sysName ?? 'Este indicador'} no se mide en {env?.name ?? 'este entorno'}.
+          </p>
+          <p className="mt-1 text-sm text-env-muted">
+            Ningún indicador de este sistema está activo en la configuración del entorno.
+          </p>
+        </div>
+        <Link to="/measure" className="hud-btn hud-btn-primary">
+          Elegir qué medir
+        </Link>
+      </section>
+    )
   }
 
   // Paso 1: elegir qué medir.
@@ -126,7 +145,7 @@ export default function Measure() {
         <ul className="grid flex-1 auto-rows-fr gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
           {withIndicators.map(({ s, inds }) => {
             const card =
-              'relative isolate flex h-full flex-col justify-center gap-1 overflow-hidden rounded-xl border border-env-border bg-env-surface p-4 pt-12 hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary lg:p-6 lg:pt-14 [&>span:nth-of-type(1)]:lg:text-xl [&>span:nth-of-type(2)]:lg:text-base'
+              'relative isolate flex h-full flex-col justify-center gap-1 overflow-hidden  border border-env-border bg-env-surface p-4 pt-12 hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary lg:p-6 lg:pt-14 [&>span:nth-of-type(1)]:lg:text-xl [&>span:nth-of-type(2)]:lg:text-base'
             if (toCheckin && s.id === CHECKIN_SYSTEM) {
               // Check-in diario en lugar del formulario, y una tarjeta por indicador sin test propio.
               const rest = inds.filter((i) => !OWN_TEST.includes(i.id))
@@ -191,7 +210,7 @@ export default function Measure() {
       memberId={memberId}
       fields={fields}
       heading={indicatorParam ? fields[0].name : (systemName ?? '')}
-      onDone={() => navigate('/dashboard')}
+      onDone={() => navigate('/measure')}
     />
   )
 }
@@ -278,7 +297,32 @@ function MeasureForm({
     try {
       // Se guarda en el dispositivo y se intenta enviar; sin red queda pendiente (no se pierde).
       const r = await sendMeasurements(memberId, batch)
-      setPhase(r.status === 'sent' ? { kind: 'sent', result: r.result } : { kind: 'queued' })
+      // Aviso con el resultado y de vuelta a Medir para seguir (sin pantalla intermedia vacía).
+      if (r.status === 'sent') {
+        const a = r.result.assessment
+        const sys = a.systems.find((x) => x.system_id === fields[0].system_id)
+        pushToast({
+          tone: 'success',
+          icon: 'pulse',
+          label: 'Medición enviada',
+          title: `${heading}: ${statusStyle(sys?.status ?? a.overall_status).label}`,
+          body:
+            (r.result.accepted === 1
+              ? '1 valor guardado'
+              : `${r.result.accepted} valores guardados`) +
+            ` · estado general: ${statusStyle(a.overall_status).label.toLowerCase()}`,
+          actions: [{ label: 'Ver el panel', to: '/dashboard' }],
+        })
+      } else {
+        pushToast({
+          tone: 'info',
+          icon: 'upload',
+          label: 'Guardada en el dispositivo',
+          title: 'Sin conexión con el servidor',
+          body: 'La medición se enviará sola al volver la conexión, sin duplicarse.',
+        })
+      }
+      onDone()
     } catch (err) {
       // Solo si falla el propio guardado local (IndexedDB no disponible).
       setPhase({
@@ -286,78 +330,6 @@ function MeasureForm({
         message: `No se ha podido guardar en el dispositivo: ${String(err)}`,
       })
     }
-  }
-
-  if (phase.kind === 'queued') {
-    return (
-      <section className="mx-auto max-w-xl space-y-4">
-        <h1 className="text-2xl font-semibold">Medición guardada en el dispositivo</h1>
-        <div className="rounded-xl border border-env-border bg-env-surface p-4" role="status">
-          <p>
-            <span aria-hidden>⇡ </span>
-            No hay conexión con el servidor. La medición está guardada aquí y{' '}
-            <strong>se enviará sola</strong> cuando vuelva la conexión, sin duplicarse.
-          </p>
-          <p className="mt-2 text-sm text-env-muted">
-            Verás los pendientes en la cabecera. Mientras tanto, el panel la evalúa en este
-            dispositivo y la marca como «provisional».
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={onDone}
-            className="rounded-lg bg-env-primary px-4 py-2 font-medium text-env-primary-text"
-          >
-            Ver el panel
-          </button>
-          <Link
-            to="/measure"
-            className="rounded-lg border border-env-border px-4 py-2 hover:border-env-text"
-          >
-            Medir otra cosa
-          </Link>
-        </div>
-      </section>
-    )
-  }
-
-  if (phase.kind === 'sent') {
-    const { accepted, duplicates, assessment } = phase.result
-    return (
-      <section className="mx-auto max-w-xl space-y-4">
-        <h1 className="text-2xl font-semibold">Medición guardada</h1>
-        <div className="rounded-xl border border-env-border bg-env-surface p-4" role="status">
-          <p>
-            {accepted === 1 ? '1 medición enviada' : `${accepted} mediciones enviadas`}
-            {duplicates > 0 && ` (${duplicates} ya estaban guardadas)`}.
-          </p>
-          <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-env-muted">
-            Evaluación actualizada:
-            <StatusBadge
-              status={assessment.overall_status}
-              label={`Estado general: ${statusStyle(assessment.overall_status).label}`}
-              size="sm"
-            />
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={onDone}
-            className="rounded-lg bg-env-primary px-4 py-2 font-medium text-env-primary-text"
-          >
-            Ver el panel
-          </button>
-          <Link
-            to="/measure"
-            className="rounded-lg border border-env-border px-4 py-2 hover:border-env-text"
-          >
-            Medir otra cosa
-          </Link>
-        </div>
-      </section>
-    )
   }
 
   const busy = phase.kind === 'sending'

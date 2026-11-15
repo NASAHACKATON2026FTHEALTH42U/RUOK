@@ -8,13 +8,20 @@ import { useVocab } from '../../environments/useVocab'
  * `part` permite pintar solo el usuario o solo el botón (la barra superior de escritorio los
  * separa: el usuario a la izquierda y "Salir" pegado a la derecha).
  */
-export function SessionMenu({ part = 'all' }: { part?: 'all' | 'user' | 'logout' }) {
+export function SessionMenu({
+  part = 'all',
+  block = false,
+}: {
+  part?: 'all' | 'user' | 'logout'
+  /** «Salir» a todo el ancho (bloque de sesión de «Más», en móvil). */
+  block?: boolean
+}) {
   const user = useSession((s) => s.user)
   const vocabulary = useVocab()
   const navigate = useNavigate()
   if (!user) return null
   return (
-    <span className="flex items-center gap-2 text-sm">
+    <span className={`flex items-center gap-2 text-sm ${block ? 'w-full' : ''}`}>
       {part !== 'logout' && (
         <span className="text-env-muted">
           <span className="text-env-text">{user.display_name}</span>
@@ -29,7 +36,7 @@ export function SessionMenu({ part = 'all' }: { part?: 'all' | 'user' | 'logout'
             await logout()
             navigate('/login')
           }}
-          className="relative inline-flex min-h-11 items-center gap-2 rounded-md border border-env-primary/70 bg-env-primary/10 px-3.5 font-display text-sm font-semibold tracking-[0.14em] text-env-text uppercase md:min-h-11 md:px-4 md:text-[0.9375rem] before:absolute before:inset-x-0 before:-inset-y-[4px] before:content-[''] hover:bg-env-primary hover:text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary"
+          className={`relative inline-flex min-h-11 items-center gap-2 ${block ? 'w-full justify-center' : ''}  border border-env-primary/70 bg-env-primary/10 px-3.5 font-display text-sm font-semibold tracking-[0.14em] text-env-text uppercase md:min-h-11 md:px-4 md:text-[0.9375rem] before:absolute before:inset-x-0 before:-inset-y-[4px] before:content-[''] hover:bg-env-primary hover:text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary`}
         >
           <svg
             viewBox="0 0 16 16"

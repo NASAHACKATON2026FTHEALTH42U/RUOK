@@ -132,7 +132,7 @@ export function SosEmergency({
           data-autofocus
           tabIndex={-1}
           // Tras enviar (o sin conexión), en móvil el mensaje va centrado en la pantalla.
-          className={`flex w-full max-w-md flex-col rounded-2xl border-2 border-st-crit bg-env-bg p-5 shadow-2xl outline-none max-sm:min-h-[calc(100dvh-1.5rem)] sm:p-6 ${
+          className={`flex w-full max-w-md flex-col  border-2 border-st-crit bg-env-surface p-5 shadow-2xl outline-none max-sm:min-h-[calc(100dvh-1.5rem)] sm:p-6 ${
             phase.kind === 'countdown' || phase.kind === 'sending'
               ? ''
               : 'max-sm:justify-center-safe'
@@ -167,7 +167,7 @@ export function SosEmergency({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full rounded-lg border border-env-border px-4 py-3 font-medium hover:border-env-text"
+                className="w-full  border border-env-border px-4 py-3 font-medium hover:border-env-text"
               >
                 Cerrar
               </button>
@@ -206,14 +206,14 @@ export function SosEmergency({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="min-h-14 rounded-xl border-2 border-env-text px-4 text-lg font-semibold hover:bg-env-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary max-sm:min-h-18 max-sm:text-2xl"
+                  className="min-h-14  border-2 border-env-text px-4 text-lg font-semibold hover:bg-env-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary max-sm:min-h-18 max-sm:text-2xl"
                 >
                   Cancelar
                 </button>
                 <button
                   type="button"
                   onClick={() => void fireRef.current()}
-                  className="min-h-12 rounded-xl bg-[var(--sos-bg)] px-4 font-semibold text-[var(--sos-text)] hover:bg-[var(--sos-bg-strong)] active:bg-[var(--sos-bg-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text max-sm:min-h-16 max-sm:text-xl"
+                  className="min-h-12  bg-[var(--sos-bg)] px-4 font-semibold text-[var(--sos-text)] hover:bg-[var(--sos-bg-strong)] active:bg-[var(--sos-bg-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text max-sm:min-h-16 max-sm:text-xl"
                 >
                   Enviar ya
                 </button>
@@ -250,7 +250,7 @@ export function SosEmergency({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full rounded-lg border border-env-border px-4 py-3 font-medium hover:border-env-text"
+                className="w-full  border border-env-border px-4 py-3 font-medium hover:border-env-text"
               >
                 Cerrar
               </button>

@@ -17,7 +17,7 @@ interface CrewKudosProps {
 const SHOWN = 4
 
 const field =
-  'min-h-11 w-full rounded-lg border border-env-border bg-env-bg px-3 text-sm text-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary'
+  'min-h-11 w-full  border border-env-border bg-env-bg px-3 text-sm text-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary'
 
 /**
  * Kudos entre compañeros (FE-24): un agradecimiento breve a alguien del equipo. Suma puntos a
@@ -85,7 +85,7 @@ export function CrewKudos({ kudos, members, memberId, canSend, onSend }: CrewKud
             <button
               type="submit"
               disabled={to === '' || !text || busy}
-              className="min-h-11 rounded-lg bg-env-primary px-4 text-sm font-semibold text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary disabled:opacity-60"
+              className="min-h-11  bg-env-primary px-4 text-sm font-semibold text-env-primary-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary disabled:opacity-60"
             >
               {busy ? 'Enviando…' : 'Dar kudos'}
             </button>

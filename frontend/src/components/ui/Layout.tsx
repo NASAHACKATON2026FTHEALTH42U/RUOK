@@ -59,7 +59,7 @@ export function Layout() {
   const logo = (
     <NavLink
       to={role ? homeFor(role) : '/'}
-      className="inline-flex min-h-11 shrink-0 items-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-env-primary"
+      className="inline-flex min-h-11 shrink-0 items-center  focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-env-primary"
       aria-label="R U OK?: inicio"
     >
       <RuokMark />
@@ -151,7 +151,7 @@ export function Layout() {
               lateral. */}
           <div className="hidden shrink-0 px-4 pt-4 md:block lg:px-6">
             <div
-              className={`mx-auto flex w-full flex-wrap items-center gap-x-5 gap-y-3 rounded-xl border border-env-border bg-env-surface px-5 py-3.5 lg:gap-x-8 lg:px-7 max-w-[1800px]`}
+              className={`mx-auto flex w-full flex-wrap items-center gap-x-5 gap-y-3  border border-env-border bg-env-surface px-5 py-3.5 lg:gap-x-8 lg:px-7 max-w-[1800px]`}
             >
               {logo}
               <span aria-hidden="true" className="h-8 w-px shrink-0 bg-env-border" />
@@ -161,7 +161,7 @@ export function Layout() {
                 id={TOPBAR_SLOT_ID}
                 // Por debajo de lg no cabe todo en una línea: el resumen de la página baja a una
                 // segunda línea (y no ocupa nada si está vacío) en vez de solaparse con el reloj.
-                className="flex flex-wrap items-center gap-2 max-lg:order-last max-lg:basis-full max-lg:empty:hidden lg:flex-1"
+                className="flex flex-wrap items-center gap-2 max-lg:order-last max-lg:basis-full max-lg:empty:hidden lg:flex-1 lg:justify-center"
               />
               <div className="max-lg:ml-auto">
                 <HudClock env={env} />

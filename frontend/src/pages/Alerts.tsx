@@ -9,6 +9,7 @@ import { useEnvironments } from '../api/useEnvironments'
 import { useInterventions } from '../api/useInterventions'
 import { useActiveMemberId, useAuth } from '../auth/useAuth'
 import { AlertDetail } from '../components/alerts/AlertDetail'
+import { AlertRowBody } from '../components/alerts/AlertRowBody'
 import { CaseFeedbackFor } from '../components/alerts/CaseFeedbackNote'
 import { EnvironmentAlerts } from '../components/alerts/EnvironmentAlerts'
 import {
@@ -19,7 +20,6 @@ import {
 } from '../components/alerts/alertFormat'
 import { roleLabel } from '../components/alerts/sos'
 import { OperatorMessageButton } from '../components/control/OperatorMessageForm'
-import { StatusBadge } from '../components/ui/StatusBadge'
 import { useVocab } from '../environments/useVocab'
 import { formatAgo } from '../lib/time'
 import { useEnvironmentStore } from '../store/environment'
@@ -121,20 +121,20 @@ export default function Alerts() {
           type="button"
           onClick={() => setSelected(a.id)}
           aria-current={active}
-          className={`flex w-full flex-col gap-0.5 px-3.5 py-2.5 text-left focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary ${
+          className={`flex w-full flex-col gap-1.5 px-4 py-3.5 text-left focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary ${
             active
               ? 'bg-env-primary/10 shadow-[inset_3px_0_0_var(--env-primary)]'
               : 'hover:bg-env-primary/5'
           } ${a.status === 'resolved' ? 'opacity-60' : ''}`}
         >
-          <span className="flex items-center justify-between gap-2">
-            <span className="truncate font-medium">{categoryLabel(a.category)}</span>
-            <StatusBadge status={sev.status} label={sev.label} size="sm" />
-          </span>
-          <span className="truncate text-xs text-env-muted">
-            {a.origin === 'auto' ? 'Automática' : 'Manual'} · {statusLabel(a.status)} · a{' '}
-            {roleLabel(a.target_role, vocab)} · {formatAgo(a.created_at, now)}
-          </span>
+          <AlertRowBody
+            title={categoryLabel(a.category)}
+            status={sev.status}
+            severityLabel={sev.label}
+            state={`${statusLabel(a.status)} · ${a.origin === 'auto' ? 'Automática' : 'Manual'}`}
+            ago={formatAgo(a.created_at, now)}
+            target={`a ${roleLabel(a.target_role, vocab)}`}
+          />
         </button>
       </li>
     )
@@ -148,9 +148,7 @@ export default function Alerts() {
           {operator ? operatorButton : <NoticeButton />}
         </div>
       </header>
-      {alerts.state === 'loading' && (
-        <div className="h-32 animate-pulse rounded-xl bg-env-surface" />
-      )}
+      {alerts.state === 'loading' && <div className="h-32 animate-pulse  bg-env-surface" />}
       {alerts.state === 'error' && (
         <p className="text-env-muted">
           No se han podido cargar las alertas.{' '}

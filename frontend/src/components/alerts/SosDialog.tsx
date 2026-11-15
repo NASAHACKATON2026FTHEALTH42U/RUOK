@@ -80,7 +80,7 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
     // Bloqueante: mientras está abierto no se puede usar nada más. Mientras se envía, no se cierra.
     <Modal labelledBy="notice-title" onClose={phase.kind === 'sending' ? undefined : onClose}>
       <div className="flex min-h-full items-end justify-center sm:items-center sm:p-6">
-        <div className="w-full max-w-lg rounded-t-2xl border border-env-border bg-env-bg p-5 shadow-2xl sm:rounded-2xl">
+        <div className="w-full max-w-lg  border border-env-border bg-env-bg p-5 shadow-2xl ">
           <div className="flex items-start justify-between gap-3">
             <h2 id="notice-title" className="text-xl font-semibold">
               {phase.kind === 'queued' ? 'No enviado' : 'Enviar aviso a control'}
@@ -91,7 +91,7 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
               onClick={onClose}
               disabled={phase.kind === 'sending'}
               aria-label="Cerrar"
-              className="rounded-md px-2 py-1 text-env-muted hover:bg-env-surface hover:text-env-text disabled:opacity-50"
+              className=" px-2 py-1 text-env-muted hover:bg-env-surface hover:text-env-text disabled:opacity-50"
             >
               ✕
             </button>
@@ -130,7 +130,7 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
                         setCategory(c.id)
                         setSeverity(defaultSeverity(c.id))
                       }}
-                      className={`rounded-lg border p-3 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
+                      className={` border p-3 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
                         category === c.id
                           ? 'border-env-text bg-env-surface'
                           : 'border-env-border hover:border-env-text'
@@ -159,7 +159,7 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
                       role="radio"
                       aria-checked={severity === s.id}
                       onClick={() => setSeverity(s.id)}
-                      className={`flex-1 rounded-lg border px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
+                      className={`flex-1  border px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
                         severity === s.id
                           ? 'border-env-text bg-env-surface font-medium'
                           : 'border-env-border hover:border-env-text'
@@ -176,7 +176,7 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
                 <select
                   value={target ?? ''}
                   onChange={(e) => setTarget(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-env-border bg-env-surface px-3 py-2 text-env-text focus:outline-2 focus:outline-offset-1 focus:outline-env-primary"
+                  className="mt-1 w-full  border border-env-border bg-env-surface px-3 py-2 text-env-text focus:outline-2 focus:outline-offset-1 focus:outline-env-primary"
                 >
                   {targets(ladder).map((r, i) => (
                     <option key={r} value={r}>
@@ -193,7 +193,7 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={2}
-                  className="mt-1 w-full rounded-md border border-env-border bg-env-surface px-3 py-2 text-env-text focus:outline-2 focus:outline-offset-1 focus:outline-env-primary"
+                  className="mt-1 w-full  border border-env-border bg-env-surface px-3 py-2 text-env-text focus:outline-2 focus:outline-offset-1 focus:outline-env-primary"
                 />
               </label>
 
@@ -206,8 +206,7 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
               <button
                 type="submit"
                 disabled={!category || phase.kind === 'sending'}
-                className="w-full rounded-lg px-4 py-3 font-semibold text-white disabled:opacity-50"
-                style={{ background: STATUS_COLORS.critical }}
+                className="w-full bg-[var(--sos-bg)] px-4 py-3 font-semibold text-[var(--sos-text)] hover:bg-[var(--sos-bg-strong)] disabled:opacity-50"
               >
                 {phase.kind === 'sending' ? 'Enviando…' : 'Enviar aviso'}
               </button>
@@ -253,7 +252,7 @@ export function Sent({
       <button
         type="button"
         onClick={onClose}
-        className="w-full rounded-lg bg-env-primary px-4 py-2.5 font-medium text-env-primary-text"
+        className="w-full  bg-env-primary px-4 py-2.5 font-medium text-env-primary-text"
       >
         Entendido
       </button>
@@ -304,11 +303,7 @@ export function Queued({
 
   return (
     <div className="mt-3 space-y-4">
-      <div
-        role="alert"
-        className="rounded-lg border-2 p-3"
-        style={{ borderColor: STATUS_COLORS.critical }}
-      >
+      <div role="alert" className=" border-2 p-3" style={{ borderColor: STATUS_COLORS.critical }}>
         <p className="text-lg font-semibold">
           No enviado. Avisa a {roleLabel('crew', vocabulary)} de viva voz.
         </p>
@@ -333,7 +328,7 @@ export function Queued({
             </ul>
           )}
           {offline.map((i) => (
-            <div key={i.id} className="mt-3 rounded-lg border border-env-border bg-env-surface p-3">
+            <div key={i.id} className="mt-3  border border-env-border bg-env-surface p-3">
               <p className="font-medium">
                 {i.title} <span className="text-sm text-env-muted">· {i.duration_min} min</span>
               </p>
@@ -350,7 +345,7 @@ export function Queued({
       <button
         type="button"
         onClick={onClose}
-        className="w-full rounded-lg border border-env-border px-4 py-2.5 font-medium hover:border-env-text"
+        className="w-full  border border-env-border px-4 py-2.5 font-medium hover:border-env-text"
       >
         Cerrar
       </button>

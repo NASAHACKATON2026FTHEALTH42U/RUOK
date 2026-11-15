@@ -234,7 +234,7 @@ export default function Missions() {
               Tareas de hoy
             </h2>
             {tasks.state === 'loading' ? (
-              <div className="m-4 h-32 animate-pulse rounded-lg bg-env-bg" aria-busy="true" />
+              <div className="m-4 h-32 animate-pulse  bg-env-bg" aria-busy="true" />
             ) : tasks.state === 'error' ? (
               <p className="p-4 text-sm" role="alert">
                 <span aria-hidden>⚠ </span>No se pudieron cargar las tareas.{' '}

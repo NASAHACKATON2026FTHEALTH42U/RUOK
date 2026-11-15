@@ -30,8 +30,8 @@ type Phase =
   | { kind: 'queued' }
   | { kind: 'failed'; message: string }
 
-const btnPrimary = 'rounded-lg bg-env-primary px-4 py-2 font-medium text-env-primary-text'
-const btnSecondary = 'rounded-lg border border-env-border px-4 py-2 hover:border-env-text'
+const btnPrimary = ' bg-env-primary px-4 py-2 font-medium text-env-primary-text'
+const btnSecondary = ' border border-env-border px-4 py-2 hover:border-env-text'
 /** Pausa tras elegir una respuesta antes de pasar a la siguiente (se ve la opción marcada). */
 const ADVANCE_MS = 350
 
@@ -109,7 +109,7 @@ export default function CheckIn() {
     return (
       <section className="mx-auto max-w-xl space-y-4">
         {title}
-        <div className="h-64 animate-pulse rounded-xl bg-env-surface" aria-busy="true" />
+        <div className="h-64 animate-pulse  bg-env-surface" aria-busy="true" />
       </section>
     )
   }
@@ -118,7 +118,7 @@ export default function CheckIn() {
     return (
       <section className="mx-auto max-w-xl space-y-4">
         {title}
-        <p className="rounded-lg border border-env-border bg-env-surface p-3 text-sm" role="alert">
+        <p className=" border border-env-border bg-env-surface p-3 text-sm" role="alert">
           <span aria-hidden>⚠ </span>
           No se pudo cargar el check-in. Comprueba la conexión con el servidor.
         </p>
@@ -165,7 +165,7 @@ export default function CheckIn() {
         aria-expanded={careOpen}
         aria-controls="checkin-care"
         onClick={() => setCareOpen((o) => !o)}
-        className="flex w-full items-center justify-between gap-3 rounded-lg border border-env-border bg-env-surface px-3 py-2 text-left font-semibold hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary"
+        className="flex w-full items-center justify-between gap-3  border border-env-border bg-env-surface px-3 py-2 text-left font-semibold hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary"
       >
         <span>
           Para cuidarte hoy <span className="font-normal text-env-muted">({care.length})</span>
@@ -202,7 +202,7 @@ export default function CheckIn() {
     return (
       <section className="mx-auto my-auto w-full max-w-xl space-y-3 lg:max-w-3xl">
         <h1 className="text-2xl font-semibold">Check-in guardado en el dispositivo</h1>
-        <div className="rounded-xl border border-env-border bg-env-surface p-3" role="status">
+        <div className=" border border-env-border bg-env-surface p-3" role="status">
           <p>
             <span aria-hidden>⇡ </span>
             No hay conexión con el servidor. Tus respuestas están guardadas aquí y{' '}
@@ -224,7 +224,7 @@ export default function CheckIn() {
     return (
       <section className="mx-auto my-auto w-full max-w-xl space-y-3 lg:max-w-3xl">
         <h1 className="text-2xl font-semibold">Check-in guardado</h1>
-        <div className="rounded-xl border border-env-border bg-env-surface p-3" role="status">
+        <div className=" border border-env-border bg-env-surface p-3" role="status">
           <p>Gracias. Tus respuestas de hoy ya están registradas.</p>
           <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-env-muted">
             Evaluación actualizada:
@@ -333,7 +333,7 @@ export default function CheckIn() {
 
         {isReview && (
           <>
-            <ul className="divide-y divide-env-border rounded-xl border border-env-border bg-env-surface text-sm">
+            <ul className="divide-y divide-env-border  border border-env-border bg-env-surface text-sm">
               {questions.map((q, i) => (
                 <li key={q.id}>
                   <button
@@ -359,7 +359,7 @@ export default function CheckIn() {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 rows={2}
-                className="mt-1 w-full rounded-md border border-env-border bg-env-surface px-3 py-2 text-env-text focus:outline-2 focus:outline-offset-1 focus:outline-env-primary"
+                className="mt-1 w-full  border border-env-border bg-env-surface px-3 py-2 text-env-text focus:outline-2 focus:outline-offset-1 focus:outline-env-primary"
               />
             </label>
           </>
@@ -374,7 +374,7 @@ export default function CheckIn() {
       )}
 
       {phase.kind === 'failed' && (
-        <p className="rounded-lg border border-env-border bg-env-surface p-3 text-sm" role="alert">
+        <p className=" border border-env-border bg-env-surface p-3 text-sm" role="alert">
           <span aria-hidden>⚠ </span>
           {phase.message}
         </p>
@@ -393,7 +393,7 @@ export default function CheckIn() {
           <button
             type="submit"
             disabled={phase.kind === 'sending' || !complete}
-            className="flex-1 rounded-lg bg-env-primary px-4 py-3 font-medium text-env-primary-text disabled:opacity-60"
+            className="flex-1  bg-env-primary px-4 py-3 font-medium text-env-primary-text disabled:opacity-60"
           >
             {phase.kind === 'sending'
               ? 'Guardando…'
@@ -406,7 +406,7 @@ export default function CheckIn() {
             type="button"
             onClick={() => goTo(current + 1)}
             disabled={question !== undefined && answers[question.id] === undefined}
-            className="flex-1 rounded-lg bg-env-primary px-4 py-3 font-medium text-env-primary-text disabled:opacity-60"
+            className="flex-1  bg-env-primary px-4 py-3 font-medium text-env-primary-text disabled:opacity-60"
           >
             Siguiente →
           </button>

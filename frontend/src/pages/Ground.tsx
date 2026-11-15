@@ -3,6 +3,7 @@ import { serverNow } from '../api/client'
 import { useGroundView } from '../api/useGroundView'
 import { useAuth } from '../auth/useAuth'
 import { AlertDetail } from '../components/alerts/AlertDetail'
+import { AlertRowBody } from '../components/alerts/AlertRowBody'
 import {
   categoryLabel,
   severityStyle,
@@ -53,7 +54,7 @@ export default function Ground() {
     return (
       <section className="space-y-4">
         {title}
-        <div className="h-40 animate-pulse rounded-xl bg-env-surface" />
+        <div className="h-40 animate-pulse  bg-env-surface" />
       </section>
     )
   }
@@ -96,22 +97,19 @@ export default function Ground() {
           type="button"
           onClick={() => setSelected(a.id)}
           aria-current={active}
-          className={`flex w-full flex-col gap-0.5 px-3.5 py-2.5 text-left focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary ${
+          className={`flex w-full flex-col gap-1.5 px-4 py-3.5 text-left focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary ${
             active
               ? 'bg-env-primary/10 shadow-[inset_3px_0_0_var(--env-primary)]'
               : 'hover:bg-env-primary/5'
           } ${a.status === 'resolved' ? 'opacity-60' : ''}`}
         >
-          <span className="flex items-center justify-between gap-2">
-            <span className="truncate font-medium">
-              {member?.name ?? `#${a.member_id}`} · {categoryLabel(a.category)}
-            </span>
-            <StatusBadge status={sev.status} label={sev.label} size="sm" />
-          </span>
-          <span className="truncate text-xs text-env-muted">
-            {statusLabel(a.status)} · entregada{' '}
-            {a.delivered_at ? formatAgo(a.delivered_at, now) : '—'}
-          </span>
+          <AlertRowBody
+            title={`${member?.name ?? `#${a.member_id}`} · ${categoryLabel(a.category)}`}
+            status={sev.status}
+            severityLabel={sev.label}
+            state={statusLabel(a.status)}
+            ago={`entregada ${a.delivered_at ? formatAgo(a.delivered_at, now) : '—'}`}
+          />
         </button>
       </li>
     )

@@ -79,7 +79,7 @@ export function BodyLegend({
             onFocus={() => onHoverSystem?.(r.systemId)}
             onBlur={() => onHoverSystem?.(null)}
             aria-pressed={selectedSystemId === r.systemId}
-            className={`flex items-center gap-2 rounded-lg border ${vertical ? 'w-full justify-between text-left' : ''} ${compact ? 'px-2 py-1 text-xs' : 'px-2.5 py-1.5 text-sm'} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
+            className={`flex items-center gap-2  border ${vertical ? 'w-full justify-between text-left' : ''} ${compact ? 'px-2 py-1 text-xs' : 'px-2.5 py-1.5 text-sm'} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
               selectedSystemId === r.systemId
                 ? 'border-env-text bg-env-surface'
                 : 'border-env-border hover:bg-env-surface'

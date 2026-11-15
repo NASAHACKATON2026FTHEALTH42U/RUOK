@@ -86,7 +86,7 @@ export default function Dashboard() {
     return (
       <section className="space-y-4">
         {title}
-        <div className="rounded-lg border border-env-border bg-env-surface p-4">
+        <div className=" border border-env-border bg-env-surface p-4">
           <p>No se ha podido cargar la evaluación.</p>
           <button
             type="button"
@@ -94,7 +94,7 @@ export default function Dashboard() {
               assessment.retry()
               systems.retry()
             }}
-            className="mt-3 rounded-md bg-env-primary px-3 py-1.5 text-sm font-medium text-env-primary-text"
+            className="mt-3  bg-env-primary px-3 py-1.5 text-sm font-medium text-env-primary-text"
           >
             Reintentar
           </button>
@@ -108,10 +108,10 @@ export default function Dashboard() {
       <section className="space-y-6">
         {title}
         <div className="grid gap-8 md:grid-cols-[minmax(240px,320px)_1fr]" aria-busy="true">
-          <div className="h-96 animate-pulse rounded-xl bg-env-surface" />
+          <div className="h-96 animate-pulse  bg-env-surface" />
           <div className="grid content-start gap-3 sm:grid-cols-2">
             {Array.from({ length: 6 }, (_, i) => (
-              <div key={i} className="h-20 animate-pulse rounded-lg bg-env-surface" />
+              <div key={i} className="h-20 animate-pulse  bg-env-surface" />
             ))}
           </div>
         </div>
@@ -144,16 +144,24 @@ export default function Dashboard() {
       <div
         className={
           desktop
-            ? 'flex min-w-0 flex-wrap items-center gap-2 text-xs'
+            ? 'flex min-w-0 flex-wrap items-center gap-3 text-xs'
             : 'mb-3 flex flex-wrap items-center gap-2 md:hidden'
         }
       >
+        {/* El estado general, en una palabra, en la barra superior (escritorio): es el peor entre
+            la salud y el liveness; con liveness stale o lost y todo normal, "Sin datos" (nunca verde
+            sin datos). */}
+        {desktop && (
+          <StatusHeadline
+            state={live && a.overall_status === 'normal' ? 'unknown' : a.overall_status}
+          />
+        )}
         {live && (
           <StatusBadge status={live} label={formatSinceLabel(a.last_seen_at, serverNow())} />
         )}
         {desktop && provisionalText && (
           <span
-            className="rounded-md border border-dashed border-env-border px-2 py-0.5 text-env-muted"
+            className=" border border-dashed border-env-border px-2 py-0.5 text-env-muted"
             title={`Estado provisional: ${provisionalText}`}
           >
             <span aria-hidden>⇡ </span>
@@ -182,7 +190,7 @@ export default function Dashboard() {
         <TopBarPortal>{summary(true)}</TopBarPortal>
         {summary(false)}
         {provisionalText && (
-          <p className="mb-3 rounded-lg border border-dashed border-env-border px-3 py-2 text-sm text-env-muted md:hidden">
+          <p className="mb-3  border border-dashed border-env-border px-3 py-2 text-sm text-env-muted md:hidden">
             <span aria-hidden>⇡ </span>
             <strong className="text-env-text">Estado provisional:</strong> {provisionalText}
           </p>
@@ -211,15 +219,8 @@ export default function Dashboard() {
             aria-labelledby="dash-systems"
             className="hud-panel @container flex min-h-0 min-w-0 flex-col [grid-area:systems]"
           >
-            {/* El estado general, en una palabra, en el extremo derecho del título: resume los
-                sistemas. Es el peor entre la salud y el liveness: con liveness stale o lost y todo
-                normal, "Sin datos" (nunca verde sin datos). */}
             <div className="hud-panel-head">
               <h2 id="dash-systems">Sistemas</h2>
-              <StatusHeadline
-                state={live && a.overall_status === 'normal' ? 'unknown' : a.overall_status}
-                className="mr-2.5 ml-auto"
-              />
             </div>
             <BodyLegend
               regions={regions}

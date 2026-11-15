@@ -77,19 +77,19 @@ export function SystemTrends({ series, initial }: { series: TrendSeries[]; initi
     data.state === 'ready' ? (data.data[id] ?? []).at(-1)?.value : undefined
 
   return (
-    <figure className="rounded-lg border border-env-border bg-env-surface p-3">
+    <figure className="border border-env-border bg-env-surface p-4">
       <div className="flex items-center justify-between gap-2">
-        <figcaption className="text-sm font-semibold">
+        <figcaption className="text-base font-semibold">
           Tendencias <span className="font-normal text-env-muted">· últimos {days} días</span>
         </figcaption>
-        <PeriodSwitch days={days} onChange={setDays} />
+        <PeriodSwitch days={days} onChange={setDays} size="md" />
       </div>
 
       {series.length > 1 && (
         <div
           role="group"
           aria-label="Indicadores en la gráfica"
-          className="mt-2 flex flex-wrap gap-1.5"
+          className="mt-3 flex flex-wrap gap-2"
         >
           {series.map((s) => {
             const on = s.id in slots
@@ -112,7 +112,7 @@ export function SystemTrends({ series, initial }: { series: TrendSeries[]; initi
                     : undefined
                 }
                 onClick={() => !locked && setSlots((cur) => toggleSlot(cur, s.id, MAX))}
-                className={`inline-flex min-h-11 items-center gap-2 rounded-md border px-2.5 text-xs pointer-fine:min-h-8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
+                className={`inline-flex min-h-11 items-center gap-2  border px-3 text-sm pointer-fine:min-h-9 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
                   on
                     ? 'border-env-text/60 bg-env-bg text-env-text'
                     : 'border-env-border text-env-muted hover:text-env-text'
@@ -138,7 +138,7 @@ export function SystemTrends({ series, initial }: { series: TrendSeries[]; initi
       {data.state === 'loading' && (
         <div className="mt-2" aria-busy="true">
           <div className="h-4" />
-          <div className="mt-1 animate-pulse rounded-md bg-env-bg" style={{ height: PLOT_H }} />
+          <div className="mt-1 animate-pulse  bg-env-bg" style={{ height: PLOT_H }} />
           <div className="mt-1 h-4" />
         </div>
       )}
@@ -198,7 +198,7 @@ function Plot({
 
   return (
     <div className="mt-2 min-w-0">
-      <p className="text-xs text-env-muted">{caption}</p>
+      <p className="text-sm text-env-muted">{caption}</p>
       {rows.length === 0 ? (
         <p className="mt-1 text-sm text-env-muted">Sin mediciones en los últimos {days} días.</p>
       ) : (
@@ -249,7 +249,7 @@ function Plot({
                     const row = active && (payload?.[0]?.payload as Record<string, number>)
                     if (!row) return null
                     return (
-                      <div className="rounded-md border border-env-border bg-env-bg px-2 py-1 text-xs shadow">
+                      <div className=" border border-env-border bg-env-bg px-2 py-1 text-xs shadow">
                         <div className="text-env-muted">{formatDateTime(row.t)}</div>
                         {selected.map(
                           (s) =>
@@ -301,7 +301,7 @@ function Plot({
             </ResponsiveContainer>
           </div>
 
-          <details className="mt-1 text-xs">
+          <details className="mt-2 text-sm">
             <summary className="cursor-pointer text-env-muted hover:text-env-text">
               Ver datos ({rows.length})
             </summary>

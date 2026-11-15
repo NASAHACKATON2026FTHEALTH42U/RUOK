@@ -122,7 +122,7 @@ export function IndicatorCard({
   // La celda no lleva borde propio: la rejilla del panel dibuja las líneas.
   const cls = tile
     ? 'block h-full w-full px-[clamp(0.75rem,7cqw,1.5rem)] py-[clamp(0.375rem,7cqh,1rem)] text-left'
-    : `block w-full rounded-lg border border-env-border bg-env-surface text-left ${
+    : `block w-full  border border-env-border bg-env-surface text-left ${
         compact ? 'px-3 py-2' : 'p-3'
       }`
 

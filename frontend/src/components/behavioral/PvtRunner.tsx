@@ -145,7 +145,7 @@ export function PvtRunner({ mode, onFinish, onCancel }: PvtRunnerProps) {
             type="button"
             data-pvt-cancel
             onClick={onCancel}
-            className="rounded-lg border border-current/40 px-3 py-1.5"
+            className=" border border-current/40 px-3 py-1.5"
           >
             Cancelar
           </button>
