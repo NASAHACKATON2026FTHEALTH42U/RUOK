@@ -78,7 +78,7 @@ export function IndicatorCard({
               ? `${statusStyle(indicator.status).label} · provisional`
               : undefined
           }
-          size="sm"
+          size="xs"
         />
       </span>
       <span className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
