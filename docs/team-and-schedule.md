@@ -39,13 +39,13 @@
   - **No se apilan PRs.** Si es inevitable, se mergea primero la de abajo.
   - Los **ficheros generados** en conflicto (`types.gen.ts`, `fixtures.gen.ts`, `package-lock.json`, `uv.lock`) no se resuelven a mano: se regeneran.
   - Tras resolver un conflicto, se pasan **todos** los tests. Si la rama es de otra persona, se le deja un comentario en su PR.
-- **🚫 Push directo a `main` prohibido. Protección por convención.**
-  - El repo es privado en una organización Free, y GitHub no permite proteger ramas ni crear *rulesets* en ese plan (la API devuelve HTTP 403). Por tanto, **la regla depende de que el equipo la cumpla**:
-    - todo cambio entra por PR;
-    - solo se mergea con los 3 checks de la CI en verde y 1 aprobación;
-    - el force-push y el borrado de `main` están prohibidos;
-    - excepción: los P0 urgentes de madrugada, con el visto bueno del supervisor y avisando en el canal.
-  - Cuando el repo pase a **público** (lo exige el envío de Space Apps), se activará la protección automática con esta misma configuración. Ver la issue FS-05.
+- **🚫 Push directo a `main` prohibido. Lo impone GitHub.**
+  - El repo es **público** desde el 15/11 y `main` tiene protección de rama (FS-05):
+    - todo cambio entra por PR (también para los administradores);
+    - solo se puede mergear con los 3 checks de la CI en verde: `Backend (pytest)`, `Frontend (lint + build)` y `Contrato API (tipos TS al día)`;
+    - el force-push y el borrado de `main` están bloqueados.
+  - **Por convención** (GitHub no lo exige): 1 aprobación de otra persona antes de mergear. No se ha hecho obligatoria para no bloquear los arreglos de última hora.
+  - Si la CI se rompe y hay que entrar con urgencia, un administrador puede relajar la regla en *Settings → Branches*; se avisa en el canal y se vuelve a activar después.
   - Resumen para el equipo: [`LEEME.txt`](../LEEME.txt). Para agentes de IA: [`AGENTS.md`](../AGENTS.md).
 - **Contrato:** cualquier cambio de API se hace primero en [api-contract.md](api-contract.md), después se regeneran los tipos (`npm run gen:api`) y se avisa al equipo.
 - **Commits:** en imperativo y cortos, con el ID de la issue (`BE-08: umbrales por entorno`).

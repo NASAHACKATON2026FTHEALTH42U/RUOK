@@ -36,7 +36,7 @@ python3 scripts/github/build_wiki.py --publish     # clona la wiki, regenera las
 python3 scripts/github/build_wiki.py --out ./wiki  # solo genera los ficheros, para revisarlos
 ```
 
-⚠️ GitHub solo ofrece wiki en repos **privados** con un plan de pago. Con la organización en el plan Free hace falta que el repo sea público. Además, la primera página hay que crearla una vez desde la web (pestaña *Wiki* → *Create the first page*) para que exista el repositorio de la wiki.
+La wiki está en https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/wiki (el repo es público desde el 15/11; en el plan Free, GitHub no ofrece wiki en repos privados). Lo que se edite a mano en la web se pierde al regenerarla.
 
 ## Reglas de oro
 0. **Nunca hagas push directo a `main`.** Todo entra por PR con la CI en verde. Lee [`LEEME.txt`](../LEEME.txt).
