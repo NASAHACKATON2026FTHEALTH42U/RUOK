@@ -63,7 +63,7 @@ export default function Alerts() {
   }
   if (memberId === null) {
     return (
-      <section className="space-y-4">
+      <section className="flex min-h-0 flex-1 flex-col gap-4">
         <header className="flex flex-wrap items-center justify-between gap-3">
           {title}
           <MemberSwitcher />
@@ -96,7 +96,7 @@ export default function Alerts() {
   const now = serverNow()
 
   return (
-    <section className="flex flex-1 flex-col gap-4">
+    <section className="flex min-h-0 flex-1 flex-col gap-4">
       <header className="flex flex-wrap items-center justify-between gap-3">
         {title}
         <div className="flex flex-wrap items-center gap-3">
@@ -138,38 +138,58 @@ export default function Alerts() {
       )}
 
       {list.length > 0 && (
-        <div className="grid flex-1 gap-6 md:grid-cols-[minmax(260px,340px)_1fr] lg:grid-cols-[minmax(300px,420px)_1fr]">
-          <ul className="space-y-2" aria-label="Alertas">
-            {list.map((a) => {
-              const sev = severityStyle(a.severity)
-              const active = current?.id === a.id
-              return (
-                <li key={a.id}>
-                  <button
-                    type="button"
-                    onClick={() => setSelected(a.id)}
-                    aria-current={active}
-                    className={`w-full rounded-lg border p-3 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
-                      active
-                        ? 'border-env-text bg-env-surface'
-                        : 'border-env-border hover:border-env-text'
-                    } ${a.status === 'resolved' ? 'opacity-70' : ''}`}
-                  >
-                    <span className="flex items-start justify-between gap-2">
-                      <span className="font-medium">{categoryLabel(a.category)}</span>
-                      <StatusBadge status={sev.status} label={sev.label} size="sm" />
-                    </span>
-                    <span className="mt-1 block text-xs text-env-muted">
-                      {a.origin === 'auto' ? 'Automática' : 'Manual'} · {statusLabel(a.status)} · a{' '}
-                      {roleLabel(a.target_role, vocab)} · {formatAgo(a.created_at, now)}
-                    </span>
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
+        // Lista y detalle miden lo que su contenido y, como mucho, el hueco: si no caben, el
+        // scroll es suyo y no de la página. En móvil, la lista con su propio scroll y el detalle
+        // debajo.
+        <div className="grid gap-4 md:min-h-0 md:flex-1 md:grid-cols-[minmax(260px,340px)_1fr] md:items-start lg:grid-cols-[minmax(300px,420px)_1fr] lg:gap-6">
+          <section
+            aria-labelledby="alerts-list-title"
+            className="hud-panel flex max-h-[45dvh] min-h-0 flex-col md:max-h-full"
+          >
+            <h2 id="alerts-list-title" className="hud-panel-head">
+              Avisos
+              <span className="ml-auto mr-2.5 normal-case tracking-normal text-env-muted">
+                {list.filter((a) => a.status !== 'resolved').length} abiertos de {list.length}
+              </span>
+            </h2>
+            <ul
+              className="min-h-0 flex-1 divide-y divide-env-border/60 overflow-y-auto [scrollbar-color:var(--env-border)_transparent]"
+              aria-label="Alertas"
+            >
+              {list.map((a) => {
+                const sev = severityStyle(a.severity)
+                const active = current?.id === a.id
+                return (
+                  <li key={a.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelected(a.id)}
+                      aria-current={active}
+                      className={`flex w-full flex-col gap-0.5 px-3.5 py-2.5 text-left focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-env-primary ${
+                        active
+                          ? 'bg-env-primary/10 shadow-[inset_3px_0_0_var(--env-primary)]'
+                          : 'hover:bg-env-primary/5'
+                      } ${a.status === 'resolved' ? 'opacity-60' : ''}`}
+                    >
+                      <span className="flex items-center justify-between gap-2">
+                        <span className="truncate font-medium">{categoryLabel(a.category)}</span>
+                        <StatusBadge status={sev.status} label={sev.label} size="sm" />
+                      </span>
+                      <span className="truncate text-xs text-env-muted">
+                        {a.origin === 'auto' ? 'Automática' : 'Manual'} · {statusLabel(a.status)} ·
+                        a {roleLabel(a.target_role, vocab)} · {formatAgo(a.created_at, now)}
+                      </span>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          </section>
           {current && (
-            <div className="rounded-xl border border-env-border p-4">
+            <section
+              aria-label="Detalle del aviso"
+              className="hud-panel min-h-0 overflow-y-auto p-4 [scrollbar-color:var(--env-border)_transparent] md:max-h-full"
+            >
               {current.system_id && (
                 <CaseFeedbackFor
                   systemId={current.system_id}
@@ -194,7 +214,7 @@ export default function Alerts() {
                   alerts.refresh()
                 }}
               />
-            </div>
+            </section>
           )}
         </div>
       )}
