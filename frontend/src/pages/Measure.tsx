@@ -17,6 +17,7 @@ import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox
 import { useEnvironmentStore } from '../store/environment'
 import { useActiveMemberId, useAuth } from '../auth/useAuth'
 import { NoMemberSelected } from '../components/ui/NoMemberSelected'
+import { AutoTextarea } from '../components/ui/AutoTextarea'
 
 /** Sistema cuyas escalas (ánimo, estrés…) se registran con el check-in diario, no con este formulario. */
 const CHECKIN_SYSTEM = 'neuro_behavioral'
@@ -367,7 +368,7 @@ function MeasureForm({
 
         <label className="block text-sm">
           <span className="text-env-muted">Nota (opcional)</span>
-          <textarea
+          <AutoTextarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={2}

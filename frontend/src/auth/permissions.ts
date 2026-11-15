@@ -21,7 +21,8 @@ export const PERMISSIONS = {
   'view:home-messages': ['member', 'admin'],
   'view:control': ['admin'],
   // Acciones
-  'action:sos': ['member', 'medic', 'commander', 'family', 'admin'],
+  // El operador es control: no pide ayuda (crea alertas y notificaciones desde Simulación).
+  'action:sos': ['member', 'medic', 'commander', 'family'],
   'action:measure-others': ['medic', 'admin'],
   'action:change-environment': ['admin'],
   'action:demo-panel': ['admin'],

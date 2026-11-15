@@ -538,7 +538,7 @@ const memberId = useActiveMemberId() // un member: siempre el suyo; el resto: el
 - **Avisos en vivo** (`LiveAlertToast`): el operador recibe los de cualquier entorno (abre el stream sin filtro de entorno); el member, las alertas que otros crean para él y las notificaciones (`notification.sent`).
 - **Ámbito (`ScopeSelector`)**: el único sitio donde se elige el entorno (solo `admin`) y el member (quien supervisa: `admin`, `medic`, `commander`, con la opción «Todo …»). Va arriba de la barra lateral y, en el móvil, en «Más»; todas las vistas muestran y actúan sobre lo elegido.
 - **"Medir ahora"** del `SystemPanel`: el member para sí mismo; medic y admin para cualquiera ("medir para otro solo medic").
-- **SOS:** sin sesión, siempre visible. Con sesión, oculto para `responder` y `psych` (están en tierra).
+- **SOS:** sin sesión, siempre visible. Con sesión, oculto para `responder` y `psych` (están en tierra) y para el operador (`admin`): es control, y en su barra lateral ve una placa «CONTROL» sin función (en el móvil, nada).
 - **Cabecera:** usuario y rol con el **vocabulario del entorno** (`userRoleLabel()`: astronauta, oficial médico, flight surgeon…; si no hay término, el `role_label` del servidor).
 - El panel de demo y `/control` ya tienen permiso (`action:demo-panel`, `view:control`) para FE-31/FE-32.
 - Ocultar en la UI **no es seguridad**: el back comprueba rol y propiedad en cada endpoint (BE-27).

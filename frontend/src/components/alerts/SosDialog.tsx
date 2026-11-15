@@ -21,6 +21,7 @@ import {
   type AlertCategory,
   type AlertSeverity,
 } from './sos'
+import { AutoTextarea } from '../ui/AutoTextarea'
 
 type Phase =
   | { kind: 'form' }
@@ -186,7 +187,7 @@ export function SosDialog({ memberId, env, vocabulary, interventions, onClose }:
 
               <label className="block text-sm">
                 <span className="font-medium">Mensaje (opcional)</span>
-                <textarea
+                <AutoTextarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={2}

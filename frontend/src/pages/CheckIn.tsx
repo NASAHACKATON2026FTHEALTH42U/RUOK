@@ -18,6 +18,7 @@ import { statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox'
 import { NoMemberSelected } from '../components/ui/NoMemberSelected'
+import { AutoTextarea } from '../components/ui/AutoTextarea'
 
 type Phase =
   | { kind: 'editing' }
@@ -322,7 +323,7 @@ export default function CheckIn() {
 
             <label className="block text-sm">
               <span className="text-env-muted">¿Algo más? (opcional)</span>
-              <textarea
+              <AutoTextarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 rows={2}

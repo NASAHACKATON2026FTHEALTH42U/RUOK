@@ -81,7 +81,15 @@ export function Layout() {
           className="hidden w-52 shrink-0 flex-col gap-3 overflow-y-auto border-r border-hud-line px-3 py-4 lg:w-64 lg:px-4 [scrollbar-width:none] md:flex [&::-webkit-scrollbar]:hidden [@media(max-height:800px)]:gap-2 [@media(max-height:800px)]:py-3"
         >
           {/* SOS: lo primero del menú, arriba a la izquierda y siempre a la vista. */}
-          <SosButton variant="sidebar" />
+          {role === 'admin' ? (
+            // El operador es control: en vez del SOS, una placa (sin función) que lo recuerda.
+            // En el móvil no hay nada en su lugar (el SOS de la barra inferior no sale).
+            <p className="sos-font hud-btn pointer-events-none mb-3 !h-16 w-full shrink-0 border-env-primary/70 bg-env-primary/10 !text-xl !font-semibold !tracking-[0.3em] text-env-primary [@media(max-height:800px)]:mb-4 [@media(max-height:800px)]:!h-14">
+              Control
+            </p>
+          ) : (
+            <SosButton variant="sidebar" />
+          )}
           {/* Ámbito (entorno y member): el único sitio donde se eligen, para todas las vistas. */}
           <ScopeSelector />
 

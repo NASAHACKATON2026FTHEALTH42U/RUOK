@@ -6,6 +6,7 @@ import { sendAlert, sendNotification } from '../../offline/outbox'
 import { categoryLabel, severityStyle } from '../alerts/alertFormat'
 import { defaultTarget, roleLabel } from '../alerts/sos'
 import { Modal } from '../ui/Modal'
+import { AutoTextarea } from '../ui/AutoTextarea'
 
 type Category = Schema<'AlertCategory'>
 type Severity = Schema<'AlertSeverity'>
@@ -236,13 +237,13 @@ export function OperatorMessageForm({
 
       <label className={FIELD}>
         <span className="hud-label">{mode === 'alert' ? 'Mensaje (opcional)' : 'Mensaje'}</span>
-        <textarea
+        <AutoTextarea
           required={mode === 'notification'}
           rows={3}
           maxLength={500}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className={`${INPUT} resize-y`}
+          className={`${INPUT}`}
           placeholder={
             mode === 'alert'
               ? 'Qué pasa (lo verá en el detalle de la alerta)'

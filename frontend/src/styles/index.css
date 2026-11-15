@@ -211,6 +211,11 @@ html[data-hud] body {
   background-size: 39px 39px;
 }
 
+/* Ningún textarea se agranda con el ratón: crecen solos con el texto (AutoTextarea). */
+textarea {
+  resize: none;
+}
+
 @layer components {
   .hud-screen {
     background-color: var(--env-bg);
