@@ -69,9 +69,14 @@ const OPERATOR_MENU = [
 
 /**
  * Secciones del operador que ocupan el alto disponible: la página no hace scroll, lo hacen sus
- * paneles (eventos en vivo, registro).
+ * paneles (eventos en vivo, registro, usuarios, dispositivos).
  */
-export const OPERATOR_FILL_ROUTES = ['/control', '/control/log']
+export const OPERATOR_FILL_ROUTES = [
+  '/control',
+  '/control/log',
+  '/control/users',
+  '/control/devices',
+]
 
 /** Entradas del menú del rol: todas las permitidas, salvo el operador, que tiene el suyo. */
 export function menuFor(role: Role | null, allowed: NavItem[]): NavItem[] {

@@ -30,16 +30,18 @@ export default function ControlDevices() {
   const list = devices.state === 'ready' ? devices.data : []
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="flex min-h-0 flex-1 flex-col gap-4">
       <ControlHeader
         title="Dispositivos"
         subtitle={`Móviles y tablets de ${env?.name ?? 'el entorno'}: conexión, pendientes y sincronización.`}
       />
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_26rem] xl:items-start">
+      {/* En escritorio, la tabla mide lo que su contenido y, como mucho, el hueco: el scroll es suyo. */}
+      <div className="grid gap-4 xl:min-h-0 xl:flex-1 xl:grid-cols-[minmax(0,1fr)_26rem] xl:items-start">
         <ControlPanel
           title="Dispositivos del entorno"
           aside={devices.state === 'ready' ? `${list.length}` : undefined}
-          bodyClassName=""
+          className="xl:max-h-full xl:min-h-0"
+          bodyClassName="min-h-0 flex-1 overflow-auto [scrollbar-color:var(--env-border)_transparent]"
         >
           {devices.state === 'loading' && <div className="m-4 h-32 animate-pulse bg-env-bg" />}
           {devices.state === 'error' && (
@@ -56,9 +58,9 @@ export default function ControlDevices() {
             </p>
           )}
           {list.length > 0 && (
-            <div className="overflow-x-auto">
+            <div>
               <table className="w-full text-sm">
-                <thead className="text-left">
+                <thead className="sticky top-0 z-10 bg-env-surface text-left">
                   <tr>
                     {['Dispositivo', 'Usuario', 'IP', 'Visto', 'Pendientes', 'Sincronizado'].map(
                       (h) => (
