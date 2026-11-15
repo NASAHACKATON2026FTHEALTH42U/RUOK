@@ -211,6 +211,22 @@ html[data-hud] body {
   background-size: 39px 39px;
 }
 
+/* Avisos emergentes: entran subiendo desde abajo (sin animación si se pide menos movimiento). */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+.toast-in {
+  animation: toast-in 0.28s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast-in {
+    animation: none;
+  }
+}
+
 /* Ningún textarea se agranda con el ratón: crecen solos con el texto (AutoTextarea). */
 textarea {
   resize: none;

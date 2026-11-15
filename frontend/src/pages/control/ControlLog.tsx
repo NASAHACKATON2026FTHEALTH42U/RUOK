@@ -52,7 +52,7 @@ export default function ControlLog() {
   const shown = filterLog(events, group, memberId)
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="flex min-h-0 flex-1 flex-col gap-4">
       <ControlHeader
         title="Registro"
         subtitle={`Incidencias resueltas y eventos importantes de ${env?.name ?? 'el entorno'}.`}
@@ -67,45 +67,49 @@ export default function ControlLog() {
           ...Object.entries(LOG_GROUPS).map(([id, g]) => ({ id, label: g.label })),
         ]}
       />
-      <ControlPanel
-        title={group ? LOG_GROUPS[group].label : 'Todo'}
-        aside={`${shown.length} eventos`}
-        bodyClassName=""
-      >
-        {recent.state === 'loading' && <div className="m-4 h-40 animate-pulse bg-env-bg" />}
-        {recent.state === 'error' && (
-          <p className="p-4 text-env-muted">
-            No se ha podido cargar el registro.{' '}
-            <button type="button" onClick={recent.retry} className="underline">
-              Reintentar
-            </button>
-          </p>
-        )}
-        {recent.state === 'ready' && shown.length === 0 && (
-          <p className="p-4 text-sm text-env-muted">Nada que mostrar todavía.</p>
-        )}
-        <ol className="divide-y divide-env-border/60">
-          {shown.map((e) => (
-            <li
-              key={e.id}
-              className="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-x-4 gap-y-1 px-4 py-2.5 text-sm sm:grid-cols-[6.5rem_11rem_minmax(0,1fr)]"
-            >
-              <time dateTime={e.at} className="text-env-muted tabular-nums">
-                {WHEN.format(new Date(e.at))}
-              </time>
-              <span className="pt-0.5">
-                <Kind e={e} />
-              </span>
-              <span className="col-span-2 min-w-0 sm:col-span-1">
-                <span className="block">{e.summary || TYPE_LABEL[e.type]}</span>
-                {e.member_id != null && (
-                  <span className="block text-xs text-env-muted">{memberName(e.member_id)}</span>
-                )}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </ControlPanel>
+      {/* El panel mide lo que su contenido y, como mucho, el hueco: si no cabe, el scroll es suyo. */}
+      <div className="flex min-h-0 flex-1 flex-col">
+        <ControlPanel
+          title={group ? LOG_GROUPS[group].label : 'Todo'}
+          aside={`${shown.length} eventos`}
+          className="max-h-full min-h-0"
+          bodyClassName="min-h-0 flex-1 overflow-y-auto [scrollbar-color:var(--env-border)_transparent]"
+        >
+          {recent.state === 'loading' && <div className="m-4 h-40 animate-pulse bg-env-bg" />}
+          {recent.state === 'error' && (
+            <p className="p-4 text-env-muted">
+              No se ha podido cargar el registro.{' '}
+              <button type="button" onClick={recent.retry} className="underline">
+                Reintentar
+              </button>
+            </p>
+          )}
+          {recent.state === 'ready' && shown.length === 0 && (
+            <p className="p-4 text-sm text-env-muted">Nada que mostrar todavía.</p>
+          )}
+          <ol className="divide-y divide-env-border/60">
+            {shown.map((e) => (
+              <li
+                key={e.id}
+                className="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-x-4 gap-y-1 px-4 py-2.5 text-sm sm:grid-cols-[6.5rem_11rem_minmax(0,1fr)]"
+              >
+                <time dateTime={e.at} className="text-env-muted tabular-nums">
+                  {WHEN.format(new Date(e.at))}
+                </time>
+                <span className="pt-0.5">
+                  <Kind e={e} />
+                </span>
+                <span className="col-span-2 min-w-0 sm:col-span-1">
+                  <span className="block">{e.summary || TYPE_LABEL[e.type]}</span>
+                  {e.member_id != null && (
+                    <span className="block text-xs text-env-muted">{memberName(e.member_id)}</span>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </ControlPanel>
+      </div>
     </section>
   )
 }

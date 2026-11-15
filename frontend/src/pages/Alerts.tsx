@@ -85,8 +85,9 @@ export default function Alerts() {
         {supervisor && envId ? (
           <EnvironmentAlerts
             envId={envId}
-            onSelect={(id, alertId) => {
+            onSelect={(id, alertId, wasResolved) => {
               setSelected(alertId)
+              if (wasResolved) setShowResolved(true)
               selectMember(id)
             }}
           />

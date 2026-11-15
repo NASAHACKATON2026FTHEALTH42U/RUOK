@@ -87,7 +87,7 @@ export default function ControlOverview() {
   }
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="flex min-h-0 flex-1 flex-col gap-4">
       <ControlHeader
         title="Centro de control"
         subtitle={
@@ -142,7 +142,7 @@ export default function ControlOverview() {
             </p>
           )}
 
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start">
+          <div className="grid gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start">
             <ControlPanel
               title={capitalize(vocab.crew)}
               aside={
@@ -153,7 +153,8 @@ export default function ControlOverview() {
                   </span>
                 )
               }
-              bodyClassName=""
+              className="lg:max-h-full lg:min-h-0"
+              bodyClassName="min-h-0 flex-1 overflow-y-auto [scrollbar-color:var(--env-border)_transparent]"
             >
               {envOv && (
                 <div className="flex flex-wrap items-center gap-1.5 border-b border-env-border/60 px-4 py-2.5">
@@ -234,11 +235,12 @@ export default function ControlOverview() {
                   </select>
                 </label>
               }
-              bodyClassName=""
+              className="lg:max-h-full lg:min-h-0"
+              bodyClassName="flex min-h-0 flex-1 flex-col"
             >
               <ol
                 aria-live="polite"
-                className="max-h-[30rem] divide-y divide-env-border/60 overflow-y-auto [scrollbar-color:var(--env-border)_transparent]"
+                className="min-h-0 flex-1 divide-y divide-env-border/60 overflow-y-auto [scrollbar-color:var(--env-border)_transparent] max-lg:max-h-[30rem]"
               >
                 {shown.length === 0 && <li className="p-4 text-sm text-env-muted">Sin eventos.</li>}
                 {shown.map((e) => (

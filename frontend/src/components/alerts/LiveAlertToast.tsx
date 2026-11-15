@@ -33,7 +33,8 @@ function toneColor(e: RealtimeEvent): string {
 }
 
 /**
- * Aviso en vivo, con vibración y (si se activa) sonido, de lo que llega de OTROS dispositivos:
+ * Aviso en vivo (sale por abajo a la derecha; en móvil, abajo y sobre la barra de pestañas), con
+ * vibración y (si se activa) sonido, de lo que llega de OTROS dispositivos:
  * - Quien atiende alertas (medic, commander, responder, psych): las nuevas o escaladas de su
  *   entorno. "El astronauta pulsa SOS → la tablet del médico la muestra y vibra al instante".
  * - El operador (admin): las de cualquier entorno, con su nombre, para no perder ninguna aunque
@@ -98,7 +99,7 @@ export function LiveAlertToast() {
   return (
     <div
       role="alert"
-      className="fixed inset-x-4 top-4 z-50 mx-auto flex max-w-lg items-start gap-3 border-2 bg-env-bg p-4 shadow-2xl"
+      className="toast-in fixed right-4 bottom-[6.5rem] left-4 z-50 flex items-start gap-3 border-2 bg-env-bg p-4 shadow-2xl md:bottom-5 md:left-auto md:w-[28rem] md:max-w-[calc(100vw-2rem)]"
       style={{ borderColor: toneColor(toast) }}
     >
       <span aria-hidden className="text-2xl leading-none">

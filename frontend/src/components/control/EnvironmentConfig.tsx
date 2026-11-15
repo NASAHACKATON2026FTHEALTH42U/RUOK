@@ -20,7 +20,7 @@ export function EnvironmentConfig({ env }: { env: Environment | undefined }) {
       {!env ? (
         <p className="text-env-muted">Elige un entorno para ver su configuración.</p>
       ) : (
-        <div className="grid gap-4 text-sm md:grid-cols-2">
+        <div className="grid gap-x-6 gap-y-4 text-sm md:grid-cols-2 xl:grid-cols-3">
           <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
             <dt className="text-env-muted">Tipo</dt>
             <dd>{formatKind(env.kind)}</dd>
