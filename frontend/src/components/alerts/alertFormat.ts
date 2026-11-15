@@ -60,6 +60,20 @@ export function sortAlerts<
   )
 }
 
+/**
+ * Alertas de todo el entorno (FE-35): las de cada member en una sola lista, con su nombre y
+ * el mismo orden que `sortAlerts`.
+ */
+export function mergeMemberAlerts<
+  T extends { status: string; severity: Schema<'AlertSeverity'>; created_at: string },
+>(groups: { memberId: number; memberName: string; alerts: T[] }[]) {
+  return sortAlerts(
+    groups.flatMap((g) =>
+      g.alerts.map((a) => ({ ...a, memberId: g.memberId, memberName: g.memberName })),
+    ),
+  )
+}
+
 /** Niveles a los que se puede escalar: los que están POR ENCIMA del destino actual. */
 export function escalationTargets(ladder: string[], current: string): string[] {
   const i = ladder.indexOf(current)

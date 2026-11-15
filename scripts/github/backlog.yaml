@@ -1322,3 +1322,22 @@ issues:
   acceptance:
     - Tras `/demo/reset`, Vega tiene una racha de varios días y alguna insignia, y no todos los members tienen los mismos puntos
     - El seed sigue siendo determinista (test)
+
+- id: FE-35
+  title: Admin como cuenta de supervisión (selector de member, alertas del entorno, estados vacíos útiles)
+  area: frontend
+  comp: ui
+  priority: P2
+  milestone: freeze
+  depends: [FE-27, FE-28, FE-14]
+  docs: auth-and-roles.md
+  tasks:
+    - "Selector de member en la barra lateral (y en «Más» en móvil) para quien puede elegir members (`view:members`: admin, medic, commander), reutilizando `useMembers` y `selectMember`"
+    - "Un único estado vacío «No hay nadie seleccionado» con acción útil según el rol: selector de member, elegir entorno (admin sin entorno) o la consola `/ground` (responder y psych, que hoy acaban en un callejón sin salida en Historial)"
+    - "`/alerts` sin member elegido: alertas de todo el entorno a bordo (agregadas en el cliente con `GET /members/{id}/alerts`), con el nombre del member; tocar una abre su detalle"
+    - Sin cambios en la matriz de permisos ni en el contrato
+  acceptance:
+    - "Con `admin`, Panel, Medir, Historial y Misiones muestran datos eligiendo el member desde el selector, sin pasar por Tripulación"
+    - "`/alerts` sin member lista las alertas de todo el entorno"
+    - "`responder` y `psych` en Historial reciben un enlace a `/ground` en vez de volver rebotados"
+    - "Un `member` no ve el selector"

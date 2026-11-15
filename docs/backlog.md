@@ -21,7 +21,7 @@ Cada issue pertenece a **un componente**: la parte del sistema que resuelve. Apa
 | 📡 **Enlace** | `comp:link` | Enlace simulado con Tierra (retardo, LOS) | BE-13, FE-17 |
 | 💓 **Liveness** | `comp:liveness` | Liveness (heartbeat, R U OK?) | BE-12, BE-16, FE-15 |
 | 📴 **Offline** | `comp:offline` | Offline y sincronización (IndexedDB, outbox) | FE-30, FE-11, FE-12 |
-| 🎨 **UI** | `comp:ui` | UI base, temas y pulido | FE-02, FE-03, FE-04, FE-33, FE-34, FE-26 |
+| 🎨 **UI** | `comp:ui` | UI base, temas y pulido | FE-02, FE-03, FE-04, FE-33, FE-34, FE-26, FE-35 |
 | 🫀 **Dashboard** | `comp:dashboard` | Dashboard, cuerpo SVG y gráficas | FE-05, FE-06, FE-07, FE-08, FE-09 |
 | 📝 **Formularios** | `comp:forms` | Formularios de medición | FE-10 |
 | 🎮 **Juego** | `comp:game` | Rutina y gamificación | BE-18, BE-19, FE-18, BE-23, FE-24, BE-37 |
@@ -77,7 +77,7 @@ Dashboard con cuerpo + semáforo con datos reales y cambio de entorno.
 | CNT-02 | 📚 Config | [#29](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/29) Textos por sistema e indicador e instrucciones de medición | content | P1 | CNT-01 | — |
 | BE-25 | 🔐 Auth | [#66](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/66) Tabla user_account, hash de contraseñas/PIN y usuarios demo | backend | P0-blocker | BE-02, BE-07 | BE-26 |
 | BE-26 | 🔐 Auth | [#67](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/67) Endpoints /auth (login, PIN, me) con JWT local | backend | P0-blocker | BE-25 | BE-27, BE-36 |
-| FE-27 | 🔐 Auth | [#68](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/68) Pantalla de login, sesión y cliente con token | frontend | P0-blocker | FE-30, FS-04, FE-02 | FE-28, FE-29 |
+| FE-27 | 🔐 Auth | [#68](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/68) Pantalla de login, sesión y cliente con token | frontend | P0-blocker | FE-30, FS-04, FE-02 | FE-28, FE-29, FE-35 |
 | FE-30 | 📴 Offline | [#74](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/74) Identidad de dispositivo e IndexedDB aislada por dispositivo/pestaña | frontend | P0-blocker | FE-01, FS-03 | FE-27, FE-11, FE-15 |
 | BE-28 | 📶 Tiempo real | [#75](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/75) Bitácora de eventos y stream en tiempo real (SSE) | backend | P0-blocker | BE-02 | FE-29 |
 | BE-31 | 🧠 Motor | [#111](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/111) Escalado a bordo sin retardo (self/crew en tiempo real) | backend | P0-blocker | BE-09 | BE-14 |
@@ -105,7 +105,7 @@ MVP integrado: alertas, offline, liveness, gamificación, consola ground.
 | FE-11 | 📴 Offline | [#41](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/41) Outbox offline en IndexedDB y sincronización | frontend | P0-blocker | FE-30, FE-10, BE-06 | FE-12, FE-13 |
 | FE-12 | 📴 Offline | [#42](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/42) Semáforo provisional offline | frontend | P1 | FE-11, FE-04 | — |
 | FE-13 | 🚨 Alertas | [#43](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/43) Botón SOS / Pedir ayuda | frontend | P1 | FS-04, FE-11 | FE-14 |
-| FE-14 | 🚨 Alertas | [#44](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/44) Panel de alertas con timeline, escalado, ETA y protocolo autónomo | frontend | P1 | BE-34, FE-29, FE-13, BE-15 | FE-16 |
+| FE-14 | 🚨 Alertas | [#44](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/44) Panel de alertas con timeline, escalado, ETA y protocolo autónomo | frontend | P1 | BE-34, FE-29, FE-13, BE-15 | FE-16, FE-35 |
 | FE-15 | 💓 Liveness | [#45](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/45) Heartbeat del cliente y modal "R U OK?" | frontend | P1 | FE-30, BE-12 | — |
 | FE-16 | 🚨 Alertas | [#46](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/46) Consola /ground con estado as-of | frontend | P1 | FE-29, FE-28, FE-14, BE-17 | — |
 | FE-17 | 📡 Enlace | [#47](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/47) Indicador del estado del enlace en la cabecera | frontend | P1 | FE-28, BE-13 | FE-32 |
@@ -114,7 +114,7 @@ MVP integrado: alertas, offline, liveness, gamificación, consola ground.
 | FE-21 | 🧘 Conductual | [#50](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/50) Barra de fase de misión y aviso del tercer cuarto | frontend | P1 | FE-02 | — |
 | CNT-03 | 📚 Config | [#51](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/51) Contenido de las intervenciones y los protocolos autónomos | content | P1 | CNT-01 | — |
 | BE-27 | 🔐 Auth | [#69](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/69) Autorización por rol y propiedad en todos los endpoints | backend | P1 | BE-26, BE-05, BE-06, BE-15, BE-17 | FS-07 |
-| FE-28 | 🔐 Auth | [#70](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/70) Guards de rutas y menús según el rol | frontend | P1 | FE-27, FE-07 | FE-16, FE-17, FE-31, FS-07 |
+| FE-28 | 🔐 Auth | [#70](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/70) Guards de rutas y menús según el rol | frontend | P1 | FE-27, FE-07 | FE-16, FE-17, FE-31, FS-07, FE-35 |
 | BE-29 | 📶 Tiempo real | [#76](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/76) Registro de dispositivos | backend | P1 | BE-02, BE-12 | BE-30 |
 | BE-30 | 🛰️ Control | [#77](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/77) Endpoints del centro de control y descubrimiento en red | backend | P1 | BE-11, BE-12, BE-13, BE-29 | FE-31 |
 | FE-29 | 📶 Tiempo real | [#78](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/78) Cliente de tiempo real (SSE) con fallback a polling | frontend | P1 | FE-27, BE-28 | FE-14, FE-16, FE-31 |
@@ -141,6 +141,7 @@ P2 y pulido. Lo no terminado a las 11:00 se corta.
 | FE-25 | 🧘 Conductual | [#57](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/57) Galería Earth view | frontend | P2 | — | — |
 | FE-26 | 🎨 UI | [#58](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/58) Pulido de animaciones, responsive y disclaimer médico | frontend | P1 | FE-07 | — |
 | CNT-04 | 🎤 Pitch | [#59](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/59) Guion, slides, vídeo y envío a Space Apps | content | P1 | — | — |
+| FE-35 | 🎨 UI | [#210](https://github.com/NASAHACKATON2026FTHEALTH42U/RUOK/issues/210) Admin como cuenta de supervisión (selector de member, alertas del entorno, estados vacíos útiles) | frontend | P2 | FE-27, FE-28, FE-14 | — |
 
 ## Ruta crítica (P0)
 

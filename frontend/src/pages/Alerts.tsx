@@ -8,6 +8,7 @@ import { useEnvironments } from '../api/useEnvironments'
 import { useInterventions } from '../api/useInterventions'
 import { useActiveMemberId, useAuth } from '../auth/useAuth'
 import { AlertDetail } from '../components/alerts/AlertDetail'
+import { EnvironmentAlerts } from '../components/alerts/EnvironmentAlerts'
 import {
   categoryLabel,
   severityStyle,
@@ -15,6 +16,7 @@ import {
   statusLabel,
 } from '../components/alerts/alertFormat'
 import { roleLabel } from '../components/alerts/sos'
+import { MemberSwitcher } from '../components/ui/MemberSwitcher'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { useVocab } from '../environments/useVocab'
 import { formatAgo } from '../lib/time'
@@ -27,9 +29,12 @@ import { useEnvironmentStore } from '../store/environment'
  */
 export default function Alerts() {
   const vocab = useVocab()
-  const { role } = useAuth()
+  const { role, can } = useAuth()
   const memberId = useActiveMemberId()
   const envId = useEnvironmentStore((s) => s.envId)
+  const selectMember = useEnvironmentStore((s) => s.selectMember)
+  // Quien supervisa (admin, medic, commander) ve todo el entorno sin member elegido (FE-35).
+  const supervisor = can('view:members')
   const alerts = useMemberAlerts(memberId)
   const assessment = useAssessment(memberId)
   const interventions = useInterventions()
@@ -57,15 +62,28 @@ export default function Alerts() {
   }
   if (memberId === null) {
     return (
-      <section className="space-y-2">
-        {title}
-        <p className="text-env-muted">
-          Elige primero a quién quieres ver en{' '}
-          <Link to="/members" className="underline hover:text-env-text">
-            {vocab.crew}
-          </Link>
-          .
-        </p>
+      <section className="space-y-4">
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          {title}
+          <MemberSwitcher />
+        </header>
+        {supervisor && envId ? (
+          <EnvironmentAlerts
+            envId={envId}
+            onSelect={(id, alertId) => {
+              setSelected(alertId)
+              selectMember(id)
+            }}
+          />
+        ) : (
+          <p className="text-env-muted">
+            Elige primero a quién quieres ver en{' '}
+            <Link to="/members" className="underline hover:text-env-text">
+              {vocab.crew}
+            </Link>
+            .
+          </p>
+        )}
       </section>
     )
   }
@@ -80,7 +98,21 @@ export default function Alerts() {
     <section className="space-y-4">
       <header className="flex flex-wrap items-center justify-between gap-3">
         {title}
-        <NoticeButton />
+        <div className="flex flex-wrap items-center gap-3">
+          {supervisor && (
+            <>
+              <button
+                type="button"
+                onClick={() => useEnvironmentStore.setState({ memberId: null })}
+                className="text-sm text-env-muted underline hover:text-env-text"
+              >
+                ← Todo {vocab.crew}
+              </button>
+              <MemberSwitcher />
+            </>
+          )}
+          <NoticeButton />
+        </div>
       </header>
       {alerts.state === 'loading' && (
         <div className="h-32 animate-pulse rounded-xl bg-env-surface" />

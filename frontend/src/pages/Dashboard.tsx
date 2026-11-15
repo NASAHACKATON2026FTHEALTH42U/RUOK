@@ -1,6 +1,5 @@
 import { AnimatePresence } from 'framer-motion'
 import { useCallback, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { serverNow } from '../api/client'
 import { useAssessment } from '../api/useAssessment'
 import { useEnvironments } from '../api/useEnvironments'
@@ -20,6 +19,7 @@ import { capitalize, useVocab } from '../environments/useVocab'
 import { useEnvironmentStore } from '../store/environment'
 import { useActiveMemberId, useAuth } from '../auth/useAuth'
 import { useProvisionalAssessment } from '../offline/useProvisional'
+import { NoMemberSelected } from '../components/ui/NoMemberSelected'
 
 /** Cada cuánto se refresca la evaluación (FE-07). */
 const REFRESH_MS = 15_000
@@ -71,13 +71,7 @@ export default function Dashboard() {
     return (
       <section>
         {title}
-        <p className="mt-2 text-env-muted">
-          No hay nadie seleccionado.{' '}
-          <Link to="/" className="underline hover:text-env-text">
-            Elige entorno y {vocab.member}
-          </Link>
-          .
-        </p>
+        <NoMemberSelected />
       </section>
     )
   }
