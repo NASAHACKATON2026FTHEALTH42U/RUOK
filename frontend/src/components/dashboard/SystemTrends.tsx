@@ -17,18 +17,29 @@ import { formatValue } from './format'
 import { PeriodSwitch } from './TrendChart'
 import {
   bands,
+  commonUnit,
   formatDateTime,
   formatDay,
+  initialSlots,
+  normalPct,
+  toggleSlot,
   yDomain,
   yTicks,
   type Period,
   type Ranges,
+  type Slots,
   type TrendPoint,
 } from './trend'
 
 const DAY_MS = 86_400_000
-/** Colores de serie en orden fijo (styles/index.css). Como mucho 6 líneas por gráfica. */
+/** Colores de serie en orden fijo (styles/index.css): como mucho 6 indicadores a la vez. */
 const SERIES = [1, 2, 3, 4, 5, 6].map((n) => `var(--series-${n})`)
+const MAX = SERIES.length
+/** Al abrir un sistema se ven sus 4 primeros indicadores (vienen ordenados por gravedad). */
+const DEFAULT_COUNT = 4
+const PLOT_H = 240
+/** Sufijo de la columna con el valor real (con escala común, lo dibujado es el % del rango). */
+const RAW = '__raw'
 
 export interface TrendSeries {
   id: string
@@ -38,39 +49,32 @@ export interface TrendSeries {
   range: Ranges
 }
 
-/** Alto de cada gráfica: más alta cuando es la única del bloque. */
-const plotHeight = (tall: boolean) => (tall ? 220 : 130)
-
 const unitLabel = (unit: string) => (unit === '1-5' ? 'escala 1-5' : unit || 'sin unidad')
 
-/** Indicadores agrupados por unidad, en orden de aparición: cada grupo comparte eje Y. */
-function groupByUnit(series: TrendSeries[]): TrendSeries[][] {
-  const groups = new Map<string, TrendSeries[]>()
-  for (const s of series) groups.set(s.unit, [...(groups.get(s.unit) ?? []), s])
-  // Más de 6 con la misma unidad: se parten, para no repetir colores en una gráfica.
-  return [...groups.values()].flatMap((g) =>
-    Array.from({ length: Math.ceil(g.length / SERIES.length) }, (_, i) =>
-      g.slice(i * SERIES.length, (i + 1) * SERIES.length),
-    ),
-  )
-}
-
 /**
- * Tendencias de un sistema en UN solo contenedor (detalle del sistema): una línea de color por
- * indicador, con leyenda. Los indicadores con la misma unidad comparten gráfica y eje; los de
- * unidad distinta van en su propia gráfica dentro del mismo bloque, porque mezclar unidades en
- * un eje (o usar dos ejes) falsearía la lectura. Selector de periodo común, tooltip con todas
- * las series y tabla de datos desplegable (los colores nunca son la única pista).
+ * Tendencias de un sistema en UNA sola gráfica (detalle de un sistema o de un indicador). Los
+ * selectores (botones con `aria-pressed`, que hacen de leyenda: color, nombre y último valor)
+ * eligen qué indicadores se ven a la vez, hasta 6; cada uno conserva su color al cambiar la
+ * selección. Con `initial`, empieza con esos (p. ej. el indicador pulsado en el panel).
+ * - Misma unidad: valores reales en un eje con esa unidad (con uno solo, también sus bandas).
+ * - Unidades distintas: escala común, el % del rango normal de cada indicador (0–100 % = normal).
+ *   Mezclar unidades en un eje, o usar dos ejes, falsearía la lectura. El valor real va en el
+ *   tooltip y en la tabla.
+ * Periodo común, tooltip con todas las series y tabla de datos desplegable (el color nunca va
+ * solo).
  */
-export function SystemTrends({ series }: { series: TrendSeries[] }) {
+export function SystemTrends({ series, initial }: { series: TrendSeries[]; initial?: string[] }) {
   const memberId = useEnvironmentStore((s) => s.memberId)
   const [days, setDays] = useState<Period>(7)
-  const data = useMeasurementsMany(
-    memberId,
-    series.map((s) => s.id),
-    days,
+  const ids = series.map((s) => s.id)
+  const [slots, setSlots] = useState<Slots>(() =>
+    initialSlots(ids, initial, initial?.length ? MAX : DEFAULT_COUNT),
   )
-  const groups = groupByUnit(series)
+  // Se cargan todas las series del sistema: cambiar la selección no vuelve a pedir datos.
+  const data = useMeasurementsMany(memberId, ids, days)
+  const selected = series.filter((s) => s.id in slots)
+  const last = (id: string) =>
+    data.state === 'ready' ? (data.data[id] ?? []).at(-1)?.value : undefined
 
   return (
     <figure className="rounded-lg border border-env-border bg-env-surface p-3">
@@ -81,30 +85,61 @@ export function SystemTrends({ series }: { series: TrendSeries[] }) {
         <PeriodSwitch days={days} onChange={setDays} />
       </div>
 
-      {/* Esqueleto con la MISMA forma que tendrá el contenido (una caja por gráfica, con su alto,
-          su título, su leyenda y su «Ver datos»): al llegar los datos la ventana no cambia de
-          tamaño. */}
-      {data.state === 'loading' && (
+      {series.length > 1 && (
         <div
-          className={`mt-2 grid gap-x-4 gap-y-3 ${groups.length > 1 ? 'md:grid-cols-2' : ''}`}
-          aria-busy="true"
+          role="group"
+          aria-label="Indicadores en la gráfica"
+          className="mt-2 flex flex-wrap gap-1.5"
         >
-          {groups.map((g) => (
-            <div key={g.map((x) => x.id).join(',')} className="min-w-0">
-              <div className="h-4" />
-              <div
-                className="mt-1 animate-pulse rounded-md bg-env-bg"
-                style={{ height: plotHeight(groups.length === 1) }}
-              />
-              {/* La leyenda real, invisible, para reservar justo sus líneas. */}
-              {g.length > 1 && (
-                <div className="invisible" aria-hidden="true">
-                  <Legend group={g} value={() => formatValue(0, g[0].unit)} />
-                </div>
-              )}
-              <div className="mt-1 h-4" />
-            </div>
-          ))}
+          {series.map((s) => {
+            const on = s.id in slots
+            const count = Object.keys(slots).length
+            // No se puede quitar el último ni añadir un séptimo: se avisa, pero el botón sigue
+            // siendo enfocable (aria-disabled, no disabled).
+            const locked = on ? count === 1 : count >= MAX
+            const value = last(s.id)
+            return (
+              <button
+                key={s.id}
+                type="button"
+                aria-pressed={on}
+                aria-disabled={locked || undefined}
+                title={
+                  locked
+                    ? on
+                      ? 'Tiene que quedar al menos un indicador'
+                      : `Como mucho ${MAX} a la vez`
+                    : undefined
+                }
+                onClick={() => !locked && setSlots((cur) => toggleSlot(cur, s.id, MAX))}
+                className={`inline-flex min-h-11 items-center gap-2 rounded-md border px-2.5 text-xs pointer-fine:min-h-8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${
+                  on
+                    ? 'border-env-text/60 bg-env-bg text-env-text'
+                    : 'border-env-border text-env-muted hover:text-env-text'
+                } ${locked && !on ? 'cursor-not-allowed opacity-60' : ''}`}
+              >
+                <span
+                  aria-hidden
+                  className="inline-block h-[3px] w-3.5 shrink-0 rounded-full"
+                  style={{ background: on ? SERIES[slots[s.id]] : 'var(--env-border)' }}
+                />
+                <span>{s.name}</span>
+                {value !== undefined && (
+                  <span className="text-env-muted tabular-nums">{formatValue(value, s.unit)}</span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Esqueleto con la MISMA forma que el contenido (título, gráfica y «Ver datos»): al llegar
+          los datos la ventana no cambia de tamaño. */}
+      {data.state === 'loading' && (
+        <div className="mt-2" aria-busy="true">
+          <div className="h-4" />
+          <div className="mt-1 animate-pulse rounded-md bg-env-bg" style={{ height: PLOT_H }} />
+          <div className="mt-1 h-4" />
         </div>
       )}
       {data.state === 'error' && (
@@ -116,83 +151,59 @@ export function SystemTrends({ series }: { series: TrendSeries[] }) {
         </p>
       )}
       {data.state === 'ready' && (
-        <div
-          className={`trends-fade mt-2 grid gap-x-4 gap-y-3 ${groups.length > 1 ? 'md:grid-cols-2' : ''}`}
-        >
-          {groups.map((g) => (
-            <GroupPlot
-              key={g.map((s) => s.id).join(',')}
-              group={g}
-              data={data.data}
-              days={days}
-              tall={groups.length === 1}
-            />
-          ))}
-        </div>
+        <Plot selected={selected} slots={slots} data={data.data} days={days} />
       )}
     </figure>
   )
 }
 
-/** Leyenda: trazo del color + nombre y último valor en texto (el color nunca va solo). */
-function Legend({ group, value }: { group: TrendSeries[]; value: (id: string) => string }) {
-  return (
-    <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
-      {group.map((s, i) => (
-        <li key={s.id} className="flex items-center gap-1.5">
-          <span
-            aria-hidden
-            className="inline-block h-0.5 w-3 shrink-0"
-            style={{ background: SERIES[i] }}
-          />
-          <span>{s.name}</span>
-          <span className="text-env-muted tabular-nums">{value(s.id)}</span>
-        </li>
-      ))}
-    </ul>
-  )
-}
-
-function GroupPlot({
-  group,
+function Plot({
+  selected,
+  slots,
   data,
   days,
-  tall,
 }: {
-  group: TrendSeries[]
+  selected: TrendSeries[]
+  slots: Slots
   data: Record<string, { taken_at: string; value: number }[]>
   days: Period
-  tall: boolean
 }) {
   const now = serverNow().getTime()
-  const unit = group[0].unit
-  const single = group.length === 1
-  // Filas por instante: { t, [indicador]: valor }, para un tooltip con todas las series.
+  const unit = commonUnit(selected.map((s) => s.unit))
+  const normalized = unit === null
+  const single = selected.length === 1
+  // Filas por instante: { t, [indicador]: valor dibujado, [indicador + RAW]: valor real }, para
+  // un tooltip con todas las series.
   const byT = new Map<number, Record<string, number>>()
-  const all: TrendPoint[] = []
-  for (const s of group) {
+  const points: TrendPoint[] = []
+  for (const s of selected) {
     for (const m of data[s.id] ?? []) {
+      const y = normalized ? normalPct(m.value, s.range) : m.value
+      if (y === null) continue
       const t = Date.parse(m.taken_at)
-      byT.set(t, { ...(byT.get(t) ?? { t }), [s.id]: m.value })
-      all.push({ t, value: m.value })
+      byT.set(t, { ...(byT.get(t) ?? { t }), [s.id]: y, [s.id + RAW]: m.value })
+      points.push({ t, value: y })
     }
   }
   const rows = [...byT.values()].sort((a, b) => a.t - b.t)
-  // Bandas normal/atención solo con una serie: con varias, cada una tiene sus rangos.
-  const range = single ? group[0].range : {}
-  const domain = yDomain(all, range)
-  const last = (id: string) => (data[id] ?? []).at(-1)?.value
+  // Bandas: con escala común, la franja normal (0–100 %); con valores reales, las del indicador
+  // si solo hay uno (con varios, cada uno tiene las suyas).
+  const range: Ranges = normalized ? { normal: [0, 100] } : single ? selected[0].range : {}
+  const domain = yDomain(points, range)
+  const caption = normalized
+    ? 'Escala común: % del rango normal de cada indicador (0–100 % = normal)'
+    : single
+      ? `${selected[0].name} · ${unitLabel(unit)}`
+      : unitLabel(unit)
 
   return (
-    <div className="min-w-0">
-      <p className="text-xs text-env-muted">
-        {single ? `${group[0].name} · ${unitLabel(unit)}` : unitLabel(unit)}
-      </p>
+    <div className="mt-2 min-w-0">
+      <p className="text-xs text-env-muted">{caption}</p>
       {rows.length === 0 ? (
         <p className="mt-1 text-sm text-env-muted">Sin mediciones en los últimos {days} días.</p>
       ) : (
         <>
-          <div style={{ height: plotHeight(tall) }} aria-hidden="true" className="mt-1">
+          <div style={{ height: PLOT_H }} aria-hidden="true" className="mt-1">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={rows}
@@ -225,10 +236,11 @@ function GroupPlot({
                 <YAxis
                   domain={domain}
                   ticks={yTicks(domain)}
+                  tickFormatter={normalized ? (v: number) => `${v} %` : undefined}
                   tick={{ fill: 'var(--env-muted)', fontSize: 11 }}
                   axisLine={false}
                   tickLine={false}
-                  width={48}
+                  width={normalized ? 60 : 48}
                   allowDecimals={false}
                 />
                 <Tooltip
@@ -239,18 +251,21 @@ function GroupPlot({
                     return (
                       <div className="rounded-md border border-env-border bg-env-bg px-2 py-1 text-xs shadow">
                         <div className="text-env-muted">{formatDateTime(row.t)}</div>
-                        {group.map(
-                          (s, i) =>
+                        {selected.map(
+                          (s) =>
                             row[s.id] !== undefined && (
                               <div key={s.id} className="flex items-center gap-1.5">
                                 <span
                                   className="inline-block h-0.5 w-3 shrink-0"
-                                  style={{ background: SERIES[i] }}
+                                  style={{ background: SERIES[slots[s.id]] }}
                                 />
                                 <span className="font-semibold text-env-text">
-                                  {formatValue(row[s.id], unit)}
+                                  {formatValue(row[s.id + RAW], s.unit)}
                                 </span>
-                                <span className="text-env-muted">{s.name}</span>
+                                <span className="text-env-muted">
+                                  {s.name}
+                                  {normalized && ` · ${Math.round(row[s.id])} % del rango`}
+                                </span>
                               </div>
                             ),
                         )}
@@ -258,26 +273,33 @@ function GroupPlot({
                     )
                   }}
                 />
-                {group.map((s, i) => (
+                {selected.map((s) => (
                   <Line
                     key={s.id}
                     type="monotone"
                     dataKey={s.id}
-                    stroke={SERIES[i]}
+                    stroke={SERIES[slots[s.id]]}
                     strokeWidth={2}
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     connectNulls
-                    dot={rows.length > 14 ? false : { r: 2.5, fill: SERIES[i], strokeWidth: 0 }}
-                    activeDot={{ r: 4.5, fill: SERIES[i], stroke: 'var(--env-bg)', strokeWidth: 2 }}
+                    dot={
+                      rows.length > 14
+                        ? false
+                        : { r: 2.5, fill: SERIES[slots[s.id]], strokeWidth: 0 }
+                    }
+                    activeDot={{
+                      r: 4.5,
+                      fill: SERIES[slots[s.id]],
+                      stroke: 'var(--env-bg)',
+                      strokeWidth: 2,
+                    }}
                     isAnimationActive={false}
                   />
                 ))}
               </LineChart>
             </ResponsiveContainer>
           </div>
-
-          {!single && <Legend group={group} value={(id) => formatValue(last(id), unit)} />}
 
           <details className="mt-1 text-xs">
             <summary className="cursor-pointer text-env-muted hover:text-env-text">
@@ -286,12 +308,12 @@ function GroupPlot({
             <div className="overflow-x-auto">
               <table className="mt-1 w-full">
                 <caption className="sr-only">
-                  {group.map((s) => s.name).join(', ')}: últimos {days} días
+                  {selected.map((s) => s.name).join(', ')}: últimos {days} días
                 </caption>
                 <thead>
                   <tr className="text-left text-env-muted">
                     <th className="font-normal">Fecha</th>
-                    {group.map((s) => (
+                    {selected.map((s) => (
                       <th key={s.id} className="pl-2 text-right font-normal">
                         {s.name}
                       </th>
@@ -302,9 +324,9 @@ function GroupPlot({
                   {[...rows].reverse().map((r) => (
                     <tr key={r.t}>
                       <td className="whitespace-nowrap">{formatDateTime(r.t)}</td>
-                      {group.map((s) => (
+                      {selected.map((s) => (
                         <td key={s.id} className="pl-2 text-right tabular-nums">
-                          {r[s.id] === undefined ? '—' : formatValue(r[s.id], unit)}
+                          {r[s.id + RAW] === undefined ? '—' : formatValue(r[s.id + RAW], s.unit)}
                         </td>
                       ))}
                     </tr>

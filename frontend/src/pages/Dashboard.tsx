@@ -13,7 +13,8 @@ import { SystemPanel } from '../components/dashboard/SystemPanel'
 import { SystemsRing } from '../components/dashboard/SystemsRing'
 import { BodyLegend } from '../components/body/BodyLegend'
 import { TopBarPortal } from '../components/ui/TopBarPortal'
-import { bySeverity, livenessState, statusStyle } from '../components/ui/status'
+import { bySeverity, livenessState } from '../components/ui/status'
+import { TrafficLight } from '../components/ui/TrafficLight'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { capitalize, useVocab } from '../environments/useVocab'
 import { useEnvironmentStore } from '../store/environment'
@@ -47,6 +48,12 @@ export default function Dashboard() {
   // Sistema señalado en la leyenda (columna derecha) o en la figura: se resalta en ambas.
   const [hovered, setHovered] = useState<string | null>(null)
   const close = useCallback(() => setSelected(null), [])
+  // Indicador pulsado (celda del panel): el detalle del sistema abre su gráfica con él solo.
+  const [focusIndicator, setFocusIndicator] = useState<string | null>(null)
+  const selectSystem = useCallback((id: string) => {
+    setSelected(id)
+    setFocusIndicator(null)
+  }, [])
   const env = envs.state === 'ready' ? envs.data.find((e) => e.id === envId) : undefined
   // Semáforo provisional (FE-12): mediciones aún sin sincronizar, evaluadas en el dispositivo.
   const prov = useProvisionalAssessment(
@@ -147,13 +154,12 @@ export default function Dashboard() {
             : 'mb-3 flex flex-wrap items-center gap-2 md:hidden'
         }
       >
-        {/* Si el "sin datos" se debe a un liveness stale, basta el badge de liveness (FE-34).
-          En móvil el estado general ya lo cuenta el anillo (SystemsRing). */}
-        {desktop && !(live === 'stale' && a.overall_status === 'unknown') && (
-          <StatusBadge
-            status={a.overall_status}
-            label={`Estado general: ${statusStyle(a.overall_status).label}`}
-            size="xs"
+        {/* Estado general como un semáforo, sin texto (el nombre accesible y el tooltip lo dicen).
+          Es el peor entre la salud y el liveness: con liveness stale o lost y todo normal, las
+          luces se apagan (nunca verde sin datos). En móvil lo cuenta el anillo (SystemsRing). */}
+        {desktop && (
+          <TrafficLight
+            state={live && a.overall_status === 'normal' ? 'unknown' : a.overall_status}
           />
         )}
         {live && (
@@ -204,7 +210,7 @@ export default function Dashboard() {
         name={user?.member_id === memberId ? user?.display_name.split(' ').pop() : undefined}
         env={env}
         now={serverNow()}
-        onSelectSystem={setSelected}
+        onSelectSystem={selectSystem}
       />
 
       {/* Tableta y escritorio: ocupa todo el hueco, sin scroll (rejilla `.dash-grid` en index.css).
@@ -225,7 +231,7 @@ export default function Dashboard() {
               regions={regions}
               stale={stale}
               selectedSystemId={selected}
-              onSelectSystem={setSelected}
+              onSelectSystem={selectSystem}
               onHoverSystem={setHovered}
               className="-mr-px -mb-px min-h-0 flex-1 auto-rows-[minmax(2.75rem,1fr)] grid-cols-1 overflow-y-auto @min-[26rem]:grid-cols-2"
               rows
@@ -241,7 +247,7 @@ export default function Dashboard() {
               liveness={a.liveness}
               staleLabel={formatSinceLabel(a.last_seen_at, serverNow())}
               selectedSystemId={selected}
-              onSelectSystem={setSelected}
+              onSelectSystem={selectSystem}
               hoveredSystemId={hovered}
               onHoverSystem={setHovered}
               showLegend={false}
@@ -273,7 +279,10 @@ export default function Dashboard() {
                       systemName={systemById.get(systemId)?.name}
                       stale={stale}
                       provisional={provisionalIds?.has(ind.indicator_id)}
-                      onClick={() => setSelected(systemId)}
+                      onClick={() => {
+                        setSelected(systemId)
+                        setFocusIndicator(ind.indicator_id)
+                      }}
                       tile
                     />
                   </li>
@@ -294,6 +303,7 @@ export default function Dashboard() {
             stale={stale}
             canMeasure={canMeasure}
             provisionalIds={provisionalIds}
+            focusIndicatorId={focusIndicator}
             onClose={close}
           />
         )}
