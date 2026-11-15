@@ -91,13 +91,6 @@ export default function Login() {
   return (
     <div className="hud-grid flex min-h-full flex-col">
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-3.5 pt-4 pb-4 md:max-w-xl md:px-6 lg:max-w-5xl lg:justify-center lg:py-8">
-        <div className="flex justify-between px-1">
-          <span className="hud-label text-[0.6875rem]">
-            Nodo{envName ? `.${envName}` : ''} / Servidor a bordo
-          </span>
-          <span className="hud-label text-[0.6875rem]">Sin internet · Local</span>
-        </div>
-
         {/* Rejilla con áreas: en móvil, una columna (marca, acceso, entorno y usuarios, y el SOS
             abajo del todo). En escritorio, la marca centrada arriba y dos bloques que empiezan y
             acaban a la misma altura: acceso con el SOS debajo | entorno y usuarios. */}
@@ -127,10 +120,7 @@ export default function Login() {
                 void enter(username.trim(), secret)
               }}
             >
-              <div className="hud-head">
-                Acceso
-                {envName && <span className="hud-chip mr-[22px]">{envName}</span>}
-              </div>
+              <div className="hud-head">Acceso</div>
               <div className="flex flex-col gap-3 px-3.5 pt-3 pb-3.5">
                 <label className="flex flex-col gap-1.5">
                   <span className="hud-label">Usuario</span>
@@ -203,10 +193,7 @@ export default function Login() {
             )}
             {demoUsers.length > 0 && showDemo && (
               <section className="hud-panel" aria-label="Usuarios de la demo">
-                <div className="hud-head">
-                  Usuarios
-                  <span className="hud-chip mr-[22px]">Un toque para entrar</span>
-                </div>
+                <div className="hud-head">Usuarios</div>
                 <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2">
                   {demoUsers.map((u) => (
                     <li key={u.username} className="border-r border-b border-env-border/60">
