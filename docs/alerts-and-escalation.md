@@ -34,6 +34,13 @@ El corte lo marca `environment.external_from_level`: el índice del primer nivel
 - Cualquier alerta automática tiene además un botón **"Escalar"**, que por defecto la sube al siguiente nivel.
 - Si se pulsa SOS **sin conexión con el servidor de a bordo**, la alerta queda en el outbox del dispositivo y se muestra: *"No enviado. Avisa a la tripulación de viva voz"*, junto con el protocolo autónomo, que está en caché.
 
+## Seguimiento para el member mientras su aviso está abierto (FE-38)
+Una alerta no se cierra sola: la cierra quien la gestiona. Mientras tanto, el member ve un mensaje de seguimiento en el detalle del sistema, en la alerta y tras medirse (check-in, PVT):
+- **«Estamos revisando tu caso»:** el aviso ha llegado a su destino, o este ya lo ha visto; sigue las recomendaciones y, si empeora, el SOS.
+- **«Nos alegra ver que estás mejor»:** el sistema está mejor que cuando saltó el aviso (p. ej. de crítico a atención), y quien lo gestiona cerrará el aviso cuando lo confirme.
+
+Solo lo ve el propio member: un sanitario que consulta sus alertas no.
+
 ## Ciclo de vida
 ```
 open ──▶ escalated ──▶ acknowledged ──▶ resolved

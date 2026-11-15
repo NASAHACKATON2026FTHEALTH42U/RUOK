@@ -13,6 +13,7 @@ import {
 } from '../components/behavioral/checkin'
 import { FaceScale } from '../components/behavioral/FaceScale'
 import { InterventionCard } from '../components/behavioral/InterventionCard'
+import { CaseFeedbackFor } from '../components/alerts/CaseFeedbackNote'
 import { statusStyle } from '../components/ui/status'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { sendMeasurements, type MeasurementBatchResult } from '../offline/outbox'
@@ -210,6 +211,10 @@ export default function CheckIn() {
             />
           </p>
         </div>
+        <CaseFeedbackFor
+          systemId="neuro_behavioral"
+          current={assessment.systems.find((s) => s.system_id === 'neuro_behavioral')?.status}
+        />
         {careSection}
         {links}
       </section>

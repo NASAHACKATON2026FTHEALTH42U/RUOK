@@ -8,6 +8,7 @@ import { useEnvironments } from '../api/useEnvironments'
 import { useInterventions } from '../api/useInterventions'
 import { useActiveMemberId, useAuth } from '../auth/useAuth'
 import { AlertDetail } from '../components/alerts/AlertDetail'
+import { CaseFeedbackFor } from '../components/alerts/CaseFeedbackNote'
 import { EnvironmentAlerts } from '../components/alerts/EnvironmentAlerts'
 import {
   categoryLabel,
@@ -169,6 +170,18 @@ export default function Alerts() {
           </ul>
           {current && (
             <div className="rounded-xl border border-env-border p-4">
+              {current.system_id && (
+                <CaseFeedbackFor
+                  systemId={current.system_id}
+                  current={
+                    assessment.state === 'ready'
+                      ? assessment.data.systems.find((s) => s.system_id === current.system_id)
+                          ?.status
+                      : undefined
+                  }
+                  className="mb-4"
+                />
+              )}
               <AlertDetail
                 key={current.id}
                 alert={current}
