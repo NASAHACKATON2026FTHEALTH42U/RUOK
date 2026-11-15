@@ -296,7 +296,15 @@ const regions = buildRegions(systems, assessment.systems)   // catálogo (svg_re
 
 ## Detalle del sistema: `SystemPanel` (FE-06)
 
-Se abre al hacer clic (o Enter) en una región de la figura o en la leyenda, y se cierra con **Esc**, con el botón ✕ o con un **clic fuera**. En escritorio es un panel lateral a la derecha; en móvil, una hoja desde abajo. Al abrirse, el foco va al botón de cerrar (`role="dialog"`, `aria-modal`).
+Se abre al hacer clic (o Enter) en una región de la figura, en la lista de sistemas o en una celda de indicador. Es un modal bloqueante (`Modal`): se cierra con **Esc** o con el botón ✕, y un clic fuera no lo cierra. Al abrirse, el foco va al botón de cerrar.
+
+**Tendencias en una sola gráfica con selectores** (`SystemTrends`):
+
+- Encima de la gráfica, un botón por indicador (`aria-pressed`) que hace de leyenda: color, nombre y último valor. Se ven hasta 6 a la vez y cada uno conserva su color al cambiar la selección (`toggleSlot()`).
+- Al abrir un sistema se ven sus 4 peores indicadores. Desde una celda del panel, solo ese indicador; luego se pueden añadir otros.
+- **Misma unidad** (p. ej. tensión sistólica y diastólica): valores reales en un eje con esa unidad; con uno solo, también sus bandas normal y de atención.
+- **Unidades distintas:** escala común, el **% del rango normal** de cada indicador (`normalPct()`: 0–100 % = normal, con la franja sombreada). Mezclar unidades en un eje, o usar dos ejes, falsearía la lectura. El valor real va en el tooltip y en la tabla «Ver datos».
+- Periodo de 7 o 30 días y tabla de datos desplegable. Las series de todo el sistema se piden de una vez: cambiar la selección no vuelve a cargar.
 
 Contenido:
 
@@ -310,7 +318,7 @@ Contenido:
 
 `/dashboard` (`src/pages/Dashboard.tsx`) muestra el panel del member activo (`memberId` del store). Sin member, enlaza a `/` para elegirlo.
 
-- **Cabecera:** `StatusBadge` con el estado general (`overall_status`), el liveness si no es `active` ("Sin datos desde hace X min") y la frescura de los datos ("Actualizado hace…"). El estado del enlace está en la cabecera global (FE-17).
+- **Cabecera:** el estado general con **tres iconos sin texto** (`StatusLights`), como un semáforo: se enciende en su color el del estado (cruz roja si es crítico, aviso ámbar si hay que estar atento, check verde si todo va bien) y los otros quedan apagados. Cada icono tiene su forma y su sitio, y el nombre accesible y el tooltip dicen el estado con palabras. Sin datos fiables (desconocido, o liveness stale/lost con todo normal), las tres apagadas: nunca verde. Al lado, el liveness si no es `active` ("Sin datos desde hace X min") y la frescura de los datos ("Actualizado hace…"). El estado del enlace está en la cabecera global (FE-17).
 - **Tableta y escritorio: ocupa todo el hueco, sin scroll.** La página llena el alto disponible (`Layout` en modo `fill`) y, en el panel, también el ancho (modo `wide`, hasta 1800 px). La rejilla es `.dash-grid` (`styles/index.css`) dentro de `.dash-fill`, un contenedor de tamaño: las medidas usan unidades de contenedor (`cqh`/`cqw`).
 - **Ancho (≥ 56rem de hueco, ~1280 px):** tres paneles a alto completo: **Sistemas** (`BodyLegend` con `rows`: el nombre y debajo su estado) | **cuerpo** | **Indicadores**.
 - **Estrecho (tableta, también 1024 px con menú):** arriba el cuerpo y los sistemas (dos columnas si caben); abajo, los indicadores a todo el ancho.
@@ -440,7 +448,7 @@ Cada dispositivo (o pestaña, en los ensayos) tiene su propia identidad, su base
 
 **SOS** (`SosButton` → `SosEmergency`): botón rojo que pone solo **«SOS»**. Está arriba del menú lateral en tableta y escritorio (lo primero al tabular) y en el centro de la barra inferior en móvil, más grande que las pestañas. En el login va a todo el ancho y funciona sin sesión. No tiene formulario:
 
-- Al pulsarlo, un modal avisa de que **se enviará la alerta de ayuda si no se cancela en 3 s**, con la cuenta atrás en grande y una barra que se vacía. **Cancelar** (o Escape) la anula y **Enviar ya** no espera.
+- Al pulsarlo, un modal avisa de que **se enviará la alerta de ayuda si no se cancela en 3 s**, con la cuenta atrás en grande y una barra que se vacía. **Cancelar** (o Escape) la anula y **Enviar ya** no espera. En móvil ocupa casi toda la pantalla, con la cuenta atrás enorme y los botones grandes abajo, al alcance del pulgar; el botón SOS de la barra inferior mide 76 px.
 - Pasados los 3 s se envía sola: `category` y `severity` `emergency`, mensaje "SOS", al siguiente nivel de la escalera del entorno, con un UUID por pulsación (idempotente). Mientras se envía no se puede cerrar.
 - "Necesito ayuda" en el «R U OK?» sin conexión lo envía al momento, sin cuenta atrás (ya se ha pedido ayuda).
 

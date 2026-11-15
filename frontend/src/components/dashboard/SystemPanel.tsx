@@ -7,6 +7,7 @@ import { useInterventions } from '../../api/useInterventions'
 import type { BodySystem } from '../../api/useSystems'
 import { InterventionCard } from '../behavioral/InterventionCard'
 import { Modal } from '../ui/Modal'
+import { bySeverity } from '../ui/status'
 import { StatusBadge } from '../ui/StatusBadge'
 import { IndicatorCard } from './IndicatorCard'
 import { SystemTrends } from './SystemTrends'
@@ -24,14 +25,17 @@ interface SystemPanelProps {
   canMeasure?: boolean
   /** Indicadores con estado provisional (medición sin sincronizar, FE-12). */
   provisionalIds?: ReadonlySet<string>
+  /** Indicador pulsado en el panel: la gráfica empieza solo con él (luego se añaden otros). */
+  focusIndicatorId?: string | null
   onClose: () => void
 }
 
 /**
  * Detalle de un sistema del cuerpo (FE-06): estado, las tendencias en un bloque y, plegados
  * (se abren por encima, sin ocupar sitio), indicadores, recomendaciones e intervenciones; y
- * "Medir ahora". Sin los textos descriptivos (función, efectos
- * en el espacio, peligros), para que quepa sin scroll. Modal grande centrada. Se cierra con Esc, con el botón o con un clic fuera.
+ * "Medir ahora". Las tendencias van en una sola gráfica con selectores de indicador. Sin los
+ * textos descriptivos (función, efectos en el espacio, peligros), para que quepa sin scroll.
+ * Modal grande centrada y bloqueante: se cierra con Esc o con el botón.
  */
 export function SystemPanel({
   system,
@@ -40,6 +44,7 @@ export function SystemPanel({
   stale,
   canMeasure = true,
   provisionalIds,
+  focusIndicatorId,
   onClose,
 }: SystemPanelProps) {
   const titleId = `system-panel-${system.id}`
@@ -157,13 +162,17 @@ export function SystemPanel({
             {!assessed || assessed.indicators.length === 0 ? (
               <p className="text-sm text-env-muted">Todavía no hay mediciones de este sistema.</p>
             ) : (
+              // Los peores primero: son los que se ven al abrir el sistema.
               <SystemTrends
-                series={assessed.indicators.map((ind) => ({
-                  id: ind.indicator_id,
-                  name: byId.get(ind.indicator_id)?.name ?? ind.indicator_id,
-                  unit: ind.unit,
-                  range: ind.range,
-                }))}
+                series={[...assessed.indicators]
+                  .sort((a, b) => bySeverity(a.status, b.status))
+                  .map((ind) => ({
+                    id: ind.indicator_id,
+                    name: byId.get(ind.indicator_id)?.name ?? ind.indicator_id,
+                    unit: ind.unit,
+                    range: ind.range,
+                  }))}
+                initial={focusIndicatorId ? [focusIndicatorId] : undefined}
               />
             )}
             {current && (

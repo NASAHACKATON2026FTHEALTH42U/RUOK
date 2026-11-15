@@ -118,17 +118,19 @@ export function SosEmergency({
       describedBy="sos-desc"
       onClose={closable ? onClose : undefined}
     >
-      <div className="flex min-h-full items-end justify-center p-3 sm:items-center sm:p-6">
+      {/* Móvil: casi toda la pantalla (cuenta atrás enorme y botones grandes abajo, al alcance del
+          pulgar). Desde 640 px, una tarjeta centrada. */}
+      <div className="flex min-h-full items-stretch justify-center p-3 sm:items-center sm:p-6">
         <div
           data-autofocus
           tabIndex={-1}
-          className="w-full max-w-md rounded-2xl border-2 border-st-crit bg-env-bg p-5 shadow-2xl outline-none sm:p-6"
+          className="flex w-full max-w-md flex-col rounded-2xl border-2 border-st-crit bg-env-bg p-5 shadow-2xl outline-none max-sm:min-h-[calc(100dvh-1.5rem)] sm:p-6"
         >
           <h2
             id="sos-title"
             className={
               phase.kind === 'countdown' || phase.kind === 'sending'
-                ? 'text-center font-mono text-sm tracking-[0.3em] text-env-muted uppercase'
+                ? 'text-center font-mono text-sm tracking-[0.3em] text-env-muted uppercase max-sm:text-base'
                 : 'text-xl font-semibold'
             }
           >
@@ -159,21 +161,26 @@ export function SosEmergency({
               </button>
             </div>
           ) : phase.kind === 'countdown' ? (
-            <div className="mt-2 text-center">
-              <p id="sos-desc" className="text-lg">
-                Se enviará la alerta de ayuda en
-              </p>
-              <p
-                aria-hidden
-                className="mt-1 font-mono text-8xl leading-none font-light tabular-nums text-st-crit"
-              >
-                {left}
-              </p>
+            <div className="mt-2 flex flex-1 flex-col text-center">
+              <div className="flex flex-1 flex-col items-center justify-center">
+                <p id="sos-desc" className="text-lg max-sm:text-2xl">
+                  Se enviará la alerta de ayuda en
+                </p>
+                <p
+                  aria-hidden
+                  className="mt-1 font-mono text-8xl leading-none font-light tabular-nums text-st-crit max-sm:mt-4 max-sm:text-[10rem]"
+                >
+                  {left}
+                </p>
+              </div>
               <p className="sr-only" aria-live="assertive">
                 Se enviará la alerta de ayuda en {delayS} segundos si no la cancelas.
               </p>
               {/* Barra que se vacía en los 3 s (sin animación con «reducir movimiento»). */}
-              <div aria-hidden className="mt-4 h-1.5 overflow-hidden rounded-full bg-env-surface">
+              <div
+                aria-hidden
+                className="mt-4 h-1.5 overflow-hidden rounded-full bg-env-surface max-sm:mt-6 max-sm:h-2"
+              >
                 <div
                   className="h-full bg-st-crit"
                   style={
@@ -187,21 +194,25 @@ export function SosEmergency({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="min-h-14 rounded-xl border-2 border-env-text px-4 text-lg font-semibold hover:bg-env-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary"
+                  className="min-h-14 rounded-xl border-2 border-env-text px-4 text-lg font-semibold hover:bg-env-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary max-sm:min-h-18 max-sm:text-2xl"
                 >
                   Cancelar
                 </button>
                 <button
                   type="button"
                   onClick={() => void fireRef.current()}
-                  className="min-h-12 rounded-xl bg-st-crit px-4 font-semibold text-[#1a0606] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
+                  className="min-h-12 rounded-xl bg-st-crit px-4 font-semibold text-[#1a0606] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text max-sm:min-h-16 max-sm:text-xl"
                 >
                   Enviar ya
                 </button>
               </div>
             </div>
           ) : phase.kind === 'sending' ? (
-            <p id="sos-desc" role="status" className="mt-4 text-center text-lg">
+            <p
+              id="sos-desc"
+              role="status"
+              className="mt-4 text-center text-lg max-sm:flex max-sm:flex-1 max-sm:items-center max-sm:justify-center max-sm:text-2xl"
+            >
               Enviando la alerta de ayuda…
             </p>
           ) : phase.kind === 'sent' ? (

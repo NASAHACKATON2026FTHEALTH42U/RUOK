@@ -71,3 +71,51 @@ export function formatDateTime(t: number): string {
   const d = new Date(t)
   return `${formatDay(t)} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
+
+/**
+ * Posición de un valor dentro de su rango normal, en % (0 = mínimo normal, 100 = máximo normal;
+ * fuera de 0–100, fuera de lo normal). Es la escala común para ver juntos indicadores con
+ * unidades distintas sin un segundo eje. Sin rango normal, null.
+ */
+export function normalPct(value: number, range: Ranges): number | null {
+  const n = range.normal
+  if (!Array.isArray(n) || n.length < 2 || n[1] === n[0]) return null
+  return Math.round(((value - n[0]) / (n[1] - n[0])) * 1000) / 10
+}
+
+/** Unidad común de las series, o null si mezclan unidades (o no hay ninguna). */
+export function commonUnit(units: readonly string[]): string | null {
+  return units.length > 0 && units.every((u) => u === units[0]) ? units[0] : null
+}
+
+/** Series elegidas → posición de su color (0, 1, 2…). */
+export type Slots = Record<string, number>
+
+/** Selección inicial: las pedidas que existan o, si no hay, las primeras `count`. */
+export function initialSlots(
+  ids: readonly string[],
+  wanted: readonly string[] | undefined,
+  count: number,
+): Slots {
+  const asked = (wanted ?? []).filter((id) => ids.includes(id))
+  const chosen = (asked.length > 0 ? asked : ids).slice(0, count)
+  return Object.fromEntries(chosen.map((id, i) => [id, i]))
+}
+
+/**
+ * Activa o quita una serie sin cambiar el color de las demás (el color sigue al indicador, no a
+ * su posición). Siempre queda al menos una y como mucho `max`; la nueva coge el primer color libre.
+ */
+export function toggleSlot(slots: Slots, id: string, max: number): Slots {
+  if (id in slots) {
+    if (Object.keys(slots).length === 1) return slots
+    const rest = { ...slots }
+    delete rest[id]
+    return rest
+  }
+  const used = new Set(Object.values(slots))
+  if (used.size >= max) return slots
+  let free = 0
+  while (used.has(free)) free++
+  return { ...slots, [id]: free }
+}

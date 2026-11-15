@@ -75,7 +75,7 @@ export function SosButton({
         <div className="flex items-start justify-center">
           <button
             {...common}
-            className="-mt-4 flex size-16 items-center justify-center rounded-full border-4 border-env-bg bg-st-crit font-mono text-base font-semibold tracking-[0.12em] text-[#1a0606] shadow-lg hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
+            className="-mt-6 flex size-[4.75rem] items-center justify-center rounded-full border-4 border-env-bg bg-st-crit font-mono text-lg font-semibold tracking-[0.12em] text-[#1a0606] shadow-lg hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-text"
           >
             SOS
           </button>
