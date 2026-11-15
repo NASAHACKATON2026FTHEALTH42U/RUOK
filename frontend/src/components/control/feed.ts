@@ -1,5 +1,6 @@
 /** Lógica pura del feed de eventos del centro de control (FE-31). */
 import type { RealtimeEvent } from '../../realtime/match'
+import type { IconGlyph } from '../ui/Icon'
 
 export interface FeedFilters {
   envId: string
@@ -12,18 +13,18 @@ export interface FeedFilters {
 export const EMPTY_FILTERS: FeedFilters = { envId: '', userId: '', deviceId: '', group: '' }
 
 /** Grupos de tipos para el filtro y el icono del feed. */
-export const GROUPS: Record<string, { label: string; icon: string }> = {
-  measurement: { label: 'Mediciones', icon: '📝' },
-  heartbeat: { label: 'Heartbeats', icon: '💓' },
-  liveness: { label: 'Liveness', icon: '📶' },
-  alert: { label: 'Alertas', icon: '🚨' },
-  link: { label: 'Enlace', icon: '📡' },
-  sync: { label: 'Sincronización', icon: '⇡' },
-  auth: { label: 'Accesos', icon: '🔐' },
-  task: { label: 'Misiones', icon: '🎯' },
-  device: { label: 'Dispositivos', icon: '📱' },
-  user: { label: 'Usuarios', icon: '👤' },
-  notification: { label: 'Notificaciones', icon: '✉' },
+export const GROUPS: Record<string, { label: string; icon: IconGlyph }> = {
+  measurement: { label: 'Mediciones', icon: 'pulse' },
+  heartbeat: { label: 'Heartbeats', icon: 'heart' },
+  liveness: { label: 'Contacto', icon: 'signal' },
+  alert: { label: 'Alertas', icon: 'alert' },
+  link: { label: 'Enlace', icon: 'radio' },
+  sync: { label: 'Sincronización', icon: 'upload' },
+  auth: { label: 'Accesos', icon: 'key' },
+  task: { label: 'Misiones', icon: 'target' },
+  device: { label: 'Dispositivos', icon: 'device' },
+  user: { label: 'Usuarios', icon: 'user' },
+  notification: { label: 'Notificaciones', icon: 'mail' },
 }
 
 export function groupOf(type: string): string {

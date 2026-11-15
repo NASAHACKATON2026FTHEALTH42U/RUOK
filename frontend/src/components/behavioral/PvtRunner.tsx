@@ -8,6 +8,7 @@ import {
   type PvtSummary,
 } from './pvt'
 import { Modal } from '../ui/Modal'
+import { Icon } from '../ui/Icon'
 
 /** Cuánto se muestra el resultado de cada respuesta antes de la siguiente espera. */
 const FEEDBACK_MS = 800
@@ -138,7 +139,7 @@ export function PvtRunner({ mode, onFinish, onCancel }: PvtRunnerProps) {
         </h2>
         <div className="flex items-center justify-between gap-3 p-4 text-sm">
           <span className="tabular-nums" aria-label={`Quedan ${secs} segundos`}>
-            ⏱ {secs} s
+            <Icon name="timer" size={16} /> {secs} s
           </span>
           <button
             type="button"

@@ -17,6 +17,7 @@ import { LivenessGuard, MemberActivitySelector } from '../liveness/LivenessGuard
 import { HudClock } from './HudClock'
 import { LinkStatusChip } from './LinkStatusChip'
 import { ScopeSelector } from './ScopeSelector'
+import { Toaster } from './Toaster'
 import { MockBanner } from './MockBanner'
 import { NavIcon } from './NavIcon'
 import { allowedItems, menuFor, navItems, OPERATOR_FILL_ROUTES, tabsFor } from './navigation'
@@ -67,6 +68,12 @@ export function Layout() {
 
   return (
     <div className="flex h-dvh flex-col">
+      {/* Rejilla viva: una pasada de luz por las líneas del fondo al cambiar de página (la `key`
+          reinicia la animación) y otra lenta de vez en cuando. Decorativa. */}
+      <div aria-hidden className="grid-fx">
+        <span key={pathname} className="grid-fx-band grid-fx-nav" />
+        <span className="grid-fx-band grid-fx-ambient" />
+      </div>
       <MockBanner />
 
       {/* Cabecera móvil: logo y reloj. El SOS va en la barra inferior, al alcance del pulgar. */}
@@ -172,7 +179,7 @@ export function Layout() {
                 bloque contenedor y descolocaría las modales `fixed` de las páginas. */}
               <motion.div
                 key={pathname}
-                className={fillPage ? 'flex min-h-0 flex-1 flex-col' : 'flex flex-1 flex-col'}
+                className={`page-enter ${fillPage ? 'flex min-h-0 flex-1 flex-col' : 'flex flex-1 flex-col'}`}
                 initial={reducedMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}
@@ -205,6 +212,7 @@ export function Layout() {
       <LivenessGuard />
       <RealtimeConnector />
       <LiveAlertToast />
+      <Toaster />
     </div>
   )
 }

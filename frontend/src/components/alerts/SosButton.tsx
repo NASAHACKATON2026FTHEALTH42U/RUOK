@@ -7,6 +7,7 @@ import { useVocab } from '../../environments/useVocab'
 import { useEnvironmentStore } from '../../store/environment'
 import { SosDialog } from './SosDialog'
 import { SosEmergency } from './SosEmergency'
+import { Icon } from '../ui/Icon'
 
 /**
  * Lo que necesitan el SOS y los avisos: quién pide ayuda, su entorno y las intervenciones (se
@@ -123,7 +124,7 @@ export function NoticeButton({ className = '' }: { className?: string }) {
         aria-haspopup="dialog"
         className={`inline-flex min-h-11 items-center gap-2 rounded-lg border border-env-border px-3.5 text-sm font-medium hover:border-env-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-env-primary ${className}`}
       >
-        <span aria-hidden>✉</span>
+        <Icon name="mail" size={17} />
         Enviar aviso a control
       </button>
       {open && (

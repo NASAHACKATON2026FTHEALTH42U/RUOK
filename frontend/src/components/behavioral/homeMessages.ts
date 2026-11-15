@@ -85,7 +85,7 @@ export function describeState(
   switch (item.state) {
     case 'local':
       return {
-        icon: '▫',
+        icon: '◦',
         label: 'Guardado en este dispositivo · saldrá al volver la conexión',
         tone: 'none',
       }
