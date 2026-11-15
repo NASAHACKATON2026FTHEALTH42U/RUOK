@@ -82,6 +82,7 @@ La matriz vive en código en **un único sitio** por lado: `backend/app/auth/per
 - **Panel de demo y centro de control (`/control`):** solo `admin`. Ver [control-center-and-devices.md](control-center-and-devices.md).
 - **SSE:** el stream de eventos se filtra en el servidor según el rol del token.
 - **Privacidad:** el filtro conductual usa el rol (`psych` ve los detalles; el resto, solo si el member comparte o hay emergencia).
+- **Previsión (FS-09):** `GET /members/{id}/forecast` usa el mismo permiso que el historial (fila *Historial y gráficas*). Si el indicador es conductual y privado, se aplica además la fila *Detalles conductuales*: quien no puede ver los detalles recibe `403`, porque la previsión delata los valores.
 
 ## Usuarios demo (seed)
 Por cada entorno:

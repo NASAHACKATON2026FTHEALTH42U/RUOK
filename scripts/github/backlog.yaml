@@ -1341,3 +1341,25 @@ issues:
     - "`/alerts` sin member lista las alertas de todo el entorno"
     - "`responder` y `psych` en Historial reciben un enlace a `/ground` en vez de volver rebotados"
     - "Un `member` no ve el selector"
+
+- id: FS-09
+  title: Previsión de valores esperados por indicador (modelo Holt amortiguado, 100 % local)
+  area: fullstack
+  comp: engine
+  priority: P2
+  milestone: freeze
+  depends: [BE-10, BE-06, FE-09]
+  docs: api-contract.md
+  tasks:
+    - "Contrato: `GET /members/{id}/forecast?indicator_id=&horizon_days=` con el schema `Forecast` (puntos diarios con banda del 80 %, primer cambio de estado previsto y error de backtest)"
+    - "`services/forecast.py`: suavizado exponencial de Holt con tendencia amortiguada, ajustado por member e indicador con sus propias mediciones; funciones puras, sin dependencias nuevas y con `clock.now()`"
+    - "Los rangos son los del motor (`merge_ranges` + `classify`): catálogo + `threshold_overrides` del entorno; ningún umbral clínico en el código"
+    - "Sin datos suficientes (< 7 días con mediciones) o con el último dato caducado (`max_age_s`) no se prevé nada: sin datos = desconocido"
+    - "Privacidad conductual: la previsión de un indicador privado solo la ve quien puede ver sus detalles"
+    - "Front: línea discontinua y banda en la gráfica del Historial, resumen en texto («a este ritmo podría entrar en Atención en ~N días») y aviso de que es una estimación, no un diagnóstico"
+    - "Mocks (`gen:mocks` + handler) para el modo demo sin servidor; método citado en `docs/sources.md`"
+  acceptance:
+    - "Tests con series sintéticas: constante, lineal, ruido, pocos datos, datos caducados, serie semanal y acumulada"
+    - "Tras el escenario `mars_sleep_bp`, el Historial de la tensión de Vega muestra la previsión y el cambio de estado previsto"
+    - "La previsión es informativa: no crea alertas ni cambia el `assessment`"
+    - "Un rol sin permiso para ver lo conductual recibe 403 al pedir la previsión de un indicador privado"

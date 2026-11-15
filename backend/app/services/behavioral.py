@@ -43,6 +43,7 @@ __all__ = [
     "FiredRule",
     "details_visible",
     "evaluate_rules",
+    "is_private",
     "load_rules",
     "redact",
 ]
@@ -154,6 +155,11 @@ def details_visible(
     if viewer_role is None or viewer_role in _IF_SHARED_OR_EMERGENCY:
         return share_behavioral_details or emergency_open
     return False
+
+
+def is_private(indicator_id: str) -> bool:
+    """¿Es un indicador conductual privado (``private_indicators``)?"""
+    return indicator_id in load_rules()["private_indicators"]
 
 
 def redact(assessment: Assessment, private: Iterable[str] | None = None) -> Assessment:

@@ -278,6 +278,28 @@ export const handlers: Record<string, Handler> = {
     if (!m) return notFound('Member desconocido')
     return assessmentFor(m.id, req.query.get('env') ?? m.env_id)
   },
+  // Previsión (FS-09): la que calculó el modelo real para el member de ejemplo (fixtures), con
+  // sus fechas (siguen a las mediciones de ejemplo). Hay 7 días calculados: un horizonte menor
+  // recorta los puntos y uno mayor se queda en 7.
+  'GET /members/{member_id}/forecast': (req) => {
+    const m = findMember(req.params.member_id)
+    if (!m) return notFound('Member desconocido')
+    const indicatorId = req.query.get('indicator_id')
+    const horizon = Number(req.query.get('horizon_days') ?? 7)
+    if (!indicatorId || !Number.isInteger(horizon) || horizon < 1 || horizon > 14) {
+      return new MockResponse(422, { detail: 'Parámetros de la previsión no válidos (mock)' })
+    }
+    const base = fx.forecastByIndicator[indicatorId]
+    if (!base) return notFound('Indicador desconocido')
+    const forecast = { ...clone(base), member_id: m.id }
+    if (forecast.status === 'ok' && horizon < forecast.horizon_days) {
+      const until = Date.parse(forecast.generated_at) + horizon * 86_400_000
+      forecast.points = forecast.points.filter((p) => Date.parse(p.at) <= until)
+      forecast.horizon_days = horizon
+      if (forecast.change && Date.parse(forecast.change.at) > until) forecast.change = null
+    }
+    return forecast
+  },
   'POST /members/{member_id}/heartbeat': () => fx.heartbeatResult,
   'POST /members/{member_id}/ruok': (req) => ({
     liveness: 'active',

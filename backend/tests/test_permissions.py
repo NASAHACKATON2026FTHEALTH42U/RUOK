@@ -60,6 +60,7 @@ MATRIX = [
     ("post", "/members/1/measurements", _measurement, {"member", "medic", "admin"}),
     ("get", "/members/1/measurements", None, CREW_VIEW),
     ("get", "/members/1/assessment", None, CREW_VIEW),
+    ("get", "/members/1/forecast?indicator_id=heart_rate", None, CREW_VIEW),
     ("post", "/members/1/heartbeat", lambda: {"device_id": str(uuid.uuid4())}, {"member"}),
     ("post", "/members/1/ruok", {"ok": True}, {"member", "admin"}),
     ("get", "/members/1/alerts", None, CREW_VIEW),

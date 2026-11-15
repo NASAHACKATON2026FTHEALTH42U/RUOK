@@ -331,6 +331,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/members/{member_id}/forecast": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Previsión estadística de un indicador
+         * @description Valores esperados de los próximos días (modelo de Holt con tendencia amortiguada, ajustado con las mediciones del propio member), intervalo de predicción aproximado del 80 % y primer cambio de estado previsto. Informativa: no crea alertas ni cambia el `assessment`. Sin datos suficientes o con el último dato caducado, `status` lo dice y no hay puntos. Un indicador desconocido → 404; la previsión de un indicador conductual privado solo la ve quien puede ver sus detalles (403 para el resto).
+         */
+        get: operations["get_forecast_api_v1_members__member_id__forecast_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/members/{member_id}/heartbeat": {
         parameters: {
             query?: never;
@@ -1466,6 +1486,119 @@ export interface components {
             /** Seconds */
             seconds: number;
         };
+        /**
+         * Forecast
+         * @description Previsión estadística de un indicador. Informativa: no es un diagnóstico, no crea
+         *     alertas y no cambia el `Assessment`.
+         */
+        Forecast: {
+            /** Member Id */
+            member_id: number;
+            /**
+             * Indicator Id
+             * @example mars
+             */
+            indicator_id: string;
+            /** Unit */
+            unit: string;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** @description `insufficient_data`: menos de 7 mediciones a su cadencia en el tramo reciente (o más de la mitad serían huecos). `stale`: el último dato ha caducado (`max_age_s`). Solo `ok` trae `points`. */
+            status: components["schemas"]["ForecastStatus"];
+            /**
+             * Method
+             * @description Modelo usado: suavizado exponencial de Holt con tendencia amortiguada
+             * @example holt_damped
+             */
+            method: string;
+            /**
+             * Horizon Days
+             * @description Días previstos desde ahora (como mínimo un paso de la serie)
+             */
+            horizon_days: number;
+            /**
+             * Step Days
+             * @description Cadencia de la serie: 1 = diaria, 7 = semanal
+             */
+            step_days: number | null;
+            /**
+             * History Days
+             * @description Días con mediciones usados para ajustar el modelo (con `insufficient_data`, los días con mediciones del tramo reciente)
+             * @default 0
+             */
+            history_days: number;
+            /** @description Estado del último valor con los rangos del entorno (`unknown` si ha caducado). Solo mira el valor: no incluye las reglas de tendencia ni las conductuales del `Assessment`. */
+            current_status: components["schemas"]["Status"];
+            /**
+             * Last Value Unusual
+             * @description true si la última medición se aparta de lo esperado mucho más de lo habitual en esa persona: la previsión aún no la da por buena (y `change` es null) hasta que otra medición parecida la confirme
+             * @default false
+             */
+            last_value_unusual: boolean;
+            /** Points */
+            points: components["schemas"]["ForecastPoint"][];
+            /** @description null si el estado no cambia en el horizonte o si `last_value_unusual` */
+            change: components["schemas"]["ForecastChange"] | null;
+            /**
+             * Backtest Mae
+             * @description Error absoluto medio de la previsión a un paso en los últimos días (validación de origen móvil); null si aún no se puede medir
+             */
+            backtest_mae: number | null;
+        };
+        /**
+         * ForecastChange
+         * @description Primer punto previsto cuyo estado difiere del actual (a peor o a mejor).
+         */
+        ForecastChange: {
+            /** @description Estado al que pasaría el indicador */
+            status: components["schemas"]["Status"];
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /**
+             * In Days
+             * @description Días desde ahora, redondeados hacia arriba
+             */
+            in_days: number;
+        };
+        /** ForecastPoint */
+        ForecastPoint: {
+            /**
+             * At
+             * Format: date-time
+             * @description Instante previsto: el último dato más n pasos de la serie
+             */
+            at: string;
+            /**
+             * Value
+             * @description Valor esperado
+             */
+            value: number;
+            /**
+             * Low
+             * @description Límite inferior del intervalo de predicción (aprox. 80 %)
+             */
+            low: number;
+            /**
+             * High
+             * @description Límite superior del intervalo de predicción (aprox. 80 %)
+             */
+            high: number;
+            /** @description Estado del valor esperado con los rangos del entorno */
+            status: components["schemas"]["Status"];
+        };
+        /**
+         * ForecastStatus
+         * @description Resultado de la previsión (FS-09). Solo `ok` trae puntos: sin datos suficientes
+         *     o con el último dato caducado no se prevé nada (sin datos = desconocido).
+         * @enum {string}
+         */
+        ForecastStatus: "ok" | "insufficient_data" | "stale";
         /** GameState */
         GameState: {
             /** Points */
@@ -3341,6 +3474,70 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Assessment"];
+                };
+            };
+            /** @description Sin sesión válida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Rol sin permiso o dato ajeno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Recurso inexistente */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_forecast_api_v1_members__member_id__forecast_get: {
+        parameters: {
+            query: {
+                indicator_id: string;
+                horizon_days?: number;
+            };
+            header?: {
+                /** @description UUID del dispositivo (docs/control-center-and-devices.md §4) */
+                "x-device-id"?: string | null;
+            };
+            path: {
+                member_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Forecast"];
                 };
             };
             /** @description Sin sesión válida */

@@ -24,7 +24,7 @@
 | 🗄️ BD | BE-02, BE-07 | 16 tablas SQLModel, SQLite en WAL, **seed determinista** de 30 días y escenarios de demo (`mars_sleep_bp`, `eva_no_contact`, `geriatric_fall_risk`) |
 | 📚 Config | BE-03, BE-04, BE-33, BE-34, CNT-01, CNT-02, CNT-03 | Catálogos JSON validados al arrancar: entornos, indicadores, sistemas, protocolos, intervenciones, tipos de tarea, insignias. Umbrales y textos con fuente en [`sources.md`](sources.md) |
 | 🌐 API | BE-05, BE-06 | Members y mediciones por lotes (idempotentes por UUID, atómicas) |
-| 🧠 Motor | BE-08 … BE-11, BE-31 | Evaluación por indicador, sistema y global, tendencias, línea base y escalado según el retardo |
+| 🧠 Motor | BE-08 … BE-11, BE-31, FS-09 | Evaluación por indicador, sistema y global, tendencias, línea base y escalado según el retardo. **Previsión** de los próximos días por indicador (Holt con tendencia amortiguada, ajustado a cada persona y 100 % local): informativa, no crea alertas |
 | 💓 Liveness | BE-12, BE-16, FE-15 | Heartbeat, `overall_status` = peor entre salud y liveness, check-in "R U OK?" y alerta `no_contact` |
 | 🚨 Alertas | BE-14, BE-15, BE-17, BE-35, FE-13, FE-14, FE-16 | Alertas automáticas con deduplicación y escalera, SOS manual (también sin sesión), consola `/ground` as-of |
 | 📡 Enlace | BE-13, BE-32, FE-17 | Enlace simulado con retardo y LOS (store-and-forward persistente), fast-forward con reloj persistente |
