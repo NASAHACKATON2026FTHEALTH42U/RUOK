@@ -179,7 +179,7 @@ export default function Login() {
                     const next = envList.find((x) => x.id === e.target.value)
                     if (next) selectEnvironment(next)
                   }}
-                  className="hud-input min-w-0 flex-1 !border-0 !bg-transparent !px-1 !font-sans !text-[0.9375rem]"
+                  className="hud-input min-w-0 flex-1 !border-0 !bg-transparent !pl-1 !font-sans !text-[0.9375rem]"
                 >
                   {envList.map((e) => (
                     <option key={e.id} value={e.id}>
